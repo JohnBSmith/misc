@@ -29,7 +29,7 @@ def list_files(root):
     a.sort()
     return a
 
-def hash(path):
+def hash_file(path):
     data = read(path)
     h = new_hasher()
     h.update(data)
@@ -38,14 +38,14 @@ def hash(path):
 def hash_rec(root):
     a = []
     for path in list_files(root):
-        digest = hash(path).hexdigest()
+        digest = hash_file(path).hexdigest()
         a.append([path,digest])
     return a
 
 def generate():
     path = sys.argv[1]
     if os.path.isfile(path):
-        value = [path,hash(path).hexdigest()]
+        value = [path,hash_file(path).hexdigest()]
     elif os.path.isdir(path):
         os.chdir(path)
         value = hash_rec("./")
@@ -64,7 +64,7 @@ def compare():
     os.chdir(sys.argv[1])
     diff_list = []
     for path, hpath in a:
-        h = hash(path).hexdigest()
+        h = hash_file(path).hexdigest()
         if h!=hpath:
             diff_list.append(path)
     if len(diff_list)==0:

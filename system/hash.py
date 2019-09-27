@@ -21,7 +21,7 @@ def list_files(root):
     a.sort()
     return a
 
-def hash(path):
+def hash_file(path):
     data = read(path)
     h = new_hasher()
     h.update(data)
@@ -31,13 +31,13 @@ def hash_rec(root):
     h = new_hasher()
     a = []
     for path in list_files(root):
-        data = hash(path).digest()
+        data = hash_file(path).digest()
         h.update(data)
     return h
 
 path = sys.argv[1]
 if os.path.isfile(path):
-    print(hash(path).hexdigest())
+    print(hash_file(path).hexdigest())
 elif os.path.isdir(path):
     print(hash_rec(path).hexdigest())
 else:
