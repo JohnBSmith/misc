@@ -5,6 +5,9 @@
 import os, sys
 import hashlib
 
+def eprint(s):
+    print(s,file=sys.stderr)
+
 def new_hasher():
     return hashlib.sha256()
 
@@ -41,6 +44,6 @@ if os.path.isfile(path):
 elif os.path.isdir(path):
     print(hash_rec(path).hexdigest())
 else:
-    print("Error: path '{}' cannot be accessed.".format(path))
+    eprint("Error: path '{}' cannot be accessed.".format(path))
 
 

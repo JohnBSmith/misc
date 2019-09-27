@@ -10,6 +10,9 @@ import os, sys
 import hashlib
 import json
 
+def eprint(s):
+    print(s,file=sys.stderr)
+
 def new_hasher():
     return hashlib.sha256()
 
@@ -47,12 +50,12 @@ def hash_tree(path):
 def generate():
     path = sys.argv[1]
     if os.path.isfile(path):
-        value = [[path,hash_file(path).hexdigest()]]
+        value = [[os.path.basename(path),hash_file(path).hexdigest()]]
     elif os.path.isdir(path):
         os.chdir(path)
         value = hash_tree("./")
     else:
-        print("Error: path '{}' cannot be accessed.".format(path))
+        eprint("Error: path '{}' cannot be accessed.".format(path))
         sys.exit(1)
     return value
 

@@ -13,6 +13,9 @@ import os, sys
 import hashlib
 import json
 
+def eprint(s):
+    print(s,file=sys.stderr)
+
 def new_hasher():
     return hashlib.sha256()
 
@@ -45,12 +48,12 @@ def hash_rec(root):
 def generate():
     path = sys.argv[1]
     if os.path.isfile(path):
-        value = [path,hash_file(path).hexdigest()]
+        value = [[os.path.basename(path),hash_file(path).hexdigest()]]
     elif os.path.isdir(path):
         os.chdir(path)
         value = hash_rec("./")
     else:
-        print("Error: path '{}' cannot be accessed.".format(path))
+        eprint("Error: path '{}' cannot be accessed.".format(path))
         sys.exit(1)
     
     print(json.dumps(value,indent=0))
@@ -61,7 +64,11 @@ def read_hashlist(path):
 
 def compare():
     a = read_hashlist(sys.argv[2])
-    os.chdir(sys.argv[1])
+    if os.path.isdir(sys.argv[1]):
+        os.chdir(sys.argv[1])
+    else:
+        fpath,fname = os.path.split(sys.argv[1])
+        os.chdir(fpath)
     diff_list = []
     for path, hpath in a:
         h = hash_file(path).hexdigest()
