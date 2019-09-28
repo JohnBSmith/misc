@@ -11,21 +11,20 @@ def eprint(s):
 def new_hasher():
     return hashlib.sha256()
 
-def read(path):
-    with open(path,"rb") as file:
-        return file.read()
-
-def hash_file(path):
-    data = read(path)
-    h = new_hasher()
-    h.update(data)
+BLOCKSIZE = 2**16
+def hash_file(h,path):
+    with open(path,"rb") as f:
+        while True:
+            buf = f.read(BLOCKSIZE)
+            if len(buf)==0: break
+            h.update(buf)
     return h
 
 def hash_rec(path):
     h = new_hasher()
     if os.path.isfile(path):
         h = new_hasher()
-        h.update(read(path))
+        hash_file(h,path)
         h.update(path.encode("utf-8"))
     elif os.path.isdir(path):
         a = []
@@ -43,7 +42,7 @@ def hash_rec(path):
 
 path = sys.argv[1]
 if os.path.isfile(path):
-    print(hash_file(path).hexdigest())
+    print(hash_file(new_hasher(),path).hexdigest())
 elif os.path.isdir(path):
     os.chdir(path)
     print(hash_rec("./").hexdigest())

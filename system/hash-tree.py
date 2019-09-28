@@ -16,21 +16,19 @@ def eprint(s):
 def new_hasher():
     return hashlib.sha256()
 
-def read(path):
-    with open(path,"rb") as file:
-        return file.read()
-
-def hash_file(path):
-    data = read(path)
-    h = new_hasher()
-    h.update(data)
+BLOCKSIZE = 2**16
+def hash_file(h,path):
+    with open(path,"rb") as f:
+        while True:
+            buf = f.read(BLOCKSIZE)
+            if len(buf)==0: break
+            h.update(buf)
     return h
 
 def hash_rec(hashlist,path):
     h = new_hasher()
     if os.path.isfile(path):
-        h = new_hasher()
-        h.update(read(path))
+        hash_file(h,path)
     elif os.path.isdir(path):
         a = []
         for item in os.listdir(path):
@@ -50,7 +48,8 @@ def hash_tree(path):
 def generate():
     path = sys.argv[1]
     if os.path.isfile(path):
-        value = [[os.path.basename(path),hash_file(path).hexdigest()]]
+        digest = hash_file(new_hasher(),path).hexdigest()
+        value = [[os.path.basename(path),digest]]
     elif os.path.isdir(path):
         os.chdir(path)
         value = hash_tree("./")
