@@ -82,9 +82,12 @@ def compare(hashlist_path):
     n = len(a)
     for k, (path, hpath) in enumerate(a):
         if log: print("[{} of {}] {}".format(k+1,n,path))
-        h = hash_file(new_hasher(),path).hexdigest()
-        if h!=hpath:
-            diff_list.append(path)
+        if os.path.exists(path):
+            h = hash_file(new_hasher(),path).hexdigest()
+            if h!=hpath:
+                diff_list.append(path)
+        else:
+            diff_list.append("[file not found] "+path)
     if len(diff_list)==0:
         print("All files match.")
     else:
