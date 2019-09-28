@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 # Compute the cryptographic hash value of a file
 # or directory. Metadata is not taken into account.

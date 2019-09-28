@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 # List all hidden files and hidden directories.
 

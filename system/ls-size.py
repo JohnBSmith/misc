@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 # List all files of a directory tree, sorted by size.
 

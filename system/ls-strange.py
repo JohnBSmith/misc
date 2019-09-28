@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 # List strange files, i.e. all files that are
 # symbolic links, sockets or device files.

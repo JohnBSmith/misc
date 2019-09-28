@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 # hash-tree PATH > list.json
 # Compute the hash tree of PATH.
