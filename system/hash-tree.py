@@ -38,6 +38,7 @@ def hash_rec(hashlist,path):
         for item in a:
             digest = hash_rec(hashlist,item)
             h.update(digest)
+        h.update("\x00".join(a).encode("utf-8"))
     hashlist.append([path,h.hexdigest()])
     return h.digest()
 
