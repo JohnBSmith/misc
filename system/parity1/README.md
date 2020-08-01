@@ -34,7 +34,7 @@ Version 01 (July 2020).
 
 ### Parity file header ###
 
-The header is 64 Bytes large.
+The header is 64 bytes large.
 
 ```
 Bytes 0..=11
@@ -58,16 +58,16 @@ Bytes 60..=63
 
 ### Parity file data stream ###
 
-The input file is split into blocks of size 16 Kibibyte.
+The input file is split into blocks of size 16 kibibyte.
 The last block is probably shorter. The remainder of the buffer
 is then filled with `0x00`.
 
 For each input block the following parity block is calculated:
-* 64 CRC-32 of the input block split into 256 Byte subblocks.
+* 64 CRC-32 of the input block split into 256 byte subblocks.
 * The SHA2-256 of the input block.
 * The CRC-32 of the 64 CRC-32 + SHA-256 itself.
 
-So each parity block is 64*4 + 32 + 4 = 292 Bytes large.
+So each parity block is 64*4 + 32 + 4 = 292 bytes large.
 
 The CRC-32 values are stored in little endian.
 The used polynomial is `0xedb88320`.
