@@ -1,0 +1,67 @@
+
+== Description ==
+
+Parity generates parity data of an input file to ensure integrity
+and secure more against data loss.
+
+For security reasons the input file is never touched. File recovery
+produces instead a recovered copy of the file.
+
+Only recovery of small errors is possible. For recovery of larger
+errors, a duplicate should be taken into account, hoping it is not
+damaged at the same place. So if you have free memory space anyway,
+store a file and its parity information multiple times.
+
+For long time archival of very important data, it is recommended to
+store duplicates of the file and its parity on a bunch of different
+data storage media.
+
+Recommended secure format for the input file:
+* packet.tar
+
+Recommended compression format for the input file:
+* packet.zip
+
+Formats not recommended, because errors will have non-local effects:
+* packet.tar.gz, packet.tar.bz2, packet.tar.xz
+
+
+== File format spec ==
+=== Parity file header ===
+
+The header is 64 Bytes large.
+
+Bytes 0..=11
+"\x00\x00parity001:"
+
+Bytes 12..=43
+SHA2-256 of the input file.
+
+Bytes 44..=47
+CRC-32 of the SHA2-256, bytes 12..=43.
+
+Bytes 48..=55
+Size of the input file, u64 little endian.
+
+Bytes 56..=59
+CRC-32 of the size, bytes 48..=55.
+
+Bytes 60..=63
+"----"
+
+=== Parity file data stream ===
+
+The input file is split into blocks of size 16 Kibibyte.
+The last block is probably shorter. The remainder of the buffer
+is then filled with 0x00.
+
+For each input block the following parity block is calculated:
+* 64 CRC-32 of the input block split into 256 Byte subblocks.
+* The SHA2-256 of the input block.
+* The CRC-32 of the 64 CRC-32 + SHA-256 itself.
+
+So each parity block is 64*4 + 32 + 4 = 292 Bytes large.
+
+The CRC-32 values are stored in little endian.
+The used polynomial is 0xedb88320.
+
