@@ -6,9 +6,12 @@ use std::path::Path;
 mod crc32;
 mod sha2;
 mod check;
+mod cipher;
+mod glue;
 
 use crc32::crc;
 use sha2::Hasher;
+use glue::{encipher_glue, unglue_decipher};
 
 #[cfg(test)]
 mod tests;
@@ -38,6 +41,13 @@ fn fill_zero(a: &mut [u8]) {
 fn u32_from_bytes_le(a: &[u8]) -> u32 {
     u32::from(a[0]) | u32::from(a[1])<<8 |
     u32::from(a[2])<<16 | u32::from(a[3])<<24
+}
+
+fn u64_from_bytes_le(a: &[u8]) -> u64 {
+    u64::from(a[0]) | u64::from(a[1])<<8 |
+    u64::from(a[2])<<16 | u64::from(a[3])<<24 |
+    u64::from(a[4])<<32 | u64::from(a[5])<<40 |
+    u64::from(a[6])<<48 | u64::from(a[7])<<56
 }
 
 fn u32_to_bytes_le(x: u32) -> [u8;4] {
@@ -113,6 +123,17 @@ fn generate_parity(ifile: &mut File, ofile: &mut File)
     Ok(())
 }
 
+fn generate_parity_file(path: &str) -> io::Result<()> {
+    let opath = String::from(path) + ".parity";
+    if Path::new(&opath).exists() {
+        return Err(io::Error::new(io::ErrorKind::AlreadyExists,
+            format!("Path '{}' already exists.",&opath)));
+    }
+    let ifile = &mut File::open(path)?;
+    let ofile = &mut File::create(opath)?;
+    generate_parity(ifile,ofile)
+}
+
 fn is_option(arg: &str) -> bool {
     !arg.is_empty() && &arg[0..1] == "-"
 }
@@ -139,18 +160,16 @@ fn main() -> io::Result<()> {
         if argv[1]=="-i" && argv.len()==3 {
             let pfile = &mut File::open(&argv[2])?;
             check::get_info(pfile)?;
+        } else if argv[1]=="-e" && argv.len()==4 {
+            generate_parity_file(&argv[2])?;
+            encipher_glue(&argv[2],&argv[3])?;
+        } else if argv[1]=="-d" && argv.len()==4 {
+            unglue_decipher(&argv[2],&argv[3])?;
         } else {
-            println!("{}",HELP_MESSAGE);                
+            println!("{}",HELP_MESSAGE);
         }
     } else if argv.len()==2 {
-        let opath = argv[1].clone() + ".parity";
-        if Path::new(&opath).exists() {
-            return Err(io::Error::new(io::ErrorKind::AlreadyExists,
-                format!("Path '{}' already exists.",&opath)));
-        }
-        let ifile = &mut File::open(&argv[1])?;
-        let ofile = &mut File::create(opath)?;
-        generate_parity(ifile,ofile)?;
+        generate_parity_file(&argv[1])?;
     } else if argv.len()==3 {
         let ifile = &mut File::open(&argv[1])?;
         let pfile = &mut File::open(&argv[2])?;
