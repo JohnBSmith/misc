@@ -2,13 +2,14 @@
 use std::{io, io::Read, io::Write};
 use std::fs::File;
 
+use crate::crc32::crc;
+use crate::cipher::{Keystream, ChaCha20Stream};
 use crate::{
     u32_to_bytes_le, u32_from_bytes_le,
     u64_to_bytes_le, u64_from_bytes_le
 };
-use crate::crc32::crc;
 use crate::read_exact;
-use crate::cipher::{Keystream, ChaCha20Stream};
+use crate::assert_nonexistent;
 
 fn write_glue_header(pfile: &mut File, ofile: &mut File,
     keystream: &mut dyn Keystream
@@ -117,6 +118,7 @@ pub fn unglue(gfile: &mut File, pfile: &mut File, ofile: &mut File,
 }
 
 pub fn encipher_glue(path: &str, opath: &str) -> io::Result<()> {
+    assert_nonexistent(opath)?;
     let ppath = String::from(path) + ".parity";
     let ifile = &mut File::open(path)?;
     let pfile = &mut File::open(ppath)?;
@@ -128,10 +130,13 @@ pub fn encipher_glue(path: &str, opath: &str) -> io::Result<()> {
 }
 
 pub fn unglue_decipher(path: &str, opath: &str) -> io::Result<()> {
+    let ppath = String::from(opath) + ".parity";
+    assert_nonexistent(&ppath)?;
+    assert_nonexistent(opath)?;
     let key = input("Key: ");
     let mut keystream = ChaCha20Stream::from_key(key);
     let gfile = &mut File::open(path)?;
-    let pfile = &mut File::create(String::from(opath) + ".parity")?;
+    let pfile = &mut File::create(ppath)?;
     let ofile = &mut File::create(opath)?;
     unglue(gfile,pfile,ofile,&mut keystream)
 }

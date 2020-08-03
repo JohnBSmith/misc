@@ -38,7 +38,6 @@ pub struct ChaCha20Stream {
     index: usize
 }
 impl ChaCha20Stream {
-    #[allow(dead_code)]
     fn new(key: &[u8;32], iv: &[u8;8]) -> Self {
         let mut state: [u32;16] = [0;16];
         state[0] = u32_from_bytes_le("expa".as_bytes());
@@ -76,7 +75,6 @@ impl ChaCha20Stream {
         self.state[12] = self.state[12].wrapping_add(1);
         if self.state[12] == 0 {self.state[13] += 1;}
     }
-    #[allow(dead_code)]
     pub fn from_generated_key() -> (String,Self) {
         let key_string = generate_key();
         let key = key_from(key_string.clone());

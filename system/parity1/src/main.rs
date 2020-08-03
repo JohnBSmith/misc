@@ -123,12 +123,18 @@ fn generate_parity(ifile: &mut File, ofile: &mut File)
     Ok(())
 }
 
+fn assert_nonexistent(path: &str) -> io::Result<()> {
+    if Path::new(path).exists() {
+        Err(io::Error::new(io::ErrorKind::AlreadyExists,
+            format!("Path '{}' already exists.",path)))
+    } else {
+        Ok(())
+    }    
+}
+
 fn generate_parity_file(path: &str) -> io::Result<()> {
     let opath = String::from(path) + ".parity";
-    if Path::new(&opath).exists() {
-        return Err(io::Error::new(io::ErrorKind::AlreadyExists,
-            format!("Path '{}' already exists.",&opath)));
-    }
+    assert_nonexistent(&opath)?;
     let ifile = &mut File::open(path)?;
     let ofile = &mut File::create(opath)?;
     generate_parity(ifile,ofile)
