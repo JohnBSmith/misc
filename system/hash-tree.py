@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-# hash-tree PATH > list.json
+# hash-tree PATH -o HASHES.json
 # Compute the hash tree of PATH.
 
-# hash-tree PATH list.json
+# hash-tree PATH HASHES.json
 # Compare the hash tree with the given directory tree to detect
 # changes.
 
@@ -47,8 +47,7 @@ def hash_tree(path):
     hash_rec(hashlist,path)
     return hashlist
 
-def generate():
-    path = sys.argv[1]
+def generate(path):
     if os.path.isfile(path):
         digest = hash_file(new_hasher(),path).hexdigest()
         value = [[os.path.basename(path),digest]]
@@ -64,9 +63,9 @@ def read_hashlist(path):
     with open(path) as f:
         return json.loads(f.read())
 
-def compare():
-    a = read_hashlist(sys.argv[2])
-    b = dict(generate())
+def compare(ipath, hash_list_path):
+    a = read_hashlist(hash_list_path)
+    b = dict(generate(ipath))
     diff_list = []
     for path, hpath in a:
         if path in b:
@@ -80,9 +79,27 @@ def compare():
         for path in diff_list:
             print(path)
 
-if len(sys.argv)==2:
-    value = generate()
-    print(json.dumps(value,indent=0))
+def write_file(path,text):
+    with open(path,"w") as f:
+        f.write(text)
+
+def usage():
+    eprint("Usage: hash-tree PATH -o HASHES.json")
+    eprint("check: hash-tree PATH HASHES.json")
+    sys.exit(1)
+
+if len(sys.argv)==4:
+    if "o" in sys.argv[2]:
+        opath = os.path.join(os.getcwd(), sys.argv[3])
+        if os.path.exists(opath):
+            eprint("Error: path {} already exists.".format(opath))
+            sys.exit(1)
+        hash_list = generate(sys.argv[1])
+        write_file(opath, json.dumps(hash_list, indent=0))
+    else:
+        usage()
+elif len(sys.argv)==3:
+    compare(sys.argv[1], sys.argv[2])
 else:
-    compare()
+    usage()
 
