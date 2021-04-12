@@ -71,12 +71,12 @@ def read_hashlist(path):
     with open(path) as f:
         return json.loads(f.read())
 
-def compare(hashlist_path):
+def compare(dir_path, hashlist_path):
     a = read_hashlist(hashlist_path)
-    if os.path.isdir(sys.argv[1]):
-        os.chdir(sys.argv[1])
+    if os.path.isdir(dir_path):
+        os.chdir(dir_path)
     else:
-        fpath,fname = os.path.split(sys.argv[1])
+        fpath, fname = os.path.split(dir_path)
         os.chdir(fpath)
     diff_list = []
     n = len(a)
@@ -99,11 +99,14 @@ if len(sys.argv)==4:
     output_path = os.path.join(os.getcwd(),sys.argv[3])
     if "l" in sys.argv[2]: log = True
     if "o" in sys.argv[2]:
+        if os.path.exists(output_path):
+            eprint("Error: path {} already exists.".format(output_path))
+            sys.exit(1)
         generate(output_path)
     else:
-        compare(sys.argv[3])
+        compare(sys.argv[1], sys.argv[3])
 elif len(sys.argv)==3:
-    compare(sys.argv[2])
+    compare(sys.argv[1], sys.argv[2])
 else:
     eprint("Usage: hash-list PATH -o FILE.json")
     eprint("check: hash-list PATH FILE.json")
