@@ -92,18 +92,18 @@ fn transform(hasher: &mut Hasher) {
 }
 
 pub struct Hasher {
-    state: [u32;64], data: [u8;64], m: [u32;64],
+    state: [u32; 64], data: [u8; 64], m: [u32; 64],
     datalen: usize, bitlen: u64
 }
 
 impl Hasher {
     pub fn new() -> Self {
         let mut hasher = Self{
-            state: [0;64], data: [0;64], m: [0;64],
+            state: [0; 64], data: [0; 64], m: [0; 64],
             datalen: 0, bitlen: 0
         };
         hasher.reset();
-        return hasher;
+        hasher
     }
 
     pub fn reset(&mut self) {

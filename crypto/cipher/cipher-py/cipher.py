@@ -7,10 +7,10 @@
 import os, hashlib, struct
 from sys import argv, exit
 
-# ChaCha20 Cipher
+# ChaCha20 cipher
 def keystream(key, iv, position=0):
-    assert isinstance(key,bytes) and len(key)==32
-    assert isinstance(iv, bytes) and len(iv)==8
+    assert isinstance(key,bytes) and len(key) == 32
+    assert isinstance(iv, bytes) and len(iv) == 8
 
     def rotate(v, c):
         return ((v << c) & 0xffffffff) | v >> (32 - c)

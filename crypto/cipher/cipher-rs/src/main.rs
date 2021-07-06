@@ -23,15 +23,15 @@ fn quarter_round(x: &mut [u32;16],
     x[b] = (x[b]^x[c]).rotate_left(7);
 }
 
-// ChaCha20 Cipher
+// ChaCha20 cipher
 struct KeyStream {
     state: [u32;16],
     obuff: [u8;64],
     index: usize
 }
 impl KeyStream {
-    fn new(key: &[u8;32], iv: &[u8;8]) -> Self {
-        let mut state: [u32;16] = [0;16];
+    fn new(key: &[u8; 32], iv: &[u8; 8]) -> Self {
+        let mut state: [u32; 16] = [0; 16];
         state[0] = u32_from_bytes_le("expa".as_bytes());
         state[1] = u32_from_bytes_le("nd 3".as_bytes());
         state[2] = u32_from_bytes_le("2-by".as_bytes());
@@ -43,10 +43,10 @@ impl KeyStream {
         state[13] = 0;
         state[14] = u32_from_bytes_le(&iv[0..4]);
         state[15] = u32_from_bytes_le(&iv[4..8]);
-        return Self{state, obuff: [0;64], index: 64};
+        Self {state, obuff: [0; 64], index: 64}
     }
     fn next_block(&mut self) {
-        let mut x: [u32;16] = self.state;
+        let mut x: [u32; 16] = self.state;
         for _ in 0..10 {
             quarter_round(&mut x, 0, 4,  8, 12);
             quarter_round(&mut x, 1, 5,  9, 13);
@@ -73,7 +73,7 @@ impl KeyStream {
             self.index = 0;
         }
         self.index += 1;
-        return self.obuff[self.index-1];
+        self.obuff[self.index-1]
     } 
 }
 
@@ -103,25 +103,25 @@ fn encipher(key: &[u8; 32], iv: &[u8; 8],
 
     loop {
         let n = ifile.read(&mut buffer)?;
-        if n==0 {break;}
+        if n == 0 {break;}
         hasher.update(&buffer[..n]);
         for x in &mut buffer[..n] {
             *x ^= stream.get();
         }
         ofile.write_all(&buffer[..n])?;
     }
-    let mut hash: [u8;32] = [0;32];
+
+    let mut hash: [u8; 32] = [0; 32];
     hasher.finalize(&mut hash);
-    for (x,y) in hash.iter_mut().zip(&hash_enc) {
+    for (x, y) in hash.iter_mut().zip(&hash_enc) {
         *x ^= y;
     }
-    
     ofile.seek(io::SeekFrom::Start(8))?;
     ofile.write_all(&hash)?;
-    return Ok(());
+    Ok(())
 }
 
-fn decipher(key: &[u8;32], iv: &[u8;8],
+fn decipher(key: &[u8; 32], iv: &[u8; 8],
     ifile: &mut File, ofile: &mut File
 ) -> io::Result<()>
 {
@@ -140,19 +140,20 @@ fn decipher(key: &[u8;32], iv: &[u8;8],
 
     loop {
         let n = ifile.read(&mut buffer)?;
-        if n==0 {break;}
+        if n == 0 {break;}
         for x in &mut buffer[..n] {
             *x ^= stream.get();
         }
         hasher.update(&buffer[..n]);
         ofile.write_all(&buffer[..n])?;
     }
-    let mut hash: [u8;32] = [0;32];
+
+    let mut hash: [u8; 32] = [0; 32];
     hasher.finalize(&mut hash);
     if hash != hash0 {
         eprintln!("\nWarning: integrity check failed or key was wrong.");
     }
-    return Ok(());
+    Ok(())
 }
 
 fn iter_hash_next(key: &mut [u8]) {
@@ -168,48 +169,50 @@ fn key_stretch(key: &mut [u8]) {
     }
 }
 
-fn key_from(salt: &[u8], mut text: String) -> [u8;32] {
+fn key_from(salt: &[u8], mut text: String) -> [u8; 32] {
     text.retain(|c| c != ' ');
-    let mut key: [u8;32] = [0;32];
+    let mut key: [u8; 32] = [0; 32];
     let mut hasher = Hasher::new();
     hasher.update(salt);
     hasher.update(text.as_bytes());
     hasher.finalize(&mut key);
     key_stretch(&mut key);
-    return key;
+    key
 }
 
 fn input(prompt: &str) -> String {
     let mut buffer = String::new();
-    print!("{}",prompt);
+    print!("{}", prompt);
     io::stdout().flush().unwrap();
     io::stdin().read_line(&mut buffer).unwrap();
-    buffer.pop();
-    if cfg!(windows) {buffer.pop();}
-    return buffer;
+    if buffer.ends_with('\n') {
+        buffer.pop();
+        if buffer.ends_with('\r') {buffer.pop();}
+    }
+    buffer
 }
 
 #[cfg(windows)]
-fn get_nonce() -> io::Result<[u8;8]> {
+fn get_nonce() -> io::Result<[u8; 8]> {
     let text = input("(Nonce) Type in some random letters (roughly 20):\n");
-    let mut buffer: [u8;32] = [0;32];
+    let mut buffer: [u8; 32] = [0; 32];
     let mut hasher = Hasher::new_256();
     hasher.update(text.as_bytes());
     hasher.finalize(&mut buffer);
     for _ in 10000 {
         iter_hash_next(&mut buffer);
     }
-    let mut nonce = [0;8];
+    let mut nonce = [0; 8];
     nonce.copy_from_slice(&buffer[..8]);
-    return Ok(nonce);
+    Ok(nonce)
 }
 
 #[cfg(not(windows))]
-fn get_nonce() -> io::Result<[u8;8]> {
-    let mut nonce: [u8;8] = [0;8];
+fn get_nonce() -> io::Result<[u8; 8]> {
+    let mut nonce: [u8; 8] = [0; 8];
     let mut rng = File::open("/dev/urandom")?;
     rng.read_exact(&mut nonce)?;
-    return Ok(nonce);
+    Ok(nonce)
 }
 
 static USAGE: &str = r#"
@@ -219,7 +222,7 @@ Usage:
 "#;
 
 fn usage() {
-    println!("{}",USAGE);
+    println!("{}", USAGE);
 }
 
 fn main() -> io::Result<()> {
@@ -248,5 +251,5 @@ fn main() -> io::Result<()> {
     } else {
         usage();
     }
-    return Ok(());
+    Ok(())
 }
