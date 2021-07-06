@@ -23,12 +23,13 @@ fn quarter_round(x: &mut [u32;16],
     x[b] = (x[b]^x[c]).rotate_left(7);
 }
 
-struct ChaCha20Stream {
+// ChaCha20 Cipher
+struct KeyStream {
     state: [u32;16],
     obuff: [u8;64],
     index: usize
 }
-impl ChaCha20Stream {
+impl KeyStream {
     fn new(key: &[u8;32], iv: &[u8;8]) -> Self {
         let mut state: [u32;16] = [0;16];
         state[0] = u32_from_bytes_le("expa".as_bytes());
@@ -76,21 +77,30 @@ impl ChaCha20Stream {
     } 
 }
 
-fn encipher(key: &[u8;32], iv: &[u8;8],
+fn salt(hasher: &mut Hasher, stream: &mut KeyStream) {
+    let mut buffer: [u8; 256] = [0; 256];
+    for x in &mut buffer {
+        *x = stream.get();
+    }
+    hasher.update(&buffer);
+}
+
+fn encipher(key: &[u8; 32], iv: &[u8; 8],
     ifile: &mut File, ofile: &mut File
 ) -> io::Result<()>
 {
-    let mut hash_enc: [u8;32] = [0;32];
+    let mut hash_enc: [u8; 32] = [0; 32];
     ofile.write_all(iv)?;
-    ofile.write_all(&[0;32])?;
+    ofile.write_all(&[0; 32])?;
     let mut buffer = [0; 0x10000];
-    let mut stream = ChaCha20Stream::new(key,iv);
+    let mut stream = KeyStream::new(key, iv);
+    let mut hasher = Hasher::new();
+    salt(&mut hasher, &mut stream);
+
     for x in &mut hash_enc {
         *x = stream.get();
     }
-    
-    let mut hasher = Hasher::new();
-    hasher.update(iv);
+
     loop {
         let n = ifile.read(&mut buffer)?;
         if n==0 {break;}
@@ -120,13 +130,14 @@ fn decipher(key: &[u8;32], iv: &[u8;8],
     assert!(n == 32);
 
     let mut buffer = [0; 0x10000];
-    let mut stream = ChaCha20Stream::new(key,iv);
+    let mut stream = KeyStream::new(key, iv);
+    let mut hasher = Hasher::new();
+    salt(&mut hasher, &mut stream);
+
     for x in &mut hash0 {
         *x ^= stream.get();
     }
-    
-    let mut hasher = Hasher::new();
-    hasher.update(iv);
+
     loop {
         let n = ifile.read(&mut buffer)?;
         if n==0 {break;}

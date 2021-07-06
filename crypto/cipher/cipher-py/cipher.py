@@ -7,7 +7,8 @@
 import os, hashlib, struct
 from sys import argv, exit
 
-def chacha20_xor_stream(key, iv, position=0):
+# ChaCha20 Cipher
+def keystream(key, iv, position=0):
     assert isinstance(key,bytes) and len(key)==32
     assert isinstance(iv, bytes) and len(iv)==8
 
@@ -47,10 +48,9 @@ def chacha20_xor_stream(key, iv, position=0):
         if ctx[12] == 0:
             ctx[13] = (ctx[13] + 1) & 0xffffffff
 
-def chacha20(data, key, iv, position=0):
-    assert isinstance(data,bytes)
-    return bytes(x^y for x,y in
-        zip(data, chacha20_xor_stream(key, iv, position)))
+def apply_xor(stream, data):
+    assert isinstance(data, bytes)
+    return bytes(x^y for x, y in zip(data, stream))
 
 def hash_value(*a):
     hasher = hashlib.sha256()
@@ -63,31 +63,35 @@ def key_stretch(h):
     for k in range(10000): h = hash_value(h)
     return h
 
-def key_hash(salt,key):
-    h = hash_value(salt + key.replace(" ","").encode("utf-8"))
+def key_hash(salt, key):
+    h = hash_value(salt + key.replace(" ", "").encode("utf-8"))
     return key_stretch(h)
 
 def encipher(ipath,opath):
     iv = os.urandom(8)
     print("     xxxx xxxx xxxx xxxx xxxx xxxx xxxx")
-    key = key_hash(iv,input("Key: "))
-    with open(ipath,'rb') as plain:
+    key = key_hash(iv, input("Key: "))
+    with open(ipath, 'rb') as plain:
         data = plain.read()
-        edata = chacha20(hash_value(iv,data)+data,key,iv)
-    with open(opath,'wb') as out:
+        stream = keystream(key, iv)
+        salt = bytes(next(stream) for i in range(256))
+        edata = apply_xor(stream, hash_value(salt, data) + data)
+    with open(opath, 'wb') as out:
         out.write(iv)
         out.write(edata)
 
-def decipher(ipath,opath):
-    with open(ipath,'rb') as chiff:
+def decipher(ipath, opath):
+    with open(ipath, 'rb') as chiff:
         iv = chiff.read(8)
-        key = key_hash(iv,input("Key: "))
+        key = key_hash(iv, input("Key: "))
         edata = chiff.read()
-        data = chacha20(edata,key,iv)
+        stream = keystream(key, iv)
+        salt = bytes(next(stream) for i in range(256))
+        data = apply_xor(stream, edata)
         h, data = data[:32], data[32:]
-        if h != hash_value(iv,data):
+        if h != hash_value(salt, data):
             print("Warning: key is wrong or data was corrupted.\n")
-    with open(opath,'wb') as out:
+    with open(opath, 'wb') as out:
         out.write(data)
 
 def usage():
@@ -98,9 +102,9 @@ def main():
     if len(argv) != 4: usage()
     mode, ipath, opath = argv[1:]
     if mode == "-e":
-        encipher(ipath,opath)
+        encipher(ipath, opath)
     elif mode == "-d":
-        decipher(ipath,opath)
+        decipher(ipath, opath)
     else:
         usage()
 
