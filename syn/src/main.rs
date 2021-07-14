@@ -92,7 +92,7 @@ fn main() {
         Err(e) => {
             let path = path.to_str().unwrap_or("INVALID UNICODE");
             eprintln!("Could not read '{}'.", path);
-            println!("{}", e);
+            eprintln!("{}", e);
             return;
         }
     };
