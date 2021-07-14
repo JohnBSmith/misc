@@ -150,14 +150,14 @@ impl Hasher {
                 i += 1;
             }
             transform(self);
-            self.data[..56].copy_from_slice(&[0;56]);
+            self.data[..56].copy_from_slice(&[0; 56]);
         }
       
         // Append to the padding the total message's length
         // in bits and transform.
         self.bitlen += self.datalen as u64 * 8;
-        self.data[63] = self.bitlen as u8;
-        self.data[62] = (self.bitlen >> 8) as u8;
+        self.data[63] = (self.bitlen >>  0) as u8;
+        self.data[62] = (self.bitlen >>  8) as u8;
         self.data[61] = (self.bitlen >> 16) as u8;
         self.data[60] = (self.bitlen >> 24) as u8;
         self.data[59] = (self.bitlen >> 32) as u8;
@@ -171,14 +171,15 @@ impl Hasher {
         // reverse all the bytes when copying the final
         // state to the output hash.
         for i in 0..4 {
-            hash[i]      = (self.state[0] >> (24 - i * 8)) as u8;
-            hash[i + 4]  = (self.state[1] >> (24 - i * 8)) as u8;
-            hash[i + 8]  = (self.state[2] >> (24 - i * 8)) as u8;
-            hash[i + 12] = (self.state[3] >> (24 - i * 8)) as u8;
-            hash[i + 16] = (self.state[4] >> (24 - i * 8)) as u8;
-            hash[i + 20] = (self.state[5] >> (24 - i * 8)) as u8;
-            hash[i + 24] = (self.state[6] >> (24 - i * 8)) as u8;
-            hash[i + 28] = (self.state[7] >> (24 - i * 8)) as u8;
+            let d = 24 - i*8;
+            hash[i +  0] = (self.state[0] >> d) as u8;
+            hash[i +  4] = (self.state[1] >> d) as u8;
+            hash[i +  8] = (self.state[2] >> d) as u8;
+            hash[i + 12] = (self.state[3] >> d) as u8;
+            hash[i + 16] = (self.state[4] >> d) as u8;
+            hash[i + 20] = (self.state[5] >> d) as u8;
+            hash[i + 24] = (self.state[6] >> d) as u8;
+            hash[i + 28] = (self.state[7] >> d) as u8;
         }
     }
 }
