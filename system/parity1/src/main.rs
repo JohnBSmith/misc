@@ -31,7 +31,7 @@ fn read_exact(file: &mut impl Read, mut buffer: &mut [u8])
         buffer = &mut buffer[n..];
         sum += n;
     }
-    return Ok(sum);
+    Ok(sum)
 }
 
 fn fill_zero(a: &mut [u8]) {
@@ -50,37 +50,37 @@ fn u64_from_bytes_le(a: &[u8]) -> u64 {
     u64::from(a[6])<<48 | u64::from(a[7])<<56
 }
 
-fn u32_to_bytes_le(x: u32) -> [u8;4] {
+fn u32_to_bytes_le(x: u32) -> [u8; 4] {
     [x as u8, (x>>8) as u8, (x>>16) as u8, (x>>24) as u8]
 }
 
-fn u64_to_bytes_le(x: u64) -> [u8;8] {
+fn u64_to_bytes_le(x: u64) -> [u8; 8] {
     [x as u8, (x>>8) as u8, (x>>16) as u8, (x>>24) as u8,
     (x>>32) as u8, (x>>40) as u8, (x>>48) as u8, (x>>56) as u8]
 }
 
 struct Generator {
-    hash_data: [u8;32]
+    hash_data: [u8; 32]
 }
 
 impl Generator {
     fn new() -> Self {
-        Self {hash_data: [0;32]}
+        Self {hash_data: [0; 32]}
     }
     fn generate_parity_block(&mut self, buffer: &[u8], ofile: &mut File)
     -> io::Result<()>
     {
         let mut parity_crc = 0;
         for k in 0..BLOCK_COUNT {
-            let value = u32_to_bytes_le(crc(&buffer[BLOCK_SIZE*k..BLOCK_SIZE*(k+1)],0));
-            parity_crc = crc(&value,parity_crc);
+            let value = u32_to_bytes_le(crc(&buffer[BLOCK_SIZE*k..BLOCK_SIZE*(k+1)], 0));
+            parity_crc = crc(&value, parity_crc);
             ofile.write_all(&value)?;
         }
         let mut hasher = Hasher::new();
         hasher.update(&buffer);
         hasher.finalize(&mut self.hash_data);
 
-        parity_crc = crc(&self.hash_data,parity_crc);
+        parity_crc = crc(&self.hash_data, parity_crc);
         ofile.write_all(&self.hash_data)?;
         ofile.write_all(&u32_to_bytes_le(parity_crc))?;
         Ok(())
@@ -91,7 +91,7 @@ fn generate_parity(ifile: &mut File, ofile: &mut File)
 -> io::Result<()>
 {
     let len: u64 = ifile.metadata()?.len();
-    let mut header: [u8;64] = [0;64];
+    let mut header: [u8; 64] = [0; 64];
     ofile.write_all(&header)?;
     let buffer: &mut [u8] = &mut [0; BUFFER_SIZE];
     let mut gen = Generator::new();
@@ -103,16 +103,16 @@ fn generate_parity(ifile: &mut File, ofile: &mut File)
         if n < BUFFER_SIZE {
             fill_zero(&mut buffer[n..]);
         }
-        gen.generate_parity_block(buffer,ofile)?;
+        gen.generate_parity_block(buffer, ofile)?;
     }
-    
+
     header[0..12].copy_from_slice(b"\x00\x00parity001:");
     hasher.finalize(&mut header[12..44]);
-    let value = u32_to_bytes_le(crc(&mut header[12..44],0));
+    let value = u32_to_bytes_le(crc(&mut header[12..44], 0));
     header[44..48].copy_from_slice(&value);
 
     let len_bytes = u64_to_bytes_le(len);
-    let len_crc = u32_to_bytes_le(crc(&len_bytes,0));
+    let len_crc = u32_to_bytes_le(crc(&len_bytes, 0));
     header[48..56].copy_from_slice(&len_bytes);
     header[56..60].copy_from_slice(&len_crc);
 
@@ -120,13 +120,15 @@ fn generate_parity(ifile: &mut File, ofile: &mut File)
 
     ofile.seek(io::SeekFrom::Start(0))?;
     ofile.write_all(&header)?;
+
+    println!("SHA2-256:\n{}", check::data_to_string(&header[12..44]));
     Ok(())
 }
 
 fn assert_nonexistent(path: &str) -> io::Result<()> {
     if Path::new(path).exists() {
         Err(io::Error::new(io::ErrorKind::AlreadyExists,
-            format!("Path '{}' already exists.",path)))
+            format!("Path '{}' already exists.", path)))
     } else {
         Ok(())
     }    
@@ -137,7 +139,7 @@ fn generate_parity_file(path: &str) -> io::Result<()> {
     assert_nonexistent(&opath)?;
     let ifile = &mut File::open(path)?;
     let ofile = &mut File::create(opath)?;
-    generate_parity(ifile,ofile)
+    generate_parity(ifile, ofile)
 }
 
 fn is_option(arg: &str) -> bool {
@@ -160,28 +162,31 @@ parity -i FILE.parity
 
 fn main() -> io::Result<()> {
     let argv: Vec<String> = std::env::args().collect();
-    if argv.len()<2 {
-        println!("{}",HELP_MESSAGE);
+    if argv.len() < 2 {
+        println!("{}", HELP_MESSAGE);
     } else if is_option(&argv[1]) {
-        if argv[1]=="-i" && argv.len()==3 {
+        if argv[1] == "-i" && argv.len() == 3 {
             let pfile = &mut File::open(&argv[2])?;
             check::get_info(pfile)?;
-        } else if argv[1]=="-e" && argv.len()==4 {
-            generate_parity_file(&argv[2])?;
-            encipher_glue(&argv[2],&argv[3])?;
-        } else if argv[1]=="-d" && argv.len()==4 {
-            unglue_decipher(&argv[2],&argv[3])?;
+        } else if argv[1] == "-e" && argv.len() == 4 {
+            let opath = String::from(&argv[2]) + ".parity";
+            if !Path::new(&opath).exists() {
+                generate_parity_file(&argv[2])?;
+            }
+            encipher_glue(&argv[2], &argv[3])?;
+        } else if argv[1] == "-d" && argv.len() == 4 {
+            unglue_decipher(&argv[2], &argv[3])?;
         } else {
-            println!("{}",HELP_MESSAGE);
+            println!("{}", HELP_MESSAGE);
         }
-    } else if argv.len()==2 {
+    } else if argv.len() == 2 {
         generate_parity_file(&argv[1])?;
-    } else if argv.len()==3 {
+    } else if argv.len() == 3 {
         let ifile = &mut File::open(&argv[1])?;
         let pfile = &mut File::open(&argv[2])?;
-        check::check_parity(ifile,pfile)?;
+        check::check_parity(ifile, pfile)?;
     } else {
-        println!("{}",HELP_MESSAGE);
+        println!("{}", HELP_MESSAGE);
     }
     Ok(())
 }

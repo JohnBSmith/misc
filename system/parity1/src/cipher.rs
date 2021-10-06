@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::Read;
 use crate::sha2::Hasher;
 
-static IV_NONE: &[u8;8] = b"12345678";
+static IV_NONE: &[u8; 8] = b"12345678";
 
 pub trait Keystream {
     fn encipher(&mut self, data: &mut [u8]);
@@ -19,7 +19,7 @@ fn u32_from_bytes_le(a: &[u8]) -> u32 {
     u32::from(a[2])<<16 | u32::from(a[3])<<24
 }
 
-fn quarter_round(x: &mut [u32;16],
+fn quarter_round(x: &mut [u32; 16],
     a: usize, b: usize, c: usize, d: usize
 ) {
     x[a] = x[a].wrapping_add(x[b]);
@@ -33,13 +33,13 @@ fn quarter_round(x: &mut [u32;16],
 }
 
 pub struct ChaCha20Stream {
-    state: [u32;16],
-    obuff: [u8;64],
+    state: [u32; 16],
+    obuff: [u8; 64],
     index: usize
 }
 impl ChaCha20Stream {
-    fn new(key: &[u8;32], iv: &[u8;8]) -> Self {
-        let mut state: [u32;16] = [0;16];
+    fn new(key: &[u8; 32], iv: &[u8; 8]) -> Self {
+        let mut state: [u32; 16] = [0; 16];
         state[0] = u32_from_bytes_le("expa".as_bytes());
         state[1] = u32_from_bytes_le("nd 3".as_bytes());
         state[2] = u32_from_bytes_le("2-by".as_bytes());
@@ -47,14 +47,14 @@ impl ChaCha20Stream {
         for i in 0..8 {
             state[4+i] = u32_from_bytes_le(&key[4*i..4*(i+1)]);
         }
-        state[12] = 0; // Counter, niederwertige Bits
-        state[13] = 0; // Counter, höherwertige Bits
+        state[12] = 0; // Counter, lower bits
+        state[13] = 0; // Counter, higher bits
         state[14] = u32_from_bytes_le(&iv[0..4]);
         state[15] = u32_from_bytes_le(&iv[4..8]);
-        return Self{state, obuff: [0;64], index: 64};
+        return Self {state, obuff: [0; 64], index: 64};
     }
     fn next_block(&mut self) {
-        let mut x: [u32;16] = self.state;
+        let mut x: [u32; 16] = self.state;
         for _ in 0..10 {
             quarter_round(&mut x, 0, 4,  8, 12);
             quarter_round(&mut x, 1, 5,  9, 13);
@@ -105,9 +105,9 @@ fn iter_hash_next(key: &mut [u8]) {
     hasher.finalize(key);
 }
 
-fn key_from(mut text: String) -> [u8;32] {
+fn key_from(mut text: String) -> [u8; 32] {
     text.retain(|c| c != ' ');
-    let mut key: [u8;32] = [0;32];
+    let mut key: [u8; 32] = [0; 32];
     let mut hasher = Hasher::new();
     hasher.update(text.as_bytes());
     hasher.finalize(&mut key);
