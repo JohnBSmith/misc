@@ -13,9 +13,7 @@
 # Note: This is not a Merkle tree, as the directories itself are
 # omitted from hashing.
 
-import os, sys
-import hashlib
-import json
+import os, sys, hashlib, json
 
 log = False
 
