@@ -48,7 +48,7 @@ def hash_rec(root):
     file_list = list_files(root)
     n = len(file_list)
     for k, path in enumerate(file_list):
-        if log: print("[{} of {}] {}".format(k+1, n, path))
+        if log: print("[{} of {}] {}".format(k + 1, n, path))
         digest = hash_file(new_hasher(), path).hexdigest()
         a.append([path, digest])
     return a
@@ -57,63 +57,69 @@ def write_file(path, text):
     with open(path, "w") as f:
         f.write(text)
 
-def generate(output_path):
-    path = sys.argv[1]
+def generate(path):
     if os.path.isfile(path):
         digest = hash_file(new_hasher(), path).hexdigest()
-        value = [[os.path.basename(path), digest]]
+        return [[os.path.basename(path), digest]]
     elif os.path.isdir(path):
         os.chdir(path)
-        value = hash_rec("./")
+        return hash_rec("./")
     else:
         eprint("Error: path '{}' cannot be accessed.".format(path))
         sys.exit(1)
-    write_file(output_path, json.dumps(value, indent = 0))
 
 def read_hashlist(path):
     with open(path) as f:
         return json.loads(f.read())
 
-def compare(dir_path, hashlist_path):
-    a = read_hashlist(hashlist_path)
-    if os.path.isdir(dir_path):
-        os.chdir(dir_path)
-    else:
-        fpath, fname = os.path.split(dir_path)
-        os.chdir(fpath)
-    diff_list = []
-    n = len(a)
-    for k, (path, hpath) in enumerate(a):
-        if log: print("[{} of {}] {}".format(k+1, n, path))
-        if os.path.exists(path):
-            h = hash_file(new_hasher(), path).hexdigest()
-            if h != hpath:
-                diff_list.append(path)
+def inv_dict(a):
+    d = {}
+    for value, key in a:
+        if key in d:
+            d[key].append(value)
         else:
-            diff_list.append("[file not found] " + path)
-    if len(diff_list) == 0:
-        print("All files match.")
-    else:
-        print("Detected modified files:")
-        for path in diff_list:
-            print(path)
+            d[key] = [value]
+    return d
 
-def compare_lists(hl_path_old, hl_path_new):
-    old = read_hashlist(hl_path_old)
-    new = read_hashlist(hl_path_new)
+def compare(old, new):
+    new_inv = inv_dict(new)
     new = dict(new)
     diff_list = []
-    for (path, h) in old:
+    none_list = []
+    move_list = []
+    for path, h in old:
         if path in new:
             if h != new[path]: diff_list.append(path)
         else:
-            diff_list.append("[file not found] " + path)
-    if len(diff_list) == 0:
+            if h in new_inv:
+                move_list.append([path, new_inv[h]])
+            else:
+                none_list.append(path)
+    if len(diff_list) + len(none_list) + len(move_list) == 0:
         print("All files match.")
     else:
-        print("Detected modified files:")
-        for path in diff_list:
-            print(path)
+        if len(move_list) != 0:
+            print("Detected moved files:")
+            for src, dest in move_list:
+                print("{} to {}".format(src, ", ".join(dest)))
+            print()
+        if len(diff_list) + len(none_list) != 0:
+            print("Detected modified files:")
+            for path in diff_list:
+                print(path)
+            for path in none_list:
+                print("[file not found]", path)
+            print()
+
+def compare_list_list(hl_path_old, hl_path_new):
+    old = read_hashlist(hl_path_old)
+    new = read_hashlist(hl_path_new)
+    return compare(old, new)
+
+def compare_dir_list(dir_path, hashlist_path):
+    old = read_hashlist(hashlist_path)
+    new = generate(dir_path)
+    return compare(old, new)
 
 if len(sys.argv) == 4:
     output_path = os.path.join(os.getcwd(), sys.argv[3])
@@ -122,15 +128,17 @@ if len(sys.argv) == 4:
         if os.path.exists(output_path):
             eprint("Error: path {} already exists.".format(output_path))
             sys.exit(1)
-        generate(output_path)
+        value = generate(sys.argv[1])
+        write_file(output_path, json.dumps(value, indent = 0))
     elif "c" in sys.argv[2]:
-        compare_lists(sys.argv[1], sys.argv[3])
+        compare_list_list(sys.argv[1], sys.argv[3])
     else:
-        compare(sys.argv[1], sys.argv[3])
+        compare_dir_list(sys.argv[1], sys.argv[3])
 elif len(sys.argv) == 3:
-    compare(sys.argv[1], sys.argv[2])
+    compare_dir_list(sys.argv[1], sys.argv[2])
 else:
     eprint("Usage: hash-list PATH -o FILE.json")
     eprint("check: hash-list PATH FILE.json")
+    eprint("check: hash-list OLD.json -c NEW.json")
     sys.exit(1)
 
