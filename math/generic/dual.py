@@ -61,4 +61,3 @@ def imag(x):
 def diff(f, x, n = 1):
     return x if n == 0 else imag(f(Dual(x, 1)))
  
-
