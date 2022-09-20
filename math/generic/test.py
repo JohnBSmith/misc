@@ -98,3 +98,7 @@ assert f(2) == 49
 assert (f**2).coeff == [1, 4, 10, 20, 25, 24, 16]
 assert (f*f).coeff == (f**2).coeff
 
+assert (Polynomial([1, 2]) + 10).coeff == [11, 2]
+assert (Polynomial([1, 2]) - 10).coeff == [-9, 2]
+assert (10 + Polynomial([1, 2])).coeff == [11, 2]
+assert (10 - Polynomial([1, 2])).coeff == [9, -2]

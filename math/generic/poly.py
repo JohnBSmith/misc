@@ -9,23 +9,41 @@ class Polynomial:
     def __neg__(self):
         return Polynomial([-a for a in self.coeff])
     def __add__(self, rhs):
-        na = len(self.coeff); nb = len(rhs.coeff)
-        n = max(na, nb)
-        acc = []
-        for k in range(n):
-            a = self.coeff[k] if k < na else 0
-            b = rhs .coeff[k] if k < nb else 0
-            acc.append(a + b)
-        return Polynomial(acc)
+        if isinstance(rhs, Polynomial):
+            na = len(self.coeff); nb = len(rhs.coeff)
+            n = max(na, nb)
+            acc = []
+            for k in range(n):
+                a = self.coeff[k] if k < na else 0
+                b = rhs .coeff[k] if k < nb else 0
+                acc.append(a + b)
+            return Polynomial(acc)
+        else:
+            c = self.coeff
+            return Polynomial([c[k] + rhs if k == 0 else c[k]
+                for k in range(len(c))])
     def __sub__(self, rhs):
-        na = len(self.coeff); nb = len(rhs.coeff)
-        n = max(na, nb)
-        acc = []
-        for k in range(n):
-            a = self.coeff[k] if k < na else 0
-            b = rhs .coeff[k] if k < nb else 0
-            acc.append(a - b)
-        return Polynomial(acc)
+        if isinstance(rhs, Polynomial):
+            na = len(self.coeff); nb = len(rhs.coeff)
+            n = max(na, nb)
+            acc = []
+            for k in range(n):
+                a = self.coeff[k] if k < na else 0
+                b = rhs .coeff[k] if k < nb else 0
+                acc.append(a - b)
+            return Polynomial(acc)
+        else:
+            c = self.coeff
+            return Polynomial([c[k] - rhs if k == 0 else c[k]
+                for k in range(len(c))])
+    def __radd__(self, lhs):
+        c = self.coeff
+        return Polynomial([lhs + c[k] if k == 0 else c[k]
+            for k in range(len(c))])
+    def __rsub__(self, lhs):
+        c = self.coeff
+        return Polynomial([lhs - c[k] if k == 0 else -c[k]
+            for k in range(len(c))])
     def __mul__(self, rhs):
         if isinstance(rhs, Polynomial):
             na = len(self.coeff); nb = len(rhs.coeff)
@@ -54,3 +72,8 @@ class Polynomial:
         for a in self.coeff:
             acc += a*p; p *= x
         return acc
+    def __eq__(self, rhs):
+        return self.coeff == rhs.coeff
+    def __hash__(self):
+        return hash(tuple(self.coeff))
+
