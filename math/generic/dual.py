@@ -59,5 +59,10 @@ def imag(x):
     return x.im if isinstance(x, Dual) else x
 
 def diff(f, x, n = 1):
-    return x if n == 0 else imag(f(Dual(x, 1)))
- 
+    if n == 1:
+        return imag(f(Dual(x, 1)))
+    elif n == 0:
+        return f(x)
+    else:
+        return imag(diff(f, Dual(x, 1), n - 1))
+
