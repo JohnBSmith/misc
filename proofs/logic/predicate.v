@@ -135,7 +135,7 @@ Proof.
     - destruct eq as (x, q). exists x. right. exact q.
 Qed.
 
-(* (∃x.P(x)) ∧ (∃x.Q(x)) ⇒ (∃x.∃y.P(x) ∧ Q(y))*)
+(* (∃x.P(x)) ∧ (∃x.Q(x)) ⇒ (∃x.∃y.P(x) ∧ Q(y)) *)
 Theorem ex_expand (X: Type) (P Q: X -> Prop):
   (exists x, P x) /\ (exists x, Q x) -> (exists x, (exists y, P x /\ Q y)).
 Proof.
