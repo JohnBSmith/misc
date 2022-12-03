@@ -478,3 +478,13 @@ Proof.
     (fun h => conj (fun a => proj1 (h a)) (fun a => proj2 (h a)))
     (fun '(conj fab fac) => fun a => conj (fab a) (fac a))).
 Qed.
+
+Theorem reverse_cond_distributes_over_disj (A B C: Prop):
+  (A -> B) \/ (A -> C) -> (A -> B \/ C).
+Proof.
+  intro h.
+  destruct h as [fab | fac].
+  * intro a. left.  apply fab. exact a.
+  * intro a. right. apply fac. exact a.
+Qed.
+
