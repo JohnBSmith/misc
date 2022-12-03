@@ -21,7 +21,7 @@ Theorem lem_and_ex_falso_implies_dne: LEM /\ ExFalso -> DNE.
 Proof.
   intro h.
   destruct h as (lem, ex_falso).
- intro A. intro nna.
+  intro A. intro nna.
   assert (dana := lem A).
   destruct dana as [a | na].
   * exact a.
