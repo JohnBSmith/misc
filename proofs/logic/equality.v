@@ -36,3 +36,13 @@ Proof.
     exact (eq_ind y P py x (eq_sym eqxy)).
 Qed.
 
+(* ∀x.∀y. x = y ⇒ (P(x) ⇔ P(y)) *)
+Theorem substitution_rule (X: Type) (P: X -> Prop):
+  forall x y, x = y -> ((P x) <-> (P y)).
+Proof.
+  intro x. intro y. intro eqxy.
+  split.
+  * intro px. exact (eq_ind x P px y eqxy).
+  * intro py. exact (eq_ind y P py x (eq_sym eqxy)).
+Qed.
+
