@@ -72,4 +72,3 @@ Proof.
     rewrite <- Nat.mul_add_distr_l.
     reflexivity.
 Qed.
-
