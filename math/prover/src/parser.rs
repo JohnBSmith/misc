@@ -21,7 +21,6 @@ enum Symbol {
     Not, And, Or, Implies, Iff, False, True
 }
 
-#[allow(dead_code)]
 #[derive(Debug)]
 struct Token {
     value: Symbol,
@@ -196,7 +195,7 @@ fn atom(a: &[Token], i: usize) -> SyntaxResult {
 
 fn negation(a: &[Token], i: usize) -> SyntaxResult {
     if let Symbol::Not = a[i].value {
-        let (x, i) = atom(a, i + 1)?;
+        let (x, i) = negation(a, i + 1)?;
         Ok((Prop::Not(Rc::new(x)), i))
     } else {
         atom(a, i)

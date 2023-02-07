@@ -1,9 +1,8 @@
 
-#![allow(dead_code)]
-
 use std::collections::HashSet;
 use std::hash::Hash;
 use std::fmt::Write;
+use std::ops::ControlFlow;
 use crate::comb::{prod2, power_set, mappings};
 use crate::classical::variables;
 use crate::parser::Prop;
@@ -26,7 +25,7 @@ pub fn fmt_worlds(worlds: &[World]) -> String {
         if first {first = false;} else {acc.push_str(", ");}
         let _ = write!(acc, "{}", w);
     }
-    acc.push_str("}");
+    acc.push('}');
     acc
 }
 
@@ -37,7 +36,7 @@ pub fn fmt_relation(rel: &[(World, World)]) -> String {
         if first {first = false;} else {acc.push_str(", ");}
         let _ = write!(acc, "({}, {})", x, y);
     }
-    acc.push_str("}");
+    acc.push('}');
     acc
 }
 
@@ -80,14 +79,16 @@ fn is_preorder(worlds: &[World], rel: &Relation) -> bool {
 }
 
 fn preorders(worlds: &[World],
-    cb: &mut dyn FnMut(&[(World, World)], &HashSet<(World, World)>)
-) {
-    power_set(&prod2(&worlds, &worlds), &mut |s| {
+    cb: &mut dyn FnMut(&[(World, World)], &HashSet<(World, World)>) -> ControlFlow<()>
+) -> ControlFlow<()>
+{
+    power_set(&prod2(worlds, worlds), &mut |s| {
         let rel: HashSet<(World, World)> = s.iter().cloned().collect();
-        if is_preorder(&worlds, &rel) {
-            cb(&s, &rel);
+        if is_preorder(worlds, &rel) {
+            cb(s, &rel)?;
         }
-    });
+        ControlFlow::Continue(())
+    })
 }
 
 fn is_monotonic(
@@ -110,14 +111,16 @@ fn is_monotonic(
 }
 
 fn monotonic_mappings(vars: &[&str], worlds: &[World],
-    rel: &Relation, cb: &mut dyn FnMut(Valuation))
+    rel: &Relation, cb: &mut dyn FnMut(Valuation) -> ControlFlow<()>
+) -> ControlFlow<()>
 {
     mappings(&prod2(worlds, vars), &[false, true], &mut |_, m| {
         let val: Valuation = &|w, v| m[&(w, v)];
         if is_monotonic(val, vars, worlds, rel) {
-            cb(val);
+            cb(val)?;
         }
-    });
+        ControlFlow::Continue(())
+    })
 }
 
 struct Env<'a> {
@@ -147,33 +150,28 @@ impl<'a> Env<'a> {
 
 fn try_find_countermodel_at(phi: &Prop, n: u32,
     cb: &mut dyn FnMut(&[World], World, &[(World, World)], Valuation, &[&str])
-) -> bool
+) -> ControlFlow<()>
 {
     let vars = variables(phi);
     let worlds: Vec<World> = (0..n).map(World).collect();
-    let mut countermodel_found = false;
     preorders(&worlds, &mut |rel_list, rel| {
-        if countermodel_found {return;}
         monotonic_mappings(vars.as_ref(), &worlds, rel, &mut |val| {
             let env = Env {worlds: &worlds, rel, val};
-            if !countermodel_found {
-                for &w in &worlds {
-                    if !env.sat(w, phi) {
-                        cb(&worlds, w, rel_list, val, &vars);
-                        countermodel_found = true;
-                        break;
-                    }
+            for &w in &worlds {
+                if !env.sat(w, phi) {
+                    cb(&worlds, w, rel_list, val, &vars);
+                    return ControlFlow::Break(());
                 }
             }
-        });
-    });
-    countermodel_found
+            ControlFlow::Continue(())
+        })
+    })
 }
 
 pub fn try_find_countermodel(phi: &Prop,
     cb: &mut dyn FnMut(&[World], World, &[(World, World)], Valuation, &[&str])
 ) {
     for n in 0..4 {
-        if try_find_countermodel_at(phi, n, cb) {return;}
+        if try_find_countermodel_at(phi, n, cb).is_break() {return;}
     }
 }

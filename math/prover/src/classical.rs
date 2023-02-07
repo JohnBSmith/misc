@@ -1,6 +1,7 @@
 
 use std::collections::{HashSet, HashMap};
 use std::fmt::Write;
+use std::ops::ControlFlow;
 use crate::parser::Prop;
 use crate::comb::mappings;
 
@@ -50,6 +51,7 @@ pub fn info(phi: &Prop) -> Info {
         let y = sat(ev, phi);
         info.tautology &= y;
         info.satisfiable |= y;
+        ControlFlow::Continue(())
     });
     info
 }
@@ -78,6 +80,7 @@ pub fn truth_table(phi: &Prop) -> String {
             let _ = write!(acc, "{:^1$}", if *x {"1"} else {"0"}, lens[index] + 1);
         }
         let _ = writeln!(acc, " {:^1$}", if sat(ev, phi) {"1"} else {"0"}, phi_count);
+        ControlFlow::Continue(())
     });
     line(&mut acc, line_len, '─');
     acc

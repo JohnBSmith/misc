@@ -11,7 +11,6 @@ struct Sequent {
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub struct Proof {
     from: Vec<Proof>,
     seq: Box<Sequent>
@@ -114,10 +113,9 @@ fn find_destruct(env: &[Prop], prop: &Prop, max_depth: u32) -> Option<Proof> {
 }
 
 fn complexity(pi: &Proof) -> u32 {
-    if let Some(value) = pi.from.iter().map(complexity).max() {
-        return 1 + value;
-    } else {
-        return 0;
+    match pi.from.iter().map(complexity).max() {
+        Some(value) => 1 + value,
+        None => 0
     }
 }
 
@@ -138,7 +136,7 @@ fn parts(env: &[Prop]) -> HashSet<Prop> {
 }
 
 fn find_rec(env: &[Prop], prop: &Prop, max_depth: u32) -> Option<Proof> {
-    if let Some(_) = env_contains(env, &prop) {
+    if env_contains(env, prop).is_some() {
         return Some(Proof::new(vec![], Sequent::new(env, prop)));
     }
     let result = find_destruct(env, prop, max_depth);
