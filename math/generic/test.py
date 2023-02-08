@@ -9,7 +9,8 @@ from generic.dual import Dual, diff
 from generic.poly import Polynomial
 from generic.gmath import exp, log, sin, cos, tan, sinh, cosh, tanh
 from generic.la import matrix, vector, identity, transpose as tp
-from generic.diffgeo import diffv
+from generic.diffgeo import diffv, grad_from_dim, Diff_from_dim,\
+    div_from_dim, induced_metric, ext_from_dim, diff as vdiff
 
 eps = 1E-14
 j = Complex(0, 1)
@@ -234,6 +235,10 @@ assert (A**-1)**2*A**2 == E and A**2*(A**-1)**2 == E
 assert (A**2)**-1 == (A**-1)**2 == A**-2
 
 vec = vector
+f = lambda t: vec(t**2 + t, t**3)
+for t in range(4):
+    assert vdiff(f, t) == vec(2*t + 1, 3*t**2)
+
 f = lambda x: x[0]**2 + x[1]**2
 g = lambda x: x*x
 for (x, y, vx, vy) in product(range(4), repeat = 4):
@@ -248,4 +253,50 @@ f = lambda x: vec(x[0]**2 + x[1]**2, (x[0] - x[1])**2)
 for (x, y, vx, vy) in product(range(4), repeat = 4):
     z = diffv(f, vec(x, y), vec(vx, vy))
     assert z == vec(2*(x*vx + y*vy), 2*(x - y)*(vx - vy))
+
+f = lambda x: 2*x
+for (x, y, vx, vy) in product(range(4), repeat = 4):
+    assert diffv(f, vec(x, y), vec(vx, vy)) == 2*vec(vx, vy)
+
+A = matrix([1, 2], [3, 4])
+f = lambda x: A*x
+for (x, y, vx, vy) in product(range(4), repeat = 4):
+    assert diffv(f, vec(x, y), vec(vx, vy)) == A*vec(vx, vy)
+
+f = lambda x: x*(A*x)
+for (x, y, vx, vy) in product(range(4), repeat = 4):
+    z = diffv(f, vec(x, y), vec(vx, vy))
+    assert z == (A + tp(A))*vec(x, y)*vec(vx, vy)
+    assert z == vec(x, y)*((A + tp(A))*vec(vx, vy))
+
+f = lambda X: X*X
+V = matrix([1, 2], [3, 4])
+for (a11, a12, a21, a22) in product(range(4), repeat = 4):
+    A = matrix([a11, a12], [a21, a22])
+    assert diffv(f, A, V) == A*V + V*A
+    assert diffv(f, V, A) == A*V + V*A
+
+grad = grad_from_dim(2)
+f = lambda x: x[0]**2 + x[1]**2
+for (x, y) in product(range(4), repeat = 2):
+    assert grad(f, vec(x, y)) == vec(2*x, 2*y)
+
+f = lambda x: 3*x[0]**2*x[1]**3 - 2*x[0]*x[1]
+for (x, y) in product(range(4), repeat = 2):
+    assert grad(f, vec(x, y)) == vec(6*x*y**3 - 2*y, 9*(x*y)**2 - 2*x)
+
+Diff = Diff_from_dim(2); div = div_from_dim(2)
+Phi = lambda x: vec(x[0]**2 + x[1]**2, x[0] + x[1]**3)
+g = induced_metric(2, Phi)
+for (x, y) in product(range(4), repeat = 2):
+    assert Diff(Phi, vec(x, y)) == matrix([2*x, 2*y], [1, 3*y**2])
+    assert div(Phi, vec(x, y)) == 2*x + 3*y**2
+    r1 = [4*x**2 + 1, 4*x*y + 3*y**2]
+    r2 = [4*x*y + 3*y**2, 4*y**2 + 9*y**4]
+    assert g(vec(x, y)) == matrix(r1, r2)
+
+ext = ext_from_dim(2)
+f = lambda x: vec(x[0]**2 + x[1]**2, x[0]*x[1]**2)
+for (x, y) in product(range(4), repeat = 2):
+    assert ext(f, vec(x, y)) == matrix([0, y**2 - 2*y], [2*y - y**2, 0])
 

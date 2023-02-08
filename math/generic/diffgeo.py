@@ -10,7 +10,7 @@ def diff(f, t):
 
 # Directional derivative
 def diffv(f, x, v):
-    y = f(Dual(x, v))
+    y = f(x + v*Dual(0, 1))
     return y.map(imag) if isinstance(y, Vectorial) else imag(y)
 
 # Partial derivative
@@ -34,7 +34,7 @@ def div_from_dim(n):
         return sum(pdiff(f, x, k)[k] for k in range(n))
     return div
 
-# Jacobi matrix
+# Jacobian matrix
 def Diff_from_dim(n):
     pdiff = pdiff_from_dim(n)
     def Diff(f, x):
@@ -49,3 +49,10 @@ def induced_metric(n, Phi):
         return transpose(J)*J
     return g
 
+# Exterior derivative
+def ext_from_dim(n):
+    Diff = Diff_from_dim(n)
+    def ext(f, x):
+        J = Diff(f, x)
+        return transpose(J) - J
+    return ext
