@@ -54,6 +54,8 @@ class Dual:
             a *= a; n //= 2
     def conj(self):
         return Dual(self.re, -self.im)
+    def __getitem__(self, i):
+        return Dual(self.re[i], self.im[i])
 
 def imag(x):
     return x.im if isinstance(x, Dual) else x
@@ -65,4 +67,3 @@ def diff(f, x, n = 1):
         return f(x)
     else:
         return imag(diff(f, Dual(x, 1), n - 1))
-

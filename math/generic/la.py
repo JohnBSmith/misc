@@ -1,5 +1,8 @@
 
-class Matrix:
+class Vectorial:
+    pass
+
+class Matrix(Vectorial):
     def __init__(self, a, dim = None):
         if dim != None:
             self.dim = dim
@@ -91,7 +94,7 @@ class Matrix:
     def map(self, f):
         return Matrix([f(x) for x in self.a], self.dim)
 
-class Vector:
+class Vector(Vectorial):
     def __init__(self, a):
         self.a = a
     def __repr__(self):
@@ -99,34 +102,44 @@ class Vector:
     def __str__(self):
         return "vector({})".format(", ".join(str(x) for x in self.a))
     def __neg__(self):
-        return Vector(-x for x in self.a)
+        return Vector([-x for x in self.a])
     def __add__(self, rhs):
-        return Vector(x + y for (x, y) in zip(self.a, rhs.a))
-    def __sub__(self, lhs):
-        return Vector(x - y for (x, y) in zip(self.a, rhs.a))
+        return Vector([x + y for (x, y) in zip(self.a, rhs.a)])
+    def __sub__(self, rhs):
+        return Vector([x - y for (x, y) in zip(self.a, rhs.a)])
     def __mul__(self, rhs):
         if isinstance(rhs, Vector):
             return sum(x*y for (x, y) in zip(self.a, rhs.a))
         else:
-            return Vector(x*rhs for x in self.a)
+            return Vector([x*rhs for x in self.a])
     def __rmul__(self, r):
-        return Vector(r*x for x in self.a)
+        return Vector([r*x for x in self.a])
     def __getitem__(self, i):
         return self.a[i]
+    def __eq__(self, rhs):
+        return self.a == rhs.a
     def map(self, f):
-        return Vector(f(x) for x in self.a)
+        return Vector([f(x) for x in self.a])
 
 def matrix(*a):
     return Matrix(a)
 
 def vector(*a):
-    return Vector(a)
+    return Vector(list(a))
 
 def row_vector(a):
     return Matrix(a, (len(a), 1))
 
 def col_vector(a):
     return Matrix(a, (1, len(a)))
+
+def matrix_from_cols(a):
+    n = len(a); m = len(a[0].a)
+    return Matrix([a[j][i] for i in range(m) for j in range(n)], (m, n))
+
+def basis_from_dim(n):
+    return [Vector([1 if i == j else 0 for i in range(n)])
+        for j in range(n)]
 
 def identity(n):
     a = [1 if i == j else 0 for i in range(n) for j in range(n)]

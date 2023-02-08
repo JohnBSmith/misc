@@ -8,6 +8,12 @@ __dispatch_exp__ = {
     complex: cmath.exp,
 }
 
+__dispatch_log__ = {
+    int: math.log,
+    float: math.log,
+    complex: cmath.log
+}
+
 __dispatch_sin__ = {
     int: math.sin,
     float: math.sin,
@@ -44,8 +50,17 @@ __dispatch_tanh__ = {
     complex: cmath.tanh
 }
 
+__dispatch_sqrt__ = {
+    int: math.sqrt,
+    float: math.sqrt,
+    complex: cmath.sqrt
+}
+
 def exp(x):
     return __dispatch_exp__[type(x)](x)
+
+def log(x):
+    return __dispatch_log__[type(x)](x)
 
 def sin(x):
     return __dispatch_sin__[type(x)](x)
@@ -65,8 +80,13 @@ def cosh(x):
 def tanh(x):
     return __dispatch_tanh__[type(x)](x)
 
+def sqrt(x):
+    return __dispatch_sqrt__[type(x)](x)
+
 def __dual_exp__(x):
     return Dual(exp(x.re), x.im*exp(x.re))
+def __dual_log__(x):
+    return Dual(log(x.re), x.im/x.re)
 def __dual_sin__(x):
     return Dual(sin(x.re), x.im*cos(x.re))
 def __dual_cos__(x):
@@ -79,11 +99,15 @@ def __dual_cosh__(x):
     return Dual(cosh(x.re), x.im*sinh(x.re))
 def __dual_tanh__(x):
     return Dual(tanh(x.re), x.im*(1 - tanh(x.re)**2))
+def __dual_sqrt__(x):
+    return Dual(sqrt(x.re), x.im/(2*sqrt(x.re)))
+
 __dispatch_exp__[Dual] = __dual_exp__
+__dispatch_log__[Dual] = __dual_log__
 __dispatch_sin__[Dual] = __dual_sin__
 __dispatch_cos__[Dual] = __dual_cos__
 __dispatch_tan__[Dual] = __dual_tan__
 __dispatch_sinh__[Dual] = __dual_sinh__
 __dispatch_cosh__[Dual] = __dual_cosh__
 __dispatch_tanh__[Dual] = __dual_tanh__
-
+__dispatch_sqrt__[Dual] = __dual_sqrt__
