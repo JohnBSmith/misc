@@ -158,6 +158,9 @@ def invert(A):
     gauss_jordan(A, X, n)
     return X
 
+def trace(A):
+    return sum(A[i, i] for i in range(A.dim[0]))
+
 def proj(v, w):
     return ((v*w)/(v*v))*v
 
@@ -178,11 +181,11 @@ def add_vec(r, v, s, w):
         return r*v + s*w
 
 def pivoting(A, B, n, j):
-    m = abs(A[j][j])
+    m = abs(A[j, j])
     k = j
     for i in range(j + 1, n):
-        if m < abs(A[i][j]):
-            m = abs(A[i][j])
+        if m < abs(A[i, j]):
+            m = abs(A[i, j])
             k = i
     A[j], A[k] = A[k], A[j]
     B[j], B[k] = B[k], B[j]
@@ -195,16 +198,46 @@ def gauss_jordan(A, B, n):
         if pivot == 0:
             zero_pivot = True
             break
-        B[j] = mul_scalar_vec(1/A[j][j], B[j])
-        A[j] = mul_scalar_vec(1/A[j][j], A[j])
+        B[j] = mul_scalar_vec(1/A[j, j], B[j])
+        A[j] = mul_scalar_vec(1/A[j, j], A[j])
         for i in range(j + 1, n):
-            if A[i][j] != 0:
-                B[i] = add_vec(1/A[i][j], B[i], -1, B[j])
-                A[i] = add_vec(1/A[i][j], A[i], -1, A[j])
+            if A[i, j] != 0:
+                B[i] = add_vec(1/A[i, j], B[i], -1, B[j])
+                A[i] = add_vec(1/A[i, j], A[i], -1, A[j])
     for i in range(0, n - 1):
         for j in range(i + 1, n):
-            B[i] = add_vec(1, B[i], -A[i][j], B[j])
-            A[i] = add_vec(1, A[i], -A[i][j], A[j])
+            B[i] = add_vec(1, B[i], -A[i, j], B[j])
+            A[i] = add_vec(1, A[i], -A[i, j], A[j])
     if zero_pivot:
         return None
     return B
+
+def pivoting_det(A, n, j):
+    m = abs(A[j, j])
+    k = j
+    for i in range(j + 1, n):
+        if m < abs(A[i, j]):
+            m = abs(A[i, j])
+            k = i
+    if k == j:
+        return (m, 1)
+    else:
+        A[j], A[k] = A[k], A[j]
+        return (m, -1)
+
+def det(A):
+    n = A.dim[1]
+    assert A.dim[0] == n
+    A = Matrix(A.a.copy(), A.dim)
+    acc = 1
+    for j in range(0, n):
+        (pivot, s) = pivoting_det(A, n, j)
+        if pivot == 0: return 0
+        acc *= s*A[j, j]
+        A[j] = mul_scalar_vec(1/A[j, j], A[j])
+        for i in range(j + 1, n):
+            if A[i, j] != 0:
+                acc *= A[i, j]
+                A[i] = add_vec(1/A[i, j], A[i], -1, A[j])
+    return acc
+

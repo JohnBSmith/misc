@@ -7,10 +7,15 @@ from fractions import Fraction
 from generic.complex import Complex
 from generic.dual import Dual, diff
 from generic.poly import Polynomial
-from generic.gmath import exp, log, sin, cos, tan, sinh, cosh, tanh
-from generic.la import matrix, vector, identity, transpose as tp
+from generic.gmath import exp, log, log10, sqrt, erf, erfc,\
+    sin, cos, tan, sinh, cosh, tanh,\
+    asin, acos, atan, asinh, acosh, atanh
+from generic.la import matrix, vector, identity, det, trace,\
+    transpose as tp
 from generic.diffgeo import diffv, grad_from_dim, Diff_from_dim,\
     div_from_dim, induced_metric, ext_from_dim, diff as vdiff
+from math import pi
+from random import randint
 
 eps = 1E-14
 j = Complex(0, 1)
@@ -114,12 +119,22 @@ assert (10 - Polynomial([1, 2])).coeff == [9, -2]
 
 assert abs(diff(exp, 1) - exp(1)) < eps
 assert abs(diff(log, 2) - 1/2) < eps
+assert abs(diff(log10, 2) - 1/(log(10)*2)) < eps
+assert abs(diff(sqrt, 2) - 1/(2*sqrt(2))) < eps
 assert abs(diff(sin, 1) - cos(1)) < eps
 assert abs(diff(cos, 1) + sin(1)) < eps
 assert abs(diff(tan, 1) - (1 + tan(1)**2)) < eps
 assert abs(diff(sinh, 1) - cosh(1)) < eps
 assert abs(diff(cosh, 1) - sinh(1)) < eps
 assert abs(diff(tanh, 1) - (1 - tanh(1)**2)) < eps
+assert abs(diff(asin, 1/2) - 2/sqrt(3)) < eps
+assert abs(diff(acos, 1/2) + 2/sqrt(3)) < eps
+assert abs(diff(atan, 1/2) - 4/5) < eps
+assert abs(diff(asinh, 1) - 1/sqrt(2)) < eps
+assert abs(diff(acosh, 2) - 1/sqrt(3)) < eps
+assert abs(diff(atanh, 1/2) - 4/3) < eps
+assert abs(diff(erf, 1) - 2*exp(-1)/sqrt(pi)) < eps
+assert abs(diff(erfc, 1) + 2*exp(-1)/sqrt(pi)) < eps
 
 f = lambda x: 2/(exp(-2*x) + 1) - 1
 assert abs(diff(f, 1) - (1 - tanh(1)**2)) < eps
@@ -182,6 +197,8 @@ assert tp(A + B) == tp(B) + tp(A)
 assert tp(A - B) == tp(A) - tp(B)
 assert tp(A*B) == tp(B)*tp(A)
 assert all(tp(A**k) == tp(A)**k for k in range(0, 10))
+assert trace(A) == 5 and trace(B) == 13
+assert trace(tp(A)) == 5 and trace(tp(B)) == 13
 
 A = matrix([1, 2, 3])
 B = matrix([4, 5, 6])
@@ -212,6 +229,7 @@ assert tp(tp(A)*A) == tp(A)*A
 
 A = matrix([1, 2], [3, 4]).map(Fraction)
 E = matrix([1, 0], [0, 1])
+assert det(A) == -2
 assert A**-1 == matrix([-2, 1], [Fraction(3, 2), -Fraction(1, 2)])
 assert (A**-1)*A == E and A*(A**-1) == E
 assert (A**-1)**2*A**2 == E and A**2*(A**-1)**2 == E
@@ -219,6 +237,8 @@ assert (A**2)**-1 == (A**-1)**2 == A**-2
 
 A = matrix([1, 2, 3], [4, 5, 6], [7, 8, 11]).map(Fraction)
 E = identity(3)
+assert trace(A) == 17 and trace(tp(A)) == 17
+assert det(A) == -6
 assert (A**-1)*A == E and A*(A**-1) == E
 assert (A**-1)**2*A**2 == E and A**2*(A**-1)**2 == E
 assert (A**2)**-1 == (A**-1)**2 == A**-2
@@ -230,9 +250,24 @@ A = matrix(
     [41, 43, 47, 53]
 ).map(Fraction)
 E = identity(4)
+assert trace(A) == 99 and trace(tp(A)) == 99
+assert det(A) == 880
 assert (A**-1)*A == E and A*(A**-1) == E
 assert (A**-1)**2*A**2 == E and A**2*(A**-1)**2 == E
 assert (A**2)**-1 == (A**-1)**2 == A**-2
+
+A = matrix([1, 2, 3], [4, 5, 6], [7, 8, 9]).map(Fraction)
+assert det(A) == 0
+assert det(A*A) == 0
+
+A = matrix(
+    [ 1,  2,  3,  4],
+    [ 5,  6,  7,  8],
+    [ 9, 10, 11, 12],
+    [13, 14, 15, 16]
+).map(Fraction)
+assert det(A) == 0
+assert det(A*A) == 0
 
 vec = vector
 f = lambda t: vec(t**2 + t, t**3)
@@ -300,3 +335,19 @@ f = lambda x: vec(x[0]**2 + x[1]**2, x[0]*x[1]**2)
 for (x, y) in product(range(4), repeat = 2):
     assert ext(f, vec(x, y)) == matrix([0, y**2 - 2*y], [2*y - y**2, 0])
 
+def random_matrix(n, a, b):
+    acc = []
+    for i in range(n):
+        acc.append([randint(a, b) for j in range(n)])
+    return matrix(*acc)
+
+def matrix_inv_test(N):
+    for n in range(1, 10):
+        E = identity(n)
+        for i in range(N):
+            A = random_matrix(n, -10, 10).map(Fraction)
+            if det(A) != 0:
+                B = A**-1
+                assert B*A == E and A*B == E
+
+matrix_inv_test(10)
