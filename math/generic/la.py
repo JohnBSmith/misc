@@ -241,3 +241,6 @@ def det(A):
                 A[i] = add_vec(1/A[i, j], A[i], -1, A[j])
     return acc
 
+def vector_arg(f):
+    return lambda x: f(*x.a)
+
