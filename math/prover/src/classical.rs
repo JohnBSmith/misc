@@ -2,7 +2,7 @@
 use std::collections::{HashSet, HashMap};
 use std::fmt::Write;
 use std::ops::ControlFlow;
-use crate::parser::Prop;
+use crate::parser::{Prop, Models};
 use crate::comb::mappings;
 
 fn variables_rec<'a>(acc: &mut HashSet<&'a str>, t: &'a Prop) {
@@ -14,13 +14,26 @@ fn variables_rec<'a>(acc: &mut HashSet<&'a str>, t: &'a Prop) {
         Prop::Implies(t) => {variables_rec(acc, &t.0); variables_rec(acc, &t.1);},
         Prop::Iff(t) => {variables_rec(acc, &t.0); variables_rec(acc, &t.1);},
         Prop::False => {},
-        Prop::True => {}
+        Prop::True => {},
+        Prop::Nec(x) => variables_rec(acc, x),
+        Prop::Pos(x) => variables_rec(acc, x)
     }
 }
 
 pub fn variables(t: &Prop) -> Vec<&str> {
     let mut acc = HashSet::new();
     variables_rec(&mut acc, t);
+    let mut vars: Vec<&str> = acc.into_iter().collect();
+    vars.sort();
+    vars
+}
+
+pub fn variables_models(models: &Models) -> Vec<&str> {
+    let mut acc = HashSet::new();
+    for phi in &models.env {
+        variables_rec(&mut acc, phi);
+    }
+    variables_rec(&mut acc, &models.prop);
     let mut vars: Vec<&str> = acc.into_iter().collect();
     vars.sort();
     vars
@@ -35,7 +48,9 @@ fn sat(ev: &HashMap<&str, bool>, phi: &Prop) -> bool {
         Prop::And(t) => sat(ev, &t.0) && sat(ev, &t.1),
         Prop::Or(t) => sat(ev, &t.0) || sat(ev, &t.1),
         Prop::Implies(t) => !sat(ev, &t.0) || sat(ev, &t.1),
-        Prop::Iff(t) => sat(ev, &t.0) == sat(ev, &t.1)
+        Prop::Iff(t) => sat(ev, &t.0) == sat(ev, &t.1),
+        Prop::Nec(_) => unimplemented!(),
+        Prop::Pos(_) => unimplemented!()
     }
 }
 

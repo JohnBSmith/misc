@@ -1,5 +1,6 @@
 
 use std::rc::Rc;
+use std::fmt::Write;
 
 #[derive(Debug)]
 pub struct SyntaxError {line: usize, col: usize, text: String}
@@ -18,7 +19,8 @@ impl std::fmt::Display for SyntaxError {
 #[derive(Clone, Debug)]
 enum Symbol {
     None, ParenLeft, ParenRight, Identifier(String),
-    Not, And, Or, Implies, Iff, False, True
+    Not, And, Or, Implies, Iff, False, True, Nec, Pos,
+    Models, Comma
 }
 
 #[derive(Debug)]
@@ -35,6 +37,8 @@ static KEYWORDS: &[(&str, Symbol)] = &[
     ("not", Symbol::Not),
     ("or", Symbol::Or),
     ("true", Symbol::True),
+    ("nec", Symbol::Nec),
+    ("pos", Symbol::Pos)
 ];
 
 fn is_keyword(s: &str) -> Option<&Symbol> {
@@ -94,8 +98,13 @@ fn scan(a: &[u8]) -> Result<Vec<Token>, SyntaxError> {
                     i += 1; col += 1;
                 },
                 b'|' => {
-                    tokens.push(Token {value: Symbol::Or, line, col});
-                    i += 1; col += 1;
+                    if a.get(i + 1) == Some(&b'=') {
+                        tokens.push(Token {value: Symbol::Models, line, col});
+                        i += 2; col += 2;
+                    } else {
+                        tokens.push(Token {value: Symbol::Or, line, col});
+                        i += 1; col += 1;
+                    }
                 },
                 b'=' if a.get(i + 1) == Some(&b'>') => {
                     tokens.push(Token {value: Symbol::Implies, line, col});
@@ -112,6 +121,10 @@ fn scan(a: &[u8]) -> Result<Vec<Token>, SyntaxError> {
                 b'<' if a.get(i + 1) == Some(&b'-') && a.get(i + 2) == Some(&b'>') => {
                     tokens.push(Token {value: Symbol::Iff, line, col});
                     i += 3; col += 3;
+                },
+                b',' => {
+                    tokens.push(Token {value: Symbol::Comma, line, col});
+                    i += 1; col += 1;
                 },
                 c => {
                     return Err(syntax_error(line, col,
@@ -132,8 +145,29 @@ pub enum Prop {
     Or(Rc<(Prop, Prop)>),
     Implies(Rc<(Prop, Prop)>),
     Iff(Rc<(Prop, Prop)>),
+    Nec(Rc<Prop>),
+    Pos(Rc<Prop>),
     False,
     True
+}
+
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+pub struct Models {
+    pub env: Vec<Prop>,
+    pub prop: Box<Prop>
+}
+impl Models {
+    pub fn new(env: Vec<Prop>, prop: Prop) -> Self {
+        Models {env, prop: Box::new(prop)}
+    }
+}
+
+#[allow(dead_code)]
+pub enum AST {
+    Prop(Prop),
+    Models(Models),
+    List(Vec<Prop>)
 }
 
 type SyntaxResult = Result<(Prop, usize), SyntaxError>;
@@ -158,7 +192,9 @@ fn fmt_ast(t: &Prop, parent_prec: u32) -> String {
         Prop::Iff(t) => (PREC_IFF, format!("{} ⇔ {}",
             fmt_ast(&t.0, PREC_IFF), fmt_ast(&t.1, PREC_IFF))),
         Prop::False => return String::from("⊥"),
-        Prop::True => return String::from("⊤")
+        Prop::True => return String::from("⊤"),
+        Prop::Nec(x) => (PREC_NOT, format!("◻{}", fmt_ast(x, PREC_NOT))),
+        Prop::Pos(x) => (PREC_NOT, format!("◇{}", fmt_ast(x, PREC_NOT)))
     };
     if prec <= parent_prec {format!("({})", s)} else {s}
 }
@@ -166,6 +202,32 @@ fn fmt_ast(t: &Prop, parent_prec: u32) -> String {
 impl std::fmt::Display for Prop {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", fmt_ast(self, 0))
+    }
+}
+
+fn fmt_prop_list(a: &[Prop]) -> String {
+    let mut acc = String::new();
+    let mut first = true;
+    for x in a {
+        if first {first = false;} else {acc.push_str(", ");}
+        let _ = write!(acc, "{}", x);
+    }
+    acc
+}
+
+impl std::fmt::Display for Models {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{} ⊨ {}", fmt_prop_list(&self.env), fmt_ast(&self.prop, 0))
+    }
+}
+
+impl std::fmt::Display for AST {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            AST::Models(x) => write!(f, "{}", x),
+            AST::Prop(x) => write!(f, "{}", x),
+            _ => unimplemented!()
+        }
     }
 }
 
@@ -197,6 +259,12 @@ fn negation(a: &[Token], i: usize) -> SyntaxResult {
     if let Symbol::Not = a[i].value {
         let (x, i) = negation(a, i + 1)?;
         Ok((Prop::Not(Rc::new(x)), i))
+    } else if let Symbol::Nec = a[i].value {
+        let (x, i) = negation(a, i + 1)?;
+        Ok((Prop::Nec(Rc::new(x)), i))
+    } else if let Symbol::Pos = a[i].value {
+        let (x, i) = negation(a, i + 1)?;
+        Ok((Prop::Pos(Rc::new(x)), i))
     } else {
         atom(a, i)
     }
@@ -242,9 +310,50 @@ fn biconditional(a: &[Token], i: usize) -> SyntaxResult {
     })
 }
 
-pub fn parse(s: &[u8]) -> Result<Prop, SyntaxError> {
+fn prop_list(a: &[Token], i: usize) -> Result<(AST, usize), SyntaxError> {
+    let (mut x, mut i) = biconditional(a, i)?;
+    if let Symbol::Comma = a[i].value {
+        let mut acc = vec![x];
+        loop {
+            (x, i) = biconditional(a, i + 1)?;
+            acc.push(x);
+            match a[i].value {
+                Symbol::Comma => {},
+                _ => break
+            }
+        }
+        Ok((AST::List(acc), i))
+    } else {
+        Ok((AST::Prop(x), i))
+    }
+}
+
+fn models(a: &[Token], i: usize) -> Result<(AST, usize), SyntaxError> {
+    let (x, i) = prop_list(a, i)?;
+    if let Symbol::Models = a[i].value {
+        let (y, i) = biconditional(a, i + 1)?;
+        let env = match x {
+            AST::Prop(x) => vec![x],
+            AST::List(x) => x,
+            _ => unreachable!()
+        };
+        Ok((AST::Models(Models {env, prop: Box::new(y)}), i))
+    } else {
+        Ok((x, i))
+    }
+}
+
+pub fn parse(s: &[u8]) -> Result<AST, SyntaxError> {
     let a = scan(s)?;
-    let (x, _) = biconditional(&a, 0)?;
+    let (x, _) = models(&a, 0)?;
     Ok(x)
 }
 
+#[allow(dead_code)]
+pub fn into_models(t: AST) -> Models {
+    match t {
+        AST::Models(x) => x,
+        AST::Prop(x) => Models {env: vec![], prop: Box::new(x)},
+        _ => unreachable!()
+    }
+}

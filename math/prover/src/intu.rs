@@ -4,13 +4,13 @@ use std::hash::Hash;
 use std::fmt::Write;
 use std::ops::ControlFlow;
 use crate::comb::{prod2, power_set, mappings};
-use crate::classical::variables;
-use crate::parser::Prop;
+use crate::classical::variables_models;
+use crate::parser::{Prop, Models};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub struct World(u32);
-type Relation = HashSet<(World, World)>;
-type Valuation<'a> = &'a dyn Fn(World, &str) -> bool;
+pub struct World(pub u32);
+pub type Relation = HashSet<(World, World)>;
+pub type Valuation<'a> = &'a dyn Fn(World, &str) -> bool;
 
 impl std::fmt::Display for World {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -130,6 +130,10 @@ struct Env<'a> {
 }
 
 impl<'a> Env<'a> {
+    fn sat_implies(&self, w: World, a: &Prop, b: &Prop) -> bool {
+        self.worlds.iter().filter(|&wp| self.rel.contains(&(w, *wp))).all(|&wp|
+            !self.sat(wp, a) || self.sat(wp, b))
+    }
     fn sat(&self, w: World, phi: &Prop) -> bool {
         match phi {
             Prop::Variable(id) => (self.val)(w, id),
@@ -137,28 +141,33 @@ impl<'a> Env<'a> {
             Prop::True => true,
             Prop::And(t) => self.sat(w, &t.0) && self.sat(w, &t.1),
             Prop::Or(t) => self.sat(w, &t.0) || self.sat(w, &t.1),
-            Prop::Implies(t) =>
-                self.worlds.iter().filter(|&wp| self.rel.contains(&(w, *wp))).all(|&wp|
-                    !self.sat(wp, &t.0) || self.sat(wp, &t.1)),
+            Prop::Implies(t) => self.sat_implies(w, &t.0, &t.1),
             Prop::Not(x) =>
                 self.worlds.iter().filter(|&wp| self.rel.contains(&(w, *wp))).all(|&wp|
                     !self.sat(wp, x)),
-            Prop::Iff(_) => todo!()
+            Prop::Iff(t) => self.sat_implies(w, &t.0, &t.1)
+                         && self.sat_implies(w, &t.1, &t.0),
+            Prop::Nec(_) => unimplemented!(),
+            Prop::Pos(_) => unimplemented!()
         }
+    }
+    fn sat_env(&self, w: World, env: &[Prop]) -> bool {
+        env.iter().all(|phi| self.sat(w, phi))
     }
 }
 
-fn try_find_countermodel_at(phi: &Prop, n: u32,
+fn try_find_countermodel_at(models: &Models, n: u32,
     cb: &mut dyn FnMut(&[World], World, &[(World, World)], Valuation, &[&str])
 ) -> ControlFlow<()>
 {
-    let vars = variables(phi);
+    let phi = &models.prop;
+    let vars = variables_models(models);
     let worlds: Vec<World> = (0..n).map(World).collect();
     preorders(&worlds, &mut |rel_list, rel| {
         monotonic_mappings(vars.as_ref(), &worlds, rel, &mut |val| {
             let env = Env {worlds: &worlds, rel, val};
             for &w in &worlds {
-                if !env.sat(w, phi) {
+                if env.sat_env(w, &models.env) && !env.sat(w, phi) {
                     cb(&worlds, w, rel_list, val, &vars);
                     return ControlFlow::Break(());
                 }
@@ -168,10 +177,10 @@ fn try_find_countermodel_at(phi: &Prop, n: u32,
     })
 }
 
-pub fn try_find_countermodel(phi: &Prop,
+pub fn try_find_countermodel(models: &Models,
     cb: &mut dyn FnMut(&[World], World, &[(World, World)], Valuation, &[&str])
 ) {
     for n in 0..4 {
-        if try_find_countermodel_at(phi, n, cb).is_break() {return;}
+        if try_find_countermodel_at(models, n, cb).is_break() {return;}
     }
 }
