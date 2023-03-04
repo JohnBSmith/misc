@@ -57,11 +57,11 @@ pub fn fmt_valuation(worlds: &[World], vars: &[&str], val: Valuation) -> String 
     acc
 }
 
-fn is_reflexive(worlds: &[World], rel: &Relation) -> bool {
+pub fn is_reflexive(worlds: &[World], rel: &Relation) -> bool {
     worlds.iter().all(|&x| rel.contains(&(x, x)))
 }
 
-fn is_transitive(worlds: &[World], rel: &Relation) -> bool {
+pub fn is_transitive(worlds: &[World], rel: &Relation) -> bool {
     for &x in worlds {
         for &y in worlds {
             for &z in worlds {
@@ -82,10 +82,10 @@ fn preorders(worlds: &[World],
     cb: &mut dyn FnMut(&[(World, World)], &HashSet<(World, World)>) -> ControlFlow<()>
 ) -> ControlFlow<()>
 {
-    power_set(&prod2(worlds, worlds), &mut |s| {
-        let rel: HashSet<(World, World)> = s.iter().cloned().collect();
+    power_set(&prod2(worlds, worlds), &mut |rel_as_list| {
+        let rel: HashSet<(World, World)> = rel_as_list.iter().cloned().collect();
         if is_preorder(worlds, &rel) {
-            cb(s, &rel)?;
+            cb(rel_as_list, &rel)?;
         }
         ControlFlow::Continue(())
     })
@@ -163,12 +163,12 @@ fn try_find_countermodel_at(models: &Models, n: u32,
     let phi = &models.prop;
     let vars = variables_models(models);
     let worlds: Vec<World> = (0..n).map(World).collect();
-    preorders(&worlds, &mut |rel_list, rel| {
+    preorders(&worlds, &mut |rel_as_list, rel| {
         monotonic_mappings(vars.as_ref(), &worlds, rel, &mut |val| {
             let env = Env {worlds: &worlds, rel, val};
             for &w in &worlds {
                 if env.sat_env(w, &models.env) && !env.sat(w, phi) {
-                    cb(&worlds, w, rel_list, val, &vars);
+                    cb(&worlds, w, rel_as_list, val, &vars);
                     return ControlFlow::Break(());
                 }
             }

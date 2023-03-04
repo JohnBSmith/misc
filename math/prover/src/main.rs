@@ -26,17 +26,30 @@ fn input(prompt: &str) -> String {
     buffer
 }
 
-enum LogicalSystem {None, K}
+#[derive(Clone, Copy)]
+pub enum LogicalSystem {None, K, T, S4, S5, B, D}
 impl LogicalSystem {
-    fn from_args() -> Self {
+    fn from_args() -> Result<Self, String> {
         let argv: Vec<String> = std::env::args().collect();
-        if argv.len() == 2 && argv[1] == "K" {Self::K} else {Self::None}
+        Ok(if argv.len() == 2 {
+            match argv[1].as_ref() {
+                "K" => Self::K,
+                "T" => Self::T,
+                "S4" => Self::S4,
+                "S5" => Self::S5,
+                "B" => Self::B,
+                "D" => Self::D,
+                s => return Err(s.to_string())
+            }
+        } else {
+            Self::None
+        })
     }
 }
 
 fn standard_analysis_model_rel(models: &Models) {
     println!("Presented statement:\n  {}\n", models);
-    intu::try_find_countermodel(&models, &mut |worlds, w, rel, val, vars| {
+    intu::try_find_countermodel(models, &mut |worlds, w, rel, val, vars| {
         println!("COUNTERMODEL (Kripke semantics)");
         println!("Worlds: {};", intu::fmt_worlds(worlds));
         println!("Relation: {};", intu::fmt_relation(rel));
@@ -85,9 +98,9 @@ fn standard_analysis(s: &str) {
     }
 }
 
-fn modal_analysis_models(models: &Models) {
+fn modal_analysis_models(models: &Models, system: LogicalSystem) {
     println!("Presented statement:\n  {}\n", models);
-    modal::try_find_countermodel(&models, &mut |worlds, w, rel, val, vars| {
+    modal::try_find_countermodel(models, system, &mut |worlds, w, rel, val, vars| {
         println!("COUNTERMODEL in system K (Kripke semantics)");
         println!("Worlds: {};", modal::fmt_worlds(worlds));
         println!("Relation: {};", modal::fmt_relation(rel));
@@ -96,18 +109,18 @@ fn modal_analysis_models(models: &Models) {
     });
 }
 
-fn modal_analysis(s: &str) {
+fn modal_analysis(s: &str, system: LogicalSystem) {
     match parse(s.as_bytes()) {
         Ok(phi) => {
             let AST::Prop(phi) = phi else {
                 if let AST::Models(models) = phi {
-                    modal_analysis_models(&models);
+                    modal_analysis_models(&models, system);
                 }
                 return;
             };
             println!("Presented formula:\n  {}\n", phi);
             let models = Models::new(vec![], phi);
-            modal::try_find_countermodel(&models, &mut |worlds, w, rel, val, vars| {
+            modal::try_find_countermodel(&models, system, &mut |worlds, w, rel, val, vars| {
                 println!("It is not a tautology in system K.\n");
                 println!("COUNTERMODEL (Kripke semantics)");
                 println!("Worlds: {};", modal::fmt_worlds(worlds));
@@ -121,13 +134,19 @@ fn modal_analysis(s: &str) {
 }
 
 fn main() {
-    let system = LogicalSystem::from_args();
+    let system = match LogicalSystem::from_args() {
+        Ok(value) => value,
+        Err(s) => {
+            println!("Error: unknown system {}", s);
+            return;
+        }
+    };
     loop {
         let s = input("> ");
         if s.is_empty() {continue;}
         match system {
             LogicalSystem::None => standard_analysis(&s),
-            LogicalSystem::K => modal_analysis(&s)
+            _ => modal_analysis(&s, system)
         }
     }
 }
