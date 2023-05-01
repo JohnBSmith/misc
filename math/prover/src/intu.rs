@@ -177,10 +177,10 @@ fn try_find_countermodel_at(models: &Models, n: u32,
     })
 }
 
-pub fn try_find_countermodel(models: &Models,
+pub fn try_find_countermodel(models: &Models, worlds_max: u32,
     cb: &mut dyn FnMut(&[World], World, &[(World, World)], Valuation, &[&str])
 ) {
-    for n in 0..4 {
+    for n in 0..worlds_max+1 {
         if try_find_countermodel_at(models, n, cb).is_break() {return;}
     }
 }
