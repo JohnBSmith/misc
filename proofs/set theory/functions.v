@@ -113,3 +113,18 @@ Proof.
   exact p.
 Qed.
 
+Theorem fixed_point_theorem (X Y: Type):
+  (exists f: X -> X -> Y, Surjective f)
+  -> (forall phi: Y -> Y, exists y: Y, phi(y) = y).
+Proof.
+  intro h. destruct h as (f, hf).
+  intro phi.
+  pose (d x := phi (f x x)).
+  unfold Surjective in hf.
+  assert (hf := hf d). destruct hf as (a, ha).
+  pose (y := f a a).
+  exists y. unfold y at 2.
+  replace (f a) with d by ha. unfold d.
+  unfold y. reflexivity.
+Qed.
+
