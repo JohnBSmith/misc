@@ -245,22 +245,21 @@ Proof.
     exfalso. exact h.
 Qed.
 
-Definition left_total (X Y f: set) :=
-  ∀x, x ∈ X → ∃y, y ∈ Y ∧ (Pair x y) ∈ f.
+Definition left_total (f X: set) :=
+  ∀x, x ∈ X → ∃y, (Pair x y) ∈ f.
 
-Definition right_uniq (X Y f: set) :=
-  ∀x y y', x ∈ X → y ∈ Y → y' ∈ Y →
-    (Pair x y) ∈ f → (Pair x y') ∈ f → y = y'.
+Definition right_uniq (f: set) :=
+  ∀x y y', (Pair x y) ∈ f → (Pair x y') ∈ f → y = y'.
 
 Definition Abb (X Y: set) :=
-  {f ∈ 𝓟 (Prod X Y) | left_total X Y f ∧ right_uniq X Y f}.
+  {f ∈ 𝓟 (Prod X Y) | left_total f X ∧ right_uniq f}.
 
-Definition Preimg (X Y f B: set) :=
+Definition Preimg (X f B: set) :=
   {x ∈ X | ∃y, y ∈ B ∧ Pair x y ∈ f}.
 
 Theorem preimg_intersection (X Y f A B: set):
   f ∈ Abb X Y → A ⊆ Y → B ⊆ Y →
-    Preimg X Y f (A ∩ B) = (Preimg X Y f A) ∩ (Preimg X Y f B).
+    Preimg X f (A ∩ B) = (Preimg X f A) ∩ (Preimg X f B).
 Proof.
   intros context hAY hBY.
   apply sep in context.
@@ -286,10 +285,77 @@ Proof.
     - exists y. unfold right_uniq in huniq.
       assert (hyY := hAY y hy). clear hAY.
       assert (hy'Y := hBY y' hy'). clear hBY.
-      assert (hyy' := huniq x y y' hx hyY hy'Y hf hf').
+      assert (hyy' := huniq x y y' hf hf').
       clear huniq. rewrite <- hyy' in hy'. clear hyy'.
       split.
       -- apply intersection_intro. exact (conj hy hy').
       -- exact hf.
+Qed.
+
+Theorem pair_in_relation (X Y x y R: set):
+  (Pair x y) ∈ R → R ⊆ (Prod X Y) → x ∈ X ∧ y ∈ Y.
+Proof.
+  intro hxy. intro hR.
+  unfold Subset in hR.
+  assert (h := hR (Pair x y) hxy).
+  apply sep in h. apply proj2 in h.
+  destruct h as (x', (y', (hx', (hy', heq)))).
+  apply pair_eq in heq. destruct heq as (hx, hy).
+  rewrite hx. rewrite hy.
+  exact (conj hx' hy').
+Qed.
+
+Definition app (Y f x: set): set :=
+  ⋃{y ∈ Y | (Pair x y) ∈ f}.
+
+Theorem application_iff (X Y f x y: set):
+  x ∈ X → f ∈ Abb X Y → (y = app Y f x ↔ (Pair x y) ∈ f).
+Proof.
+  intro hx. intro hf.
+  split.
+  * intro h. apply sep in hf.
+    assert (hft := proj1 (proj2 hf)).
+    assert (hfr := proj2 (proj2 hf)).
+    unfold left_total in hft.
+    destruct (hft x hx) as (y', hy').
+    assert (heq: y' = app Y f x). {
+      apply set_ext. intro u. split.
+      * intro hu. apply union_system_ext.
+        exists y'. split.
+        - exact hu.
+        - apply sep. split.
+          -- apply proj1 in hf.
+             apply power_set_ext in hf.
+             apply (pair_in_relation X Y x y' f hy') in hf.
+             exact (proj2 hf).
+          -- exact hy'.
+      * intro hu. apply union_system_ext in hu.
+        destruct hu as (y'', (hu, hy'')).
+        apply sep in hy''. apply proj2 in hy''.
+        unfold right_uniq in hfr.
+        assert (heq := hfr x y' y'' hy' hy'').
+        rewrite heq. exact hu.
+    }
+    rewrite <- h in heq. rewrite heq in hy'.
+    exact hy'.
+  * intro h. apply set_ext. intro u. split.
+    - intro hu. unfold app.
+      apply union_system_ext. exists y.
+      split.
+      -- exact hu.
+      -- apply sep. split.
+         --- apply sep in hf. apply proj1 in hf.
+             apply power_set_ext in hf.
+             apply (pair_in_relation X Y x y f h) in hf.
+             exact (proj2 hf).
+         --- exact h.
+    - intro hu. unfold app in hu.
+      apply union_system_ext in hu.
+      destruct hu as (y', (hu, hy')).
+      apply sep in hy'. destruct hy' as (hy', hxy').
+      apply sep in hf. apply proj2 in hf.
+      apply proj2 in hf. unfold right_uniq in hf.
+      assert (heq := hf x y y' h hxy').
+      rewrite heq. exact hu.
 Qed.
 

@@ -127,3 +127,10 @@ Proof.
       -- rewrite hXB. exact hB.
 Qed.
 
+Lemma sep_is_subset (X: set) (P: set → Prop):
+  {x ∈ X | P x} ⊆ X.
+Proof.
+  intro u. intro hu. apply sep in hu.
+  exact (proj1 hu).
+Qed.
+
