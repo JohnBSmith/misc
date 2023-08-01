@@ -1,17 +1,20 @@
 
-(* Sequent natural deduction for propositional calculus. *)
-(* Soundness under classical semantics. *)
+(* Sequent natural deduction for *)
+(* classical propositional calculus *)
+
+(* Shown is soundness under classical semantics. *)
+(* Furthermore, some admissible rules are shown. *)
 
 (* Double negation elimination, *)
-(* needed for classical semantics. *)
+(* needed for classical semantics *)
 Axiom dne: forall A: Prop, ~~A -> A.
 
-(* Type of atomic variables *)
+(* The type of atomic variables *)
 Inductive Var := var: nat -> Var.
 
-(* Recursive definition of what should *)
-(* be a logical formula *)
-Inductive Formula :=
+(* Recursive definition of the type of *)
+(* well-formed logical formulas *)
+Inductive Formula: Set :=
 | Atom: Var -> Formula
 | FF: Formula
 | TF: Formula
@@ -45,7 +48,7 @@ Fixpoint concat (Gamma Gamma': List) :=
   | (Cons Gamma' A) => Cons (concat Gamma Gamma') A
   end.
 
-(* Type of sequents *)
+(* The type of sequents *)
 Inductive Seq := seq: List -> Formula -> Seq.
 
 Fixpoint sat_list (I: Var -> Prop) (Gamma: List) :=
@@ -54,7 +57,7 @@ Fixpoint sat_list (I: Var -> Prop) (Gamma: List) :=
   | Cons Gamma A => (sat I A) /\ (sat_list I Gamma)
   end.
 
-(* Logical valid sequence *)
+(* Logically valid sequents *)
 Definition valid '(seq Gamma A) :=
   forall I, sat_list I Gamma -> sat I A.
 
@@ -70,7 +73,7 @@ Proof.
     exact (h I).
 Qed.
 
-Lemma axiom_schema_is_sound A:
+Lemma basic_seq_intro_is_sound A:
   valid (seq (Cons Empty A) A).
 Proof.
   unfold valid. intro I. intro h.
@@ -225,8 +228,8 @@ Proof.
   apply (h I). exact hI.
 Qed.
 
-Inductive Proof: Seq -> Type :=
-| AxiomSchema: forall A, Proof (seq (Cons Empty A) A)
+Inductive Proof: Seq -> Prop :=
+| BasicSeqIntro: forall A, Proof (seq (Cons Empty A) A)
 | Weakening: forall Gamma A B,
     Proof (seq Gamma B) -> Proof (seq (Cons Gamma A) B)
 | Contraction: forall Gamma Gamma' A B,
@@ -282,7 +285,7 @@ Proof.
   | Gamma A pi hpi
   | Gamma A pinA hpinA piA hpiA
   | Gamma A pi hpi].
-  * exact (axiom_schema_is_sound A). 
+  * exact (basic_seq_intro_is_sound A). 
   * exact (weakening_is_sound Gamma A B hpi).
   * exact (contraction_is_sound Gamma Gamma' A B hpi).
   * exact (exchange_is_sound Gamma Gamma' A B C hpi).
@@ -306,5 +309,36 @@ Proof.
   intro h. induction Gamma' as [| Gamma' ih B].
   * simpl concat. exact h.
   * simpl concat. apply Weakening. exact ih.
+Qed.
+
+Fixpoint is_in (A: Formula) (Gamma: List): Prop :=
+  match Gamma with
+  | Empty => False
+  | (Cons Gamma B) => A = B \/ is_in A Gamma
+  end.
+
+Theorem basic_seq_intro_general1_is_admissible Gamma A:
+  Proof (seq (Cons Gamma A) A).
+Proof.
+  induction Gamma as [| Gamma ih B].
+  * exact (BasicSeqIntro A).
+  * pose (Gamma' := (Cons (Cons Gamma A) B)).
+    assert (h: Proof (seq (concat Gamma' Empty) A)). {
+      simpl concat. unfold Gamma'.
+      apply Weakening. exact ih.
+    }
+    assert (h' := Exchange Gamma Empty A B A h).
+    simpl concat in h'. exact h'.
+Qed.
+
+Theorem basic_seq_intro_general2_is_admissible Gamma A:
+  is_in A Gamma -> Proof (seq Gamma A).
+Proof.
+  intro h. induction Gamma as [| Gamma ih B].
+  * simpl is_in in h. exfalso. exact h.
+  * simpl is_in in h. destruct h as [hAB |hA].
+    - rewrite <- hAB.
+      exact (basic_seq_intro_general1_is_admissible Gamma A).
+    - apply Weakening. apply ih. exact hA.
 Qed.
 
