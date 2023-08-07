@@ -5,7 +5,7 @@ Inductive Var := var: nat → Var.
 Parameter World: Type.
 Parameter P: Var → World → Prop.
 Parameter R: World → World → Prop.
-Axiom DNE: forall (A: Prop), ¬¬A → A.
+Axiom DNE: ∀(A: Prop), ¬¬A → A.
 
 Definition Rrefl := ∀x, R x x.
 Definition Rsym := ∀x y, R x y → R y x.
@@ -73,7 +73,7 @@ Proof.
 Qed.
 
 (* Axiom schema K *)
-Theorem ax_K: ∀A B, ⊢ □(A → B) → (□A → □B).
+Theorem axiom_K: ∀A B, ⊢ □(A → B) → (□A → □B).
 Proof.
   intros A B. unfold is_theorem. intro x. simpl st.
   intro h. intro hA. intro y. intro hxy.
@@ -81,14 +81,14 @@ Proof.
 Qed.
 
 (* Axiom schema T *)
-Theorem ax_T: ∀A, KT ⊢ □A → A.
+Theorem axiom_T: ∀A, KT ⊢ □A → A.
 Proof.
   intro A. intro hrefl. unfold is_theorem. intro x.
   simpl st. intro h. apply (h x). exact (hrefl x).
 Qed.
 
 (* Axiom schema 4 *)
-Theorem ax_4: ∀A, S4 ⊢ □A → □□A.
+Theorem axiom_4: ∀A, S4 ⊢ □A → □□A.
 Proof.
   intro A. intro hS4. destruct hS4 as (hrefl, htrans).
   unfold is_theorem. intro x. simpl st. intro h.
