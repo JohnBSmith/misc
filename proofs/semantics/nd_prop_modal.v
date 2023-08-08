@@ -35,8 +35,8 @@ Notation "A ∧ B" := (Conj A B): formula_scope.
 Notation "A ∨ B" := (Disj A B): formula_scope.
 Notation "A → B" := (Impl A B): formula_scope.
 Notation "A ↔ B" := (Equi A B): formula_scope.
-Notation "□ A" := (Nec A) (at level 75).
-Notation "◇ A" := (Pos A) (at level 75).
+Notation "□ A" := (Nec A) (at level 75): formula_scope.
+Notation "◇ A" := (Pos A) (at level 75): formula_scope.
 
 Definition World := Type.
 
@@ -380,4 +380,82 @@ Proof.
   * exact (nec_is_sound A ih).
   * exact (axiom_K_is_sound Γ A B).
   * exact (axiom_pos_is_sound Γ A).
+Qed.
+
+Theorem basic_seq_general Γ A:
+  Prf (Cons Γ A ⊢ A).
+Proof.
+  induction Γ as [| Γ ih B].
+  * exact (BasicSeq A).
+  * pose (Γ' := (Cons (Cons Γ A) B)).
+    assert (h: Prf (concat Γ' Empty ⊢ A)). {
+      simpl concat. unfold Γ'.
+      apply Weakening. exact ih.
+    }
+    assert (h' := Exchange Γ Empty A B A h).
+    simpl concat in h'. exact h'.
+Qed.
+
+Theorem impl_intro_inv {Γ A B}:
+  Prf (Γ ⊢ A → B) → Prf ((Cons Γ A) ⊢ B).
+Proof.
+  intro h. apply (Weakening Γ A) in h.
+  assert (hA := basic_seq_general Γ A).
+  exact (ImplElim _ _ _ h hA).
+Qed.
+
+Fixpoint Nec_list (Γ: List) :=
+  match Γ with
+  | Empty => Empty
+  | Cons Γ A => Cons (Nec_list Γ) (□A)
+  end.
+
+Notation "□ Γ" := (Nec_list Γ) (at level 75).
+
+Theorem necessitation_general {Γ A}:
+  Prf (Γ ⊢ A) → Prf (□Γ ⊢ □A).
+Proof.
+  revert A. induction Γ as [| Γ ih B].
+  * intro A. intro h. simpl Nec_list.
+    exact (Necessitation A h).
+  * intro A. intro h. apply ImplIntro in h.
+    apply (ih (Impl B A)) in h. clear ih.
+    assert (h0 := AxiomK (□Γ) B A).
+    assert (h1 := ImplElim _ _ _ h0 h).
+    assert (h2 := impl_intro_inv h1).
+    simpl Nec_list. exact h2.
+Qed.
+
+Fixpoint in_list (A: Formula) (Γ: List) :=
+  match Γ with
+  | Empty => False
+  | Cons Γ X => in_list A Γ ∨ X = A
+  end.
+
+Theorem basic_seq_in Γ A:
+  in_list A Γ → Prf (Γ ⊢ A).
+Proof.
+  intro h.
+  induction Γ as [| Γ ih B].
+  * simpl in_list in h. exfalso. exact h.
+  * simpl in_list in h. destruct h as [hl | hr].
+    - apply Weakening. apply ih. exact hl.
+    - rewrite hr. exact (basic_seq_general Γ A).
+Qed.
+
+Theorem concat_empty Γ:
+  concat Empty Γ = Γ.
+Proof.
+  induction Γ as [| Γ ih B].
+  * simpl concat. reflexivity.
+  * simpl concat. rewrite ih. reflexivity.
+Qed.
+
+Theorem weakening_list_right Γ Γ' A:
+  Prf (Γ ⊢ A) → Prf (concat Γ Γ' ⊢ A).
+Proof.
+  intro h. induction Γ' as [| Γ' ih B].
+  * simpl concat. exact h.
+  * simpl concat. apply Weakening.
+    exact ih.
 Qed.
