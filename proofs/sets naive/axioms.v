@@ -1,6 +1,7 @@
 
 Require Import Coq.Unicode.Utf8.
-Require Export Coq.Logic.Classical.
+
+Definition LEM := ∀(A: Prop), A ∨ ¬A.
 
 Parameter set: Type.
 Parameter EmptySet: set.
@@ -26,6 +27,11 @@ Notation "{ x | P }" := (Comp (fun x: set => P)): set_scope.
 
 Axiom comp: ∀P: set → Prop,
   ∀x, x ∈ {u | P u} ↔ P x.
+
+Parameter Pair: set → set → set.
+Axiom pair_eq: ∀x y x' y',
+  (Pair x y) = (Pair x' y') ↔ x = x' ∧ y = y'.
+Notation "( x , y )" := (Pair x y): set_scope.
 
 Lemma comp_intro {P: set → Prop} {x: set}:
   P x → x ∈ {u | P u}.
@@ -107,6 +113,36 @@ Qed.
 
 Lemma intersection_elim (M x: set):
   x ∈ ⋂M → (∀A, A ∈ M → x ∈ A).
+Proof.
+  intro h. apply comp_elim in h.
+  simpl in h. exact h.
+Qed.
+
+Lemma union_intro {M x: set}:
+  (∃A, A ∈ M ∧ x ∈ A) → x ∈ ⋃M.
+Proof.
+  intro h. apply comp_intro. exact h.
+Qed.
+
+Lemma union_elim (M x: set):
+  x ∈ ⋃M → (∃A, A ∈ M ∧ x ∈ A).
+Proof.
+  intro h. apply comp_elim in h.
+  simpl in h. exact h.
+Qed.
+
+Definition Prod (X Y: set) :=
+  {t | ∃x y, x ∈ X ∧ y ∈ Y ∧ t = (x, y)}.
+Notation "X × Y" := (Prod X Y) (at level 40): set_scope.
+
+Lemma prod_intro X Y t:
+  (∃x y, x ∈ X ∧ y ∈ Y ∧ t = (x, y)) → t ∈ X × Y.
+Proof.
+  intro h. apply comp. exact h.
+Qed.
+
+Lemma prod_elim X Y t:
+  t ∈ X × Y → (∃x y, x ∈ X ∧ y ∈ Y ∧ t = (x, y)).
 Proof.
   intro h. apply comp_elim in h.
   simpl in h. exact h.
