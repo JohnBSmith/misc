@@ -239,7 +239,10 @@ Proof.
     apply prod_elim in htA. apply prod_elim in htB.
     destruct htA as (x, (y, (hx, (hy, ht)))).
     destruct htB as (x', (y', (hx', (hy', ht')))).
-    rewrite ht in ht'. apply pair_eq in ht'.
+    rewrite ht in ht'.
+    assert (hset := (conj
+      (set_intro hx) (set_intro hy))).
+    apply (pair_eq x y x' y' hset) in ht'.
     destruct ht' as (_, hyy'). clear hx'. clear x'.
     rewrite <- hyy' in hy'. clear hyy'.
     apply prod_intro.

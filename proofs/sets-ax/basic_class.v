@@ -81,3 +81,45 @@ Proof.
     exact (conj h (empty_set_property x)).
 Qed.
 
+Theorem UnivCl_neutral A:
+  UnivCl ∪ A = UnivCl.
+Proof.
+  apply ext. split.
+  * intro h. apply -> comp.
+    apply comp in h. exact ((conj (proj1 h) I)).
+  * intro h. apply comp in h. apply proj1 in h.
+    apply -> comp. split.
+    - exact h.
+    - left. apply -> comp. exact (conj h I).
+Qed.
+
+Theorem SgSet_of_proper_class C:
+  ¬set C → SgSet C = UnivCl.
+Proof.
+  intro h. apply ext. intro x. split.
+  * intro hx. apply comp in hx.
+    apply proj1 in hx.
+    apply -> comp. exact (conj hx I).
+  * intro hx. apply comp in hx.
+    apply proj1 in hx.
+    apply -> comp. split.
+    - exact hx.
+    - intro hC. exfalso.
+      exact (h hC).
+Qed.
+
+Definition SgSetBogus a :=
+  {x | x = a}.
+
+Theorem SgSetBogus_of_proper_class C:
+  ¬set C → SgSetBogus C = ∅.
+Proof.
+  intro h. apply ext. intro x. split.
+  * intro hx. exfalso. apply comp in hx.
+    destruct hx as (hx, heq).
+    rewrite heq in hx.
+    exact (h hx).
+  * intro hx. exfalso.
+    exact (empty_set_property x hx).
+Qed.
+

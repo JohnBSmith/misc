@@ -18,28 +18,20 @@ Notation "{ x | P }" := (Comp (fun x: Class => P)): class_scope.
 Definition set (A: Class) := ∃C, A ∈ C.
 Definition Subclass (A B: Class) :=
   ∀x, x ∈ A → x ∈ B.
-Notation "A ⊆ B" := (Subclass A B) (at level 70): class_scope.
-
-Axiom comp: ∀P: Class → Prop,
-  ∀x, set x ∧ P x ↔ x ∈ {u | P u}.
-
-Axiom ext: ∀(A B: Class),
-  A = B ↔ (∀x, x ∈ A ↔ x ∈ B).
-
-Axiom subset: ∀(A B: Class),
-  set B → A ⊆ B → set A.
-
-Parameter Pair: Class → Class → Class.
-Notation "( x , y )" := (Pair x y) (at level 0): class_scope.
-
-Axiom pair_eq: ∀x y x' y',
-  (x, y) = (x', y') ↔ x = x' ∧ y = y'.
-
-Axiom pair_is_set: ∀(x y: Class),
-  set x ∧ set y ↔ set (x, y).
-
 Definition EmptySet :=
   {x | False}.
+Definition SgSet a :=
+  {x | set a → x = a}.
+Definition PairSet a b :=
+  {x | (set a → x = a) ∨ (set b → x = b)}.
+Definition Pair x y :=
+  (PairSet (SgSet x) (PairSet x y)).
+
+Notation "A ⊆ B" := (Subclass A B) (at level 70): class_scope.
+Notation "( x , y )" := (Pair x y) (at level 0): class_scope.
+
+Definition Power (X: Class) :=
+  {A | A ⊆ X}.
 Definition Intersection2 (A B: Class) :=
   {x | x ∈ A ∧ x ∈ B}.
 Definition Union2 (A B: Class) :=
@@ -65,6 +57,27 @@ Notation "A × B" := (Prod A B) (at level 40): class_scope.
 Notation "⋂ M" := (Intersection M) (at level 30): class_scope.
 Notation "⋃ M" := (Union M) (at level 30): class_scope.
 
+Axiom comp: ∀P: Class → Prop,
+  ∀x, set x ∧ P x ↔ x ∈ {u | P u}.
+
+Axiom ext: ∀(A B: Class),
+  A = B ↔ (∀x, x ∈ A ↔ x ∈ B).
+
+Axiom subset: ∀(A B: Class),
+  set B → A ⊆ B → set A.
+
+Axiom pair_set: ∀(x y: Class),
+  set x ∧ set y → set (PairSet x y).
+
+Axiom union: ∀x,
+  set x → set (⋃x).
+
+Axiom pair_eq: ∀(x y x' y': Class), set x ∧ set y
+  → ((x, y) = (x', y') ↔ x = x' ∧ y = y').
+
+Axiom power_set: ∀(X: Class),
+  set X → set (Power X).
+
 Definition non_empty A := ∃x, x ∈ A.
 
 Lemma empty_set_property:
@@ -78,6 +91,35 @@ Lemma set_intro {x A}:
   x ∈ A → set x.
 Proof.
   intro h. unfold set. exists A. exact h.
+Qed.
+
+Theorem pair_set_self x:
+  set x → (PairSet x x) = (SgSet x).
+Proof.
+  intro hx. apply ext. intro u. split.
+  * intro h. apply comp in h.
+    destruct h as (hu, hux).
+    apply -> comp. split.
+    - exact hu.
+    - destruct hux as [hl | hr].
+      -- intros _. exact (hl hx).
+      -- intros _. exact (hr hx).
+  * intro h. apply comp in h.
+    destruct h as (hu, hux).
+    apply -> comp. split.
+    - exact hu.
+    - left. exact hux.
+Qed.
+
+Theorem pair_is_set {x y}:
+  set x ∧ set y → set (x, y).
+Proof.
+  intros (hx, hy). unfold Pair.
+  apply pair_set. split.
+  * rewrite <- (pair_set_self x hx). apply pair_set.
+    exact (conj hx hx).
+  * apply pair_set.
+    exact (conj hx hy).
 Qed.
 
 Theorem subclass_refl A:
@@ -212,7 +254,55 @@ Lemma prod_elim_term {A B x y}:
 Proof.
   intro h. apply comp in h. apply proj2 in h.
   destruct h as (x', (y', (hx', (hy', heq)))).
-  apply pair_eq in heq. destruct heq as (hxx', hyy').
-  rewrite hxx'. rewrite hyy'. exact (conj hx' hy').
+  assert (hset := (conj (set_intro hx') (set_intro hy'))).
+  apply eq_sym in heq.
+  apply (pair_eq x' y' x y hset) in heq.
+  destruct heq as (hxx', hyy').
+  rewrite hxx' in hx'. rewrite hyy' in hy'.
+  exact (conj hx' hy').
 Qed.
 
+Theorem sep (A: Class) (P: Class → Prop):
+  set A → set {x | x ∈ A ∧ P x}.
+Proof.
+  intro h. apply (subset _ A h).
+  unfold Subclass. intro x. intro hx.
+  apply comp in hx. exact (proj1 (proj2 hx)).
+Qed.
+
+Theorem union_sg x:
+  set x → x = ⋃(SgSet x).
+Proof.
+  intro hx. apply ext. intro u. split.
+  * intro h. apply -> comp. split.
+    - exact (set_intro h).
+    - exists x. split.
+      -- apply -> comp. split.
+         --- exact hx.
+         --- intros _. reflexivity.
+      -- exact h.
+  * intro h. apply comp in h. apply proj2 in h.
+    destruct h as (x', (hx', hu)).
+    apply comp in hx'. apply proj2 in hx'.
+    rewrite (hx' hx) in hu. exact hu.
+Qed.
+
+Theorem pair_set_is_union_sg x y:
+  (PairSet x y) = (SgSet x) ∪ (SgSet y).
+Proof.
+  apply ext. intro u. split.
+  * intro h. apply union2_intro.
+    apply comp in h. destruct h as (hu, h).
+    destruct h as [hl | hr].
+    - left. apply -> comp. exact (conj hu hl).
+    - right. apply -> comp. exact (conj hu hr).
+  * intro h.  apply comp in h.
+    destruct h as (hu, h).
+    apply -> comp. split.
+    - exact hu.
+    - destruct h as [hl | hr].
+      -- apply comp in hl. apply proj2 in hl.
+         left. exact hl.
+      -- apply comp in hr. apply proj2 in hr.
+         right. exact hr.
+Qed.

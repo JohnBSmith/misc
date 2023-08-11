@@ -17,8 +17,12 @@ Proof.
   assert (h := hR (x, y) hxy).
   apply prod_elim in h.
   destruct h as (x', (y', (hx', (hy', heq)))).
-  apply pair_eq in heq. destruct heq as (hx, hy).
-  rewrite hx. rewrite hy.
+  apply eq_sym in heq.
+  assert (hset := (conj
+    (set_intro hx') (set_intro hy'))).
+  apply (pair_eq x' y' x y hset) in heq.
+  destruct heq as (hx, hy).
+  rewrite hx in hx'. rewrite hy in hy'.
   exact (conj hx' hy').
 Qed.
 
@@ -40,13 +44,14 @@ Proof.
              ---- exact hxy.
   * intro h. apply -> comp. split.
     - exact (set_intro h).
-    - apply comp in h. apply proj2 in h.
+    - apply comp in h. destruct h as (hx, h).
       destruct h as (y, (hy, hyx)).
       exists y. split.
       -- exact hy.
       -- apply comp in hyx. apply proj2 in hyx.
          destruct hyx as (y', (x', (hyx, hR))).
-         apply pair_eq in hyx.
+         assert (hset := (conj (set_intro hy) hx)).
+         apply (pair_eq y x y' x' hset) in hyx.
          destruct hyx as (hyy', hxx').
          rewrite hyy'. rewrite hxx'.
          exact hR.

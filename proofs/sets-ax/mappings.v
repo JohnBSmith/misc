@@ -32,6 +32,14 @@ Proof.
   intro h. unfold mapping in h. exact (proj1 h).
 Qed.
 
+Theorem pair_in_mapping {f X Y x y}:
+  mapping f X Y → (x, y) ∈ f → x ∈ X ∧ y ∈ Y.
+Proof.
+  intro hf. intro hxy. apply proj_relation in hf.
+  unfold Subclass in hf. apply hf in hxy. clear hf.
+  apply prod_elim_term in hxy. exact hxy.
+Qed.
+
 Theorem app_iff {f X Y x y}:
   mapping f X Y → x ∈ X → ((x, y) ∈ f ↔ y = app f x).
 Proof.
@@ -39,9 +47,8 @@ Proof.
   * intro h. unfold app. apply ext. intro u. split.
     - intro hu. apply union_intro. exists y. split.
       -- apply -> comp. split.
-         --- apply set_intro in h.
-             apply pair_is_set in h.
-             exact (proj2 h).
+         --- assert (hxy := pair_in_mapping hf h).
+             exact (set_intro (proj2 hxy)).
          --- exact h.
       -- exact hu.
     - intro hu. apply union_elim in hu.
@@ -56,9 +63,8 @@ Proof.
       * intro hu. unfold app. apply union_intro.
         exists y'. split.
         - apply -> comp. split.
-          --- apply set_intro in hy'.
-              apply pair_is_set in hy'.
-              exact (proj2 hy').
+          --- assert (hxy' := pair_in_mapping hf hy').
+              exact (set_intro (proj2 hxy')).
           --- exact hy'.
         - exact hu.
       * intro hu. apply union_elim in hu.
