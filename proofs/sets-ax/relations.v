@@ -15,15 +15,7 @@ Theorem pair_in_relation {X Y x y R}:
 Proof.
   intro hxy. intro hR. unfold Subclass in hR.
   assert (h := hR (x, y) hxy).
-  apply prod_elim in h.
-  destruct h as (x', (y', (hx', (hy', heq)))).
-  apply eq_sym in heq.
-  assert (hset := (conj
-    (set_intro hx') (set_intro hy'))).
-  apply (pair_eq x' y' x y hset) in heq.
-  destruct heq as (hx, hy).
-  rewrite hx in hx'. rewrite hy in hy'.
-  exact (conj hx' hy').
+  exact (prod_elim_term h).
 Qed.
 
 Theorem inv_rel_inv_img R Y:

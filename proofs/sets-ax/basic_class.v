@@ -123,3 +123,13 @@ Proof.
     exact (empty_set_property x hx).
 Qed.
 
+Theorem sg_is_set_iff x:
+  LEM → (set (SgSet x) ↔ set x).
+Proof.
+  intro lem. split.
+  * intro h. apply (dne_from_lem lem). intro hn.
+    assert (heq := SgSet_of_proper_class x hn).
+    rewrite heq in h. exact (UnivCl_is_proper h).
+  * exact (sg_is_set x).
+Qed.
+

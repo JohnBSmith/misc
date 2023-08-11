@@ -80,6 +80,15 @@ Axiom power_set: ∀(X: Class),
 
 Definition non_empty A := ∃x, x ∈ A.
 
+Lemma dne_from_lem:
+  LEM → ∀(A: Prop), ¬¬A → A.
+Proof.
+  intro lem. intro A. intro h.
+  destruct (lem A) as [hl | hr].
+  * exact hl.
+  * exfalso. exact (h hr).
+Qed.
+
 Lemma empty_set_property:
   ∀x, x ∉ ∅.
 Proof.
@@ -109,6 +118,13 @@ Proof.
     apply -> comp. split.
     - exact hu.
     - left. exact hux.
+Qed.
+
+Theorem sg_is_set x:
+  set x → set (SgSet x).
+Proof.
+  intro h. rewrite <- (pair_set_self x h).
+  exact (pair_set x x (conj h h)).
 Qed.
 
 Theorem pair_is_set {x y}:
@@ -306,3 +322,4 @@ Proof.
       -- apply comp in hr. apply proj2 in hr.
          right. exact hr.
 Qed.
+
