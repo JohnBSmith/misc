@@ -1,5 +1,6 @@
 
-Load "axioms.v".
+Require Import Coq.Unicode.Utf8.
+Require Import axioms.
 
 Theorem intersection2_com A B:
   A ∩ B = B ∩ A.
@@ -134,9 +135,9 @@ Proof.
 Qed.
 
 Theorem union2_compl A U:
-  LEM → A ⊆ U → A ∪ (U \ A) = U.
+  A ⊆ U → A ∪ (U \ A) = U.
 Proof.
-  intro lem. intro hAU. apply ext.
+  intro hAU. apply ext.
   intro x. split.
   * intro h. apply union2_elim in h.
     destruct h as [hl | hr].
@@ -144,7 +145,7 @@ Proof.
     - apply difference_elim in hr.
       exact (proj1 hr).
   * intro h. apply union2_intro.
-    destruct (lem (x ∈ A)) as [hA | hnA].
+    destruct (LEM (x ∈ A)) as [hA | hnA].
     - left. exact hA.
     - right. apply difference_intro.
       exact (conj h hnA).
@@ -240,10 +241,13 @@ Proof.
     destruct htA as (x, (y, (hx, (hy, ht)))).
     destruct htB as (x', (y', (hx', (hy', ht')))).
     rewrite ht in ht'.
-    assert (hset := (conj
-      (set_intro hx) (set_intro hy))).
-    apply (pair_eq x y x' y' hset) in ht'.
-    destruct ht' as (_, hyy'). clear hx'. clear x'.
+    assert (hsx := set_intro hx).
+    assert (hsy := set_intro hy).
+    assert (hsx' := set_intro hx').
+    assert (hsy' := set_intro hy').
+    apply (pair_eq x y x' y' hsx hsy) in ht'.
+    clear hsx hsy hsx' hsy'.
+    destruct ht' as (_, hyy'). clear hx' x'.
     rewrite <- hyy' in hy'. clear hyy'.
     apply prod_intro.
     exists x. exists y. repeat split.

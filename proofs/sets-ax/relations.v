@@ -1,5 +1,6 @@
 
-Load "axioms.v".
+Require Import Coq.Unicode.Utf8.
+Require Import axioms.
 
 Definition img R X :=
   {y | ∃x, x ∈ X ∧ (x, y) ∈ R}.
@@ -36,14 +37,14 @@ Proof.
              ---- exact hxy.
   * intro h. apply -> comp. split.
     - exact (set_intro h).
-    - apply comp in h. destruct h as (hx, h).
+    - apply comp in h. destruct h as (hsx, h).
       destruct h as (y, (hy, hyx)).
       exists y. split.
       -- exact hy.
       -- apply comp in hyx. apply proj2 in hyx.
          destruct hyx as (y', (x', (hyx, hR))).
-         assert (hset := (conj (set_intro hy) hx)).
-         apply (pair_eq y x y' x' hset) in hyx.
+         assert (hsy := (set_intro hy)).
+         apply (pair_eq y x y' x' hsy hsx) in hyx.
          destruct hyx as (hyy', hxx').
          rewrite hyy'. rewrite hxx'.
          exact hR.

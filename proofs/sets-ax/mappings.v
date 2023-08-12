@@ -1,5 +1,6 @@
 
-Load "axioms.v".
+Require Import Coq.Unicode.Utf8.
+Require Import axioms.
 
 Definition left_total X f :=
   ∀x, x ∈ X → ∃y, (x, y) ∈ f.
