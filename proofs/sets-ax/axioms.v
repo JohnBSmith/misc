@@ -55,6 +55,11 @@ Notation "A × B" := (Prod A B) (at level 40): class_scope.
 Notation "⋂ M" := (Intersection M) (at level 30): class_scope.
 Notation "⋃ M" := (Union M) (at level 30): class_scope.
 
+Definition succ n := n ∪ (SgSet n).
+Definition Inductive :=
+  {A | ∅ ∈ A ∧ (∀n, n ∈ A → succ n ∈ A)}.
+Definition ℕ := ⋂Inductive.
+
 Axiom LEM:
   ∀(A: Prop), A ∨ ¬A.
 
@@ -76,8 +81,8 @@ Axiom union: ∀x,
 Axiom power_set: ∀(X: Class),
   set X → set (Power X).
 
-Axiom sg_element: ∀x,
-  set (SgSet x) → set x.
+Axiom infinity:
+  ∃A, A ∈ Inductive.
 
 Definition non_empty A := ∃x, x ∈ A.
 
@@ -98,6 +103,12 @@ Proof.
   * intro hx. exact hx.
 Qed.
 
+Lemma set_intro {x A}:
+  x ∈ A → set x.
+Proof.
+  intro h. unfold set. exists A. exact h.
+Qed.
+
 Lemma empty_set_property:
   ∀x, x ∉ ∅.
 Proof.
@@ -105,10 +116,12 @@ Proof.
   exact (proj2 h).
 Qed.
 
-Lemma set_intro {x A}:
-  x ∈ A → set x.
+Theorem empty_set_is_set:
+  set ∅.
 Proof.
-  intro h. unfold set. exists A. exact h.
+  destruct infinity as (A, h).
+  apply comp in h. destruct h as (_, (h, _)).
+  exact (set_intro h).
 Qed.
 
 Theorem subclass1_pair_set x y:
@@ -771,3 +784,14 @@ Proof.
   rewrite hxx' in hx'. rewrite hyy' in hy'.
   exact (conj hx' hy').
 Qed.
+
+Theorem union2_is_set A B:
+  set A → set B → set (A ∪ B).
+Proof.
+  intros hA hB.
+  assert (hAB := pair_set A B (conj hA hB)).
+  apply union in hAB.
+  rewrite (union_pair_set A B hA hB) in hAB.
+  exact hAB.
+Qed.
+
