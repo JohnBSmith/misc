@@ -56,9 +56,9 @@ Notation "⋂ M" := (Intersection M) (at level 30): class_scope.
 Notation "⋃ M" := (Union M) (at level 30): class_scope.
 
 Definition succ n := n ∪ (SgSet n).
-Definition Inductive :=
+Definition InductiveSets :=
   {A | ∅ ∈ A ∧ (∀n, n ∈ A → succ n ∈ A)}.
-Definition ℕ := ⋂Inductive.
+Definition ℕ := ⋂InductiveSets.
 
 Axiom LEM:
   ∀(A: Prop), A ∨ ¬A.
@@ -82,7 +82,7 @@ Axiom power_set: ∀(X: Class),
   set X → set (Power X).
 
 Axiom infinity:
-  ∃A, A ∈ Inductive.
+  ∃A, A ∈ InductiveSets.
 
 Definition non_empty A := ∃x, x ∈ A.
 
@@ -486,6 +486,35 @@ Proof.
   exact hxy.
 Qed.
 
+Theorem intersection_UnivCl:
+  ⋂UnivCl = ∅.
+Proof.
+  apply ext. intro x. split.
+  * intro h. apply comp in h. apply proj2 in h.
+    assert (h0 := empty_set_is_set).
+    apply (in_UnivCl_iff_set ∅) in h0.
+    exact (h ∅ h0).
+  * intro h. exfalso. exact (empty_set_property x h).
+Qed.
+
+Theorem union_UnivCl:
+  ⋃UnivCl = UnivCl.
+Proof.
+  apply ext. intro x. split.
+  * intro h. apply comp in h. apply proj2 in h.
+    destruct h as (A, (hA, hx)).
+    apply (in_UnivCl_iff_set x). exact (set_intro hx).
+  * intro h. apply -> comp. split.
+    - exact (set_intro h).
+    - pose (Px := Power x). exists Px. split.
+      -- assert (hPx := power_set x (set_intro h)).
+         apply (in_UnivCl_iff_set Px).
+         fold Px in hPx. exact hPx.
+      -- unfold Px. unfold Power.
+         apply -> comp. split.
+         --- exact (set_intro h).
+         --- exact (subclass_refl x).
+Qed.
 
 (* Basic results about singletons, pair sets and pairs *)
 (* =================================================== *)

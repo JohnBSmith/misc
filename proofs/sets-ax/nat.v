@@ -43,7 +43,7 @@ Proof.
 Qed.
 
 Theorem induction_sets_brief A:
-  A ∈ Inductive → ℕ ⊆ A.
+  A ∈ InductiveSets → ℕ ⊆ A.
 Proof.
   intro h. unfold ℕ.
   apply intersection_is_lower_bound.
@@ -59,7 +59,7 @@ Proof.
 Qed.
 
 Theorem nat_is_inductive:
-  ℕ ∈ Inductive.
+  ℕ ∈ InductiveSets.
 Proof.
   apply -> comp. repeat split.
   * exact nat_is_set.
