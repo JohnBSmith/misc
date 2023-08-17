@@ -10,11 +10,23 @@ Definition right_uniq f :=
 
 Definition app f x := ⋃ {y | (x, y) ∈ f}.
 
+Definition dom f := {x | ∃y, (x, y) ∈ f}.
+Definition rng f := {y | ∃x, (x, y) ∈ f}.
+
 Definition mapping f X Y :=
   f ⊆ X × Y ∧ left_total X f ∧ right_uniq f.
 
+Definition is_mapping f :=
+  left_total (dom f) f ∧ right_uniq f.
+
 Definition inj X f := ∀x x', x ∈ X → x' ∈ X →
   app f x = app f x' → x = x'.
+
+Definition sur Y f :=
+  ∀y, y ∈ Y → ∃x, (x, y) ∈ f.
+
+Definition bij X Y f :=
+  inj X f ∧ sur Y f.
 
 Lemma proj_right_uniq {f X Y}: mapping f X Y
   → ∀x y y', (x, y) ∈ f → (x, y') ∈ f → y = y'.
@@ -218,3 +230,124 @@ Proof.
   exact h.
 Qed.
 
+Theorem outside_of_domain X Y f x:
+  mapping f X Y → x ∉ X → app f x = ∅.
+Proof.
+  intro hf. intro hnx. apply ext. intro u. split.
+  * intro h. apply comp in h.
+    destruct h as (hsu, (y, (hy, hu))).
+    apply comp in hy. destruct hy as (hsy, hxy).
+    apply proj_relation in hf. unfold Subclass in hf.
+    apply hf in hxy. clear hf.
+    apply prod_elim_term in hxy.
+    destruct hxy as (hx, _). exfalso.
+    exact (hnx hx).
+  * intro hu. exfalso. exact ((empty_set_property u) hu).
+Qed.
+
+Theorem dom_is_dom X Y f:
+  mapping f X Y → dom f = X.
+Proof.
+  intro hf. apply ext. intro x. split.
+  * intro h. apply comp in h. apply proj2 in h.
+    destruct h as (y, hxy).
+    apply (pair_in_mapping hf) in hxy.
+    exact (proj1 hxy).
+  * intro hx. apply -> comp. split.
+    - exact (set_intro hx).
+    - exact (proj_left_total hf x hx).
+Qed.
+
+Theorem cod_subclass_rng_implies_sur Y f:
+  Y ⊆ rng f → sur Y f.
+Proof.
+  intros hf. unfold sur. intro y. intro hy.
+  apply hf in hy. apply comp in hy.
+  exact (proj2 hy).
+Qed.
+
+Theorem empty_set_is_mapping Y:
+  mapping ∅ ∅ Y.
+Proof.
+  unfold mapping. repeat split.
+  * unfold Subclass. intro t. intro ht.
+    exfalso. exact ((empty_set_property t) ht).
+  * unfold left_total. intros x hx.
+    exfalso. exact ((empty_set_property x) hx).
+  * unfold right_uniq. intros x y y' hxy hxy'.
+    exfalso. exact ((empty_set_property (x, y)) hxy).
+Qed.
+
+Definition graph_from X (f: Class → Class) :=
+  {t | ∃x, x ∈ X ∧ t = (x, f x)}.
+
+Theorem graph_is_mapping X Y (f: Class → Class):
+  (∀x, x ∈ X → f x ∈ Y) →
+  mapping (graph_from X f) X Y.
+Proof.
+  intro htotal. set (Gf := graph_from X f).
+  unfold mapping. repeat split.
+  * unfold Subclass. intros t ht.
+    apply comp in ht.
+    destruct ht as (hst, (x, (hx, ht))).
+    apply -> comp. split.
+    - exact hst.
+    - exists x. exists (f x). repeat split.
+      -- exact hx.
+      -- exact (htotal x hx).
+      -- exact ht.
+  * unfold left_total. intros x hx.
+    exists (f x). apply -> comp. split.
+    - apply pair_is_set. split.
+      -- exact (set_intro hx).
+      -- exact (set_intro (htotal x hx)).
+    - exists x. split.
+      -- exact hx.
+      -- reflexivity.
+  * unfold right_uniq. intros x y1 y2 hy1 hy2.
+    apply comp in hy1. apply proj2 in hy1.
+    apply comp in hy2. apply proj2 in hy2.
+    destruct hy1 as (x1, (hx1, h1)).
+    destruct hy2 as (x2, (hx2, h2)).
+    assert (hy1 := htotal x1 hx1).
+    assert (hy2 := htotal x2 hx2).
+    apply eq_sym in h1.
+    apply eq_sym in h2.
+    apply (pair_eq _ _ _ _
+      (set_intro hx1) (set_intro hy1)) in h1.
+    apply (pair_eq _ _ _ _
+      (set_intro hx2) (set_intro hy2)) in h2.
+    destruct h1 as (h1x, h1y).
+    destruct h2 as (h2x, h2y).
+    rewrite <- h1y. rewrite <- h2y.
+    rewrite h1x. rewrite h2x.
+    reflexivity.
+Qed.
+
+Theorem app_graph X f x:
+  x ∈ X → set (f x) → app (graph_from X f) x = f x.
+Proof.
+  intros hx hsfx. apply ext. intro u. split.
+  * intro h. apply comp in h. apply proj2 in h.
+    destruct h as (y, (hy, hu)).
+    apply comp in hy. apply proj2 in hy.
+    apply comp in hy. destruct hy as (hxy, hy).
+    destruct hy as (x0, (hx0, heq)).
+    apply pair_is_set_rev in hxy.
+    destruct hxy as (hsx, hsy).
+    apply (pair_eq _ _ _ _ hsx hsy) in heq.
+    destruct heq as (h1, h2).
+    rewrite h1. rewrite <- h2. exact hu.
+  * intro h. apply -> comp. split.
+    - exact (set_intro h).
+    - exists (f x). split.
+      -- apply -> comp. split.
+         --- exact hsfx.
+         --- apply -> comp. split.
+             ---- apply pair_is_set.
+                  exact (conj (set_intro hx) hsfx).
+             ---- exists x. split.
+                  ----- exact hx.
+                  ----- reflexivity.
+      -- exact h.
+Qed.

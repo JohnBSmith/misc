@@ -185,6 +185,19 @@ Proof.
   exact (intersection_elim hM A hAM).
 Qed.
 
+Theorem intersection_subclass_union M:
+  M ≠ ∅ → ⋂M ⊆ ⋃M.
+Proof.
+  intro hM. unfold Subclass. intros x. intro hx.
+  apply -> comp. apply comp in hx.
+  destruct hx as (hsx, hx). split.
+  * exact hsx.
+  * apply non_empty_class in hM.
+    destruct hM as (A, hA). exists A. split.
+    - exact hA.
+    - exact (hx A hA).
+Qed.
+
 Theorem prod_left_empty Y:
   ∅ × Y = ∅.
 Proof.

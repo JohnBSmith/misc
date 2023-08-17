@@ -95,6 +95,14 @@ Proof.
   * exfalso. exact (h hr).
 Qed.
 
+Theorem neg_ex {X: Type} {P: X → Prop}:
+  (¬∃x, P x) → (∀x, ¬P x).
+Proof.
+  intro hn. intro x. intro hx.
+  assert (h := ex_intro P x hx).
+  exact (hn h).
+Qed.
+
 Lemma ext_rev {A B}:
   A = B → ∀x, x ∈ A ↔ x ∈ B.
 Proof.
@@ -114,14 +122,6 @@ Lemma empty_set_property:
 Proof.
   intro x. intro h. apply comp in h.
   exact (proj2 h).
-Qed.
-
-Theorem empty_set_is_set:
-  set ∅.
-Proof.
-  destruct infinity as (A, h).
-  apply comp in h. destruct h as (_, (h, _)).
-  exact (set_intro h).
 Qed.
 
 Theorem subclass1_pair_set x y:
@@ -160,6 +160,18 @@ Proof.
     - left. exact hux.
 Qed.
 
+
+(* Results about what constitutes a set *)
+(* ==================================== *)
+
+Theorem empty_set_is_set:
+  set ∅.
+Proof.
+  destruct infinity as (A, h).
+  apply comp in h. destruct h as (_, (h, _)).
+  exact (set_intro h).
+Qed.
+
 Theorem sg_is_set x:
   set x → set (SgSet x).
 Proof.
@@ -177,6 +189,42 @@ Proof.
   * apply pair_set.
     exact (conj hx hy).
 Qed.
+
+Theorem sep_is_set (A: Class) (P: Class → Prop):
+  set A → set {x | x ∈ A ∧ P x}.
+Proof.
+  intro h. apply (subset _ A h).
+  unfold Subclass. intro x. intro hx.
+  apply comp in hx. exact (proj1 (proj2 hx)).
+Qed.
+
+Theorem non_empty_class A:
+  A ≠ ∅ → ∃x, x ∈ A.
+Proof.
+  intro h. apply DNE. intro hn.
+  assert (hn' := neg_ex hn). simpl in hn'.
+  assert (h0: A = ∅). {
+    apply ext. intro x. split.
+    * intro hx. exfalso. exact (hn' x hx).
+    * intro hx. exfalso. exact ((empty_set_property x) hx).
+  }
+  exact (h h0).
+Qed.
+
+Theorem intersection_is_set M:
+  M ≠ ∅ → set (⋂M).
+Proof.
+  intro hM. apply non_empty_class in hM.
+  destruct hM as (A, hA).
+  apply (subset _ A (set_intro hA)).
+  unfold Subclass. intros x hx.
+  apply comp in hx. apply proj2 in hx.
+  exact (hx A hA).
+Qed.
+
+
+(* Basic lemmas and theorems *)
+(* ========================= *)
 
 Theorem subclass_refl A:
   A ⊆ A.
@@ -321,14 +369,6 @@ Proof.
     exact (conj hx (conj hy (eq_refl (x, y)))).
 Qed.
 
-Theorem sep (A: Class) (P: Class → Prop):
-  set A → set {x | x ∈ A ∧ P x}.
-Proof.
-  intro h. apply (subset _ A h).
-  unfold Subclass. intro x. intro hx.
-  apply comp in hx. exact (proj1 (proj2 hx)).
-Qed.
-
 
 (* Basic results about classes *)
 (* =========================== *)
@@ -413,7 +453,7 @@ Proof.
     exact (conj h (empty_set_property x)).
 Qed.
 
-Theorem UnivCl_neutral A:
+Theorem UnivCl_extremal A:
   UnivCl ∪ A = UnivCl.
 Proof.
   apply ext. split.
@@ -423,6 +463,14 @@ Proof.
     apply -> comp. split.
     - exact h.
     - left. apply -> comp. exact (conj h I).
+Qed.
+
+Theorem comp_subclass_UnivCl:
+  ∀(P: Class → Prop), {x | P x} ⊆ UnivCl.
+Proof.
+  intros P. unfold Subclass. intros x hx.
+  apply comp in hx. apply -> comp.
+  exact (conj (proj1 hx) I).
 Qed.
 
 Theorem SgSet_of_proper_class C:
@@ -486,6 +534,20 @@ Proof.
   exact hxy.
 Qed.
 
+Theorem intersection_empty_set:
+  ⋂∅ = UnivCl.
+Proof.
+  apply ext. intro x. split.
+  * intro h. apply comp in h.
+    apply -> comp. apply proj1 in h.
+    exact (conj h I).
+  * intro h. apply comp in h. apply proj1 in h.
+    apply -> comp. split.
+    - exact h.
+    - intros A hA. exfalso.
+      exact ((empty_set_property A) hA).
+Qed.
+
 Theorem intersection_UnivCl:
   ⋂UnivCl = ∅.
 Proof.
@@ -495,6 +557,17 @@ Proof.
     apply (in_UnivCl_iff_set ∅) in h0.
     exact (h ∅ h0).
   * intro h. exfalso. exact (empty_set_property x h).
+Qed.
+
+Theorem union_empty_set:
+  ⋃∅ = ∅.
+Proof.
+  apply ext. intro x. split.
+  * intro h. apply comp in h. exfalso.
+    destruct h as (_, (A, (hA, _))).
+    exact ((empty_set_property A) hA).
+  * intro hx. exfalso.
+    exact ((empty_set_property x) hx).
 Qed.
 
 Theorem union_UnivCl:
@@ -516,8 +589,36 @@ Proof.
          --- exact (subclass_refl x).
 Qed.
 
+Theorem power_UnivCl:
+  Power UnivCl = UnivCl.
+Proof.
+  apply ext. intro x. split.
+  * intro h. apply comp in h. apply proj1 in h.
+    apply -> comp. exact (conj h I).
+  * intro h. apply comp in h. apply proj1 in h.
+    apply -> comp. split.
+    - exact h.
+    - unfold Subclass. intros u hu.
+      apply -> comp. exact (conj (set_intro hu) I).
+Qed.
+
 (* Basic results about singletons, pair sets and pairs *)
 (* =================================================== *)
+
+Theorem intersection_sg x:
+  set x → ⋂(SgSet x) = x.
+Proof.
+  intro hsx. apply ext. intro u. split.
+  * intro h. apply comp in h. apply proj2 in h.
+    apply (h x). clear h u. apply -> comp. split.
+    - exact hsx.
+    - intros _. reflexivity.
+  * intro h. apply -> comp. split.
+    - exact (set_intro h).
+    - intros x' hx'. apply comp in hx'.
+      apply proj2 in hx'.
+      rewrite (hx' hsx). exact h.
+Qed.
 
 Theorem union_sg x:
   set x → x = ⋃(SgSet x).
@@ -824,3 +925,12 @@ Proof.
   exact hAB.
 Qed.
 
+Theorem sg_inj {x y: set x → set y →
+  SgSet x = SgSet y → x = y.
+Proof.
+  intros hsx hsy. intro h.
+  apply (f_equal (fun u => ⋃u)) in h.
+  rewrite <- (union_sg x hsx) in h.
+  rewrite <- (union_sg y hsy) in h.
+  exact h.
+Qed.
