@@ -6,8 +6,7 @@ Theorem intersection_is_lower_bound {A M}:
   A ∈ M → ⋂M ⊆ A.
 Proof.
   intro h. unfold Subclass. intro x. intro hx.
-  apply comp in hx. destruct hx as (_, hx).
-  exact (hx A h).
+  apply comp_elim in hx. exact (hx A h).
 Qed.
 
 Theorem nat_is_set:
@@ -23,7 +22,7 @@ Qed.
 Theorem empty_set_in_nat:
   ∅ ∈ ℕ.
 Proof.
-  unfold ℕ. apply -> comp. split.
+  unfold ℕ. apply comp. split.
   * exact empty_set_is_set.
   * intro A. intro hA. apply comp in hA.
     destruct hA as (_, (hA, _)).
@@ -37,7 +36,7 @@ Proof.
   * unfold ℕ.
     apply intersection_is_lower_bound.
     apply (subset A ℕ nat_is_set) in h.
-    apply -> comp.
+    apply comp.
     exact (conj h hind).
   * exact h.
 Qed.
@@ -61,14 +60,14 @@ Qed.
 Theorem nat_is_inductive:
   ℕ ∈ InductiveSets.
 Proof.
-  apply -> comp. repeat split.
+  apply comp. repeat split.
   * exact nat_is_set.
-  * apply -> comp. split.
+  * apply comp. split.
     - exact empty_set_is_set.
     - intro A. intro hA. apply comp in hA.
       destruct hA as (_, (hA, _)). exact hA.
   * intro n. intro hn. apply comp in hn.
-    destruct hn as (hsn, hn). apply -> comp. split.
+    destruct hn as (hsn, hn). apply comp. split.
     - exact (succ_is_set n hsn).
     - intro A. intro hA. assert (h := hA).
       apply comp in h. destruct h as (_, (_, h)).
@@ -90,11 +89,11 @@ Proof.
   intro h.
   assert (h': ∅ ∈ M ∧ (∀ n : Class, n ∈ M → succ n ∈ M)). {
     destruct h as (h0, hind). split.
-    * apply -> comp. repeat split.
+    * apply comp. repeat split.
       - exact empty_set_is_set.
       - exact empty_set_in_nat.
       - exact h0. 
-    * intro n. intro hn. apply -> comp.
+    * intro n. intro hn. apply comp.
       apply comp in hn.
       destruct hn as (hsn, (hn, hA)).
       repeat split.

@@ -69,7 +69,7 @@ Theorem inf_equi X R y A: y ∈ X →
 Proof.
   intro hsy. split.
   * intro h. unfold is_max. split.
-    - apply -> comp. repeat split.
+    - apply comp. repeat split.
       -- exact (set_intro hsy).
       -- exact hsy.
       -- unfold lower_bound. intros x hx.
@@ -77,7 +77,7 @@ Proof.
          unfold lower_bound in hA.
          exact (hA x hx).
     - unfold upper_bound. intro x. intro hx.
-      apply comp in hx. apply proj2 in hx.
+      apply comp_elim in hx.
       unfold is_inf in h. apply proj2 in h.
       exact (h x (proj1 hx) (proj2 hx)).
   * intro h. unfold is_inf. split.
@@ -90,7 +90,7 @@ Proof.
       destruct h as (hy, hby).
       apply comp in hy.
       unfold upper_bound in hby.
-      apply (hby s). apply -> comp. repeat split.
+      apply (hby s). apply comp. repeat split.
       -- exact (set_intro hs).
       -- exact hs. 
       -- exact hbs.
@@ -101,7 +101,7 @@ Theorem sup_equi X R y A: y ∈ X →
 Proof.
   intro hsy. split.
   * intro h. unfold is_min. split.
-    - apply -> comp. repeat split.
+    - apply comp. repeat split.
       -- exact (set_intro hsy).
       -- exact hsy.
       -- unfold upper_bound. intros x hx.
@@ -109,7 +109,7 @@ Proof.
          unfold upper_bound in hA.
          exact (hA x hx).
     - unfold lower_bound. intro x. intro hx.
-      apply comp in hx. apply proj2 in hx.
+      apply comp_elim in hx.
       unfold is_inf in h. apply proj2 in h.
       exact (h x (proj1 hx) (proj2 hx)).
   * intro h. unfold is_sup. split.
@@ -122,7 +122,7 @@ Proof.
       destruct h as (hy, hby).
       apply comp in hy.
       unfold lower_bound in hby.
-      apply (hby s). apply -> comp. repeat split.
+      apply (hby s). apply comp. repeat split.
       -- exact (set_intro hs).
       -- exact hs. 
       -- exact hbs.

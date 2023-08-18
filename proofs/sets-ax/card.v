@@ -3,10 +3,15 @@ Require Import Coq.Unicode.Utf8.
 Require Import axioms.
 Require Import mappings.
 
+(* |X| = |Y| *)
 Definition card_eq X Y :=
   ∃f, mapping f X Y ∧ bij X Y f.
+
+(* |X| ≤ |Y| *)
 Definition card_le X Y :=
   ∃f, mapping f X Y ∧ inj X f.
+
+(* |X| < |Y| *)
 Definition card_lt X Y :=
   (∃f, mapping f X Y ∧ inj X f) ∧
   (¬∃f, mapping f X Y ∧ bij X Y f).
@@ -15,15 +20,14 @@ Theorem sep_is_subclass (X: Class) (P: Class → Prop):
   {x | x ∈ X ∧ P x} ⊆ X.
 Proof.
   unfold Subclass. intro x. intro h.
-  apply comp in h. destruct h as (_, (h, _)).
-  exact h.
+  apply comp_elim in h. exact (proj1 h).
 Qed.
 
 Theorem sep_in_power (X: Class) (P: Class → Prop):
   set X → {x | x ∈ X ∧ P x} ∈ Power X.
 Proof.
   intro hsX. set (A := {x | x ∈ X ∧ P x}).
-  apply -> comp.
+  apply comp.
   assert (h := sep_is_subclass X P). fold A in h.
   split.
   * exact (subset A X hsX h).
@@ -45,8 +49,8 @@ Proof.
   assert (hcontra: x ∈ app f x ↔ x ∉ app f x). {
     split.
     * intro hl. rewrite <- hx in hl.
-      apply comp in hl. exact (proj2 (proj2 hl)).
-    * intro hr. rewrite <- hx. apply -> comp.
+      apply comp_elim in hl. exact (proj2 hl).
+    * intro hr. rewrite <- hx. apply comp.
       repeat split.
       - exact (set_intro hsx).
       - exact hsx.
@@ -58,8 +62,8 @@ Qed.
 Theorem sg_is_subset {x X}:
   x ∈ X → SgSet x ⊆ X.
 Proof.
-  intro h. unfold Subclass. intros u hu.
-  apply comp in hu. apply proj2 in hu.
+  intro h. unfold Subclass.
+  intros u hu. apply comp_elim in hu.
   assert (heq := hu (set_intro h)).
   rewrite heq. exact h.
 Qed.
@@ -72,7 +76,7 @@ Proof.
   * pose (f := graph_from X (fun x => SgSet x)).
     exists f. split.
     - apply graph_is_mapping.
-      intros x hx. apply -> comp. split.
+      intros x hx. apply comp. split.
       -- apply sg_is_set. exact (set_intro hx).
       -- exact (sg_is_subset hx).
     - unfold inj. intros x x' hx hx'.

@@ -2,15 +2,6 @@
 Require Import Coq.Unicode.Utf8.
 Require Import axioms.
 
-Definition img R X :=
-  {y | ∃x, x ∈ X ∧ (x, y) ∈ R}.
-
-Definition inv_img R Y :=
-  {x | ∃y, y ∈ Y ∧ (x, y) ∈ R}.
-
-Definition inv_rel R :=
-  {t | ∃y x, t = (y, x) ∧ (x, y) ∈ R}.
-
 Theorem pair_in_relation {X Y x y R}:
   (x, y) ∈ R → R ⊆ X × Y → x ∈ X ∧ y ∈ Y.
 Proof.
@@ -23,25 +14,25 @@ Theorem inv_rel_inv_img R Y:
   inv_img R Y = img (inv_rel R) Y.
 Proof.
   apply ext. intro x. split.
-  * intro h. apply -> comp. split.
+  * intro h. apply comp. split.
     - exact (set_intro h).
     - apply comp in h. destruct h as (hx, h).
       destruct h as (y, (hy, hxy)).
       exists y. split.
       -- exact hy.
-      -- apply -> comp. split.
+      -- apply comp. split.
          --- apply pair_is_set.
              exact (conj (set_intro hy) hx).
          --- exists y. exists x. split.
              ---- reflexivity.
              ---- exact hxy.
-  * intro h. apply -> comp. split.
+  * intro h. apply comp. split.
     - exact (set_intro h).
     - apply comp in h. destruct h as (hsx, h).
       destruct h as (y, (hy, hyx)).
       exists y. split.
       -- exact hy.
-      -- apply comp in hyx. apply proj2 in hyx.
+      -- apply comp_elim in hyx.
          destruct hyx as (y', (x', (hyx, hR))).
          assert (hsy := (set_intro hy)).
          apply (pair_eq y x y' x' hsy hsx) in hyx.
@@ -59,22 +50,22 @@ Proof.
     destruct h as (x, (hx, hxy)).
     apply union2_elim in hx.
     destruct hx as [hl | hr].
-    - left. apply -> comp. split.
+    - left. apply comp. split.
       -- exact hy.
       -- exists x. exact (conj hl hxy).
-    - right. apply -> comp. split.
+    - right. apply comp. split.
       -- exact hy.
       -- exists x. exact (conj hr hxy).
-  * intro h. apply -> comp. split.
+  * intro h. apply comp. split.
     - exact (set_intro h).
     - apply union2_elim in h.
       destruct h as [hl | hr].
-      -- apply comp in hl. apply proj2 in hl.
+      -- apply comp_elim in hl.
          destruct hl as (x, (hx, hxy)).
          exists x. split.
          --- apply union2_intro. left. exact hx.
          --- exact hxy.
-      -- apply comp in hr. apply proj2 in hr.
+      -- apply comp_elim in hr.
          destruct hr as (x, (hx, hxy)).
          exists x. split.
          --- apply union2_intro. right. exact hx.
@@ -90,10 +81,10 @@ Proof.
   destruct h as (x, (hx, hxy)).
   apply union2_elim in hx.
   destruct hx as [hl | hr].
-  * left. apply -> comp. split.
+  * left. apply comp. split.
     - exact hy.
     - exists x. exact (conj hl hxy).
-  * right. apply -> comp. split.
+  * right. apply comp. split.
     - exact hy.
     - exists x. exact (conj hr hxy).
 Qed.

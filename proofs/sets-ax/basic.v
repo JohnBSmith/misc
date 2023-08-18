@@ -31,7 +31,7 @@ Proof.
   * intro h. apply intersection2_elim in h.
     exact (proj2 h).
   * intro h. exfalso.
-    exact (empty_set_property x h).
+    exact (empty_set_property h).
 Qed.
 
 Theorem intersection2_neutral U A:
@@ -55,7 +55,7 @@ Proof.
     destruct hUA as (hU, hnA).
     exfalso. exact (hnA hA).
   * intro h. exfalso.
-    exact (empty_set_property x h).
+    exact (empty_set_property h).
 Qed.
 
 Theorem intersection2_assoc A B C:
@@ -189,7 +189,7 @@ Theorem intersection_subclass_union M:
   M ≠ ∅ → ⋂M ⊆ ⋃M.
 Proof.
   intro hM. unfold Subclass. intros x. intro hx.
-  apply -> comp. apply comp in hx.
+  apply comp. apply comp in hx.
   destruct hx as (hsx, hx). split.
   * exact hsx.
   * apply non_empty_class in hM.
@@ -202,24 +202,20 @@ Theorem prod_left_empty Y:
   ∅ × Y = ∅.
 Proof.
   apply ext. intro t. split.
-  * intro h. apply comp in h. apply proj2 in h.
+  * intro h. apply comp_elim in h.
     destruct h as (u, (v, (hu, (hv, huv)))).
-    apply (empty_set_property u) in hu.
-    exfalso. exact hu.
-  * intro h. apply (empty_set_property t) in h.
-    exfalso. exact h.
+    exfalso. exact (empty_set_property hu).
+  * intro h. exfalso. exact (empty_set_property h).
 Qed.
 
 Theorem prod_right_empty X:
   X × ∅ = ∅.
 Proof.
   apply ext. intro t. split.
-  * intro h. apply comp in h. apply proj2 in h.
+  * intro h. apply comp_elim in h.
     destruct h as (u, (v, (hu, (hv, huv)))).
-    apply (empty_set_property v) in hv.
-    exfalso. exact hv.
-  * intro h. apply (empty_set_property t) in h.
-    exfalso. exact h.
+    exfalso. exact (empty_set_property hv).
+  * intro h. exfalso. exact (empty_set_property h).
 Qed.
 
 Theorem prod_subclass_prod A B X Y:
