@@ -69,6 +69,7 @@ Proof.
     exact hy'.
 Qed.
 
+(*
 Lemma mapping_ext_lemma {X Y f g}:
   mapping f X Y → mapping g X Y
   → (∀x, app f x = app g x) → f ⊆ g.
@@ -93,6 +94,38 @@ Proof.
   assert (hfg := mapping_ext_lemma hf hg h).
   assert (h': ∀x, app g x = app f x). {
     intro x. apply eq_sym. exact (h x).
+  }
+  assert (hgf := mapping_ext_lemma hg hf h').
+  apply ext. intro x. split.
+  * intro hx. exact (hfg x hx). 
+  * intro hx. exact (hgf x hx).
+Qed.
+*)
+
+Lemma mapping_ext_lemma {X Y f g}:
+  mapping f X Y → mapping g X Y
+  → (∀x, x ∈ X → app f x = app g x) → f ⊆ g.
+Proof.
+  intro hf. intro hg. intro h. unfold Subclass. intro t.
+  intro ht. assert (hrel := proj_relation hf).
+  unfold Subclass in hrel. assert (h0 := hrel t ht).
+  clear hrel. apply prod_elim in h0.
+  destruct h0 as (x, (y, (hx, (hy, htxy)))).
+  assert (h := h x). rewrite htxy in ht.
+  apply (app_iff hf hx) in ht.
+  rewrite (h hx) in ht.
+  apply (app_iff hg hx) in ht.
+  rewrite <- htxy in ht. exact ht.
+Qed.
+
+Theorem mapping_ext {X Y f g}:
+  mapping f X Y → mapping g X Y
+  → (∀x, x ∈ X → app f x = app g x) → f = g.
+Proof.
+  intro hf. intro hg. intro h.
+  assert (hfg := mapping_ext_lemma hf hg h).
+  assert (h': ∀x, x ∈ X → app g x = app f x). {
+    intros x hx. apply eq_sym. exact (h x hx).
   }
   assert (hgf := mapping_ext_lemma hg hf h').
   apply ext. intro x. split.

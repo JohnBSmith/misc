@@ -73,20 +73,19 @@ Proof.
 Qed.
 
 Theorem img_intersection2 R A B:
-  img R (A ∪ B) ⊆ img R A ∪ img R B.
+  img R (A ∩ B) ⊆ img R A ∩ img R B.
 Proof.
   unfold Subclass. intro y. intro h.
-  apply union2_intro.
+  apply intersection2_intro.
   apply comp in h. destruct h as (hy, h).
   destruct h as (x, (hx, hxy)).
-  apply union2_elim in hx.
-  destruct hx as [hl | hr].
-  * left. apply comp. split.
+  apply intersection2_elim in hx. split.
+  * apply comp. split.
     - exact hy.
-    - exists x. exact (conj hl hxy).
-  * right. apply comp. split.
+    - exists x. exact (conj (proj1 hx) hxy).
+  * apply comp. split.
     - exact hy.
-    - exists x. exact (conj hr hxy).
+    - exists x. exact (conj (proj2 hx) hxy).
 Qed.
 
 Theorem inv_img_union2 R A B:
@@ -97,8 +96,30 @@ Proof.
 Qed.
 
 Theorem inv_img_intersection2 R A B:
-  inv_img R (A ∪ B) ⊆ inv_img R A ∪ inv_img R B.
+  inv_img R (A ∩ B) ⊆ inv_img R A ∩ inv_img R B.
 Proof.
   repeat rewrite inv_rel_inv_img.
   apply img_intersection2.
+Qed.
+
+Theorem img_difference R A B:
+  (img R A) \ (img R B) ⊆ img R (A \ B).
+Proof.
+  unfold Subclass. intro y. intro h.
+  apply difference_elim in h.
+  destruct h as (hA, hnB).
+  apply comp. split.
+  * exact (set_intro hA).
+  * apply comp_elim in hA.
+    destruct hA as (x, (hx, hxy)).
+    exists x. split.
+    - apply difference_intro. split.
+      -- exact hx.
+      -- intro hB. contradiction hnB.
+         apply comp. split.
+         --- apply set_intro in hxy.
+             apply pair_is_set_rev in hxy.
+             exact (proj2 hxy).
+         --- exists x. exact (conj hB hxy).
+    - exact hxy.
 Qed.

@@ -297,3 +297,36 @@ Proof.
       -- apply union2_intro. right. exact hy.
       -- exact ht.
 Qed.
+
+Theorem union_union2 M N:
+  ⋃(M ∪ N) = (⋃M) ∪ (⋃N).
+Proof.
+  apply ext. intro x. split.
+  * intro h. apply union2_intro.
+    apply comp in h.
+    destruct h as (hsx, (A, (hA, hx))).
+    apply union2_elim in hA.
+    destruct hA as [hl | hr].
+    - left. apply comp. split.
+      -- exact hsx.
+      -- exists A. exact (conj hl hx).
+    - right. apply comp. split.
+      -- exact hsx.
+      -- exists A. exact (conj hr hx).
+  * intro h. apply union2_elim in h.
+    apply comp. destruct h as [hl | hr].
+    - apply comp in hl.
+      destruct hl as (hsx, (A, (hA, hx))).
+      split.
+      -- exact hsx.
+      -- exists A. split.
+         --- apply union2_intro. left. exact hA.
+         --- exact hx.
+    - apply comp in hr.
+      destruct hr as (hsx, (A, (hA, hx))).
+      split.
+      -- exact hsx.
+      -- exists A. split.
+         --- apply union2_intro. right. exact hA.
+         --- exact hx.
+Qed.

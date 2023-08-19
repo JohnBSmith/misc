@@ -969,6 +969,20 @@ Proof.
   exact (conj hx' hy').
 Qed.
 
+Theorem sg_inj {x y}: set x → set y →
+  SgSet x = SgSet y → x = y.
+Proof.
+  intros hsx hsy. intro h.
+  apply (f_equal (fun u => ⋃u)) in h.
+  rewrite <- (union_sg x hsx) in h.
+  rewrite <- (union_sg y hsy) in h.
+  exact h.
+Qed.
+
+
+(* Further results about set constitution *)
+(* ====================================== *)
+
 Theorem union2_is_set A B:
   set A → set B → set (A ∪ B).
 Proof.
@@ -979,12 +993,45 @@ Proof.
   exact hAB.
 Qed.
 
-Theorem sg_inj {x y}: set x → set y →
-  SgSet x = SgSet y → x = y.
+Theorem prod_is_set {A B}:
+  set A → set B → set (A × B).
 Proof.
-  intros hsx hsy. intro h.
-  apply (f_equal (fun u => ⋃u)) in h.
-  rewrite <- (union_sg x hsx) in h.
-  rewrite <- (union_sg y hsy) in h.
-  exact h.
+  intros hsA hsB.
+  assert (hsub: A × B ⊆ Power (Power (A ∪ B))). {
+    unfold Subclass. intros t ht.
+    apply comp. split.
+    * exact (set_intro ht).
+    * unfold Subclass. intros s hs.
+      apply comp. split.
+      - exact (set_intro hs).
+      - unfold Subclass. intros x hx.
+        apply union2_intro.
+        apply comp_elim in ht.
+        destruct ht as (a, (b, (ha, (hb, ht)))).
+        rewrite ht in hs. clear ht t.
+        unfold Pair in hs. apply comp_elim in hs.
+        destruct hs as [hl | hr].
+        -- left.
+           assert (hl := (hl (sg_is_set a (set_intro ha)))).
+           rewrite hl in hx. clear hl.
+           apply (sg_elim _ _ (set_intro ha)) in hx.
+           rewrite hx. exact ha.
+        -- assert (hsa := set_intro ha).
+           assert (hsb := set_intro hb).
+           assert (hr := (hr (pair_set a b (conj hsa hsb)))).
+           rewrite hr in hx. clear hr.
+           apply comp_elim in hx.
+           destruct hx as [hxa | hxb].
+           --- assert (hxa := hxa hsa). left.
+               rewrite hxa. exact ha.
+           --- assert (hxb := hxb hsb). right.
+               rewrite hxb. exact hb.
+  }
+  assert (hsPP: set (Power (Power (A ∪ B)))). {
+    apply power_set. apply power_set.
+    exact (union2_is_set A B hsA hsB).
+  }
+  apply (subset (A × B) (Power (Power (A ∪ B)))).
+  * exact hsPP.
+  * exact hsub.
 Qed.
