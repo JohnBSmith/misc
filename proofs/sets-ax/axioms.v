@@ -95,6 +95,9 @@ Definition dom f :=
 Definition rng f :=
   {y | ∃x, (x, y) ∈ f}.
 
+Definition restr f A :=
+  {t | t ∈ f ∧ ∃x y, x ∈ A ∧ t = (x, y)}.
+
 Definition is_mapping f :=
   left_total (dom f) f ∧ right_uniq f.
 

@@ -68,7 +68,7 @@ Proof.
   rewrite heq. exact h.
 Qed.
 
-(* Cantor's_theorem *)
+(* Cantor's theorem *)
 Theorem power_set_cardinality X:
   set X → card_lt X (Power X).
 Proof.

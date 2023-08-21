@@ -463,3 +463,137 @@ Proof.
   }
   exact (from_cod_proper_class hg hsur hn).
 Qed.
+
+Theorem graph_is_set {X Y f}:
+  mapping f X Y → set f → set X.
+Proof.
+  intros hf hsf.
+  assert (h := graph_proper_class hf).
+  apply DNE. intro hnsX. exact (h hnsX hsf).
+Qed.
+
+Theorem inv_img_subclass_dom X Y B f:
+  mapping f X Y → inv_img f B ⊆ X.
+Proof.
+  intros hf. unfold Subclass. intros x hx.
+  apply comp_elim in hx.
+  destruct hx as (y, (hy, hxy)).
+  apply (pair_in_mapping hf) in hxy.
+  exact (proj1 hxy).
+Qed.
+
+Theorem inv_img_is_set_from_dom {X Y f} B:
+  mapping f X Y → set X → set (inv_img f B).
+Proof.
+  intros hf hsX.
+  apply (inv_img_subclass_dom X Y B f) in hf.
+  exact (subset _ X hsX hf).
+Qed.
+
+Theorem inv_img_is_set_from_graph {X Y f} B:
+  mapping f X Y → set f → set (inv_img f B).
+Proof.
+  intros hf hsf.
+  assert (hsX := graph_is_set hf hsf).
+  exact (inv_img_is_set_from_dom B hf hsX).
+Qed.
+
+Theorem inv_img_restr f M B:
+  inv_img (restr f M) B = M ∩ inv_img f B.
+Proof.
+  apply ext. intro x. split.
+  * intro h.
+    apply comp_elim in h.
+    destruct h as (y, (hy, hxy)).
+    apply comp in hxy.
+    destruct hxy as (hsxy, (hxy, (x0, (y0, (hx, heq))))).
+    apply pair_is_set_rev in hsxy as (hsx, hsy).
+    apply (pair_eq x y _ _ hsx hsy) in heq as (hxx0, _).
+    rewrite <- hxx0 in hx. clear hxx0 x0 y0.
+    apply intersection2_intro. split.
+    - exact hx.
+    - apply comp. split.
+      -- exact hsx.
+      -- exists y. exact (conj hy hxy).
+  * intro h. apply intersection2_elim in h.
+    destruct h as (hx, h).
+    apply comp_elim in h.
+    destruct h as (y, (hy, hxy)).
+    apply comp. split.
+    - exact (set_intro hx).
+    - exists y. split.
+      -- exact hy.
+      -- apply comp. repeat split.
+         --- apply pair_is_set. split.
+             ---- exact (set_intro hx).
+             ---- exact (set_intro hy).
+         --- exact hxy.
+         --- exists x. exists y. split.
+             ---- exact hx.
+             ---- reflexivity.
+Qed.
+
+Theorem restr_subclass_prod {f X Y M}:
+  mapping f X Y → M ⊆ X → restr f M ⊆ M × Y.
+Proof.
+  intros hf hMX. unfold Subclass. intros t ht.
+  apply comp_elim in ht.
+  destruct ht as (ht, (x, (y, (hx, hxy)))).
+  apply comp. split.
+  * exact (set_intro ht).
+  * exists x. exists y. repeat split.
+    - exact hx.
+    - rewrite hxy in ht.
+      apply (pair_in_mapping hf) in ht.
+      exact (proj2 ht).
+    - exact hxy.
+Qed.
+
+Theorem restr_is_mapping {f X Y M}:
+  mapping f X Y → M ⊆ X → mapping (restr f M) M Y.
+Proof.
+  intros hf hMX. unfold mapping. repeat split.
+  * exact (restr_subclass_prod hf hMX).
+  * unfold left_total. intros x hx.
+    assert (h := proj_left_total hf x (hMX x hx)).
+    destruct h as (y, hxy).
+    exists y. apply comp. repeat split.
+    -- exact (set_intro hxy).
+    -- exact hxy.
+    -- exists x. exists y. split.
+       --- exact hx.
+       --- reflexivity.
+  * unfold right_uniq. intros x y1 y2 hy1 hy2.
+    apply comp_elim in hy1. apply proj1 in hy1.
+    apply comp_elim in hy2. apply proj1 in hy2.
+    assert (h := proj_right_uniq hf).
+    exact (h x y1 y2 hy1 hy2).
+Qed.
+
+Theorem restr_subclass_graph f M:
+  restr f M ⊆ f.
+Proof.
+  unfold Subclass. intros t ht.
+  apply comp_elim in ht. exact (proj1 ht).
+Qed.
+
+Theorem restr_is_set_from_graph f M:
+  set f → set (restr f M).
+Proof.
+  intro hf. assert (h := restr_subclass_graph f M).
+  exact (subset _ f hf h).
+Qed.
+
+Theorem restr_is_set {f X Y M}:
+  set X → set Y → mapping f X Y → M ⊆ X → set (restr f M).
+Proof.
+  intros hsX hsY hf hMX.
+  assert (hsub := restr_subclass_prod hf hMX).
+  assert (h: set (M × Y)). {
+    apply prod_is_set.
+    * exact (subset M X hsX hMX).
+    * exact hsY.
+  }
+  apply (subset _ _ h hsub).
+Qed.
+

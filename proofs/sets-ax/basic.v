@@ -218,7 +218,7 @@ Proof.
   * intro h. exfalso. exact (empty_set_property h).
 Qed.
 
-Theorem prod_subclass_prod A B X Y:
+Theorem prod_subclass_prod {A B X Y}:
   A ⊆ X → B ⊆ Y → A × B ⊆ X × Y.
 Proof.
   intros hAX hBY. unfold Subclass. intro t. intro ht.
