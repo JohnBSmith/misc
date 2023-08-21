@@ -41,7 +41,7 @@ Proof.
   * intro h. apply intersection2_elim in h.
     exact (proj1 h).  
   * intro h. apply intersection2_intro.
-    unfold Subclass in hAU.
+    unfold subclass in hAU.
     exact (conj h (hAU x h)).
 Qed.
 
@@ -127,7 +127,7 @@ Proof.
   intro hAU. apply ext. intro x. split.
   * intro h. apply union2_elim in h.
     destruct h as [hA | hU].
-    - unfold Subclass in hAU.
+    - unfold subclass in hAU.
       exact (hAU x hA).
     - exact hU.
   * intro h. apply union2_intro.
@@ -141,7 +141,7 @@ Proof.
   intro x. split.
   * intro h. apply union2_elim in h.
     destruct h as [hl | hr].
-    - unfold Subclass in hAU. exact (hAU x hl).
+    - unfold subclass in hAU. exact (hAU x hl).
     - apply difference_elim in hr.
       exact (proj1 hr).
   * intro h. apply union2_intro.
@@ -176,7 +176,7 @@ Qed.
 Theorem intersection2_intersection M N:
   ⋂ M ∩ ⋂ N ⊆ ⋂ (M ∩ N).
 Proof.
-  unfold Subclass. intro x.
+  unfold subclass. intro x.
   intro h. apply intersection2_elim in h.
   destruct h as (hM, _).
   apply (intersection_intro (set_intro hM)).
@@ -188,7 +188,7 @@ Qed.
 Theorem intersection_subclass_union M:
   M ≠ ∅ → ⋂M ⊆ ⋃M.
 Proof.
-  intro hM. unfold Subclass. intros x. intro hx.
+  intro hM. unfold subclass. intros x. intro hx.
   apply comp. apply comp in hx.
   destruct hx as (hsx, hx). split.
   * exact hsx.
@@ -221,12 +221,12 @@ Qed.
 Theorem prod_subclass_prod {A B X Y}:
   A ⊆ X → B ⊆ Y → A × B ⊆ X × Y.
 Proof.
-  intros hAX hBY. unfold Subclass. intro t. intro ht.
+  intros hAX hBY. unfold subclass. intro t. intro ht.
   apply prod_intro. apply prod_elim in ht.
   destruct ht as (x, (y, (hx, (hy, ht)))).
   exists x. exists y. repeat split.
-  * unfold Subclass in hAX. exact (hAX x hx).
-  * unfold Subclass in hBY. exact (hBY y hy).
+  * unfold subclass in hAX. exact (hAX x hx).
+  * unfold subclass in hBY. exact (hBY y hy).
   * exact ht.
 Qed.
 

@@ -2,10 +2,35 @@
 Require Import Coq.Unicode.Utf8.
 Require Import axioms.
 
+Definition BinaryRel := Class → Class → Prop.
+
+Definition graph_as_rel (G: Class): BinaryRel :=
+  fun x y => (x, y) ∈ G.
+
+Definition refl M (R: BinaryRel) :=
+  ∀x, x ∈ M → R x x.
+
+Definition sym M (R: BinaryRel) :=
+  ∀x y, x ∈ M → y ∈ M → R x y → R y x.
+
+Definition trans M (R: BinaryRel) :=
+  ∀x y z, x ∈ M → y ∈ M → z ∈ M →
+  R x y → R y z → R x z.
+
+Definition antisym M (R: BinaryRel) :=
+  ∀x y, x ∈ M → y ∈ M →
+  R x y → R y x → x = y.
+
+Definition total M (R: BinaryRel) :=
+  ∀x y, x ∈ M → y ∈ M → R x y ∨ R y x.
+
+Definition antirefl M (R: BinaryRel) :=
+  ¬∃x, x ∈ M ∧ R x x.
+
 Theorem pair_in_relation {X Y x y R}:
   (x, y) ∈ R → R ⊆ X × Y → x ∈ X ∧ y ∈ Y.
 Proof.
-  intro hxy. intro hR. unfold Subclass in hR.
+  intro hxy. intro hR. unfold subclass in hR.
   assert (h := hR (x, y) hxy).
   exact (prod_elim_term h).
 Qed.
@@ -75,7 +100,7 @@ Qed.
 Theorem img_intersection2 R A B:
   img R (A ∩ B) ⊆ img R A ∩ img R B.
 Proof.
-  unfold Subclass. intro y. intro h.
+  unfold subclass. intro y. intro h.
   apply intersection2_intro.
   apply comp in h. destruct h as (hy, h).
   destruct h as (x, (hx, hxy)).
@@ -105,7 +130,7 @@ Qed.
 Theorem img_difference R A B:
   (img R A) \ (img R B) ⊆ img R (A \ B).
 Proof.
-  unfold Subclass. intro y. intro h.
+  unfold subclass. intro y. intro h.
   apply difference_elim in h.
   destruct h as (hA, hnB).
   apply comp. split.

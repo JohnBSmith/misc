@@ -19,7 +19,7 @@ Definition card_lt X Y :=
 Theorem sep_is_subclass (X: Class) (P: Class → Prop):
   {x | x ∈ X ∧ P x} ⊆ X.
 Proof.
-  unfold Subclass. intro x. intro h.
+  unfold subclass. intro x. intro h.
   apply comp_elim in h. exact (proj1 h).
 Qed.
 
@@ -62,7 +62,7 @@ Qed.
 Theorem sg_is_subset {x X}:
   x ∈ X → SgSet x ⊆ X.
 Proof.
-  intro h. unfold Subclass.
+  intro h. unfold subclass.
   intros u hu. apply comp_elim in hu.
   assert (heq := hu (set_intro h)).
   rewrite heq. exact h.

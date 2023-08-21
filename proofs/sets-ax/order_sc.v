@@ -18,7 +18,7 @@ Theorem intersection_is_a_lower_bound M:
   lower_bound (⋂M) M.
 Proof.
   unfold lower_bound. intros A hA.
-  unfold Subclass. intros x hx.
+  unfold subclass. intros x hx.
   apply comp_elim in hx.
   exact (hx A hA).
 Qed.
@@ -27,7 +27,7 @@ Theorem union_is_an_upper_bound M:
   upper_bound M (⋃M).
 Proof.
   unfold upper_bound. intros A hA.
-  unfold Subclass. intros x hx.
+  unfold subclass. intros x hx.
   apply comp. split.
   * exact (set_intro hx).
   * exists A. exact (conj hA hx).
@@ -37,21 +37,19 @@ Theorem inf_is_intersection M Y:
   is_inf Y M ↔ Y = ⋂M.
 Proof.
   split.
-  * intro h. apply ext. intros x. split.
-    - intro hx. apply comp. split.
+  * intro h. apply subclass_antisym. split.
+    - unfold subclass. intros x hx. apply comp. split.
       -- exact (set_intro hx).
       -- intros A hA. unfold is_inf in h.
          apply proj1 in h. unfold lower_bound in h.
          apply h in hA. exact (hA x hx).
-    - intro hx. unfold is_inf in h.
-      destruct h as (hY, h).
+    - unfold is_inf in h. apply proj2 in h.
       assert (hM := intersection_is_a_lower_bound M).
-      assert (h := h _ hM).
-      exact (h x hx).
+      exact (h _ hM).
   * intro h. rewrite h. clear h.
     unfold is_inf. split.
     - exact (intersection_is_a_lower_bound M).
-    - intros S hS. unfold Subclass. intros x hx.
+    - intros S hS. unfold subclass. intros x hx.
       apply comp. split.
       -- exact (set_intro hx).
       -- intros A hA. unfold lower_bound in hS.
@@ -63,20 +61,19 @@ Theorem sup_is_union M Y:
 Proof.
   split.
   * intro h. apply subclass_antisym. split.
-    - unfold is_sup in h.
-      destruct h as (hY, h).
+    - unfold is_sup in h. apply proj2 in h.
       assert (hM := union_is_an_upper_bound M).
       exact (h _ hM).
     - unfold is_sup in h. apply proj1 in h.
       unfold upper_bound in h.
-      unfold Subclass. intros x hx.
+      unfold subclass. intros x hx.
       apply comp_elim in hx.
       destruct hx as (A, (hA, hx)).
       exact (h A hA x hx).
   * intro h. rewrite h. clear h.
     unfold is_sup. split.
     - exact (union_is_an_upper_bound M).
-    - intros S hS. unfold Subclass. intros x hx.
+    - intros S hS. unfold subclass. intros x hx.
       apply comp_elim in hx.
       destruct hx as (A, (hA, hx)).
       unfold upper_bound in hS.

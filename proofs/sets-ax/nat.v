@@ -7,7 +7,7 @@ Require Import mappings.
 Theorem intersection_is_lower_bound {A M}:
   A ∈ M → ⋂M ⊆ A.
 Proof.
-  intro h. unfold Subclass. intro x. intro hx.
+  intro h. unfold subclass. intro x. intro hx.
   apply comp_elim in hx. exact (hx A h).
 Qed.
 
@@ -95,7 +95,7 @@ Proof.
   pose (M := {n | n ∈ ℕ ∧ A n}).
   assert (hM := induction_sets M).
   assert (hsub: M ⊆ ℕ). {
-    unfold Subclass. intro n. intro hn.
+    unfold subclass. intro n. intro hn.
     apply comp in hn. destruct hn as (_, (hn, _)).
     exact hn.
   }
@@ -225,7 +225,7 @@ Proof.
   assert (hG: G ∈ M). {
     apply comp. repeat split.
     * admit.
-    * unfold Subclass. intros t ht.
+    * unfold subclass. intros t ht.
       apply comp_elim in ht. exact (ht _ hprod).
     * apply comp. split.
       - apply pair_is_set. split.

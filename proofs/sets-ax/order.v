@@ -1,22 +1,19 @@
 
 Require Import Coq.Unicode.Utf8.
 Require Import axioms.
+Require Import relations.
 
-Notation "x ≤ [ R ] y" := ((x, y) ∈ R) (at level 70).
+Definition partial_order X R :=
+  refl X R ∧ antisym X R ∧ trans X R.
 
-Record partial_order R X := {
-  po_refl: ∀x, x ∈ X → x ≤[R] x;
-  po_antisym: ∀x y, x ∈ X → y ∈ X →
-    x ≤[R] y → y ≤[R] x → x = y;
-  po_trans: ∀x y z, x ∈ X → y ∈ X → z ∈ X →
-    x ≤[R] y → y ≤[R] z → x ≤[R] z
-}.
+Definition total_order X R :=
+  partial_order X R ∧ total X R.
 
-Definition lower_bound R s A :=
-  ∀x, x ∈ A → s ≤[R] x.
+Definition lower_bound (R: BinaryRel) s A :=
+  ∀x, x ∈ A → R s x.
 
-Definition upper_bound R A s :=
-  ∀x, x ∈ A → x ≤[R] s.
+Definition upper_bound (R: BinaryRel) A s :=
+  ∀x, x ∈ A → R x s.
 
 (* y = min(A) *)
 Definition is_min R y A :=
@@ -28,20 +25,32 @@ Definition is_max R y A :=
 
 (* y = inf(A) where (X, R) is a poset *)
 Definition is_inf X R y A :=
-  lower_bound R y A ∧ ∀s, s ∈ X → lower_bound R s A → s ≤[R] y.
+  lower_bound R y A ∧ ∀s, s ∈ X → lower_bound R s A → R s y.
 
 (* y = sup(A) where (X, R) is a poset *)
 Definition is_sup X R y A :=
-  upper_bound R A y ∧ ∀s, s ∈ X → upper_bound R A s → y ≤[R] s.
+  upper_bound R A y ∧ ∀s, s ∈ X → upper_bound R A s → R y s.
 
 Definition is_minimal R y A :=
-  y ∈ A ∧ ¬∃x, x ∈ A ∧ x ≤[R] y ∧ x ≠ y.
+  y ∈ A ∧ ¬∃x, x ∈ A ∧ R x y ∧ x ≠ y.
 
 Definition is_maximal R y A :=
-  y ∈ A ∧ ¬∃x, x ∈ A ∧ y ≤[R] x ∧ y ≠ x.
+  y ∈ A ∧ ¬∃x, x ∈ A ∧ R y x ∧ y ≠ x.
 
-Theorem minimum_is_unique R X A y y':
-  partial_order R X → y ∈ X → y' ∈ X →
+Theorem subclass_is_partial_order:
+  partial_order UnivCl subclass.
+Proof.
+  unfold partial_order. repeat split.
+  * unfold refl. intros x _.
+    exact (subclass_refl x).
+  * unfold antisym. intros x y _ _ hxy hyx.
+    exact (subclass_antisym (conj hxy hyx)).
+  * unfold trans. intros x y z _ _ _ hxy hyz.
+    exact (subclass_trans (conj hxy hyz)).
+Qed.
+
+Theorem minimum_is_unique X R A y y':
+  partial_order X R → y ∈ X → y' ∈ X →
   is_min R y A → is_min R y' A → y = y'.
 Proof.
   intros hpo hy hy' hmy hmy'.
@@ -49,11 +58,12 @@ Proof.
   unfold is_min in hmy'. destruct hmy' as (h', hby').
   unfold lower_bound in hby. apply hby in h'. clear hby.
   unfold lower_bound in hby'. apply hby' in h. clear hby'.
-  exact (hpo.(po_antisym R X) y y' hy hy' h' h).
+  assert (hantisym := (proj1 (proj2 hpo))).
+  exact (hantisym y y' hy hy' h' h).
 Qed.
 
-Theorem maximum_is_unique R X A y y':
-  partial_order R X → y ∈ X → y' ∈ X →
+Theorem maximum_is_unique X R A y y':
+  partial_order X R → y ∈ X → y' ∈ X →
   is_max R y A → is_max R y' A → y = y'.
 Proof.
   intros hpo hy hy' hmy hmy'.
@@ -61,7 +71,8 @@ Proof.
   unfold is_min in hmy'. destruct hmy' as (h', hby').
   unfold lower_bound in hby. apply hby in h'. clear hby.
   unfold lower_bound in hby'. apply hby' in h. clear hby'.
-  exact (hpo.(po_antisym R X) y y' hy hy' h h').
+  assert (hantisym := (proj1 (proj2 hpo))).
+  exact (hantisym y y' hy hy' h h').
 Qed.
 
 Theorem inf_equi X R y A: y ∈ X →
@@ -129,7 +140,7 @@ Proof.
 Qed.
 
 Theorem minimum_is_minimal X R y A:
-  partial_order R X → A ⊆ X →
+  partial_order X R → A ⊆ X →
   is_min R y A → is_minimal R y A.
 Proof.
   intros hR hAX h.
@@ -140,12 +151,13 @@ Proof.
     unfold lower_bound in hby.
     assert (hyx := hby x hx).
     apply (hAX x) in hx. apply (hAX y) in hy.
-    assert (h := hR.(po_antisym R X) x y hx hy hxy hyx).
+    assert (hantisym := (proj1 (proj2 hR))).
+    assert (h := hantisym x y hx hy hxy hyx).
     exact (hn h).
 Qed.
 
 Theorem maximum_is_maximal X R y A:
-  partial_order R X → A ⊆ X →
+  partial_order X R → A ⊆ X →
   is_max R y A → is_maximal R y A.
 Proof.
   intros hR hAX h.
@@ -156,7 +168,7 @@ Proof.
     unfold upper_bound in hby.
     assert (hxy := hby x hx).
     apply (hAX x) in hx. apply (hAX y) in hy.
-    assert (h := hR.(po_antisym R X) x y hx hy hxy hyx).
+    assert (hantisym := (proj1 (proj2 hR))).
+    assert (h := hantisym x y hx hy hxy hyx).
     apply eq_sym in h. exact (hn h).
 Qed.
-

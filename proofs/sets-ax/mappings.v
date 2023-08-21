@@ -26,7 +26,7 @@ Theorem pair_in_mapping {f X Y x y}:
   mapping f X Y → (x, y) ∈ f → x ∈ X ∧ y ∈ Y.
 Proof.
   intro hf. intro hxy. apply proj_relation in hf.
-  unfold Subclass in hf. apply hf in hxy. clear hf.
+  unfold subclass in hf. apply hf in hxy. clear hf.
   apply prod_elim_term in hxy. exact hxy.
 Qed.
 
@@ -74,9 +74,9 @@ Lemma mapping_ext_lemma {X Y f g}:
   mapping f X Y → mapping g X Y
   → (∀x, app f x = app g x) → f ⊆ g.
 Proof.
-  intro hf. intro hg. intro h. unfold Subclass. intro t.
+  intro hf. intro hg. intro h. unfold subclass. intro t.
   intro ht. assert (hrel := proj_relation hf).
-  unfold Subclass in hrel. assert (h0 := hrel t ht).
+  unfold subclass in hrel. assert (h0 := hrel t ht).
   clear hrel. apply prod_elim in h0.
   destruct h0 as (x, (y, (hx, (hy, htxy)))).
   assert (h := h x). rewrite htxy in ht.
@@ -106,9 +106,9 @@ Lemma mapping_ext_lemma {X Y f g}:
   mapping f X Y → mapping g X Y
   → (∀x, x ∈ X → app f x = app g x) → f ⊆ g.
 Proof.
-  intro hf. intro hg. intro h. unfold Subclass. intro t.
+  intro hf. intro hg. intro h. unfold subclass. intro t.
   intro ht. assert (hrel := proj_relation hf).
-  unfold Subclass in hrel. assert (h0 := hrel t ht).
+  unfold subclass in hrel. assert (h0 := hrel t ht).
   clear hrel. apply prod_elim in h0.
   destruct h0 as (x, (y, (hx, (hy, htxy)))).
   assert (h := h x). rewrite htxy in ht.
@@ -141,7 +141,7 @@ Theorem composition_is_mapping {X Y Z f g}:
   mapping f X Y → mapping g Y Z → mapping (g ∘ f) X Z.
 Proof.
   intros hf hg. unfold mapping. repeat split.
-  * unfold Subclass. intro t. intro h.
+  * unfold subclass. intro t. intro h.
     apply comp in h. destruct h as (ht, h).
     destruct h as (x, (y, (z, (hxz, (hyz, hxy))))).
     assert (h0 := pair_in_mapping hf hxy).
@@ -244,7 +244,7 @@ Proof.
   * intro h. apply comp in h.
     destruct h as (hsu, (y, (hy, hu))).
     apply comp in hy. destruct hy as (hsy, hxy).
-    apply proj_relation in hf. unfold Subclass in hf.
+    apply proj_relation in hf. unfold subclass in hf.
     apply hf in hxy. clear hf.
     apply prod_elim_term in hxy.
     destruct hxy as (hx, _). exfalso.
@@ -277,7 +277,7 @@ Theorem empty_set_is_mapping Y:
   mapping ∅ ∅ Y.
 Proof.
   unfold mapping. repeat split.
-  * unfold Subclass. intro t. intro ht.
+  * unfold subclass. intro t. intro ht.
     exfalso. exact (empty_set_property ht).
   * unfold left_total. intros x hx.
     exfalso. exact (empty_set_property hx).
@@ -294,7 +294,7 @@ Theorem graph_is_mapping X Y (f: Class → Class):
 Proof.
   intro htotal. set (Gf := graph_from X f).
   unfold mapping. repeat split.
-  * unfold Subclass. intros t ht.
+  * unfold subclass. intros t ht.
     apply comp in ht.
     destruct ht as (hst, (x, (hx, ht))).
     apply comp. split.
@@ -362,7 +362,7 @@ Qed.
 Theorem dom_subclass_inv_img_cod X Y f:
   mapping f X Y → X ⊆ inv_img f Y.
 Proof.
-  intros hf. unfold Subclass. intros x hx.
+  intros hf. unfold subclass. intros x hx.
   apply comp. split.
   * exact (set_intro hx).
   * exists (app f x). split.
@@ -475,7 +475,7 @@ Qed.
 Theorem inv_img_subclass_dom X Y B f:
   mapping f X Y → inv_img f B ⊆ X.
 Proof.
-  intros hf. unfold Subclass. intros x hx.
+  intros hf. unfold subclass. intros x hx.
   apply comp_elim in hx.
   destruct hx as (y, (hy, hxy)).
   apply (pair_in_mapping hf) in hxy.
@@ -536,7 +536,7 @@ Qed.
 Theorem restr_subclass_prod {f X Y M}:
   mapping f X Y → M ⊆ X → restr f M ⊆ M × Y.
 Proof.
-  intros hf hMX. unfold Subclass. intros t ht.
+  intros hf hMX. unfold subclass. intros t ht.
   apply comp_elim in ht.
   destruct ht as (ht, (x, (y, (hx, hxy)))).
   apply comp. split.
@@ -573,7 +573,7 @@ Qed.
 Theorem restr_subclass_graph f M:
   restr f M ⊆ f.
 Proof.
-  unfold Subclass. intros t ht.
+  unfold subclass. intros t ht.
   apply comp_elim in ht. exact (proj1 ht).
 Qed.
 

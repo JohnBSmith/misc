@@ -15,7 +15,7 @@ Notation "{ x | P }" := (Comp (fun x: Class => P)): class_scope.
 
 Definition set (A: Class) := ∃C, A ∈ C.
 
-Definition Subclass (A B: Class) :=
+Definition subclass (A B: Class) :=
   ∀x, x ∈ A → x ∈ B.
 
 Definition EmptySet :=
@@ -30,7 +30,7 @@ Definition PairSet a b :=
 Definition Pair x y :=
   (PairSet (SgSet x) (PairSet x y)).
 
-Notation "A ⊆ B" := (Subclass A B) (at level 70): class_scope.
+Notation "A ⊆ B" := (subclass A B) (at level 70): class_scope.
 Notation "( x , y )" := (Pair x y) (at level 0): class_scope.
 
 Definition Power (X: Class) :=
@@ -190,7 +190,7 @@ Qed.
 Theorem subclass1_pair_set x y:
   (SgSet x) ⊆ (PairSet x y).
 Proof.
-  unfold Subclass. intros u.
+  unfold subclass. intros u.
   intro h. apply comp. split.
   * exact (set_intro h).
   * left. apply comp_elim in h. exact h.
@@ -199,7 +199,7 @@ Qed.
 Theorem subclass2_pair_set x y:
   (SgSet y) ⊆ (PairSet x y).
 Proof.
-  unfold Subclass. intros u.
+  unfold subclass. intros u.
   intro h. apply comp. split.
   * exact (set_intro h).
   * right. apply comp_elim in h. exact h.
@@ -257,7 +257,7 @@ Theorem sep_is_set (A: Class) (P: Class → Prop):
   set A → set {x | x ∈ A ∧ P x}.
 Proof.
   intro h. apply (subset _ A h).
-  unfold Subclass. intro x. intro hx.
+  unfold subclass. intro x. intro hx.
   apply comp_elim in hx. exact (proj1 hx).
 Qed.
 
@@ -280,7 +280,7 @@ Proof.
   intro hM. apply non_empty_class in hM.
   destruct hM as (A, hA).
   apply (subset _ A (set_intro hA)).
-  unfold Subclass. intros x hx.
+  unfold subclass. intros x hx.
   apply comp_elim in hx. exact (hx A hA).
 Qed.
 
@@ -291,24 +291,24 @@ Qed.
 Theorem subclass_refl A:
   A ⊆ A.
 Proof.
-  unfold Subclass. intro x. intro h. exact h.
+  unfold subclass. intro x. intro h. exact h.
 Qed.
 
 Theorem subclass_antisym {A B}:
   A ⊆ B ∧ B ⊆ A → A = B.
 Proof.
   intros (hAB, hBA). apply ext. intro x. split.
-  * intro h. unfold Subclass in hAB. exact (hAB x h).
-  * intro h. unfold Subclass in hBA. exact (hBA x h).
+  * intro h. unfold subclass in hAB. exact (hAB x h).
+  * intro h. unfold subclass in hBA. exact (hBA x h).
 Qed.
 
 Theorem subclass_trans {A B C}:
   A ⊆ B ∧ B ⊆ C → A ⊆ C.
 Proof.
-  intros (hAB, hBC). unfold Subclass.
+  intros (hAB, hBC). unfold subclass.
   intro x. intro h.
-  unfold Subclass in hAB.
-  unfold Subclass in hBC.
+  unfold subclass in hAB.
+  unfold subclass in hBC.
   exact (hBC x (hAB x h)).
 Qed.
 
@@ -489,7 +489,7 @@ Qed.
 Theorem DiagCl_subclass_UnivCl:
   DiagCl ⊆ UnivCl.
 Proof.
-  unfold Subclass. intro x. intro h.
+  unfold subclass. intro x. intro h.
   apply comp in h. apply comp.
   exact (conj (proj1 h) I).
 Qed.
@@ -528,7 +528,7 @@ Qed.
 Theorem comp_subclass_UnivCl:
   ∀(P: Class → Prop), {x | P x} ⊆ UnivCl.
 Proof.
-  intros P. unfold Subclass. intros x hx.
+  intros P. unfold subclass. intros x hx.
   apply comp in hx. apply comp.
   exact (conj (proj1 hx) I).
 Qed.
@@ -658,7 +658,7 @@ Proof.
   * intro h. apply comp in h. apply proj1 in h.
     apply comp. split.
     - exact h.
-    - unfold Subclass. intros u hu.
+    - unfold subclass. intros u hu.
       apply comp. exact (conj (set_intro hu) I).
 Qed.
 
@@ -1001,13 +1001,13 @@ Theorem prod_is_set {A B}:
 Proof.
   intros hsA hsB.
   assert (hsub: A × B ⊆ Power (Power (A ∪ B))). {
-    unfold Subclass. intros t ht.
+    unfold subclass. intros t ht.
     apply comp. split.
     * exact (set_intro ht).
-    * unfold Subclass. intros s hs.
+    * unfold subclass. intros s hs.
       apply comp. split.
       - exact (set_intro hs).
-      - unfold Subclass. intros x hx.
+      - unfold subclass. intros x hx.
         apply union2_intro.
         apply comp_elim in ht.
         destruct ht as (a, (b, (ha, (hb, ht)))).
