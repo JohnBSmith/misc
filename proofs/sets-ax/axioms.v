@@ -1038,3 +1038,32 @@ Proof.
   * exact hsPP.
   * exact hsub.
 Qed.
+
+(* Unique existence *)
+(* ================ *)
+
+Definition ex_uniq (P: Class → Prop) :=
+  (∃x, set x ∧ P x) ∧ (∀x x', P x ∧ P x' → x = x').
+Notation "∃ ! x , t" := (ex_uniq (fun x => t)) (at level 200).
+
+Theorem iota_property {P} x:
+  ex_uniq P → x = ⋂{x | P x} → P x.
+Proof.
+  intros hP h. unfold ex_uniq in hP.
+  destruct hP as ((x0, (hsx0, hx0)), huniq).
+  assert (heq: x0 = ⋂{x | P x}). {
+    apply ext. intro u. split.
+    * intro hu. apply comp. split.
+      - exact (set_intro hu).
+      - intro x1. intro hx1.
+        apply comp_elim in hx1.
+        assert (heq := huniq x0 x1 (conj hx0 hx1)).
+        rewrite heq in hu. exact hu.
+    * intro hu. apply comp_elim in hu.
+      apply (hu x0). apply comp. split.
+      - exact hsx0.
+      - exact hx0.
+  }
+  rewrite <- heq in h.
+  rewrite h. exact hx0.
+Qed.
