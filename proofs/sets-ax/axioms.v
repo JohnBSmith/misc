@@ -74,7 +74,7 @@ Definition img R X :=
 Definition inv_img R Y :=
   {x | ∃y, y ∈ Y ∧ (x, y) ∈ R}.
 
-Definition inv_rel R :=
+Definition inv R :=
   {t | ∃y x, t = (y, x) ∧ (x, y) ∈ R}.
 
 Definition left_total X f :=
@@ -958,6 +958,16 @@ Proof.
     reflexivity.
 Qed.
 
+Theorem pair_eq_from {X Y x y x' y'}:
+  x ∈ X → y ∈ Y →
+  (x, y) = (x', y') ↔ x = x' ∧ y = y'.
+Proof.
+  intros hx hy.
+  apply pair_eq.
+  * exact (set_intro hx).
+  * exact (set_intro hy).
+Qed.
+
 Lemma prod_elim_term {A B x y}:
   (x, y) ∈ A × B → x ∈ A ∧ y ∈ B.
 Proof.
@@ -1046,6 +1056,14 @@ Definition ex_uniq (P: Class → Prop) :=
   (∃x, set x ∧ P x) ∧ (∀x x', P x ∧ P x' → x = x').
 Notation "∃ ! x , t" := (ex_uniq (fun x => t)) (at level 200).
 
+Definition iota P := ⋂{x | P x}.
+(* See iota, description operator in
+"The Notation in Principia Mathematica" in
+"The Stanford Encyclopedia of Philosophy".
+https://plato.stanford.edu/entries/pm-notation/
+Notation "'ι' x , t" := (iota (fun x => t)) (at level 200).
+*)
+
 Theorem iota_property {P} x:
   ex_uniq P → x = ⋂{x | P x} → P x.
 Proof.
@@ -1066,4 +1084,36 @@ Proof.
   }
   rewrite <- heq in h.
   rewrite h. exact hx0.
+Qed.
+
+Theorem iota_property_rev {P} x:
+  ex_uniq P → P x → x = ⋂{x | P x}.
+Proof.
+  intros hP hx. apply ext. intro u. split.
+  * intro hu. apply comp. split.
+    - exact (set_intro hu).
+    - intros x0 hx0. apply comp_elim in hx0.
+      unfold ex_uniq in hP. apply proj2 in hP.
+      rewrite (hP x x0 (conj hx hx0)) in hu.
+      exact hu.
+  * intro h. apply comp_elim in h.
+    apply h. apply comp.
+    unfold ex_uniq in hP.
+    destruct (proj1 hP) as (x0, (hsx0, hx0)).
+    assert (heq := proj2 hP x x0 (conj hx hx0)).
+    rewrite heq. exact (conj hsx0 hx0).
+Qed.
+
+Theorem comp_rewriting {P Q: Class → Prop}:
+  (∀x, P x ↔ Q x) → {x | P x} = {x | Q x}.
+Proof.
+  intro h. apply ext. intro x. split.
+  * intro hx. apply comp in hx as (hsx, hx).
+    apply comp. split.
+    - exact hsx.
+    - exact (proj1 (h x) hx).
+  * intro hx. apply comp in hx as (hsx, hx).
+    apply comp. split.
+    - exact hsx.
+    - exact (proj2 (h x) hx).
 Qed.

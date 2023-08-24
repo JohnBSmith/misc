@@ -36,7 +36,7 @@ Proof.
 Qed.
 
 Theorem inv_rel_inv_img R Y:
-  inv_img R Y = img (inv_rel R) Y.
+  inv_img R Y = img (inv R) Y.
 Proof.
   apply ext. intro x. split.
   * intro h. apply comp. split.
@@ -147,4 +147,27 @@ Proof.
              exact (proj2 hxy).
          --- exists x. exact (conj hB hxy).
     - exact hxy.
+Qed.
+
+Theorem inv_relation_subset {R X Y}:
+  R ⊆ X × Y → inv R ⊆ Y × X.
+Proof.
+  intro h. unfold subclass. intros t ht.
+  apply comp_elim in ht.
+  destruct ht as (y, (x, (ht, hxy))).
+  apply h in hxy. rewrite ht. clear t ht.
+  apply prod_elim_term in hxy as (hx, hy).
+  apply prod_intro. exists y. exists x.
+  repeat split.
+  * exact hy.
+  * exact hx.
+Qed.
+
+Theorem inv_relation_is_set {R X Y}:
+  R ⊆ X × Y → set X → set Y → set (inv R).
+Proof.
+  intros hR hsX hsY.
+  apply inv_relation_subset in hR.
+  assert (hprod := prod_is_set hsY hsX).
+  exact (subset _ _ hprod hR).
 Qed.

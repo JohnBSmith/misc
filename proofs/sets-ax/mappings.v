@@ -1,6 +1,7 @@
 
 Require Import Coq.Unicode.Utf8.
 Require Import axioms.
+Require Import relations.
 
 Lemma proj_right_uniq {f X Y}: mapping f X Y
   → ∀x y y', (x, y) ∈ f → (x, y') ∈ f → y = y'.
@@ -68,39 +69,6 @@ Proof.
     rewrite <- heq in h. rewrite <- h in hy'.
     exact hy'.
 Qed.
-
-(*
-Lemma mapping_ext_lemma {X Y f g}:
-  mapping f X Y → mapping g X Y
-  → (∀x, app f x = app g x) → f ⊆ g.
-Proof.
-  intro hf. intro hg. intro h. unfold subclass. intro t.
-  intro ht. assert (hrel := proj_relation hf).
-  unfold subclass in hrel. assert (h0 := hrel t ht).
-  clear hrel. apply prod_elim in h0.
-  destruct h0 as (x, (y, (hx, (hy, htxy)))).
-  assert (h := h x). rewrite htxy in ht.
-  apply (app_iff hf hx) in ht.
-  rewrite h in ht.
-  apply (app_iff hg hx) in ht.
-  rewrite <- htxy in ht. exact ht.
-Qed.
-
-Theorem mapping_ext {X Y f g}:
-  mapping f X Y → mapping g X Y
-  → (∀x, app f x = app g x) → f = g.
-Proof.
-  intro hf. intro hg. intro h.
-  assert (hfg := mapping_ext_lemma hf hg h).
-  assert (h': ∀x, app g x = app f x). {
-    intro x. apply eq_sym. exact (h x).
-  }
-  assert (hgf := mapping_ext_lemma hg hf h').
-  apply ext. intro x. split.
-  * intro hx. exact (hfg x hx). 
-  * intro hx. exact (hgf x hx).
-Qed.
-*)
 
 Lemma mapping_ext_lemma {X Y f g}:
   mapping f X Y → mapping g X Y
@@ -235,6 +203,37 @@ Proof.
   apply (hg _ _ hy hy') in h.
   apply (hf x x' hx hx') in h.
   exact h.
+Qed.
+
+Theorem composition_of_surjections {X Y Z f g}:
+  mapping f X Y → mapping g Y Z
+  → sur Y f → sur Z g → sur Z (g ∘ f).
+Proof.
+  intros hf hg hsf hsg. unfold sur. intros z hz.
+  unfold sur in hsf. unfold sur in hsg.
+  destruct (hsg z hz) as (y, hyz).
+  assert (hy := proj1 (pair_in_mapping hg hyz)).
+  destruct (hsf y hy) as (x, hxy).
+  assert (hx := proj1 (pair_in_mapping hf hxy)).
+  exists x. apply comp. split.
+  * apply pair_is_set. split.
+    - exact (set_intro hx).
+    - exact (set_intro hz).
+  * exists x. exists y. exists z. repeat split.
+    - exact hyz.
+    - exact hxy.
+Qed.
+
+Theorem composition_of_bijections {X Y Z f g}:
+  mapping f X Y → mapping g Y Z
+  → bij X Y f → bij Y Z g → bij X Z (g ∘ f).
+Proof.
+  intros hf hg hbf hbg. unfold bij.
+  unfold bij in hbf. destruct hbf as (hif, hsf).
+  unfold bij in hbg. destruct hbg as (hig, hsg).
+  split.
+  * exact (composition_of_injections hf hg hif hig).
+  * exact (composition_of_surjections hf hg hsf hsg).
 Qed.
 
 Theorem outside_of_domain X Y f x:
@@ -472,6 +471,15 @@ Proof.
   apply DNE. intro hnsX. exact (h hnsX hsf).
 Qed.
 
+Theorem graph_is_set_from_dom_cod {X Y f}:
+  mapping f X Y → set X → set Y → set f.
+Proof.
+  intros hf hsX hsY.
+  assert (hprod := prod_is_set hsX hsY).
+  apply proj_relation in hf.
+  exact (subset _ _ hprod hf).
+Qed.
+
 Theorem inv_img_subclass_dom X Y B f:
   mapping f X Y → inv_img f B ⊆ X.
 Proof.
@@ -597,3 +605,211 @@ Proof.
   apply (subset _ _ h hsub).
 Qed.
 
+Theorem composition_assoc {A B C D f g h}:
+  mapping f A B → mapping g B C → mapping h C D →
+  h ∘ (g ∘ f) = (h ∘ g) ∘ f.
+Proof.
+  intros hf hg hh.
+  assert (hgf := composition_is_mapping hf hg).
+  assert (hhg := composition_is_mapping hg hh).
+  assert (hhgf1 := composition_is_mapping hgf hh).
+  assert (hhgf2 := composition_is_mapping hf hhg).
+  apply (mapping_ext hhgf1 hhgf2). intros x hx.
+  assert (h1 := composition_eq hgf hh hx).
+  assert (h2 := composition_eq hf hhg hx).
+  assert (h3 := composition_eq hf hg hx).
+  assert (hy := app_value_in_cod hf hx).
+  assert (h4 := composition_eq hg hh hy).
+  rewrite h1. rewrite h2.
+  rewrite h3. rewrite h4.
+  reflexivity.
+Qed.
+
+Definition id X := graph_from X (fun x => x).
+
+Theorem id_is_mapping X:
+  mapping (id X) X X.
+Proof.
+  apply graph_is_mapping. intros x hx. exact hx.
+Qed.
+
+Theorem id_app {X x}:
+  x ∈ X → app (id X) x = x.
+Proof.
+  intro hx. unfold id. apply app_graph.
+  * exact hx.
+  * exact (set_intro hx).
+Qed.
+
+Theorem id_is_left_neutral {X Y f}:
+  mapping f X Y → id Y ∘ f = f.
+Proof.
+  intro hf. assert(hid := id_is_mapping Y).
+  assert (h := composition_is_mapping hf hid).
+  apply (mapping_ext h hf). intros x hx.
+  rewrite (composition_eq hf hid hx).
+  assert (hy := app_value_in_cod hf hx).
+  rewrite (id_app hy). reflexivity.
+Qed.
+
+Theorem id_is_right_neutral {X Y f}:
+  mapping f X Y → f ∘ id X = f.
+Proof.
+  intro hf. assert (hid := id_is_mapping X).
+  assert (h := composition_is_mapping hid hf).
+  apply (mapping_ext h hf). intros x hx.
+  rewrite (composition_eq hid hf hx).
+  rewrite (id_app hx). reflexivity.
+Qed.
+
+Theorem id_is_bijective X:
+  bij X X (id X).
+Proof.
+  unfold bij. split.
+  * unfold inj. intros x1 x2 h1 h2 h.
+    rewrite (id_app h1) in h.
+    rewrite (id_app h2) in h.
+    exact h.
+  * unfold sur. intros x hx. exists x.
+    assert (h := id_is_mapping X).
+    apply (app_iff h hx).
+    rewrite (id_app hx).
+    reflexivity.
+Qed.
+
+Theorem inv_of_bij_is_mapping {X Y f}:
+  mapping f X Y → bij X Y f → mapping (inv f) Y X.
+Proof.
+  intros hf hbf. unfold bij in hbf.
+  destruct hbf as (hif, hsf).
+  unfold mapping. repeat split.
+  * apply proj_relation in hf.
+    exact (inv_relation_subset hf).
+  * unfold left_total. intros y hy.
+    unfold sur in hsf.
+    destruct (hsf y hy) as (x, hxy).
+    exists x. apply comp. split.
+    - apply pair_is_set.
+      apply (pair_in_mapping hf) in hxy as (hx, _).
+      exact (conj (set_intro hy) (set_intro hx)).
+    - exists y. exists x. split.
+      -- reflexivity.
+      -- exact hxy.
+  * clear hsf.
+    unfold right_uniq. intros x y y' hxy hxy'.
+    apply comp_elim in hxy.
+    apply comp_elim in hxy'.
+    destruct hxy as (x0, (y0, (heq0, h0))).
+    destruct hxy' as (x1, (y1, (heq1, h1))).
+    symmetry in heq0. symmetry in heq1.
+    assert (h0xy := pair_in_mapping hf h0).
+    assert (h1xy := pair_in_mapping hf h1).
+    destruct h0xy as (hy0, hx0).
+    destruct h1xy as (hy1, hx1).
+    unfold inj in hif.
+    assert (h := hif y0 y1 hy0 hy1). clear hif.
+    apply (app_iff hf hy0) in h0.
+    apply (app_iff hf hy1) in h1.
+    apply (pair_eq_from hx0 hy0) in heq0.
+    apply (pair_eq_from hx1 hy1) in heq1.
+    clear hx0 hy0 hx1 hy1.
+    destruct heq0 as (hxx0, hyy0).
+    destruct heq1 as (hxx1, hyy1).
+    rewrite <- hyy0. rewrite <- hyy1.
+    apply h. clear hyy0 hyy1 h.
+    rewrite <- h0. rewrite <- h1.
+    rewrite hxx0. rewrite hxx1.
+    reflexivity.
+Qed.
+
+Theorem bij_inv_is_left_inv {X Y f x}:
+  mapping f X Y → bij X Y f → x ∈ X →
+  app (inv f) (app f x) = x.
+Proof.
+  intros hf hbf hx. set (y := app f x).
+  assert (hy := app_value_in_cod hf hx).
+  fold y in hy.
+  assert (hinv := inv_of_bij_is_mapping hf hbf).
+  symmetry.
+  apply (app_iff hinv hy). clear hinv.
+  apply comp. split.
+  * apply pair_is_set. split.
+    - exact (set_intro hy).
+    - exact (set_intro hx).
+  * exists y. exists x. split.
+    - reflexivity.
+    - apply (app_iff hf hx). reflexivity.
+Qed.
+
+Theorem bij_inv_is_right_inv {X Y f y}:
+  mapping f X Y → bij X Y f → y ∈ Y →
+  app f (app (inv f) y) = y.
+Proof.
+  intros hf hbf hy. set (x := app (inv f) y).
+  assert (hinv := inv_of_bij_is_mapping hf hbf).
+  assert (hx := app_value_in_cod hinv hy).
+  fold x in hx.
+  symmetry. apply (app_iff hf hx).
+  assert (h: x = x) by reflexivity.
+  unfold x in h at 2.
+  apply (app_iff hinv hy) in h.
+  apply comp_elim in h.
+  destruct h as (y0, (x0, (heq, hxy))).
+  apply (pair_eq_from hy hx) in heq as (hyy0, hxx0).
+  rewrite hyy0. rewrite hxx0. exact hxy.
+Qed.
+
+Theorem bij_invl {X Y f}:
+  mapping f X Y → bij X Y f →
+  inv f ∘ f = id X.
+Proof.
+  intros hf hbf.
+  assert (hinv := inv_of_bij_is_mapping hf hbf).
+  assert (h := composition_is_mapping hf hinv).
+  apply (mapping_ext h (id_is_mapping X)).
+  intros x hx. rewrite (id_app hx).
+  rewrite (composition_eq hf hinv hx).
+  exact (bij_inv_is_left_inv hf hbf hx).
+Qed.
+
+Theorem bij_invr {X Y f}:
+  mapping f X Y → bij X Y f →
+  f ∘ inv f = id Y.
+Proof.
+  intros hf hbf.
+  assert (hinv := inv_of_bij_is_mapping hf hbf).
+  assert (h := composition_is_mapping hinv hf).
+  apply (mapping_ext h (id_is_mapping Y)).
+  intros y hy. rewrite (id_app hy).
+  rewrite (composition_eq hinv hf hy).
+  exact (bij_inv_is_right_inv hf hbf hy).
+Qed.
+
+Theorem inv_of_bij_is_bij {X Y f}:
+  mapping f X Y → bij X Y f → bij Y X (inv f).
+Proof.
+  intros hf hbf.
+  assert (hif := proj1 hbf).
+  assert (hsf := proj2 hbf).
+  unfold bij. split.
+  * unfold inj. intros y1 y2 hy1 hy2. intro h.
+    unfold sur in hsf.
+    destruct (hsf y1 hy1) as (x1, h1).
+    destruct (hsf y2 hy2) as (x2, h2).
+    assert (hx1 := proj1 (pair_in_mapping hf h1)).
+    assert (hx2 := proj1 (pair_in_mapping hf h2)).
+    apply (app_iff hf hx1) in h1.
+    apply (app_iff hf hx2) in h2.
+    rewrite h1 in h. rewrite h2 in h.
+    rewrite (bij_inv_is_left_inv hf hbf hx1) in h.
+    rewrite (bij_inv_is_left_inv hf hbf hx2) in h.
+    rewrite h1. rewrite h2. rewrite h.
+    reflexivity.
+  * unfold sur. intros x hx.
+    exists (app f x).
+    assert (hinv := inv_of_bij_is_mapping hf hbf).
+    assert (hy := app_value_in_cod hf hx).
+    apply (app_iff hinv hy).
+    rewrite (bij_inv_is_left_inv hf hbf hx).
+    reflexivity.
+Qed.

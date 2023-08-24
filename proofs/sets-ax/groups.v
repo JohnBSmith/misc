@@ -1,6 +1,8 @@
 
 Require Import Coq.Unicode.Utf8.
 Require Import axioms.
+Require Import relations.
+Require Import mappings.
 
 Definition neut G mul :=
   ⋂{x | x ∈ G ∧ ∀a, a ∈ G → mul x a = a ∧ mul a x = a}.
@@ -17,6 +19,16 @@ Record group G mul := {
     mul e a = a ∧ mul a e = a;
   group_inv: ∀a, a ∈ G → ∃b, b ∈ G ∧
     mul b a = neut G mul ∧ mul a b = neut G mul;
+}.
+
+Record group_explicit G mul e := {
+  group_expl_closed: ∀a b, a ∈ G → b ∈ G → mul a b ∈ G;
+  group_expl_assoc: ∀a b c, a ∈ G → b ∈ G → c ∈ G →
+    mul (mul a b) c = mul a (mul b c);
+  group_expl_neut: e ∈ G ∧ ∀a, a ∈ G →
+    mul e a = a ∧ mul a e = a;
+  group_expl_inv: ∀a, a ∈ G → ∃b, b ∈ G ∧
+    mul b a = e ∧ mul a b = e;
 }.
 
 Definition subgroup mul H G :=
@@ -117,6 +129,32 @@ Proof.
   intros hG ha. exact (proj2 (invlr hG ha)).
 Qed.
 
+Theorem group_from_explicit {G mul} e:
+  group_explicit G mul e → group G mul.
+Proof.
+  intros (hclosed, hassoc, hneut, hinv).
+  assert (he := proj1 hneut).
+  assert (hex_uniq: ∃!e, e ∈ G ∧
+    ∀a, a ∈ G → mul e a = a ∧ mul a e = a).
+  {
+    unfold ex_uniq. split.
+    * exists e. split.
+      - exact (set_intro he).
+      - exact hneut.
+    * intros x x' ((hx, h), (hx', h')).
+      rewrite <- (proj1 (h x' hx')).
+      rewrite (proj2 (h' x hx)).
+      reflexivity.
+  }
+  assert (heq := iota_property_rev e hex_uniq hneut).
+  simpl in heq. fold (neut G mul) in heq.
+  split.
+  * exact hclosed.
+  * exact hassoc.
+  * exists e. exact hneut.
+  * rewrite <- heq. exact hinv.
+Qed.
+
 Theorem subclass_neut {H G mul}:
   group G mul → H ⊆ G → neut G mul ∈ H →
   neut G mul = neut H mul.
@@ -163,12 +201,12 @@ Proof.
   }
   unfold subgroup. split.
   * exact hHG.
-  * split.
+  * apply (group_from_explicit e). split.
     - exact hclosed.
     - intros a b c ha hb hc.
       apply hHG in ha. apply hHG in hb. apply hHG in hc.
       exact (assoc hG ha hb hc).
-    - exists e. split.
+    - split.
       -- exact he.
       -- intros a ha. apply hHG in ha. split.
          --- exact (neutl hG ha).
@@ -181,6 +219,58 @@ Proof.
       assert (hb := hinv a ha). fold b in hb.
       split.
       -- exact hb.
-      -- assert (heq := subclass_neut hG hHG he).
-         rewrite <- heq. fold e. exact hab. 
+      -- exact hab.
+Qed.
+
+Definition Sym X := {f | mapping f X X ∧ bij X X f}.
+
+Theorem id_in_symmetric_group {X}:
+  set X → id X ∈ Sym X.
+Proof.
+  intro hsX. assert (hid := id_is_mapping X).
+  apply comp. split.
+  * exact (graph_is_set_from_dom_cod hid hsX hsX).
+  * split.
+    - exact hid.
+    - exact (id_is_bijective X).
+Qed.
+
+Theorem symmetric_group_is_group X:
+  set X → group (Sym X) composition.
+Proof.
+  intro hsX.
+  apply (group_from_explicit (id X)).
+  split.
+  * intros g f hg hf.
+    apply comp_elim in hf as (hf, hbf).
+    apply comp_elim in hg as (hg, hbg).
+    apply comp. split.
+    - assert (h := composition_is_mapping hf hg).
+      exact (graph_is_set_from_dom_cod h hsX hsX).
+    - split.
+      -- exact (composition_is_mapping hf hg).
+      -- exact (composition_of_bijections hf hg hbf hbg).
+  * intros h g f hh hg hf.
+    apply comp_elim in hf as (hf, _).
+    apply comp_elim in hg as (hg, _).
+    apply comp_elim in hh as (hh, _).
+    symmetry.
+    exact (composition_assoc hf hg hh).
+  * split.
+    - exact (id_in_symmetric_group hsX).
+    - intros f hf. apply comp_elim in hf as (hf, _).
+      split.
+      -- exact (id_is_left_neutral hf).
+      -- exact (id_is_right_neutral hf).
+  * intros f hf. exists (axioms.inv f).
+    apply comp_elim in hf as (hf, hbf).
+    repeat split.
+    - apply comp. split.
+      -- apply proj_relation in hf.
+         exact (inv_relation_is_set hf hsX hsX).
+      -- split.
+         --- exact (inv_of_bij_is_mapping hf hbf).
+         --- exact (inv_of_bij_is_bij hf hbf).
+    - rewrite (bij_invl hf hbf). reflexivity.
+    - rewrite (bij_invr hf hbf). reflexivity.
 Qed.
