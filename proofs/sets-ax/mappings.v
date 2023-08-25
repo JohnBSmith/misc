@@ -403,6 +403,16 @@ Proof.
          apply (app_iff hf hx). exact heq.
 Qed.
 
+Theorem img_subclass_cod {X Y f A}:
+  mapping f X Y → A ⊆ X → img f A ⊆ Y.
+Proof.
+  intros hf hAX. unfold subclass. intros y hy.
+  apply comp_elim in hy.
+  destruct hy as (x, (hx, hxy)).
+  apply (pair_in_mapping hf) in hxy.
+  exact (proj2 hxy).
+Qed.
+
 Theorem sur_img X Y f:
   mapping f X Y → sur Y f → Y = img f X.
 Proof.
@@ -416,6 +426,50 @@ Proof.
   * intro hy. apply comp_elim in hy.
     destruct hy as (x, (_, hxy)).
     exact (proj2 (pair_in_mapping hf hxy)).
+Qed.
+
+Theorem img_composition {X Y Z f g A}:
+  mapping f X Y → mapping g Y Z →
+  A ⊆ X → img (g ∘ f) A = img g (img f A).
+Proof.
+  intros hf hg hAX. apply ext. intro z. split.
+  * intro hz. apply comp_elim in hz.
+    destruct hz as (x, (hx, hxz)).
+    assert (hgf := composition_is_mapping hf hg).
+    apply (app_iff hgf (hAX x hx)) in hxz.
+    rewrite (composition_eq hf hg (hAX x hx)) in hxz.
+    assert (hy := app_value_in_cod hf (hAX x hx)).
+    assert (hz := app_value_in_cod hg hy).
+    apply comp. split.
+    - rewrite <- hxz in hz.
+      exact (set_intro hz).
+    - exists (app f x). split.
+      -- apply comp. split.
+         --- apply (set_intro hy).
+         --- exists x. split.
+             ---- exact hx.
+             ---- apply (app_iff hf (hAX x hx)).
+                  reflexivity.
+      -- apply (app_iff hg hy). exact hxz.
+  * intro hz. apply comp_elim in hz.
+    destruct hz as (y, (hy, hyz)).
+    apply comp_elim in hy.
+    destruct hy as (x, (hx, hxy)).
+    apply (app_iff hf (hAX x hx)) in hxy.
+    assert (hy := app_value_in_cod hf (hAX x hx)).
+    rewrite <- hxy in hy.
+    apply (app_iff hg hy) in hyz.
+    assert (hz := app_value_in_cod hg hy).
+    rewrite <- hyz in hz.
+    apply comp. split.
+    - exact (set_intro hz).
+    - exists x. split.
+      -- exact hx.
+      -- assert (hgf := composition_is_mapping hf hg).
+         apply (app_iff hgf (hAX x hx)).
+         rewrite (composition_eq hf hg (hAX x hx)).
+         rewrite <- hxy. rewrite <- hyz.
+         reflexivity.
 Qed.
 
 Theorem from_cod_proper_class {X Y f}:
@@ -478,6 +532,65 @@ Proof.
   assert (hprod := prod_is_set hsX hsY).
   apply proj_relation in hf.
   exact (subset _ _ hprod hf).
+Qed.
+
+Theorem expand_graph {X Y f}:
+  mapping f X Y → f = {t | ∃x, x ∈ X ∧ t = (x, app f x)}.
+Proof.
+  intro hf. fold (graph_from X (fun x => app f x)).
+  pose (G := graph_from X (fun x => app f x)).
+  assert (hG: mapping G X Y). {
+    apply graph_is_mapping. intros x hx.
+    exact (app_value_in_cod hf hx).
+  }
+  apply (mapping_ext hf hG). intros x hx.
+  assert (hsy := set_intro (app_value_in_cod hf hx)).
+  assert (heq := app_graph X (fun x => app f x) x hx hsy).
+  simpl in heq. fold G in heq. symmetry. exact heq.
+Qed.
+
+Theorem graph_is_set_from_dom {X Y f}:
+  mapping f X Y → set X → set f.
+Proof.
+  intros hf hsX.
+  pose (g := graph_from X (fun x => (x, app f x))).
+  assert (hg: mapping g X (X × Y)). {
+    apply graph_is_mapping. intros x hx.
+    apply prod_intro_term. split.
+    * exact hx.
+    * exact (app_value_in_cod hf hx).
+  }
+  assert (hX := subclass_refl X).
+  assert (hsimg := replacement X _ g X hg hX hsX).
+  assert (hgf: ∀x, x ∈ X → app g x = (x, app f x)). {
+    intros x hx. unfold g.
+    rewrite (app_graph X _ x hx).
+    * reflexivity.
+    * apply pair_is_set. split.
+      - exact (set_intro hx).
+      - exact (set_intro (app_value_in_cod hf hx)).
+  }
+  assert (heq: f = img g X). {
+    apply ext. intro t. split.
+    * intro ht. apply comp. split.
+      - exact (set_intro ht).
+      - rewrite (expand_graph hf) in ht.
+        apply comp_elim in ht.
+        destruct ht as (x, (hx, ht)).
+        exists x. split.
+        -- exact hx.
+        -- apply (app_iff hg hx).
+           rewrite (hgf x hx). exact ht.
+    * intro ht. apply comp_elim in ht.
+      destruct ht as (x, (hx, ht)).
+      apply (app_iff hg hx) in ht.
+      rewrite ht. rewrite (hgf x hx).
+      destruct (proj_left_total hf x hx) as (y, hxy).
+      assert (hy := hxy).
+      apply (app_iff hf hx) in hy.
+      rewrite <- hy. exact hxy.
+  }
+  rewrite heq. exact hsimg.
 Qed.
 
 Theorem inv_img_subclass_dom X Y B f:
@@ -639,6 +752,25 @@ Proof.
   intro hx. unfold id. apply app_graph.
   * exact hx.
   * exact (set_intro hx).
+Qed.
+
+Theorem id_img {X A}:
+  A ⊆ X → img (id X) A = A.
+Proof.
+  intro hAX. apply ext. intros x. split.
+  * intro h. apply comp_elim in h.
+    destruct h as (x0, (hx0, h)).
+    assert (hx0' := hAX x0 hx0).
+    apply (app_iff (id_is_mapping X) hx0') in h.
+    rewrite (id_app hx0') in h.
+    rewrite h. exact hx0.
+  * intro h. apply comp. split.
+    - exact (set_intro h).
+    - exists x. split.
+      -- exact h.
+      -- apply (app_iff (id_is_mapping X) (hAX x h)).
+         rewrite (id_app (hAX x h)).
+         reflexivity.
 Qed.
 
 Theorem id_is_left_neutral {X Y f}:
