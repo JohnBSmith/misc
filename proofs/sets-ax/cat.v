@@ -15,6 +15,24 @@ Definition cat_neut Ob Hom compose id :=
 Definition category := fun '(Ob, Hom, compose, id) =>
   cat_assoc Ob Hom compose ∧ cat_neut Ob Hom compose id.
 
+Definition functor_cov Fob F :=
+  fun '(ObC, HomC, composeC, idC)
+      '(ObD, HomD, composeD, idD) =>
+  (∀X, X ∈ ObC → Fob X ∈ ObD) ∧
+  (∀X Y f, f ∈ HomC X Y → F f ∈ HomD (Fob X) (Fob Y)) ∧
+  (∀X Y Z f g, f ∈ HomC X Y → g ∈ HomC Y Z →
+    F (composeC g f) = composeD (F g) (F f)) ∧
+  (∀X, X ∈ ObC → F (idC X) = idD (Fob X)).
+
+Definition functor_contra Fob F :=
+  fun '(ObC, HomC, composeC, idC)
+      '(ObD, HomD, composeD, idD) =>
+  (∀X, X ∈ ObC → Fob X ∈ ObD) ∧
+  (∀X Y f, f ∈ HomC X Y → F f ∈ HomD (Fob Y) (Fob X)) ∧
+  (∀X Y Z f g, f ∈ HomC X Y → g ∈ HomC Y Z →
+    F (composeC g f) = composeD (F f) (F g)) ∧
+  (∀X, X ∈ ObC → F (idC X) = idD (Fob X)).
+
 Definition Abb A B := {f | mapping f A B}.
 Definition Ens := (UnivCl, Abb, composition, id).
 Definition Fimg f :=
@@ -38,24 +56,6 @@ Proof.
     - exact (id_is_right_neutral hf).
     - exact (id_is_left_neutral hf).
 Qed.
-
-Definition functor_cov Fob F :=
-  fun '(ObC, HomC, composeC, idC)
-      '(ObD, HomD, composeD, idD) =>
-  (∀X, X ∈ ObC → Fob X ∈ ObD) ∧
-  (∀X Y f, f ∈ HomC X Y → F f ∈ HomD (Fob X) (Fob Y)) ∧
-  (∀X Y Z f g, f ∈ HomC X Y → g ∈ HomC Y Z →
-    F (composeC g f) = composeD (F g) (F f)) ∧
-  (∀X, X ∈ ObC → F (idC X) = idD (Fob X)).
-
-Definition functor_contra Fob F :=
-  fun '(ObC, HomC, composeC, idC)
-      '(ObD, HomD, composeD, idD) =>
-  (∀X, X ∈ ObC → Fob X ∈ ObD) ∧
-  (∀X Y f, f ∈ HomC X Y → F f ∈ HomD (Fob Y) (Fob X)) ∧
-  (∀X Y Z f g, f ∈ HomC X Y → g ∈ HomC Y Z →
-    F (composeC g f) = composeD (F f) (F g)) ∧
-  (∀X, X ∈ ObC → F (idC X) = idD (Fob X)).
 
 Theorem Fimg_is_mapping {X Y f}:
   mapping f X Y → mapping (Fimg f) (Power X) (Power Y).

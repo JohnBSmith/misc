@@ -312,6 +312,13 @@ Proof.
   exact (hBC x (hAB x h)).
 Qed.
 
+Theorem subclass_from_eq {A B}:
+  A = B → A ⊆ B.
+Proof.
+  intro heq. assert (h := subclass_refl A).
+  symmetry in heq. rewrite heq. exact h.
+Qed.
+
 Lemma intersection2_intro {A B x}:
   x ∈ A ∧ x ∈ B → x ∈ A ∩ B.
 Proof.

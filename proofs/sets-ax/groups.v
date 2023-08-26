@@ -4,204 +4,128 @@ Require Import axioms.
 Require Import relations.
 Require Import mappings.
 
-Definition neut G mul :=
-  ⋂{x | x ∈ G ∧ ∀a, a ∈ G → mul x a = a ∧ mul a x = a}.
+Definition group_closed G mul :=
+  ∀a b, a ∈ G → b ∈ G → mul a b ∈ G.
 
-Definition inv G (mul: Class → Class → Class) a
-  := let e := neut G mul in
-    ⋂{b | b ∈ G ∧ mul b a = e ∧ mul a b = e}.
+Definition group_assoc G mul :=
+  ∀a b c, a ∈ G → b ∈ G → c ∈ G →
+  mul (mul a b) c = mul a (mul b c).
 
-Record group G mul := {
-  group_closed: ∀a b, a ∈ G → b ∈ G → mul a b ∈ G;
-  group_assoc: ∀a b c, a ∈ G → b ∈ G → c ∈ G →
-    mul (mul a b) c = mul a (mul b c);
-  group_neut: ∃e, e ∈ G ∧ ∀a, a ∈ G →
-    mul e a = a ∧ mul a e = a;
-  group_inv: ∀a, a ∈ G → ∃b, b ∈ G ∧
-    mul b a = neut G mul ∧ mul a b = neut G mul;
-}.
+Definition group_neut G mul e :=
+  e ∈ G ∧ ∀a, a ∈ G →
+  mul e a = a ∧ mul a e = a.
 
-Record group_explicit G mul e := {
-  group_expl_closed: ∀a b, a ∈ G → b ∈ G → mul a b ∈ G;
-  group_expl_assoc: ∀a b c, a ∈ G → b ∈ G → c ∈ G →
-    mul (mul a b) c = mul a (mul b c);
-  group_expl_neut: e ∈ G ∧ ∀a, a ∈ G →
-    mul e a = a ∧ mul a e = a;
-  group_expl_inv: ∀a, a ∈ G → ∃b, b ∈ G ∧
-    mul b a = e ∧ mul a b = e;
-}.
+Definition group_inv G mul (e: Class) inv :=
+  ∀a, a ∈ G → inv a ∈ G ∧
+  mul (inv a) a = e ∧ mul a (inv a) = e.
 
-Definition subgroup mul H G :=
-  H ⊆ G ∧ group H mul.
+Definition group G mul e inv :=
+  group_closed G mul ∧
+  group_assoc G mul ∧
+  group_neut G mul e ∧
+  group_inv G mul e inv.
 
-Lemma assoc {G mul a b c}:
-  group G mul → a ∈ G → b ∈ G → c ∈ G →
+Definition subgroup H G mul e inv :=
+  H ⊆ G ∧ group H mul e inv.
+
+Definition hom f := fun G mulG H mulH =>
+  (∀a, a ∈ G → f a ∈ H) ∧
+  (∀a b, a ∈ G → b ∈ G → f (mulG a b) = mulH (f a) (f b)).
+
+Definition ker (f: Class → Class) G eH :=
+  {g | g ∈ G ∧ f g = eH}.
+
+Definition img f G :=
+  {h | ∃g, g ∈ G ∧ h = f g}.
+
+Lemma closed {G mul e inv a b}:
+  group G mul e inv → a ∈ G → b ∈ G → mul a b ∈ G.
+Proof.
+  intro h. destruct h as (h, _).
+  unfold group_closed in h.
+  exact (h a b).
+Qed.
+
+Lemma assoc {G mul e inv a b c}:
+  group G mul e inv → a ∈ G → b ∈ G → c ∈ G →
     mul (mul a b) c = mul a (mul b c).
 Proof.
-  intro h. exact (group_assoc G mul h a b c).
+  intro h. destruct h as (_, (h, _)).
+  unfold group_assoc in h.
+  exact (h a b c).
 Qed.
 
-Theorem neutral_element_uniq G mul:
-  group G mul → ∃!e, e ∈ G ∧ ∀a, a ∈ G →
-    mul e a = a ∧ mul a e = a.
+Lemma neut_in_group {G mul e inv}:
+  group G mul e inv → e ∈ G.
 Proof.
-  intro hG. unfold ex_uniq. split.
-  * assert (h := group_neut G mul hG).
-    destruct h as (e, (he, hneut)).
-    exists e. split.
-    - exact (set_intro he).
-    - exact (conj he hneut).
-  * intros e e' ((he, h), (he', h')).
-    assert (h1 := proj2 (h' e he)).
-    assert (h2 := proj1 (h e' he')).
-    rewrite <- h1. rewrite h2.
-    reflexivity.
+  intro hG. destruct hG as (_, (_, (h, _))).
+  unfold group_neut in h. exact (proj1 h).
 Qed.
 
-Lemma neutl {G mul a}:
-  group G mul → a ∈ G → mul (neut G mul) a = a.
+Lemma neutl {G mul e inv a}:
+  group G mul e inv → a ∈ G → mul e a = a.
 Proof.
-  intros hG ha.
-  set (e := neut G mul). assert (he := eq_refl e).
-  unfold e in he at 2. unfold neut in he.
-  assert (huniq := neutral_element_uniq G mul hG).
-  assert (h := iota_property e huniq he).
-  simpl in h. clear he huniq. apply proj2 in h.
-  apply h in ha. exact (proj1 ha).
+  intros hG ha. destruct hG as (_, (_, (h, _))).
+  unfold group_neut in h. apply proj2 in h.
+  exact (proj1 (h a ha)).
 Qed.
 
-Lemma neutr {G mul a}:
-  group G mul → a ∈ G → mul a (neut G mul) = a.
+Lemma neutr {G mul e inv a}:
+  group G mul e inv → a ∈ G → mul a e = a.
+Proof.
+  intros hG ha. destruct hG as (_, (_, (h, _))).
+  unfold group_neut in h. apply proj2 in h.
+  exact (proj2 (h a ha)).
+Qed.
+
+Lemma invl {G mul e inv a}:
+  group G mul e inv → a ∈ G →
+  mul (inv a) a = e.
 Proof.
   intros hG ha.
-  set (e := neut G mul). assert (he := eq_refl e).
-  unfold e in he at 2. unfold neut in he.
-  assert (huniq := neutral_element_uniq G mul hG).
-  assert (h := iota_property e huniq he).
-  simpl in h. clear he huniq. apply proj2 in h.
-  apply h in ha. exact (proj2 ha).
+  destruct hG as (_, (_, (_, hinv))).
+  unfold group_inv in hinv.
+  exact (proj1 (proj2 (hinv a ha))).
 Qed.
 
-Theorem inv_uniq {G mul a}:
-  group G mul → a ∈ G → ∃!b, b ∈ G ∧
-    mul b a = neut G mul ∧ mul a b = neut G mul.
-Proof.
-  intros hG ha. set (e := neut G mul).
-  unfold ex_uniq. split.
-  * assert (hex := group_inv G mul hG a ha).
-    destruct hex as (b, (hb, hinv)).
-    exists b. split.
-    - exact (set_intro hb).
-    - split.
-      -- exact hb.
-      -- exact hinv.
-  * intros b b' ((hb, h), (hb', h')).
-    rewrite <- (neutr hG hb). fold e.
-    rewrite <- (proj2 h').
-    rewrite <- (assoc hG hb ha hb').
-    rewrite (proj1 h). unfold e.
-    rewrite (neutl hG hb').
-    reflexivity.
-Qed.
-
-Theorem invlr {G mul a}: group G mul → a ∈ G →
-  mul (inv G mul a) a = neut G mul ∧
-  mul a (inv G mul a) = neut G mul.
+Lemma invr {G mul e inv a}:
+  group G mul e inv → a ∈ G →
+  mul a (inv a) = e.
 Proof.
   intros hG ha.
-  set (b := inv G mul a). assert (hb := eq_refl b).
-  unfold b in hb at 2. unfold inv in hb.
-  assert (huniq := inv_uniq hG ha).
-  assert (h := iota_property b huniq hb).
-  simpl in h. clear hb huniq. apply proj2 in h.
-  exact h.
+  destruct hG as (_, (_, (_, hinv))).
+  unfold group_inv in hinv.
+  exact (proj2 (proj2 (hinv a ha))).
 Qed.
 
-Theorem invl {G mul a}: group G mul → a ∈ G →
-  mul (inv G mul a) a = neut G mul.
+Lemma inv_closed {G mul e inv a}:
+  group G mul e inv → a ∈ G → inv a ∈ G.
 Proof.
-  intros hG ha. exact (proj1 (invlr hG ha)).
+  intros hG ha. destruct hG as (_, (_, (_, hinv))).
+  unfold group_inv in hinv.
+  exact (proj1 (hinv a ha)).
 Qed.
 
-Theorem invr {G mul a}: group G mul → a ∈ G →
-  mul a (inv G mul a) = neut G mul.
-Proof.
-  intros hG ha. exact (proj2 (invlr hG ha)).
-Qed.
-
-Theorem group_from_explicit {G mul} e:
-  group_explicit G mul e → group G mul.
-Proof.
-  intros (hclosed, hassoc, hneut, hinv).
-  assert (he := proj1 hneut).
-  assert (hex_uniq: ∃!e, e ∈ G ∧
-    ∀a, a ∈ G → mul e a = a ∧ mul a e = a).
-  {
-    unfold ex_uniq. split.
-    * exists e. split.
-      - exact (set_intro he).
-      - exact hneut.
-    * intros x x' ((hx, h), (hx', h')).
-      rewrite <- (proj1 (h x' hx')).
-      rewrite (proj2 (h' x hx)).
-      reflexivity.
-  }
-  assert (heq := iota_property_rev e hex_uniq hneut).
-  simpl in heq. fold (neut G mul) in heq.
-  split.
-  * exact hclosed.
-  * exact hassoc.
-  * exists e. exact hneut.
-  * rewrite <- heq. exact hinv.
-Qed.
-
-Theorem subclass_neut {H G mul}:
-  group G mul → H ⊆ G → neut G mul ∈ H →
-  neut G mul = neut H mul.
-Proof.
-  set (e := neut G mul).
-  intros hG hHG he. apply ext. intro u.
-  split.
-  * intro hu. apply comp. split.
-    - exact (set_intro hu).
-    - intros e' he'. apply comp_elim in he'.
-      destruct he' as (he', h).
-      assert (h1 := neutl hG (hHG e' he')).
-      fold e in h1.
-      assert (h2 := proj2 (h e he)).
-      rewrite <- h1. rewrite h2.
-      exact hu.
-  * intro hu. apply comp_elim in hu.
-    apply hu. clear hu. apply comp. split.
-    - exact (set_intro he). 
-    - split.
-      -- exact he.
-      -- intros a ha. split.
-         --- exact (neutl hG (hHG a ha)).
-         --- exact (neutr hG (hHG a ha)).
-Qed.
-
-Theorem subgroup_test H G mul:
-  group G mul → H ⊆ G → H ≠ ∅ →
+Theorem subgroup_test {H G mul e inv}:
+  group G mul e inv → H ⊆ G → H ≠ ∅ →
   (∀a b, a ∈ H → b ∈ H → mul a b ∈ H) →
-  (∀a, a ∈ H → inv G mul a ∈ H) →
-  subgroup mul H G.
+  (∀a, a ∈ H → inv a ∈ H) →
+  subgroup H G mul e inv.
 Proof.
   intro hG. intros hHG hH. intros hclosed hinv.
-  pose (e := neut G mul).
   assert (he: e ∈ H). {
     apply non_empty_class in hH.
     destruct hH as (x, hx).
-    pose (y := inv G mul x).
+    pose (y := inv x).
     assert (hy := hinv x hx). fold y in hy.
     assert (hxy := hclosed x y hx hy).
     unfold y in hxy.
     rewrite (invr hG (hHG x hx)) in hxy.
-    fold e in hxy. exact hxy.
+    exact hxy.
   }
   unfold subgroup. split.
   * exact hHG.
-  * apply (group_from_explicit e). split.
+  * unfold group. split; [| split; [| split]].
     - exact hclosed.
     - intros a b c ha hb hc.
       apply hHG in ha. apply hHG in hb. apply hHG in hc.
@@ -211,15 +135,12 @@ Proof.
       -- intros a ha. apply hHG in ha. split.
          --- exact (neutl hG ha).
          --- exact (neutr hG ha).
-    - intros a ha. clear hclosed.
-      pose (b := inv G mul a).
-      assert (hab := invlr hG (hHG a ha)).
-      fold b in hab. fold e in hab.
-      exists b.
-      assert (hb := hinv a ha). fold b in hb.
-      split.
-      -- exact hb.
-      -- exact hab.
+    - unfold group_inv.
+      intros a ha. clear hclosed.
+      repeat split.
+      -- exact (hinv a ha).
+      -- exact (invl hG (hHG a ha)).
+      -- exact (invr hG (hHG a ha)).
 Qed.
 
 Definition Sym X := {f | mapping f X X ∧ bij X X f}.
@@ -236,11 +157,9 @@ Proof.
 Qed.
 
 Theorem symmetric_group_is_group X:
-  set X → group (Sym X) composition.
+  set X → group (Sym X) composition (id X) inv.
 Proof.
-  intro hsX.
-  apply (group_from_explicit (id X)).
-  split.
+  intro hsX. split; [| split; [| split]].
   * intros g f hg hf.
     apply comp_elim in hf as (hf, hbf).
     apply comp_elim in hg as (hg, hbg).
@@ -262,7 +181,7 @@ Proof.
       split.
       -- exact (id_is_left_neutral hf).
       -- exact (id_is_right_neutral hf).
-  * intros f hf. exists (axioms.inv f).
+  * intros f hf.
     apply comp_elim in hf as (hf, hbf).
     repeat split.
     - apply comp. split.
@@ -273,4 +192,144 @@ Proof.
          --- exact (inv_of_bij_is_bij hf hbf).
     - rewrite (bij_invl hf hbf). reflexivity.
     - rewrite (bij_invr hf hbf). reflexivity.
+Qed.
+
+Theorem left_mul_inv {G mul e inv a b c}:
+  group G mul e inv → a ∈ G → b ∈ G → c ∈ G →
+  mul a b = c → b = mul (inv a) c.
+Proof.
+  intros hG ha hb hc h.
+  assert (hai := inv_closed hG ha).
+  apply (f_equal (fun x => mul (inv a) x)) in h.
+  rewrite <- (assoc hG hai ha hb) in h.
+  rewrite (invl hG ha) in h. rewrite (neutl hG hb) in h.
+  exact h.
+Qed.
+
+Theorem prod_inv {G mul e inv a b}:
+  group G mul e inv → a ∈ G → b ∈ G →
+  inv (mul a b) = mul (inv b) (inv a).
+Proof.
+  intros hG ha hb.
+  assert (hab := closed hG ha hb).
+  assert (h := invr hG hab).
+  assert (hiab := inv_closed hG hab).
+  rewrite (assoc hG ha hb hiab) in h.
+  assert (he := neut_in_group hG).
+  assert (hbiab := closed hG hb hiab).
+  apply (left_mul_inv hG ha hbiab he) in h.
+  assert (hia := inv_closed hG ha).
+  rewrite (neutr hG hia) in h.
+  apply (left_mul_inv hG hb hiab hia) in h.
+  exact h.
+Qed.
+
+Theorem inv_inv {G mul e inv a}:
+  group G mul e inv → a ∈ G →
+  inv (inv a) = a.
+Proof.
+  intros hG ha.
+  assert (hia := inv_closed hG ha).
+  assert (hiia := inv_closed hG hia).
+  assert (h := invr hG hia).
+  apply (f_equal (fun x => mul a x)) in h.
+  assert (he := neut_in_group hG).
+  rewrite <- (assoc hG ha hia hiia) in h.
+  rewrite (invr hG ha) in h.
+  rewrite (neutl hG hiia) in h.
+  rewrite (neutr hG ha) in h.
+  exact h.
+Qed.
+
+Theorem inv_neut {G mul e inv}:
+  group G mul e inv → inv e = e.
+Proof.
+  intro hG.
+  assert (he := neut_in_group hG).
+  assert (hie := inv_closed hG he).
+  assert (h := invl hG he).
+  rewrite (neutr hG hie) in h.
+  exact h.
+Qed.
+
+Theorem hom_neut {f G mulG eG invG H mulH eH invH}:
+  group G mulG eG invG → group H mulH eH invH →
+  hom f G mulG H mulH → f eG = eH.
+Proof.
+  intros hG hH hf. unfold hom in hf.
+  destruct hf as (hfclosed, hf).
+  assert (he := neut_in_group hG).
+  assert (h := neutl hG he).
+  apply (f_equal f) in h.
+  rewrite (hf eG eG he he) in h. clear hf.
+  assert (hfe := hfclosed eG he).
+  apply (left_mul_inv hH hfe hfe hfe) in h.
+  rewrite (invl hH hfe) in h.
+  exact h.
+Qed.
+
+Theorem hom_inv {f g G mulG eG invG H mulH eH invH}:
+  group G mulG eG invG → group H mulH eH invH →
+  hom f G mulG H mulH → g ∈ G →
+  f (invG g) = invH (f g).
+Proof.
+  intros hG hH hf hg.
+  assert (h := invr hG hg).
+  apply (f_equal f) in h.
+  rewrite (hom_neut hG hH hf) in h.
+  assert (hig := inv_closed hG hg).
+  destruct hf as (hfclosed, hf).
+  rewrite (hf g _ hg hig) in h. clear hf.
+  assert (hfg := hfclosed g hg).
+  assert (hfig := hfclosed _ hig).
+  assert (he := neut_in_group hH).
+  apply (left_mul_inv hH hfg hfig he) in h.
+  clear he hg hig hfig hfclosed.
+  assert (hifg := inv_closed hH hfg).
+  rewrite (neutr hH hifg) in h.
+  exact h.
+Qed.
+
+Theorem neut_in_ker {G mulG eG invG H mulH eH invH f}:
+  group G mulG eG invG → group H mulH eH invH →
+  hom f G mulG H mulH → eG ∈ ker f G eH.
+Proof.
+  intros hG hH hf. apply comp.
+  assert (he := neut_in_group hG).
+  repeat split.
+  * exact (set_intro he).
+  * exact he.
+  * exact (hom_neut hG hH hf).
+Qed.
+
+Theorem ker_is_subgroup {G mulG eG invG H mulH eH invH f}:
+  group G mulG eG invG → group H mulH eH invH →
+  hom f G mulG H mulH →
+  subgroup (ker f G eH) G mulG eG invG.
+Proof.
+  intros hG hH hf. apply (subgroup_test hG).
+  * unfold subclass. intros g hg.
+    apply comp_elim in hg. exact (proj1 hg).
+  * intro h. apply subclass_from_eq in h.
+    assert (he := neut_in_ker hG hH hf).
+    apply h in he.
+    exact (empty_set_property he).
+  * intros a b ha hb.
+    apply comp_elim in ha as (ha, hfa).
+    apply comp_elim in hb as (hb, hfb).
+    apply comp. repeat split.
+    - assert (hab := closed hG ha hb).
+      exact (set_intro hab).
+    - exact (closed hG ha hb).
+    - apply proj2 in hf.
+      rewrite (hf a b ha hb). clear hf.
+      rewrite hfa. rewrite hfb.
+      exact (neutl hH (neut_in_group hH)).
+  * intros g hg. apply comp_elim in hg as (hg, hfg).
+    apply comp. assert (hig := inv_closed hG hg).
+    repeat split.
+    - exact (set_intro hig).
+    - exact hig.
+    - rewrite (hom_inv hG hH hf hg). rewrite hfg.
+      rewrite (inv_neut hH). reflexivity.
 Qed.
