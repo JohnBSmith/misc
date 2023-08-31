@@ -272,6 +272,24 @@ Proof.
   exact hy.
 Qed.
 
+Theorem graph_subclass_dom_times_rng {X Y f}:
+  mapping f X Y → f ⊆ X × rng f.
+Proof.
+  intro hf. unfold subclass. intros t ht.
+  apply comp. split.
+  * exact (set_intro ht).
+  * assert (hprod := proj_relation hf).
+    assert (h := hprod t ht). clear hprod.
+    apply prod_elim in h.
+    destruct h as (x, (y, (hx, (hy, hxy)))).
+    exists x. exists y. repeat split.
+    - exact hx.
+    - apply comp. split.
+      -- exact (set_intro hy).
+      -- exists x. rewrite hxy in ht. exact ht.
+    - exact hxy.
+Qed.
+
 Theorem empty_set_is_mapping Y:
   mapping ∅ ∅ Y.
 Proof.
@@ -472,6 +490,37 @@ Proof.
          reflexivity.
 Qed.
 
+Theorem img_dom_is_rng {X Y f}:
+  mapping f X Y → img f X = rng f.
+Proof.
+  intro hf. apply ext. intro y. split.
+  * intro hy. apply comp_elim in hy.
+    destruct hy as (x, (hx, hxy)).
+    apply comp. split.
+    - apply (pair_in_mapping hf) in hxy.
+      exact (set_intro (proj2 hxy)).
+    - exists x. exact hxy.
+  * intro hy. apply comp_elim in hy.
+    destruct hy as (x, hxy).
+    apply comp. split.
+    - apply (pair_in_mapping hf) in hxy.
+      exact (set_intro (proj2 hxy)).
+    - exists x. split.
+      -- apply (pair_in_mapping hf) in hxy.
+         exact (proj1 hxy).
+      -- exact hxy.
+Qed.
+
+Theorem rng_is_set_from_dom {X Y f}:
+  mapping f X Y → set X → set (rng f).
+Proof.
+  intros hf hsX.
+  assert (hXX := subclass_refl X).
+  assert (hsY := replacement X Y f X hf hXX hsX).
+  rewrite (img_dom_is_rng hf) in hsY.
+  exact hsY.
+Qed.
+
 Theorem from_cod_proper_class {X Y f}:
   mapping f X Y → sur Y f → ¬set Y → ¬set X.
 Proof.
@@ -553,6 +602,17 @@ Theorem graph_is_set_from_dom {X Y f}:
   mapping f X Y → set X → set f.
 Proof.
   intros hf hsX.
+  assert (hsrng := rng_is_set_from_dom hf hsX).
+  assert (hprod := prod_is_set hsX hsrng).
+  assert (hsub := graph_subclass_dom_times_rng hf).
+  exact (subset f _ hprod hsub).
+Qed.
+
+(* Alternative proof. *)
+Goal ∀X Y f,
+  mapping f X Y → set X → set f.
+Proof.
+  intros X Y f. intros hf hsX.
   pose (g := graph_from X (fun x => (x, app f x))).
   assert (hg: mapping g X (X × Y)). {
     apply graph_is_mapping. intros x hx.

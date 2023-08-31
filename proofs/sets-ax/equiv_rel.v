@@ -12,6 +12,61 @@ Definition equiv_class M (R: BinaryRel) a :=
 Definition quotient M (R: BinaryRel) :=
   {C | ∃x, x ∈ M ∧ C = equiv_class M R x}.
 
+Theorem equiv_impl_class_eq {M R a b}:
+  equiv_rel M R → a ∈ M → b ∈ M →
+  let C := equiv_class M R in
+    R a b → C a = C b.
+Proof.
+  intros hR ha hb. intro C. intro hab.
+  apply ext. intro x. split.
+  * intro h. apply comp_elim in h as (hx, hxa).
+    apply comp. repeat split.
+    - exact (set_intro hx).
+    - exact hx.
+    - destruct hR as (_, (_, htrans)).
+      unfold trans in htrans.
+      exact (htrans x a b hx ha hb hxa hab).
+  * intro h. apply comp_elim in h as (hx, hxb).
+    apply comp. repeat split.
+    - exact (set_intro hx).
+    - exact hx.
+    - destruct hR as (_, (hsym, htrans)).
+      unfold sym in hsym.
+      assert (hba := hsym a b ha hb hab).
+      clear hsym hab.
+      unfold trans in htrans.
+      exact (htrans x b a hx hb ha hxb hba).
+Qed.
+
+Theorem class_eq_impl_equiv {M R a b}:
+  equiv_rel M R → a ∈ M → b ∈ M →
+  let C := equiv_class M R in
+    C a = C b → R a b.
+Proof.
+  intros hR ha hb. intro C. intro hab.
+  assert (h: a ∈ C a). {
+    apply comp. repeat split.
+    - exact (set_intro ha).
+    - exact ha.
+    - destruct hR as (hrefl, _).
+      unfold refl in hrefl.
+      exact (hrefl a ha).
+  }
+  rewrite hab in h.
+  apply comp_elim in h.
+  exact (proj2 h).
+Qed.
+
+Theorem equiv_is_class_eq {M R a b}:
+  equiv_rel M R → a ∈ M → b ∈ M →
+  let C := equiv_class M R in
+    R a b ↔ C a = C b.
+Proof.
+  intros hR ha hb C. split.
+  * exact (equiv_impl_class_eq hR ha hb).
+  * exact (class_eq_impl_equiv hR ha hb).
+Qed.
+
 Theorem different_equiv_classes_disjoint M R a b:
   equiv_rel M R → a ∈ M → b ∈ M →
   let C := equiv_class M R in
