@@ -2,11 +2,8 @@
 Load "axioms.v".
 Load "logic.v".
 
-Definition Pair (x: set) (y: set) :=
-  PairSet (PairSet x x) (PairSet x y).
-
 Theorem singleton_eq_pair_set (x y: set):
-  PairSet x x = PairSet x y → x = y.
+  {x,} = {x, y} → x = y.
 Proof.
   intro h.
   assert (hy: y ∈ PairSet x y). {
@@ -19,7 +16,7 @@ Proof.
 Qed.
 
 Theorem pair_set_diff_singleton (x y: set):
-  x ≠ y → (PairSet x y) \ (PairSet x x) = (PairSet y y).
+  x ≠ y → {x, y} \ {x,} = {y,}.
 Proof.
   intro hxy. apply set_ext. intro u. split.
   * intro h. apply pair_set_axiom. left.
@@ -41,7 +38,7 @@ Proof.
 Qed.
 
 Theorem union_pair (x y: set):
-  ⋃(Pair x y) = PairSet x y.
+  ⋃(x, y) = {x, y}.
 Proof.
   apply set_ext. intro u. split.
   * intro h. apply pair_set_axiom.
@@ -66,7 +63,7 @@ Proof.
 Qed.
 
 Theorem intersection_pair (x y: set):
-  ⋂(Pair x y) = PairSet x x.
+  ⋂(x, y) = {x,}.
 Proof.
   apply set_ext. intro u. unfold Pair.
   rewrite intersection_pair_set.
@@ -83,7 +80,7 @@ Proof.
 Qed.
 
 Theorem union_singleton (x: set):
-  x = ⋃(PairSet x x).
+  x = ⋃{x,}.
 Proof.
   apply set_ext. intro u. split.
   * intro h. apply union_axiom.
@@ -98,14 +95,14 @@ Proof.
 Qed.
 
 Theorem pair_proj1 (x y: set):
-  x = ⋃⋂(Pair x y).
+  x = ⋃⋂(x, y).
 Proof.
   rewrite intersection_pair.
   exact (union_singleton x).
 Qed.
 
 Theorem pair_proj2 (x y: set):
-  x ≠ y → y = ⋃(⋃(Pair x y) \ ⋂(Pair x y)).
+  x ≠ y → y = ⋃(⋃(x, y) \ ⋂(x, y)).
 Proof.
   rewrite union_pair.
   rewrite intersection_pair.
@@ -129,7 +126,7 @@ Proof.
 Qed.
 
 Theorem pair_eq (x y x' y': set):
-  Pair x y = Pair x' y' ↔ x = x' ∧ y = y'.
+  (x, y) = (x', y') ↔ x = x' ∧ y = y'.
 Proof.
   split.
   * intro h. assert (hx := h).
@@ -146,7 +143,7 @@ Proof.
       -- rewrite hxy in h.
          exact (singleton_eq_pair_set y y' h).
       -- assert (h0 := h).
-         apply (f_equal (fun u => u \ (PairSet x x))) in h0.
+         apply (f_equal (fun u => u \ {x,})) in h0.
          rewrite (pair_set_diff_singleton x y hnxy) in h0.
          assert (hy: y ∈ PairSet y y). {
            apply pair_set_axiom. left. reflexivity.
@@ -165,16 +162,17 @@ Proof.
 Qed.
 
 Definition Prod (X Y: set) :=
-  {t ∈ 𝓟(𝓟(X ∪ Y)) | ∃x, ∃y, x ∈ X ∧ y ∈ Y ∧ t = Pair x y}.
+  {t ∈ 𝓟(𝓟(X ∪ Y)) | ∃x, ∃y, x ∈ X ∧ y ∈ Y ∧ t = (x, y)}.
+Notation "X × Y" := (Prod X Y) (at level 60): set_scope.
 
 Lemma prod_elim {X Y t: set}:
-  t ∈ Prod X Y → ∃x, ∃y, x ∈ X ∧ y ∈ Y ∧ t = Pair x y.
+  t ∈ X × Y → ∃x, ∃y, x ∈ X ∧ y ∈ Y ∧ t = (x, y).
 Proof.
   intro h. apply sep in h. exact (proj2 h).
 Qed.
 
 Lemma prod_intro {X Y: set} (x y t: set):
-  x ∈ X → y ∈ Y → t = Pair x y → t ∈ Prod X Y.
+  x ∈ X → y ∈ Y → t = (x, y) → t ∈ X × Y.
 Proof.
   intros hx hy ht.
   apply sep. split.
@@ -198,15 +196,16 @@ Proof.
 Qed.
 
 Lemma prod_intro_term {X Y x y: set}:
-  x ∈ X → y ∈ Y → Pair x y ∈ Prod X Y.
+  x ∈ X → y ∈ Y → (x, y) ∈ X × Y.
 Proof.
-  intros hx hy. apply (prod_intro x y (Pair x y)).
+  intros hx hy. apply (prod_intro x y (x, y)).
   * exact hx.
   * exact hy.
   * reflexivity.
 Qed.
 
-Theorem prod_left_empty (Y: set): Prod ∅ Y = ∅.
+Theorem prod_left_empty (Y: set):
+  ∅ × Y = ∅.
 Proof.
   apply set_ext. intro y. split.
   * intro h. apply prod_elim in h.
@@ -217,7 +216,8 @@ Proof.
     exfalso. exact h.
 Qed.
 
-Theorem prod_empty_right (X: set): Prod X ∅ = ∅.
+Theorem prod_empty_right (X: set):
+  X × ∅ = ∅.
 Proof.
   apply set_ext. intro x. split.
   * intro h. apply prod_elim in h.
@@ -229,7 +229,7 @@ Proof.
 Qed.
 
 Theorem pair_in_relation (X Y x y R: set):
-  (Pair x y) ∈ R → R ⊆ (Prod X Y) → x ∈ X ∧ y ∈ Y.
+  (x, y) ∈ R → R ⊆ X × Y → x ∈ X ∧ y ∈ Y.
 Proof.
   intro hxy. intro hR.
   unfold Subset in hR.

@@ -5,13 +5,18 @@ Require Export Coq.Logic.Classical.
 Parameter set: Type.
 Parameter EmptySet: set.
 Parameter In: set → set → Prop.
-Notation "x ∈ y" := (In x y) (at level 70): type_scope.
-Notation "x ∉ y" := (¬In x y) (at level 70): type_scope.
-Notation "∅" := EmptySet: type_scope.
+
+Declare Scope set_scope.
+Bind Scope set_scope with set.
+Open Scope set_scope.
+
+Notation "x ∈ y" := (In x y) (at level 70): set_scope.
+Notation "x ∉ y" := (¬In x y) (at level 70): set_scope.
+Notation "∅" := EmptySet: set_scope.
 
 Definition Subset (A B: set): Prop :=
   ∀x, x ∈ A → x ∈ B.
-Notation "A ⊆ B" := (Subset A B) (at level 70): type_scope.
+Notation "A ⊆ B" := (Subset A B) (at level 70): set_scope.
 
 Axiom set_ext: ∀A B, (∀x, x ∈ A ↔ x ∈ B) → A = B.
 Axiom empty_set_axiom: ∀x, x ∉ ∅.
@@ -26,11 +31,11 @@ Axiom sep: ∀X: set, ∀P: set → Prop,
 Parameter Union: set → set.
 Axiom union_axiom: ∀M x: set,
   x ∈ Union M ↔ ∃A, x ∈ A ∧ A ∈ M.
-Notation "⋃ M" := (Union M) (at level 50): type_scope.
+Notation "⋃ M" := (Union M) (at level 50): set_scope.
 
 Definition Intersection (M: set): set :=
   {x ∈ ⋃ M | ∀A, A ∈ M → x ∈ A}.
-Notation "⋂ M" := (Intersection M) (at level 50): type_scope.
+Notation "⋂ M" := (Intersection M) (at level 50): set_scope.
 
 Parameter PairSet: set → set → set.
 Axiom pair_set_axiom: ∀a x y: set,
@@ -40,17 +45,25 @@ Parameter 𝓟: set → set.
 Axiom power_set_axiom: ∀A M: set,
   A ∈ 𝓟 M ↔ A ⊆ M.
 
+Definition Pair (x: set) (y: set) :=
+  PairSet (PairSet x x) (PairSet x y).
+Notation "{ x , y }" := (PairSet x y)
+  (at level 0, x at level 69): set_scope.
+Notation "{ x ,}" := (PairSet x x)
+  (at level 0, x at level 69): set_scope.
+Notation "( x , y )" := (Pair x y) (at level 0): set_scope.
+
 Definition Intersection2 (A B: set) :=
   {x ∈ A | x ∈ B}.
-Notation "A ∩ B" := (Intersection2 A B) (at level 60): type_scope.
+Notation "A ∩ B" := (Intersection2 A B) (at level 60): set_scope.
 
 Definition Union2 (A B: set) :=
   ⋃(PairSet A B).
-Notation "A ∪ B" := (Union2 A B) (at level 60): type_scope.
+Notation "A ∪ B" := (Union2 A B) (at level 60): set_scope.
 
 Definition Difference (A B: set) :=
   {x ∈ A | x ∉ B}.
-Notation "A \ B" := (Difference A B) (at level 60): type_scope.
+Notation "A \ B" := (Difference A B) (at level 60): set_scope.
 
 Lemma intersection2_intro {A B x: set}:
   x ∈ A ∧ x ∈ B → x ∈ A ∩ B.

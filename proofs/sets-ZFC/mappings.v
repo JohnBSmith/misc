@@ -2,24 +2,24 @@
 Load "relations.v".
 
 Definition left_total (X Y f: set) :=
-  ∀x, x ∈ X → ∃y, y ∈ Y ∧ (Pair x y) ∈ f.
+  ∀x, x ∈ X → ∃y, y ∈ Y ∧ (x, y) ∈ f.
 
 Definition right_uniq (X Y f: set) :=
   ∀x y y', x ∈ X → y ∈ Y → y' ∈ Y →
-    (Pair x y) ∈ f → (Pair x y') ∈ f → y = y'.
+    (x, y) ∈ f → (x, y') ∈ f → y = y'.
 
 Definition Abb (X Y: set) :=
-  {f ∈ 𝓟 (Prod X Y) | left_total X Y f ∧ right_uniq X Y f}.
+  {f ∈ 𝓟 (X × Y) | left_total X Y f ∧ right_uniq X Y f}.
 
 Theorem proj_subset_prod {X Y f: set}:
-  f ∈ Abb X Y → f ⊆ (Prod X Y).
+  f ∈ Abb X Y → f ⊆ X × Y.
 Proof.
   intro h. apply sep in h. apply proj1 in h.
   apply power_set_axiom in h. exact h.
 Qed.
 
 Theorem proj_left_total {X Y f: set}:
-  f ∈ Abb X Y → ∀x, x ∈ X → ∃y, y ∈ Y ∧ (Pair x y) ∈ f.
+  f ∈ Abb X Y → ∀x, x ∈ X → ∃y, y ∈ Y ∧ (x, y) ∈ f.
 Proof.
   intro h. apply sep in h. apply proj2 in h.
   apply proj1 in h. exact h.
@@ -27,7 +27,7 @@ Qed.
 
 Theorem proj_right_uniq {X Y f: set}:
   f ∈ Abb X Y → ∀x y y', 
-    (Pair x y) ∈ f → (Pair x y') ∈ f → y = y'.
+    (x, y) ∈ f → (x, y') ∈ f → y = y'.
 Proof.
   intro hf. intros x y y'. intro hfy. intro hfy'.
   apply sep in hf. destruct hf as (hf, (hflt, hfru)).
@@ -40,12 +40,12 @@ Proof.
   exact (hfru x y y' hx hy hy' hfy hfy').
 Qed.
 
-Definition Preimg (X f B: set) :=
-  {x ∈ X | ∃y, y ∈ B ∧ Pair x y ∈ f}.
+Definition inv_img (X f B: set) :=
+  {x ∈ X | ∃y, y ∈ B ∧ (x, y) ∈ f}.
 
 Theorem preimg_intersection (X Y f A B: set):
   f ∈ Abb X Y → A ⊆ Y → B ⊆ Y →
-    Preimg X f (A ∩ B) = (Preimg X f A) ∩ (Preimg X f B).
+    inv_img X f (A ∩ B) = (inv_img X f A) ∩ (inv_img X f B).
 Proof.
   intros hf hAY hBY.
   apply set_ext. intro x. split.
@@ -78,10 +78,10 @@ Proof.
 Qed.
 
 Definition app (Y f x: set): set :=
-  ⋃{y ∈ Y | (Pair x y) ∈ f}.
+  ⋃{y ∈ Y | (x, y) ∈ f}.
 
 Theorem application_iff (X Y f x y: set):
-  x ∈ X → f ∈ Abb X Y → (y = app Y f x ↔ (Pair x y) ∈ f).
+  x ∈ X → f ∈ Abb X Y → (y = app Y f x ↔ (x, y) ∈ f).
 Proof.
   intro hx. intro hf.
   split.
@@ -140,7 +140,7 @@ Proof.
 Qed.
 
 Definition composition (X Y Z g f: set) :=
-  {t ∈ Prod X Z | ∃x z, t = (Pair x z) ∧ z = app Z g (app Y f x)}.
+  {t ∈ Prod X Z | ∃x z, t = (x, z) ∧ z = app Z g (app Y f x)}.
 
 Theorem composition_is_mapping (X Y Z g f: set):
   f ∈ Abb X Y → g ∈ Abb Y Z → (composition X Y Z g f) ∈ Abb X Z.

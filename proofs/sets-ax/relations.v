@@ -171,3 +171,45 @@ Proof.
   assert (hprod := prod_is_set hsY hsX).
   exact (subset _ _ hprod hR).
 Qed.
+
+Theorem dom_subclass_left {R X Y}:
+  R ⊆ X × Y → dom R ⊆ X.
+Proof.
+  intro h. unfold subclass. intros x hx.
+  apply comp_elim in hx.
+  destruct hx as (y, hxy).
+  apply h in hxy.
+  apply prod_elim_term in hxy.
+  exact (proj1 hxy).
+Qed.
+
+Theorem rng_subclass_right {R X Y}:
+  R ⊆ X × Y → rng R ⊆ Y.
+Proof.
+  intro h. unfold subclass. intros y hy.
+  apply comp_elim in hy.
+  destruct hy as (x, hxy).
+  apply h in hxy.
+  apply prod_elim_term in hxy.
+  exact (proj2 hxy).
+Qed.
+
+Theorem rel_img_subclass_cod {X Y R A}:
+  R ⊆ X × Y → A ⊆ X → img R A ⊆ Y.
+Proof.
+  intros hR hAX. unfold subclass. intros y hy.
+  apply comp_elim in hy.
+  destruct hy as (x, (hx, hxy)).
+  apply hR in hxy. apply prod_elim_term in hxy.
+  exact (proj2 hxy).
+Qed.
+
+Theorem rel_inv_img_subclass_src {X Y R B}:
+  R ⊆ X × Y → B ⊆ Y → inv_img R B ⊆ X.
+Proof.
+  intros hR hBY. unfold subclass. intros x hx.
+  apply comp_elim in hx.
+  destruct hx as (y, (hy, hxy)).
+  apply hR in hxy. apply prod_elim_term in hxy.
+  exact (proj1 hxy).
+Qed.

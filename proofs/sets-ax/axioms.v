@@ -87,7 +87,7 @@ Definition mapping f X Y :=
   f ⊆ X × Y ∧ left_total X f ∧ right_uniq f.
 
 Definition app f x :=
-  ⋃ {y | (x, y) ∈ f}.
+  ⋂{y | (x, y) ∈ f}.
 
 Definition dom f :=
   {x | ∃y, (x, y) ∈ f}.
@@ -1060,7 +1060,7 @@ Qed.
 (* ========================================= *)
 
 Definition ex_uniq (P: Class → Prop) :=
-  (∃x, set x ∧ P x) ∧ (∀x x', P x ∧ P x' → x = x').
+  (∃x, P x) ∧ (∀x x', P x ∧ P x' → x = x').
 Notation "∃ ! x , t" := (ex_uniq (fun x => t)) (at level 200).
 
 Definition iota P := ⋂{x | P x}.
@@ -1072,17 +1072,17 @@ Notation "'ι' x , t" := (iota (fun x => t)) (at level 200).
 *)
 
 Theorem iota_property_set {P} x:
-  ex_uniq P → x = ⋂{x | P x} → set x ∧ P x.
+  (∃!x, set x ∧ P x) → x = iota P → set x ∧ P x.
 Proof.
   intros hP h. unfold ex_uniq in hP.
   destruct hP as ((x0, (hsx0, hx0)), huniq).
-  assert (heq: x0 = ⋂{x | P x}). {
+  assert (heq: x0 = iota P). {
     apply ext. intro u. split.
     * intro hu. apply comp. split.
       - exact (set_intro hu).
       - intro x1. intro hx1.
-        apply comp_elim in hx1.
-        assert (heq := huniq x0 x1 (conj hx0 hx1)).
+        apply comp in hx1.
+        assert (heq := huniq x0 x1 (conj (conj hsx0 hx0) hx1)).
         rewrite heq in hu. exact hu.
     * intro hu. apply comp_elim in hu.
       apply (hu x0). apply comp. split.
@@ -1094,28 +1094,24 @@ Proof.
 Qed.
 
 Theorem iota_property {P} x:
-  ex_uniq P → x = ⋂{x | P x} → P x.
+  (∃!x, set x ∧ P x) → x = iota P → P x.
 Proof.
   intro hP. intro h.
   exact (proj2 (iota_property_set x hP h)).
 Qed.
 
 Theorem iota_property_rev {P} x:
-  ex_uniq P → P x → x = ⋂{x | P x}.
+  (∃!x, set x ∧ P x) → (set x ∧ P x) → x = iota P.
 Proof.
   intros hP hx. apply ext. intro u. split.
   * intro hu. apply comp. split.
     - exact (set_intro hu).
-    - intros x0 hx0. apply comp_elim in hx0.
+    - intros x0 hx0. apply comp in hx0.
       unfold ex_uniq in hP. apply proj2 in hP.
       rewrite (hP x x0 (conj hx hx0)) in hu.
       exact hu.
   * intro h. apply comp_elim in h.
-    apply h. apply comp.
-    unfold ex_uniq in hP.
-    destruct (proj1 hP) as (x0, (hsx0, hx0)).
-    assert (heq := proj2 hP x x0 (conj hx hx0)).
-    rewrite heq. exact (conj hsx0 hx0).
+    apply h. apply comp. exact hx.
 Qed.
 
 Theorem comp_rewriting {P Q: Class → Prop}:
@@ -1133,23 +1129,20 @@ Proof.
 Qed.
 
 Theorem ex_uniq_equi1 P:
-  (∃!x, P x) ↔ (∃x, set x ∧ ∀y, P y ↔ x = y).
+  (∃!x, P x) ↔ (∃x, ∀y, P y ↔ x = y).
 Proof.
   split.
   * intro h. unfold ex_uniq in h.
-    destruct h as ((x, (hsx, hx)), hxy).
-    exists x. split.
-    - exact hsx.
-    - intro y. split.
-      -- intro hy.
-         exact (hxy x y (conj hx hy)).
-      -- intro heq. rewrite heq in hx.
-         exact hx.
-  * intro h. destruct h as (u, (hsu, h)).
+    destruct h as ((x, hx), hxy).
+    exists x. intros y. split.
+    - intro hy.
+      exact (hxy x y (conj hx hy)).
+    - intro heq. rewrite heq in hx.
+      exact hx.
+  * intro h. destruct h as (u, h).
     unfold ex_uniq. split.
-    - exists u. split.
-      -- exact hsu.
-      -- apply (proj2 (h u)). reflexivity.
+    - exists u.
+      apply (proj2 (h u)). reflexivity.
     - intros x y (hx, hy).
       apply h in hx. rewrite <- hx.
       apply h in hy. rewrite <- hy.
@@ -1157,18 +1150,17 @@ Proof.
 Qed.
 
 Theorem ex_uniq_equi2 P:
-  (∃!x, P x) ↔ (∃x, set x ∧ P x ∧ ∀y, P y → x = y).
+  (∃!x, P x) ↔ (∃x, P x ∧ ∀y, P y → x = y).
 Proof.
   split.
   * intro h. unfold ex_uniq in h.
-    destruct h as ((x, (hsx, hx)), hxy).
-    exists x. repeat split.
-    - exact hsx.
+    destruct h as ((x, hx), hxy).
+    exists x. split.
     - exact hx.
     - intros y hy. exact (hxy x y (conj hx hy)).
-  * intro h. destruct h as (u, (hsu, (hu, h))).
+  * intro h. destruct h as (u, (hu, h)).
     unfold ex_uniq. split.
-    - exists u. exact (conj hsu hu).
+    - exists u. exact hu.
     - intros x y (hx, hy).
       apply h in hx. rewrite <- hx.
       apply h in hy. rewrite <- hy.
@@ -1178,21 +1170,20 @@ Qed.
 (* Similar to what is called Lambert's law in
 https://en.wikipedia.org/wiki/Karel_Lambert *)
 Theorem ex_uniq_iota_equi {P x}:
-  (∃!x, P x) ∧ x = iota P
-  ↔ (set x ∧ P x) ∧ ∀y, P y → x = y.
+  (∃!x, set x ∧ P x) ∧ x = iota P
+  ↔ (set x ∧ P x) ∧ ∀y, set y ∧ P y → x = y.
 Proof.
   split.
   * intros (h, hiota).
     assert (hx := iota_property_set x h hiota).
-    simpl in hx. destruct hx as (hsx, hx).
     split.
-    - exact (conj hsx hx).
+    - exact hx.
     - intros y hy. apply proj2 in h.
       exact (h x y (conj hx hy)).
-  * intros ((hsx, hx), h).
-    assert (hex_uniq: ∃!x, P x). {
+  * intros (hx, h).
+    assert (hex_uniq: ∃!x, set x ∧ P x). {
       split.
-      * exists x. exact (conj hsx hx).
+      * exists x. exact hx.
       * intros u y (hu, hy).
         apply h in hu. rewrite <- hu.
         apply h in hy. exact hy.
@@ -1203,8 +1194,8 @@ Proof.
 Qed.
 
 Theorem ex_uniq_iota_pred {P Q}:
-  (∃!x, P x) ∧ Q (iota P)
-  ↔ ∃x, set x ∧ Q x ∧ ∀y, P y ↔ x = y.
+  (∃!x, set x ∧ P x) ∧ Q (iota P)
+  ↔ ∃x, set x ∧ Q x ∧ ∀y, set y ∧ P y ↔ x = y.
 Proof.
   split.
   * intros (hP, hQ). set (x := iota P).
@@ -1217,15 +1208,12 @@ Proof.
     - apply proj2 in hP.
       intro y. split.
       -- intro hy.
-         exact (hP x y (conj hx hy)).
-      -- intro hxy. rewrite hxy in hx.
-         exact hx.
+         exact (hP x y (conj (conj hsx hx) hy)).
+      -- intro hxy. rewrite <- hxy.
+         exact (conj hsx hx).
   * intro h. destruct h as (x, (hsx, (hx, h))).
-    assert (hex_uniq: ∃!x, P x). {
-      apply ex_uniq_equi1. exists x.
-      split.
-      * exact hsx.
-      * exact h.
+    assert (hex_uniq: ∃!x, set x ∧ P x). {
+      apply ex_uniq_equi1. exists x. exact h.
     }
     assert (heq: x = iota P). {
       apply iota_property_rev.
@@ -1236,3 +1224,4 @@ Proof.
     - exact hex_uniq.
     - rewrite heq in hx. exact hx.
 Qed.
+

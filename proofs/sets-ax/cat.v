@@ -1,6 +1,7 @@
 
 Require Import Coq.Unicode.Utf8.
 Require Import axioms.
+Require Import relations.
 Require Import mappings.
 
 Definition cat_assoc Ob Hom compose := ∀A B C D f g h,
@@ -36,7 +37,7 @@ Definition functor_contra Fob F :=
 Definition Abb A B := {f | mapping f A B}.
 Definition Ens := (UnivCl, Abb, composition, id).
 Definition Fimg f :=
-  graph_from (Power (dom f)) (fun X => img f X).
+  graph_from (Power (dom f)) (fun A => img f A).
 
 Theorem category_of_sets:
   category Ens.
@@ -127,3 +128,4 @@ Proof.
     - rewrite (dom_is_dom _ _ _ hid). exact hA.
     - apply (replacement _ _ _ _ hid hAsub hsA).
 Qed.
+
