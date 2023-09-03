@@ -396,7 +396,7 @@ Proof.
     reflexivity.
 Qed.
 
-Theorem app_graph X f x:
+Theorem app_graph_from_set X f x:
   x ∈ X → set (f x) → app (graph_from X f) x = f x.
 Proof.
   intros hx hsfx. symmetry.
@@ -427,6 +427,32 @@ Proof.
       rewrite <- h11. rewrite <- h21.
       reflexivity.
   * exact h.
+Qed.
+
+Theorem app_graph {X Y f x}:
+  x ∈ X → mapping (graph_from X f) X Y →
+  app (graph_from X f) x = f x.
+Proof.
+  intros hx hf.
+  assert (h: f x ⊆ app (graph_from X f) x). {
+    unfold subclass. intros u hu.
+    apply comp. split.
+    * exact (set_intro hu).
+    * intros y hy. apply comp_elim in hy.
+      apply comp in hy.
+      destruct hy as (hsxy, (x0, (hx0, heq))).
+      apply pair_is_set_rev in hsxy as (hsx, hsy).
+      apply (pair_eq _ _ _ _ hsx hsy) in heq.
+      destruct heq as (hxx0, hyy0).
+      rewrite <- hxx0 in hyy0.
+      rewrite <- hyy0 in hu.
+      exact hu.
+  }
+  assert (hy := app_value_in_cod hf hx).
+  apply set_intro in hy.
+  apply app_graph_from_set.
+  * exact hx.
+  * exact (subset _ _ hy h).
 Qed.
 
 Theorem dom_subclass_inv_img_cod X Y f:
@@ -588,7 +614,7 @@ Theorem graph_proper_class {X Y f}:
   mapping f X Y → ¬set X → ¬set f.
 Proof.
   intro hf. intro hn.
-  pose (g := graph_from f (fun t => ⋃⋂t)).
+  pose (g := graph_from f projl).
   assert (hg: mapping g f X). {
     apply graph_is_mapping. clear g. intros t ht.
     assert (hxy := proj_relation hf t ht).
@@ -611,7 +637,7 @@ Proof.
     exists (x, y). apply (app_iff hg).
     * exact hxy.
     * assert (heq := pair_proj1 x y hsx hsy).
-      unfold g. rewrite (app_graph f).
+      unfold g. rewrite (app_graph_from_set f).
       - exact heq.
       - exact hxy.
       - rewrite <- heq. exact hsx.
@@ -647,7 +673,7 @@ Proof.
   }
   apply (mapping_ext hf hG). intros x hx.
   assert (hsy := set_intro (app_value_in_cod hf hx)).
-  assert (heq := app_graph X (fun x => app f x) x hx hsy).
+  assert (heq := app_graph_from_set X (fun x => app f x) x hx hsy).
   simpl in heq. fold G in heq. symmetry. exact heq.
 Qed.
 
@@ -677,7 +703,7 @@ Proof.
   assert (hsimg := replacement X _ g X hg hX hsX).
   assert (hgf: ∀x, x ∈ X → app g x = (x, app f x)). {
     intros x hx. unfold g.
-    rewrite (app_graph X _ x hx).
+    rewrite (app_graph_from_set X _ x hx).
     * reflexivity.
     * apply pair_is_set. split.
       - exact (set_intro hx).
@@ -862,7 +888,7 @@ Qed.
 Theorem id_app {X x}:
   x ∈ X → app (id X) x = x.
 Proof.
-  intro hx. unfold id. apply app_graph.
+  intro hx. unfold id. apply app_graph_from_set.
   * exact hx.
   * exact (set_intro hx).
 Qed.
@@ -1177,3 +1203,227 @@ Proof.
   apply comp. exact (conj (hsinv_img B hsB) I).
 Qed.
 
+Theorem pair_eq_from_graph {f x y x' y'}:
+  (x, y) ∈ f → (x, y) = (x', y') → x = x' ∧ y = y'.
+Proof.
+  intros hxy h.
+  apply set_intro in hxy.
+  apply pair_is_set_rev in hxy as (hx, hy).
+  apply (pair_eq x y x' y' hx hy) in h.
+  exact h.
+Qed.
+
+Theorem pair_eq_from_graph_rev {f x y x' y'}:
+  (y, x) ∈ f → (x, y) = (x', y') → x = x' ∧ y = y'.
+Proof.
+  intros hyx h.
+  apply set_intro in hyx.
+  apply pair_is_set_rev in hyx as (hy, hx).
+  apply (pair_eq x y x' y' hx hy) in h.
+  exact h.
+Qed.
+
+Theorem app_if {X Y f x y}:
+  mapping f X Y → (x, y) ∈ f → y = app f x.
+Proof.
+  intros hf hxy.
+  assert (h := pair_in_mapping hf hxy).
+  destruct h as (hx, _).
+  apply (app_iff hf hx) in hxy.
+  exact hxy.
+Qed.
+
+Theorem inv_from_inj {X Y f}:
+  mapping f X Y → inj X f →
+  mapping (inv f) (img f X) X.
+Proof.
+  intros hf hinj. unfold mapping.
+  split; [| split].
+  * unfold subclass. intros t ht.
+    apply comp_elim in ht.
+    destruct ht as (y, (x, (heq, hxy))).
+    assert (h := pair_in_mapping hf hxy).
+    destruct h as (hx, hy).
+    apply prod_intro.
+    exists y. exists x. split; [| split].
+    - apply comp. split.
+      -- exact (set_intro hy).
+      -- exists x. exact (conj hx hxy).
+    - exact hx.
+    - exact heq.
+  * unfold left_total. intros y hy.
+    apply comp_elim in hy.
+    destruct hy as (x, (hx, hxy)).
+    exists x. apply comp. split.
+    - apply (pair_in_mapping hf) in hxy as (_, hy).
+      apply pair_is_set. split.
+      -- exact (set_intro hy).
+      -- exact (set_intro hx).
+    - exists y. exists x. split.
+      -- reflexivity.
+      -- exact hxy.
+  * unfold right_uniq. intros y x1 x2 h1 h2.
+    apply comp_elim in h1.
+    apply comp_elim in h2.
+    destruct h1 as (y1, (x01, (h01, h1))).
+    destruct h2 as (y2, (x02, (h02, h2))).
+    symmetry in h01. symmetry in h02.
+    apply (pair_eq_from_graph_rev h1) in h01.
+    apply (pair_eq_from_graph_rev h2) in h02.
+    destruct h01 as (h11, h12).
+    destruct h02 as (h21, h22).
+    rewrite h12 in h1. clear h12.
+    rewrite h22 in h2. clear h22.
+    rewrite h11 in h1. clear h11.
+    rewrite h21 in h2. clear h21.
+    assert (hx1 := proj1 (pair_in_mapping hf h1)).
+    assert (hx2 := proj1 (pair_in_mapping hf h2)).
+    apply (app_iff hf hx1) in h1.
+    apply (app_iff hf hx2) in h2.
+    rewrite h1 in h2.
+    exact (hinj x1 x2 hx1 hx2 h2).
+Qed.
+
+Definition graph_from_cases X P f1 f2 :=
+  {t | ∃x, x ∈ X ∧
+   (P x ∧ t = (x, f1 x) ∨
+   ¬P x ∧ t = (x, f2 x))}.
+
+Theorem graph_cases_is_mapping X Y (P: Class → Prop) f1 f2:
+  (∀x, x ∈ X → P x → f1 x ∈ Y) →
+  (∀x, x ∈ X → ¬P x → f2 x ∈ Y) →
+  mapping (graph_from_cases X P f1 f2) X Y.
+Proof.
+  intros h1 h2.
+  set (f := graph_from_cases X P f1 f2).
+  unfold mapping. split; [| split].
+  * unfold subclass. intros t ht.
+    apply prod_intro.
+    apply comp_elim in ht.
+    destruct ht as (x, (hx, hlr)).
+    destruct hlr as [(hl, heq) | (hr, heq)].
+    - exists x. exists (f1 x). split; [| split].
+      -- exact hx.
+      -- exact (h1 x hx hl).
+      -- exact heq.
+    - exists x. exists (f2 x). split; [| split].
+      -- exact hx.
+      -- exact (h2 x hx hr).
+      -- exact heq.
+  * unfold left_total. intros x hx.
+    destruct (LEM (P x)) as [hl | hr].
+    - exists (f1 x).
+      assert (hy := h1 x hx hl).
+      assert (hsy := set_intro hy).
+      apply comp. split.
+      -- apply pair_is_set.
+         exact (conj (set_intro hx) hsy).
+      -- exists x. split.
+         --- exact hx.
+         --- left. split.
+             ---- exact hl.
+             ---- reflexivity.
+    - exists (f2 x).
+      assert (hy := h2 x hx hr).
+      assert (hsy := set_intro hy).
+      apply comp. split.
+      -- apply pair_is_set.
+         exact (conj (set_intro hx) hsy).
+      -- exists x. split.
+         --- exact hx.
+         --- right. split.
+             ---- exact hr.
+             ---- reflexivity.
+  * unfold right_uniq. intros x y1 y2 hy1 hy2.
+    assert (h := pair_is_set_rev x y1 (set_intro hy1)).
+    destruct h as (hsx, hsy1).
+    assert (h := pair_is_set_rev x y2 (set_intro hy2)).
+    destruct h as (_, hsy2).
+    apply comp_elim in hy1.
+    destruct hy1 as (x1, (hx1, hlr1)).
+    apply comp_elim in hy2.
+    destruct hy2 as (x2, (hx2, hlr2)).
+    destruct hlr1 as [(hl1, heq1) | (hr1, heq1)].
+    - destruct hlr2 as [(hl2, heq2) | (hr2, heq2)].
+      -- apply (pair_eq _ _ _ _ hsx hsy1) in heq1 as (h11, h12).
+         apply (pair_eq _ _ _ _ hsx hsy2) in heq2 as (h21, h22).
+         rewrite h12. clear h12.
+         rewrite h22. clear h22.
+         rewrite <- h11. rewrite <- h21.
+         reflexivity.
+      -- exfalso.
+         apply (pair_eq _ _ _ _ hsx hsy1) in heq1 as (h11, _).
+         apply (pair_eq _ _ _ _ hsx hsy2) in heq2 as (h21, _).
+         rewrite <- h11 in hl1. rewrite <- h21 in hr2.
+         exact (hr2 hl1).
+    - destruct hlr2 as [(hl2, heq2) | (hr2, heq2)].
+      -- exfalso.
+         apply (pair_eq _ _ _ _ hsx hsy1) in heq1 as (h11, _).
+         apply (pair_eq _ _ _ _ hsx hsy2) in heq2 as (h21, _).
+         rewrite <- h11 in hr1. rewrite <- h21 in hl2.
+         exact (hr1 hl2).
+      -- apply (pair_eq _ _ _ _ hsx hsy1) in heq1 as (h11, h12).
+         apply (pair_eq _ _ _ _ hsx hsy2) in heq2 as (h21, h22).
+         rewrite h12. clear h12.
+         rewrite h22. clear h22.
+         rewrite <- h11. rewrite <- h21.
+         reflexivity.
+Qed.
+
+Theorem invl_from_inj {X Y f}:
+  X ≠ ∅ → mapping f X Y → inj X f →
+  ∃g, mapping g Y X ∧ g ∘ f = id X.
+Proof.
+  intros hX hf hinj.
+  apply non_empty_class in hX.
+  destruct hX as (x0, hx0).
+  pose (g := graph_from_cases Y
+  (fun y => y ∈ img f X)
+    (fun y => app (inv f) y)
+    (fun y => x0)).
+  assert (hg: mapping g Y X). {
+    apply graph_cases_is_mapping.
+    * intros y hy h.
+      assert (hi := inv_from_inj hf hinj).
+      exact (app_value_in_cod hi h).
+    * intros _ _ _. exact hx0.
+  }
+  exists g. split.
+  * exact hg.
+  * assert (hgf := composition_is_mapping hf hg).
+    assert (hid := id_is_mapping X).
+    apply (mapping_ext hgf hid).
+    intros x hx.
+    rewrite (composition_eq hf hg hx).
+    rewrite (id_app hx). clear hid hgf.
+    symmetry.
+    assert (hy := app_value_in_cod hf hx).
+    set (y := app f x). fold y in hy.
+    assert (hy_img: y ∈ img f X). {
+      apply comp. split.
+      * exact (set_intro hy).
+      * exists x. split.
+        - exact hx.
+        - apply (app_iff hf hx). reflexivity.
+    }
+    assert (heq: x = app (inv f) y). {
+      assert (hi := inv_from_inj hf hinj).
+      apply (app_iff hi hy_img).
+      apply comp. split.
+      * apply pair_is_set. split.
+        - exact (set_intro hy).
+        - exact (set_intro hx).
+      * exists y. exists x. split.
+        - reflexivity.
+        - apply (app_iff hf hx). reflexivity.
+    }
+    apply (app_iff hg hy).
+    apply comp. split.
+    - apply pair_is_set.
+      exact (conj (set_intro hy) (set_intro hx)).
+    - exists y. split.
+      -- exact hy.
+      -- left. split.
+         --- exact hy_img.
+         --- rewrite <- heq. reflexivity.
+Qed.

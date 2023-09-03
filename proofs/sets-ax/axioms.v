@@ -65,8 +65,11 @@ Notation "A ∩ B" := (Intersection2 A B) (at level 40): class_scope.
 Notation "A ∪ B" := (Union2 A B) (at level 50): class_scope.
 Notation "A \ B" := (Difference A B) (at level 50): class_scope.
 Notation "A × B" := (Prod A B) (at level 40): class_scope.
-Notation "⋂ M" := (Intersection M) (at level 30): class_scope.
-Notation "⋃ M" := (Union M) (at level 30): class_scope.
+Notation "⋂ M" := (Intersection M) (at level 0, M at level 30): class_scope.
+Notation "⋃ M" := (Union M) (at level 0, M at level 30): class_scope.
+
+Definition projl t := ⋃⋂t.
+Definition projr t := ⋂⋃t ∪ (⋃⋃t \ ⋃⋂t).
 
 Definition img R X :=
   {y | ∃x, x ∈ X ∧ (x, y) ∈ R}.
@@ -896,11 +899,40 @@ Proof.
 Qed.
 
 Theorem pair_proj1 x y: set x → set y →
-  x = ⋃⋂(x, y).
+  x = projl (x, y).
 Proof.
-  intros hsx hsy.
+  intros hsx hsy. unfold projl.
   rewrite (intersection_pair x y hsx hsy).
   exact (union_sg x hsx).
+Qed.
+
+Theorem pair_proj2 x y: set x → set y →
+  y = projr (x, y).
+Proof.
+  intros hsx hsy. unfold projr.
+  rewrite (intersection_pair x y hsx hsy).
+  rewrite (union_pair x y hsx hsy).
+  rewrite (intersection_pair_set x y hsx hsy).
+  rewrite (union_pair_set x y hsx hsy).
+  rewrite <- (union_sg x hsx).
+  apply ext. intro u. split.
+  * intro hu. apply union2_intro.
+    destruct (LEM (u ∈ x)) as [hl | hr].
+    - left. apply intersection2_intro.
+      exact (conj hl hu).
+    - right. apply difference_intro. split.
+      -- apply union2_intro. right. exact hu.
+      -- exact hr.
+  * intro hu. apply union2_elim in hu.
+    destruct hu as [hl | hr].
+    - apply intersection2_elim in hl.
+      exact (proj2 hl).
+    - apply difference_elim in hr.
+      destruct hr as (hxy, hnx).
+      apply union2_elim in hxy.
+      destruct hxy as [hx | hy].
+      -- exfalso. exact (hnx hx).
+      -- exact hy.
 Qed.
 
 Lemma pair_set_eq_lemma {A B B': Prop}:
@@ -950,7 +982,7 @@ Proof.
     rewrite h in hset. apply pair_is_set_rev in hset.
     destruct hset as (hsx', hsy').
     assert (hx := h).
-    apply (f_equal (fun u => ⋃⋂u)) in hx.
+    apply (f_equal projl) in hx.
     rewrite <- (pair_proj1 x y hsx hsy) in hx.
     rewrite <- (pair_proj1 x' y' hsx' hsy') in hx.
     split.

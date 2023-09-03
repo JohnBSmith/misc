@@ -26,8 +26,8 @@ def loc(path, allow, specific = False):
             (_, ext) = os.path.splitext(file)
             ext = ext[1:]
             if ext in allow:
-                fname = os.path.join(root, file)
-                count = loc_file(fname)
+                fpath = os.path.join(root, file)
+                count = loc_file(fpath)
                 if ext in acc:
                     acc[ext] += count
                 else:

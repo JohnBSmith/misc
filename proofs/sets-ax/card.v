@@ -81,12 +81,12 @@ Proof.
       -- exact (sg_is_subset hx).
     - unfold inj. intros x x' hx hx'.
       assert (hfx: app f x = SgSet x). {
-        apply app_graph.
+        apply app_graph_from_set.
         * exact hx.
         * apply sg_is_set. exact (set_intro hx).
       }
       assert (hfx': app f x' = SgSet x'). {
-        apply app_graph.
+        apply app_graph_from_set.
         * exact hx'.
         * apply sg_is_set. exact (set_intro hx').
       }

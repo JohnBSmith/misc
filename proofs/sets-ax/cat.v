@@ -98,15 +98,15 @@ Proof.
     assert (hAsub := hA). apply comp_elim in hAsub.
     assert (hsA := set_intro hA).
     rewrite (composition_eq hFf hFg hA).
-    unfold Fimg at 1. rewrite app_graph.
+    unfold Fimg at 1. rewrite app_graph_from_set.
     3: { apply (replacement _ _ _ _ hgf hAsub hsA). }
     2: { rewrite (dom_is_dom _ _ _ hgf). exact hA. }
     assert (hAX := hA). apply comp_elim in hAX.
     rewrite (img_composition hf hg hAX).
-    unfold Fimg at 2. rewrite app_graph.
+    unfold Fimg at 2. rewrite app_graph_from_set.
     3: { apply (replacement _ _ _ _ hf hAX hsA). }
     2: { rewrite (dom_is_dom _ _ _ hf). exact hA. }
-    unfold Fimg. rewrite app_graph.
+    unfold Fimg. rewrite app_graph_from_set.
     - reflexivity.
     - rewrite (dom_is_dom _ _ _ hg). apply comp. split.
       -- apply (replacement _ _ _ _ hf hAX hsA).
@@ -121,11 +121,111 @@ Proof.
     apply (mapping_ext hFid hid'). intros A hA.
     assert (hAsub := hA). apply comp_elim in hAsub.
     assert (hsA := set_intro hA).
-    unfold Fimg. rewrite app_graph.
+    unfold Fimg. rewrite app_graph_from_set.
     - rewrite (id_img hAsub).
-      unfold id. rewrite (app_graph _ _ _ hA hsA).
+      unfold id. rewrite (app_graph_from_set _ _ _ hA hsA).
       reflexivity.
     - rewrite (dom_is_dom _ _ _ hid). exact hA.
     - apply (replacement _ _ _ _ hid hAsub hsA).
+Qed.
+
+Definition prod Ob compose Y1 Y2 Y proj1 proj2 :=
+  Y1 ∈ Ob ∧ Y2 ∈ Ob ∧ Y ∈ Ob ∧
+  mapping proj1 Y Y1 ∧ mapping proj2 Y Y2 ∧
+  ∀X f1 f2, X ∈ Ob → mapping f1 X Y1 → mapping f2 X Y2 →
+  ∃!f, mapping f X Y ∧
+    f1 = compose proj1 f ∧ f2 = compose proj2 f.
+
+Definition pr1 Y1 Y2 := graph_from (Y1 × Y2) projl.
+Definition pr2 Y1 Y2 := graph_from (Y1 × Y2) projr.
+
+Theorem prod_of_sets_is_prod Y1 Y2:
+  set Y1 → set Y2 →
+  prod UnivCl composition Y1 Y2
+    (Y1 × Y2) (pr1 Y1 Y2) (pr2 Y1 Y2).
+Proof.
+  intros hsY1 hsY2.
+  assert (hpr1: mapping (pr1 Y1 Y2) (Y1 × Y2) Y1). {
+    unfold pr1.
+    apply graph_is_mapping. intros t ht.
+    apply prod_elim in ht as (y1, (y2, (hy1, (hy2, ht)))).
+    rewrite ht. unfold pr1.
+    assert (hsy1 := set_intro hy1).
+    assert (hsy2 := set_intro hy2).
+    rewrite <- (pair_proj1 y1 y2 hsy1 hsy2).
+    exact hy1.
+  }
+  assert (hpr2: mapping (pr2 Y1 Y2) (Y1 × Y2) Y2). {
+    apply graph_is_mapping. intros t ht.
+    apply prod_elim in ht as (y1, (y2, (hy1, (hy2, ht)))).
+    rewrite ht. unfold pr2.
+    assert (hsy1 := set_intro hy1).
+    assert (hsy2 := set_intro hy2).
+    rewrite <- (pair_proj2 y1 y2 hsy1 hsy2).
+    exact hy2.
+  }
+  unfold prod.
+  split; [| split; [| split; [| split; [| split]]]].
+  * apply comp. exact (conj hsY1 I).
+  * apply comp. exact (conj hsY2 I).
+  * apply comp. exact (conj (prod_is_set hsY1 hsY2) I).
+  * exact hpr1.
+  * exact hpr2.
+  * intros X f1 f2 hX hf1 hf2.
+    pose (f := fun x => (app f1 x, app f2 x)).
+    pose (Gf := graph_from X f).
+    assert (hf: mapping Gf X (Y1 × Y2)). {
+      unfold Gf. apply graph_is_mapping.
+      intros x hx. unfold f.
+      apply prod_intro_term. split.
+      * apply (app_value_in_cod hf1 hx).
+      * apply (app_value_in_cod hf2 hx).
+    }
+    apply ex_uniq_equi2.
+    exists Gf. split.
+    - split; [| split].
+      -- exact hf.
+      -- assert (h := composition_is_mapping hf hpr1).
+         apply (mapping_ext hf1 h). intros x hx.
+         rewrite (composition_eq hf hpr1 hx).
+         assert (hy := app_value_in_cod hf hx).
+         unfold pr1. rewrite (app_graph hy hpr1).
+         unfold Gf.  rewrite (app_graph hx hf).
+         unfold f.
+         assert (hy1 := app_value_in_cod hf1 hx).
+         assert (hy2 := app_value_in_cod hf2 hx).
+         apply set_intro in hy1. apply set_intro in hy2.
+         rewrite <- (pair_proj1 _ _ hy1 hy2).
+         reflexivity.
+      -- assert (h := composition_is_mapping hf hpr2).
+         apply (mapping_ext hf2 h). intros x hx.
+         rewrite (composition_eq hf hpr2 hx).
+         assert (hy := app_value_in_cod hf hx).
+         unfold pr2. rewrite (app_graph hy hpr2).
+         unfold Gf.  rewrite (app_graph hx hf).
+         unfold f.
+         assert (hy1 := app_value_in_cod hf1 hx).
+         assert (hy2 := app_value_in_cod hf2 hx).
+         apply set_intro in hy1. apply set_intro in hy2.
+         rewrite <- (pair_proj2 _ _ hy1 hy2).
+         reflexivity.
+    - intros Gg (hg, (h1, h2)).
+      apply (mapping_ext hf hg). intros x hx.
+      unfold Gf. rewrite (app_graph hx hf).
+      unfold f. rewrite h1. rewrite h2.
+      rewrite (composition_eq hg hpr1 hx).
+      rewrite (composition_eq hg hpr2 hx).
+      set (y := app Gg x).
+      assert (hy := app_value_in_cod hg hx).
+      fold y in hy.
+      assert (h := prod_elim hy).
+      destruct h as (y1, (y2, (hy1, (hy2, heq)))).
+      unfold pr1. rewrite (app_graph hy hpr1).
+      unfold pr2. rewrite (app_graph hy hpr2).
+      apply set_intro in hy1. apply set_intro in hy2.
+      rewrite heq.
+      rewrite <- (pair_proj1 _ _ hy1 hy2).
+      rewrite <- (pair_proj2 _ _ hy1 hy2).
+      reflexivity.
 Qed.
 
