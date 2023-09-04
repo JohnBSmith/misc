@@ -21,5 +21,6 @@ build([
     "axioms",
     "basic",
     "relations",
-    "mappings"
+    "mappings",
+    "order_sc"
 ])

@@ -44,6 +44,21 @@ Proof.
     exact (proj_right_uniq hf x y1 y2 hy1 hy2).
 Qed.
 
+Theorem mapping_property_rev {X Y f}:
+  f ⊆ X × Y → (∀x, x ∈ X → ∃!y, (x, y) ∈ f)
+  → mapping f X Y.
+Proof.
+  intros hfsub hf. unfold mapping. split; [| split].
+  * exact hfsub.
+  * unfold left_total. intros x hx.
+    exact (proj1 (hf x hx)).
+  * unfold right_uniq. intros x y1 y2 h1 h2.
+    assert (h := h1). apply hfsub in h.
+    apply prod_elim_term in h as (hx, _).
+    assert (h := hf x hx). apply proj2 in h.
+    apply h. exact (conj h1 h2).
+Qed.
+
 Theorem app_iff {f X Y x y}:
   mapping f X Y → x ∈ X → ((x, y) ∈ f ↔ y = app f x).
 Proof.

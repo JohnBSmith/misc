@@ -287,6 +287,17 @@ Proof.
   apply comp_elim in hx. exact (hx A hA).
 Qed.
 
+Theorem difference_is_set {A B}:
+  set A → set (A \ B).
+Proof.
+  assert (h: A \ B ⊆ A). {
+    unfold subclass. intros x hx.
+    apply comp_elim in hx.
+    exact (proj1 hx).
+  }
+  intro hA. exact (subset _ A hA h).
+Qed.
+
 
 (* Basic lemmas and theorems *)
 (* ========================= *)
@@ -437,6 +448,13 @@ Proof.
     exact (conj (set_intro hx) (set_intro hy)).
   * exists x. exists y.
     exact (conj hx (conj hy (eq_refl (x, y)))).
+Qed.
+
+Theorem difference_subclass {A B}:
+  A \ B ⊆ A.
+Proof.
+  unfold subclass. intros x hx.
+  apply comp_elim in hx. exact (proj1 hx).
 Qed.
 
 
