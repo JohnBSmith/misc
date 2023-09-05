@@ -429,3 +429,276 @@ Proof.
     exact (rec_def_uniqueness hphi hf1 hf2 h1 h2).
 Qed.
 
+Theorem iota_property_mapping {X Y P} f:
+  set X → set Y → (∃!f, mapping f X Y ∧ P f) →
+  f = iota (fun f => mapping f X Y ∧ P f) →
+  mapping f X Y ∧ P f.
+Proof.
+  intros hsX hsY hP hf.
+  assert (h: ∃!f, set f ∧ mapping f X Y ∧ P f). {
+    destruct hP as (hex, huniq).
+    split.
+    * destruct hex as (f0, (hf0, h0)).
+      exists f0. split; [| split].
+      - apply proj_relation in hf0.
+        assert (hprod := prod_is_set hsX hsY).
+        exact (subset _ _ hprod hf0).
+      - exact hf0.
+      - exact h0.
+    * intros f1 f2 ((_, h1), (_, h2)).
+      exact (huniq f1 f2 (conj h1 h2)).
+  }
+  apply (iota_property f h) in hf.
+  exact hf.
+Qed.
+
+Definition gsucc := graph_from ℕ succ.
+
+Theorem succ_is_mapping:
+  mapping gsucc ℕ ℕ.
+Proof.
+  apply graph_is_mapping. intros n hn.
+  exact (succ_in_nat hn).
+Qed.
+
+Definition add a b :=
+  let f := iota (fun f =>
+    mapping f ℕ ℕ ∧ rec_eq a gsucc f)
+  in app f b.
+
+Theorem add_in_nat {a b}:
+  a ∈ ℕ → b ∈ ℕ → add a b ∈ ℕ.
+Proof.
+  intros ha hb.
+  assert (hnat := nat_is_set).
+  assert (hsucc := succ_is_mapping).
+  assert (h := recursion_theorem ℕ a gsucc hnat ha hsucc).
+  unfold add.
+  set (f := iota (fun f => mapping f ℕ ℕ ∧ rec_eq a gsucc f)).
+  assert (hf := eq_refl f).
+  apply (iota_property_mapping f hnat hnat h) in hf.
+  apply proj1 in hf.
+  exact (app_value_in_cod hf hb).
+Qed.
+
+Theorem add_zero {a}:
+  a ∈ ℕ → add a ∅ = a.
+Proof.
+  intro ha.
+  assert (hnat := nat_is_set).
+  assert (hsucc := succ_is_mapping).
+  assert (h := recursion_theorem ℕ a gsucc hnat ha hsucc).
+  unfold add.
+  set (f := iota (fun f => mapping f ℕ ℕ ∧ rec_eq a gsucc f)).
+  assert (hf := eq_refl f).
+  apply (iota_property_mapping f hnat hnat h) in hf.
+  unfold rec_eq in hf. apply proj2 in hf.
+  exact (proj1 hf).
+Qed.
+
+Theorem add_succ {a b}:
+  a ∈ ℕ → b ∈ ℕ → add a (succ b) = succ (add a b).
+Proof.
+  intros ha hb.
+  assert (hnat := nat_is_set).
+  assert (hsucc := succ_is_mapping).
+  assert (h := recursion_theorem ℕ a gsucc hnat ha hsucc).
+  unfold add.
+  set (f := iota (fun f => mapping f ℕ ℕ ∧ rec_eq a gsucc f)).
+  assert (hf := eq_refl f).
+  apply (iota_property_mapping f hnat hnat h) in hf.
+  unfold rec_eq in hf.
+  destruct hf as (hfm, (_, hf)).
+  assert (hf := hf b hb). rewrite hf.
+  assert (hy := app_value_in_cod hfm hb).
+  unfold gsucc.
+  rewrite (app_graph hy hsucc).
+  reflexivity.
+Qed.
+
+Theorem add_assoc {a b c}:
+  a ∈ ℕ → b ∈ ℕ → c ∈ ℕ →
+  add (add a b) c = add a (add b c).
+Proof.
+  intros ha hb. revert c.
+  apply induction. split.
+  * assert (hab := add_in_nat ha hb).
+    rewrite (add_zero hab).
+    rewrite (add_zero hb).
+    reflexivity.
+  * intros c hc ih.
+    assert (hab := add_in_nat ha hb).
+    assert (hbc := add_in_nat hb hc).
+    rewrite (add_succ hab hc).
+    rewrite ih.
+    rewrite (add_succ hb hc).
+    rewrite (add_succ ha hbc).
+    reflexivity.
+Qed.
+
+Theorem add_left_zero {a}:
+  a ∈ ℕ → add ∅ a = a.
+Proof.
+  revert a. apply induction.
+  assert (h0 := empty_set_in_nat).
+  split.
+  * exact (add_zero h0).
+  * intros n hn ih.
+    rewrite (add_succ h0 hn). rewrite ih.
+    reflexivity.
+Qed.
+
+Lemma add_comm_succ {a}:
+  a ∈ ℕ → add a (succ ∅) = add (succ ∅) a.
+Proof.
+  revert a. apply induction.
+  assert (h0 := empty_set_in_nat).
+  assert (h1 := succ_in_nat h0).
+  split.
+  * rewrite (add_succ h0 h0).
+    rewrite (add_zero h0).
+    rewrite (add_zero h1).
+    reflexivity.
+  * intros n hn ih.
+    rewrite (add_succ (succ_in_nat hn) h0).
+    rewrite (add_succ h1 hn).
+    rewrite <- ih.
+    rewrite (add_succ hn h0).
+    rewrite (add_zero (succ_in_nat hn)).
+    rewrite (add_zero hn). reflexivity.
+Qed.
+
+Theorem add_comm {a b}:
+  a ∈ ℕ → b ∈ ℕ → add a b = add b a.
+Proof.
+  intros ha hb.
+  revert b hb. apply induction. split.
+  * rewrite (add_zero ha).
+    rewrite (add_left_zero ha).
+    reflexivity.
+  * intros b hb ih.
+    rewrite (add_succ ha hb).
+    rewrite ih.
+    rewrite <- (add_succ hb ha).
+    assert (h0 := empty_set_in_nat).
+    assert (h1 := succ_in_nat h0).
+    assert (hadd1: succ a = add a (succ ∅)). {
+      rewrite (add_succ ha h0).
+      rewrite (add_zero ha). reflexivity.
+    }
+    rewrite hadd1.
+    rewrite (add_comm_succ ha).
+    rewrite <- (add_assoc hb h1 ha).
+    rewrite (add_succ hb h0).
+    rewrite (add_zero hb).
+    reflexivity.
+Qed.
+
+Definition gadd b :=
+  graph_from ℕ (fun a => add a b).
+
+Theorem gadd_is_mapping {b}:
+  b ∈ ℕ → mapping (gadd b) ℕ ℕ.
+Proof.
+  intro hb.
+  apply graph_is_mapping. intros a ha.
+  exact (add_in_nat ha hb).
+Qed.
+
+Definition mul a b :=
+  let f := iota (fun f =>
+    mapping f ℕ ℕ ∧ rec_eq ∅ (gadd a) f)
+  in app f b.
+
+Theorem mul_in_nat {a b}:
+  a ∈ ℕ → b ∈ ℕ → mul a b ∈ ℕ.
+Proof.
+  intros ha hb.
+  assert (hnat := nat_is_set).
+  assert (hadd := gadd_is_mapping ha).
+  assert (h0 := empty_set_in_nat).
+  assert (h := recursion_theorem ℕ ∅ (gadd a) hnat h0 hadd).
+  unfold mul.
+  set (f := iota (fun f => mapping f ℕ ℕ ∧ rec_eq ∅ (gadd a) f)).
+  assert (hf := eq_refl f).
+  apply (iota_property_mapping f hnat hnat h) in hf.
+  apply proj1 in hf.
+  exact (app_value_in_cod hf hb).
+Qed.
+
+Theorem mul_zero {a}:
+  a ∈ ℕ → mul a ∅ = ∅.
+Proof.
+  intros ha.
+  assert (hnat := nat_is_set).
+  assert (hadd := gadd_is_mapping ha).
+  assert (h0 := empty_set_in_nat).
+  assert (h := recursion_theorem ℕ ∅ (gadd a) hnat h0 hadd).
+  unfold mul.
+  set (f := iota (fun f => mapping f ℕ ℕ ∧ rec_eq ∅ (gadd a) f)).
+  assert (hf := eq_refl f).
+  apply (iota_property_mapping f hnat hnat h) in hf.
+  apply proj2 in hf. unfold rec_eq in hf.
+  exact (proj1 hf).
+Qed.
+
+Theorem mul_succ {a b}:
+  a ∈ ℕ → b ∈ ℕ → mul a (succ b) = add (mul a b) a.
+Proof.
+  intros ha hb.
+  assert (hnat := nat_is_set).
+  assert (hadd := gadd_is_mapping ha).
+  assert (h0 := empty_set_in_nat).
+  assert (h := recursion_theorem ℕ ∅ (gadd a) hnat h0 hadd).
+  unfold mul.
+  set (f := iota (fun f => mapping f ℕ ℕ ∧ rec_eq ∅ (gadd a) f)).
+  assert (hf := eq_refl f).
+  apply (iota_property_mapping f hnat hnat h) in hf.
+  unfold rec_eq in hf.
+  destruct hf as (hfm, (_, hf)).
+  rewrite (hf b hb).
+  assert (hy := app_value_in_cod hfm hb).
+  unfold gadd.
+  rewrite (app_graph hy hadd).
+  reflexivity.
+Qed.
+
+Theorem mul_distr_right {a b c}:
+  a ∈ ℕ → b ∈ ℕ → c ∈ ℕ →
+  mul (add a b) c = add (mul a c) (mul b c).
+Proof.
+  intros ha hb. revert c.
+  assert (hab := add_in_nat ha hb).
+  apply induction. split.
+  * rewrite (mul_zero hab).
+    rewrite (mul_zero ha).
+    rewrite (mul_zero hb).
+    rewrite (add_zero empty_set_in_nat).
+    reflexivity.
+  * intros c hc ih.
+    rewrite (mul_succ hab hc).
+    rewrite ih. clear ih.
+    assert (hac := mul_in_nat ha hc).
+    assert (hbc := mul_in_nat hb hc).
+    assert (hacbc := add_in_nat hac hbc).
+    rewrite <- (add_assoc hacbc ha hb).
+    rewrite (add_assoc hac hbc ha).
+    rewrite (add_comm hbc ha).
+    rewrite <- (add_assoc hac ha hbc).
+    assert (haca := add_in_nat hac ha).
+    rewrite (add_assoc haca hbc hb).
+    rewrite <- (mul_succ ha hc).
+    rewrite <- (mul_succ hb hc).
+    reflexivity.
+Qed.
+
+Theorem mul_zero_left {a}:
+  a ∈ ℕ → mul ∅ a = ∅.
+Proof.
+  assert (h0 := empty_set_in_nat).
+  revert a. apply induction. split.
+  * apply (mul_zero h0).
+  * intros a ha ih.
+    rewrite (mul_succ h0 ha).
+    rewrite ih. exact (add_zero h0).
+Qed.
