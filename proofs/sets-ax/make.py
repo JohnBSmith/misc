@@ -22,5 +22,7 @@ build([
     "basic",
     "relations",
     "mappings",
-    "order_sc"
+    "order_sc",
+    "card",
+    "nat"
 ])

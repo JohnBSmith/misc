@@ -192,7 +192,7 @@ Proof.
     reflexivity.
 Qed.
 
-Theorem succ_is_inj m n:
+Theorem succ_is_inj {m n}:
   m ∈ ℕ → n ∈ ℕ → succ m = succ n → m = n.
 Proof.
   intros hm hn h.
@@ -392,7 +392,7 @@ Proof.
                symmetry in h.
                apply (pair_eq_from_graph hy) in h.
                destruct h as (h, hyu).
-               apply (succ_is_inj n m hn hm) in h.
+               apply (succ_is_inj hn hm) in h.
                assert (hxu: x = u). {
                  apply heq. rewrite h.
                  exact hmu.
@@ -976,4 +976,36 @@ Proof.
     rewrite <- (mul_assoc ham han ha).
     rewrite <- (pow_succ ha hn).
     reflexivity.
+Qed.
+
+Theorem add_cancel_r {a b x}:
+  a ∈ ℕ → b ∈ ℕ → x ∈ ℕ →
+  add a x = add b x → a = b.
+Proof.
+  intros ha hb.
+  pose (P a b x := add a x = add b x → a = b).
+  fold (P a b x). revert x.
+  apply induction. split.
+  * unfold P. intro h.
+    rewrite (add_zero ha) in h.
+    rewrite (add_zero hb) in h.
+    exact h.
+  * intros x hx ih.
+    unfold P. intros h.
+    rewrite (add_succ ha hx) in h.
+    rewrite (add_succ hb hx) in h.
+    assert (hax := add_in_nat ha hx).
+    assert (hbx := add_in_nat hb hx).
+    apply (succ_is_inj hax hbx) in h.
+    unfold P in ih. exact (ih h).
+Qed.
+
+Theorem add_cancel_l {a b x}:
+  a ∈ ℕ → b ∈ ℕ → x ∈ ℕ →
+  add x a = add x b → a = b.
+Proof.
+  intros ha hb hx h.
+  rewrite (add_comm hx ha) in h.
+  rewrite (add_comm hx hb) in h.
+  exact (add_cancel_r ha hb hx h).
 Qed.

@@ -99,4 +99,3 @@ Proof.
     assert (hn := no_surjection_to_power_set X f hsX hfm).
     exact (hn h).
 Qed.
-
