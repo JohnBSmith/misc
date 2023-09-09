@@ -3,7 +3,6 @@ Require Import Coq.Unicode.Utf8.
 Require Import axioms.
 Require Import basic.
 Require Import mappings.
-Require Import order_sc.
 
 Theorem intersection_is_lower_bound {A M}:
   A ∈ M → ⋂M ⊆ A.
@@ -298,9 +297,9 @@ Proof.
         apply comp_elim in hnx. apply hnx.
         exact hA.
   }
-  assert (hGinf: is_inf G M). {
+  (* assert (hGinf: is_inf G M). {
     apply inf_is_intersection. reflexivity.
-  }
+  } *)
   assert (hGm: mapping G ℕ X). {
     assert (hGsub: G ⊆ ℕ × X). {
       apply comp_elim in hG as (hG, _).
@@ -345,10 +344,8 @@ Proof.
                destruct h as (h, _). symmetry in h.
                exact (empty_set_is_not_a_successor m h).
          }
-         unfold is_inf in hGinf.
-         destruct hGinf as (h, _).
-         unfold lower_bound in h.
-         apply h in h0. unfold G0 in h0.
+         apply intersection_is_lower_bound in h0.
+         unfold G0 in h0.
          exact (diff_sg_smaller hx1 h0).
     - intros n hn (x, (hnx, heq)).
       exists (app φ (n, x)). split.
@@ -401,10 +398,8 @@ Proof.
                rewrite <- hxu in hyu. symmetry in hyu.
                rewrite h in hneq. exact (hneq hyu).
          }
-         unfold is_inf in hGinf.
-         destruct hGinf as (h, _).
-         unfold lower_bound in h.
-         apply h in h0. unfold G0 in h0.
+         apply intersection_is_lower_bound in h0.
+         unfold G0 in h0.
          exact (diff_sg_smaller hy h0).
   }
   exists G. split.
@@ -1008,4 +1003,114 @@ Proof.
   rewrite (add_comm hx ha) in h.
   rewrite (add_comm hx hb) in h.
   exact (add_cancel_r ha hb hx h).
+Qed.
+
+Theorem nonzero_is_succ {n}:
+  n ∈ ℕ → n ≠ ∅ → ∃m, m ∈ ℕ ∧ n = succ m.
+Proof.
+  pose (E n := n ≠ ∅ → ∃ m : Class, m ∈ ℕ ∧ n = succ m).
+  fold (E n). revert n. apply induction.
+  split.
+  * unfold E. intro h. exfalso.
+    apply h. reflexivity.
+  * unfold E. clear E. intros n hn _.
+    intros _. exists n. split.
+    - exact hn.
+    - reflexivity.
+Qed.
+
+Local Definition F A :=
+  (SgSet ∅) ∪ {m | ∃n, n ∈ A ∧ m = succ n}.
+
+Theorem inductive_set_iff_pre_fixed_point:
+  InductiveSets = {A | F A ⊆ A}.
+Proof.
+  apply ext. intros A. split.
+  * intros hA. apply comp. split.
+    - exact (set_intro hA).
+    - apply comp_elim in hA.
+      destruct hA as (h0, hA).
+      unfold subclass. intros m hm.
+      unfold F in hm.
+      apply union2_elim in hm.
+      destruct hm as [hl | hr].
+      -- apply sg_elim in hl.
+         --- rewrite hl. exact h0.
+         --- exact empty_set_is_set.
+      -- apply comp_elim in hr.
+         destruct hr as (n, (hn, heq)).
+         rewrite heq. apply hA. exact hn.
+  * intro hA. apply comp in hA as (hsA, hA).
+    apply comp. split; [| split].
+    - exact hsA.
+    - unfold F in hA. apply hA.
+      apply union2_intro. left.
+      apply sg_intro.
+      -- exact empty_set_is_set.
+      -- reflexivity.
+    - intros n hn. apply hA. unfold F.
+      apply union2_intro. right.
+      apply comp. split.
+      -- exact (succ_is_set n (set_intro hn)).
+      -- exists n. split.
+         --- exact hn.
+         --- reflexivity.
+Qed.
+
+Theorem nat_is_least_pre_fixed_point:
+  ℕ = ⋂{A | F A ⊆ A}.
+Proof.
+  rewrite <- inductive_set_iff_pre_fixed_point.
+  unfold ℕ. reflexivity.
+Qed.
+
+Theorem nat_is_fixed_point:
+  F ℕ = ℕ.
+Proof.
+  apply ext. intros n. split.
+  * intro hn. unfold F in hn.
+    apply union2_elim in hn.
+    destruct hn as [hl | hr].
+    - apply (sg_elim _ _ empty_set_is_set) in hl.
+      rewrite hl. exact zero_in_nat.
+    - apply comp_elim in hr.
+      destruct hr as (m, (hm, heq)).
+      rewrite heq. exact (succ_in_nat hm).
+  * intros hn. apply comp. split.
+    - exact (set_intro hn).
+    - destruct (LEM (n = ∅)) as [hl | hr].
+      -- left. apply sg_intro.
+         --- exact empty_set_is_set.
+         --- exact hl.
+      -- right. apply comp.
+         assert (hs := nonzero_is_succ hn hr).
+         destruct hs as (m, (hm, heq)). split.
+         --- exact (set_intro hn).
+         --- exists (⋃(succ m)). split.
+             ---- rewrite (union_succ _ hm).
+                  exact hm.
+             ---- rewrite (union_succ _ hm).
+                  rewrite heq. reflexivity.
+Qed.
+
+Theorem nat_is_least_fixed_point:
+  ℕ = ⋂{A | F A = A}.
+Proof.
+  assert (hsub: {A | F A = A} ⊆ {A | F A ⊆ A}). {
+    unfold subclass at 1. intros A hA.
+    apply comp in hA as (hsA, hA).
+    apply comp. split.
+    * exact hsA.
+    * rewrite hA. exact (subclass_refl A).
+  }
+  assert (hnat: ℕ ∈ {A | F A = A}). {
+    apply comp. split.
+    * exact nat_is_set.
+    * exact nat_is_fixed_point.
+  }
+  apply intersection_anti_monotone in hsub.
+  rewrite <- nat_is_least_pre_fixed_point in hsub.
+  apply subclass_antisym. split.
+  * exact hsub.
+  * exact (intersection_is_lower_bound hnat).
 Qed.

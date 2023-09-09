@@ -330,3 +330,25 @@ Proof.
          --- apply union2_intro. right. exact hA.
          --- exact hx.
 Qed.
+
+Theorem intersection_anti_monotone {M N}:
+  M ⊆ N → ⋂N ⊆ ⋂M.
+Proof.
+  intros h. unfold subclass.
+  intros x hx. apply intersection_intro.
+  * exact (set_intro hx).
+  * intros A hA. apply h in hA. clear h.
+    apply comp_elim in hx. exact (hx A hA).
+Qed.
+
+Theorem union_monotone {M N}:
+  M ⊆ N → ⋃M ⊆ ⋃N.
+Proof.
+  intros h. unfold subclass.
+  intros x hx. apply union_intro.
+  apply comp_elim in hx.
+  destruct hx as (A, (hA, hx)).
+  exists A. split.
+  * exact (h A hA).
+  * exact hx.
+Qed.

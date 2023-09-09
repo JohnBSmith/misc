@@ -128,8 +128,27 @@ Proof.
       apply int_eq_sym in heq. exact heq.
 Qed.
 
-Theorem add_is_well_defined z1 z2: z1 ∈ ℤ → z2 ∈ ℤ →
-  ∃!c, ∃x y x' y', (x, y) ∈ z1 ∧ (x', y') ∈ z2 ∧
+Theorem int_class_subclass_prod a b:
+  int_class a b ⊆ ℕ × ℕ.
+Proof.
+  unfold subclass. intros t ht.
+  apply prod_intro.
+  apply comp_elim in ht.
+  destruct ht as (x, (y, (hx, (hy, (heq, _))))).
+  exists x. exists y. exact (conj hx (conj hy heq)).
+Qed.
+
+Theorem int_class_is_set x y:
+  set (int_class x y).
+Proof.
+  assert (hnat := nat.nat_is_set).
+  assert (hprod := prod_is_set hnat hnat).
+  assert (hsub := int_class_subclass_prod x y).
+  exact (subset _ _ hprod hsub).
+Qed.
+
+Theorem add_is_well_defined {z1 z2}: z1 ∈ ℤ → z2 ∈ ℤ →
+  ∃!c, set c ∧ ∃x y x' y', (x, y) ∈ z1 ∧ (x', y') ∈ z2 ∧
     c = int_class (nat.add x x') (nat.add y y').
 Proof.
   intros hz1 hz2. apply ex_uniq_equi2.
@@ -139,12 +158,14 @@ Proof.
   destruct hz2 as (x', (y', (hx', (hy', hxy')))).
   pose (c := int_class (nat.add x x') (nat.add y y')).
   exists c. split.
-  * exists x. exists y. exists x'. exists y'.
-    split; [| split].
-    - rewrite hxy. exact (int_class_refl hx hy).
-    - rewrite hxy'. exact (int_class_refl hx' hy').
-    - reflexivity.
-  * intros c2 (a, (b, (a', (b', (hab, (hab', heq)))))).
+  * split.
+    - exact (int_class_is_set _ _).
+    - exists x. exists y. exists x'. exists y'.
+      split; [| split].
+      -- rewrite hxy. exact (int_class_refl hx hy).
+      -- rewrite hxy'. exact (int_class_refl hx' hy').
+      -- reflexivity.
+  * intros c2 (_, (a, (b, (a', (b', (hab, (hab', heq))))))).
     rewrite hxy in hab. clear hxy.
     rewrite hxy' in hab'. clear hxy'.
     assert (h := nat_from_class hab).
@@ -177,4 +198,41 @@ Proof.
     rewrite <- (nat.add_assoc ha ha' hy).
     rewrite (nat.add_assoc haa' hy hy').
     reflexivity. 
+Qed.
+
+Theorem nat_pair_from_int {a x y}:
+  a ∈ ℤ → (x, y) ∈ a → x ∈ ℕ ∧ y ∈ ℕ.
+Proof.
+  intros ha hxy.
+  apply comp_elim in ha.
+  destruct ha as (x0, (y0, (hx0, (hy0, h)))).
+  rewrite h in hxy.
+  apply comp_elim in hxy.
+  destruct hxy as (x1, (y1, (hx1, (hy1, (heq, _))))).
+  symmetry in heq.
+  apply (pair_eq_from hx1 hy1) in heq as (hx, hy).
+  rewrite hx in hx1. rewrite hy in hy1.
+  exact (conj hx1 hy1).
+Qed.
+
+Theorem add_in_int {a b}:
+  a ∈ ℤ → b ∈ ℤ → add a b ∈ ℤ.
+Proof.
+  intros ha hb.
+  assert (hadd := add_is_well_defined ha hb).
+  assert (heq: add a b = add a b) by reflexivity.
+  assert (h := iota_property (add a b) hadd heq).
+  simpl in h.
+  destruct h as (x, (y, (x', (y', (hxy, (hxy', h)))))).
+  apply comp. split.
+  * rewrite h. exact (int_class_is_set _ _ ).
+  * exists (nat.add x x'). exists (nat.add y y').
+    split; [| split].
+    - apply (nat_pair_from_int ha) in hxy as (hx, _).
+      apply (nat_pair_from_int hb) in hxy' as (hx', _).
+      exact (nat.add_in_nat hx hx').
+    - apply (nat_pair_from_int ha) in hxy as (_, hy).
+      apply (nat_pair_from_int hb) in hxy' as (_, hy').
+      exact (nat.add_in_nat hy hy').
+    - rewrite h. reflexivity.
 Qed.
