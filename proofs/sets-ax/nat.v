@@ -297,9 +297,6 @@ Proof.
         apply comp_elim in hnx. apply hnx.
         exact hA.
   }
-  (* assert (hGinf: is_inf G M). {
-    apply inf_is_intersection. reflexivity.
-  } *)
   assert (hGm: mapping G ℕ X). {
     assert (hGsub: G ⊆ ℕ × X). {
       apply comp_elim in hG as (hG, _).
@@ -1067,7 +1064,7 @@ Qed.
 Theorem nat_is_fixed_point:
   F ℕ = ℕ.
 Proof.
-  apply ext. intros n. split.
+  apply ext. intro n. split.
   * intro hn. unfold F in hn.
     apply union2_elim in hn.
     destruct hn as [hl | hr].
@@ -1113,4 +1110,24 @@ Proof.
   apply subclass_antisym. split.
   * exact hsub.
   * exact (intersection_is_lower_bound hnat).
+Qed.
+
+Theorem F_is_monotone {A B}:
+  A ⊆ B → F A ⊆ F B.
+Proof.
+  intro hAB. unfold subclass. intros x hx.
+  apply comp_elim in hx. apply comp.
+  destruct hx as [hl | hr].
+  * split.
+    - exact (set_intro hl).
+    - left. exact hl.
+  * split.
+    - exact (set_intro hr).
+    - right. apply comp. split.
+      -- exact (set_intro hr).
+      -- apply comp_elim in hr.
+         destruct hr as (n, (hn, heq)).
+         exists n. split.
+         --- exact (hAB n hn).
+         --- exact heq.
 Qed.
