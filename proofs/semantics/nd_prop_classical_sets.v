@@ -275,27 +275,29 @@ Proof.
   exact (Empty_set_zero_right Formula Γ).
 Qed.
 
-Theorem union_add_assoc Γ Γ' B:
-  Γ ∪ Add Formula Γ' B = (Γ ∪ Γ') ∪ {B,}.
+Theorem union_sg_eq_union_add Γ A:
+  Add Formula Γ A = Γ ∪ {A,}.
 Proof.
   apply Extensionality_Ensembles. unfold Same_set.
   split.
-  * unfold Included. intros A hA.
-    apply Union_inv in hA. destruct hA as [hl | hr].
-    - apply Union_introl. apply Union_introl.
-      exact hl.
-    - apply Add_inv in hr. destruct hr as [hl | hr].
-      -- apply Union_introl. apply Union_intror.
-         exact hl.
-      -- apply Union_intror. apply Singleton_intro.
-         exact hr.
-  * unfold Included. intros A hA.
-    apply Union_inv in hA. destruct hA as [hl | hr].
-    - apply Union_inv in hl. destruct hl as [hl | hr].
-      -- apply Union_introl. exact hl.
-      -- apply Union_intror. apply Add_intro1. exact hr.
-    - apply Union_intror. apply Singleton_inv in hr.
-      subst B. apply Add_intro2.
+  * unfold Included. intros X hX.
+    apply Add_inv in hX. destruct hX as [hl | hr].
+    - apply Union_introl. exact hl.
+    - apply Union_intror. apply Singleton_intro.
+      exact hr.
+  * unfold Included. intros X hX.
+    apply Union_inv in hX. destruct hX as [hl | hr].
+    - apply Add_intro1. exact hl.
+    - apply Singleton_inv in hr. subst X.
+      apply Add_intro2.
+Qed.
+
+Theorem union_add_assoc Γ Γ' B:
+  Γ ∪ Add Formula Γ' B = (Γ ∪ Γ') ∪ {B,}.
+Proof.
+  rewrite union_sg_eq_union_add.
+  rewrite Union_associative.
+  reflexivity.
 Qed.
 
 Theorem weakening_general {Γ Γ' A}:

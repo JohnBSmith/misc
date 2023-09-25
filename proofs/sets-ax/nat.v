@@ -4,13 +4,6 @@ Require Import axioms.
 Require Import basic.
 Require Import mappings.
 
-Theorem intersection_is_lower_bound {A M}:
-  A ∈ M → ⋂M ⊆ A.
-Proof.
-  intro h. unfold subclass. intro x. intro hx.
-  apply comp_elim in hx. exact (hx A h).
-Qed.
-
 Theorem nat_is_set:
   set ℕ.
 Proof.

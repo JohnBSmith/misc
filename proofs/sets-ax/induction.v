@@ -184,13 +184,6 @@ Proof.
   rewrite h. unfold F. reflexivity.
 Qed.
 
-Local Theorem intersection_is_lower_bound {A M}:
-  A ∈ M → ⋂M ⊆ A.
-Proof.
-  intro h. unfold subclass. intro x. intro hx.
-  apply comp_elim in hx. exact (hx A h).
-Qed.
-
 Theorem img_is_monotone {f X Y A B}:
   mapping f X Y → B ⊆ X → A ⊆ B → img f A ⊆ img f B.
 Proof.
@@ -299,4 +292,84 @@ Proof.
     }
     apply intersection_is_lower_bound in hX.
     fold X in hX. exact hX.
+Qed.
+
+Definition closure U F1 F2 B :=
+  let F := extend B F1 F2 in
+    ⋂{A | A ⊆ U ∧ F A ⊆ A}.
+
+Theorem extensivity U F1 F2:
+  let cl := closure U F1 F2 in
+    ∀B, B ⊆ cl B.
+Proof.
+  intro cl. intro B.
+  unfold subclass. intros x hx.
+  unfold cl. unfold closure. clear cl.
+  apply comp.  split.
+  * exact (set_intro hx).
+  * intros A hA. apply comp_elim in hA as (_, hA).
+    apply hA. unfold extend.
+    apply union2_intro. left. exact hx.
+Qed.
+
+Theorem monotonicity U F1 F2:
+  let cl := closure U F1 F2 in
+    ∀B1 B2, B1 ⊆ B2 → cl B1 ⊆ cl B2.
+Proof.
+  intro cl. intros B1 B2. intro h.
+  unfold subclass. intros x hx.
+  unfold cl. unfold closure.
+  apply comp. split.
+  * exact (set_intro hx).
+  * intros A hA. apply comp in hA as (hsA, (hAU, hA)).
+    unfold cl in hx. unfold closure in hx.
+    apply comp_elim in hx. apply hx.
+    apply comp. split; [| split].
+    - exact hsA.
+    - exact hAU.
+    - unfold subclass. intros u hu.
+      apply hA. unfold extend in hu.
+      apply union2_elim in hu.
+      destruct hu as [hl | hr].
+      -- unfold extend. apply union2_intro.
+         left. exact (h u hl).
+      -- unfold extend. apply union2_intro.
+         right. exact hr.
+Qed.
+
+Theorem closedness {U F1 F2}:
+  set U → F1 ⊆ Abb U U → F2 ⊆ Abb (U × U) U →
+  let cl := closure U F1 F2 in
+    ∀B, B ⊆ U → cl (cl B) ⊆ cl B.
+Proof.
+  intros hsU hF1 hF2. intro cl. intros B hB.
+  set (F := extend B F1 F2).
+  assert (h: cl B ∈ {A | A ⊆ U ∧ F A ⊆ A}). {
+    unfold F. unfold cl. unfold closure.
+    rewrite <- (inductive_set_iff_pre_fixed_point hB hF1 hF2).
+    apply (intersection_inductive_sets hsU hB hF1 hF2).
+  }
+  unfold cl at 1. unfold closure.
+  apply intersection_is_lower_bound.
+  apply comp. split; [| split].
+  * exact (set_intro h).
+  * apply comp_elim in h as (h, _). exact h.
+  * unfold subclass. intros x hx.
+    unfold extend in hx. apply union2_elim in hx.
+    destruct hx as [hl | hr].
+    - exact hl.
+    - apply comp_elim in h as (_, h).
+      apply h. unfold F. unfold extend.
+      apply union2_intro. right. exact hr.
+Qed.
+
+Theorem idempotence U F1 F2:
+  set U → F1 ⊆ Abb U U → F2 ⊆ Abb (U × U) U →
+  let cl := closure U F1 F2 in
+    ∀B, B ⊆ U → cl (cl B) = cl B.
+Proof.
+  intros hsU hF1 hF2. intro cl. intros B hB.
+  apply subclass_antisym. split.
+  * exact (closedness hsU hF1 hF2 B hB).
+  * apply monotonicity. apply extensivity.
 Qed.
