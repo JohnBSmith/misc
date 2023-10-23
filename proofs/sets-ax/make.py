@@ -23,6 +23,7 @@ build([
     "relations",
     "mappings",
     "order_sc",
+    "closures",
     "card",
     "nat"
 ])
