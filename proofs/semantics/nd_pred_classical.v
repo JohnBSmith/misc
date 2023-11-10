@@ -1,8 +1,16 @@
 
+(* Sequent natural deduction for *)
+(* classical first-order predicate logic *)
+
+(* Shown is soundness under classical semantics. *)
+
 Require Import Coq.Unicode.Utf8.
 Require Import Coq.Sets.Constructive_sets.
 Require Import Coq.Arith.PeanoNat.
 Require Import Coq.Logic.FunctionalExtensionality.
+
+(* Syntax *)
+(* ====== *)
 
 Record Signature := {
   SigConst: Type;
@@ -11,6 +19,8 @@ Record Signature := {
 }.
 
 Parameter sig: Signature.
+
+(* The type of individual variables *)
 Definition Var := nat.
 
 Inductive Term: Type :=
@@ -28,6 +38,13 @@ Inductive Formula: Type :=
 | Impl: Formula →  Formula → Formula
 | EQ: Var → Formula → Formula
 | UQ: Var → Formula → Formula.
+
+(* Semantics *)
+(* ========= *)
+
+(* Double negation elimination, *)
+(* needed for classical semantics *)
+Axiom DNE: ∀A: Prop, ¬¬A → A.
 
 Record Structure := {
   Univ: Type;
@@ -50,6 +67,9 @@ Definition reassign M s (x: Var) (u: Univ M): Var → Univ M
   | true => u
   end.
 
+(* Interpretation (M, s) satisfies the formula A. *)
+(* M is a structure, *)
+(* s assigns values to free variables. *)
 Fixpoint sat M s (A: Formula) :=
   match A with
   | Atom P t => spred M P (eval M s t)
@@ -70,9 +90,11 @@ Notation "{ A ,}" := (Singleton _ A) (at level 0).
 Notation "A ∪ B" := (Union _ A B) (at level 50).
 Notation "A \ B" := (Setminus _ A B) (at level 50).
 
+(* Interpretation (M, s) satisfies the set Γ *)
 Definition sat_set M s Γ :=
   ∀X, X ∈ Γ → sat M s X.
 
+(* Logical consequence *)
 Definition valid Γ A :=
   ∀M s, sat_set M s Γ → sat M s A.
 
@@ -86,6 +108,10 @@ Notation "A ∨ B" := (Disj A B): formula_scope.
 Notation "A → B" := (Impl A B): formula_scope.
 Notation "Γ ⊨ A" := (valid Γ A) (at level 100).
 
+(* Utilities *)
+(* ========= *)
+
+(* The set of free variables of a term *)
 Fixpoint FV_term (t: Term): Ensemble Var :=
   match t with
   | Va x => {x,}
@@ -93,6 +119,7 @@ Fixpoint FV_term (t: Term): Ensemble Var :=
   | App f t => FV_term t
   end.
 
+(* The set of free variables of a formula *)
 Fixpoint FV (A: Formula): Ensemble Var :=
   match A with
   | Atom P t => FV_term t
@@ -106,32 +133,30 @@ Fixpoint FV (A: Formula): Ensemble Var :=
   | UQ x A => FV A \ {x,}
   end.
 
-Fixpoint Vars_term (t: Term): Ensemble Var :=
-  match t with
-  | Va x => {x,}
-  | Const _ => ∅
-  | App f t => Vars_term t  
-  end.
-
-Fixpoint Vars (A: Formula): Ensemble Var :=
+(* The set of bound variables of a formula *)
+Fixpoint BV (A: Formula): Ensemble Var :=
   match A with
-  | Atom P t => Vars_term t
+  | Atom P t => ∅
   | FF => ∅
   | TF => ∅
-  | Neg A => Vars A
-  | Conj A B => Vars A ∪ Vars B
-  | Disj A B => Vars A ∪ Vars B
-  | Impl A B => Vars A ∪ Vars B
-  | EQ x A => Vars A ∪ {x,}
-  | UQ x A => Vars A ∪ {x,}
+  | Neg A => BV A
+  | Conj A B => BV A ∪ BV B
+  | Disj A B => BV A ∪ BV B
+  | Impl A B => BV A ∪ BV B
+  | EQ x A => BV A ∪ {x,}
+  | UQ x A => BV A ∪ {x,}
   end.
 
+(* The free variables of term t are certainly *)
+(* not shadowed by any quantification in A *)
 Definition unshadowed t A :=
-  ∀x, x ∈ FV_term(t) → x ∉ Vars(A).
+  ∀x, x ∈ FV_term(t) → x ∉ BV(A).
 
 Definition not_in_FV x Γ :=
-  (∀X, X ∈ Γ → x ∉ FV X).
+  ∀X, X ∈ Γ → x ∉ FV X.
 
+(* Substitution of every occurrence of x *)
+(* in term t0 by term t *)
 Fixpoint subst_in_term t0 (x: Var) (t: Term) :=
   match t0 with
   | Va y => (if Nat.eqb x y then t else Va y)
@@ -139,6 +164,8 @@ Fixpoint subst_in_term t0 (x: Var) (t: Term) :=
   | App f t1 => App f (subst_in_term t1 x t)
   end.
 
+(* Substitution of every occurrence of x *)
+(* in formula A by term t *)
 Fixpoint subst A (x: Var) (t: Term) :=
   match A with
   | Atom P t0 => Atom P (subst_in_term t0 x t)
@@ -202,8 +229,8 @@ Proof.
     reflexivity.
 Qed.
 
-Theorem notin_union_vars {x A B}:
-  x ∉ Vars A ∪ Vars B → x ∉ Vars A ∧ x ∉ Vars B.
+Theorem notin_union_bv {x A B}:
+  x ∉ BV A ∪ BV B → x ∉ BV A ∧ x ∉ BV B.
 Proof.
   intro h. split.
   * intro hl. contradiction h.
@@ -216,19 +243,19 @@ Theorem unshadowed_neg t A:
   unshadowed t (¬ A) → unshadowed t A.
 Proof.
   unfold unshadowed. intro h.
-  simpl Vars in h. exact h.
+  simpl BV in h. exact h.
 Qed.
 
 Theorem unshadowed_conj t A B:
   unshadowed t (A ∧ B) → unshadowed t A ∧ unshadowed t B.
 Proof.
   unfold unshadowed. intro h.
-  simpl Vars in h. split.
+  simpl BV in h. split.
   * intros x hx. apply h in hx.
-    apply notin_union_vars in hx.
+    apply notin_union_bv in hx.
     exact (proj1 hx).
   * intros x hx. apply h in hx.
-    apply notin_union_vars in hx.
+    apply notin_union_bv in hx.
     exact (proj2 hx).
 Qed.
 
@@ -236,12 +263,12 @@ Theorem unshadowed_disj t A B:
   unshadowed t (A ∨ B) → unshadowed t A ∧ unshadowed t B.
 Proof.
   unfold unshadowed. intro h.
-  simpl Vars in h. split.
+  simpl BV in h. split.
   * intros x hx. apply h in hx.
-    apply notin_union_vars in hx.
+    apply notin_union_bv in hx.
     exact (proj1 hx).
   * intros x hx. apply h in hx.
-    apply notin_union_vars in hx.
+    apply notin_union_bv in hx.
     exact (proj2 hx).
 Qed.
 
@@ -249,12 +276,12 @@ Theorem unshadowed_impl t A B:
   unshadowed t (A → B) → unshadowed t A ∧ unshadowed t B.
 Proof.
   unfold unshadowed. intro h.
-  simpl Vars in h. split.
+  simpl BV in h. split.
   * intros x hx. apply h in hx.
-    apply notin_union_vars in hx.
+    apply notin_union_bv in hx.
     exact (proj1 hx).
   * intros x hx. apply h in hx.
-    apply notin_union_vars in hx.
+    apply notin_union_bv in hx.
     exact (proj2 hx).
 Qed.
 
@@ -262,7 +289,7 @@ Theorem unshadowed_eq t y A:
   unshadowed t (EQ y A) → y ∉ FV_term(t) ∧ unshadowed t A.
 Proof.
   intro h. unfold unshadowed in h.
-  simpl Vars in h.
+  simpl BV in h.
   split.
   * intro hy. apply h in hy. contradiction hy.
     apply Union_intror. apply Singleton_intro.
@@ -277,7 +304,7 @@ Theorem unshadowed_uq t y A:
   unshadowed t (UQ y A) → y ∉ FV_term(t) ∧ unshadowed t A.
 Proof.
   intro h. unfold unshadowed in h.
-  simpl Vars in h.
+  simpl BV in h.
   split.
   * intro hy. apply h in hy. contradiction hy.
     apply Union_intror. apply Singleton_intro.
@@ -324,7 +351,7 @@ Proof.
     rewrite subst_in_term_eq. reflexivity.
   * intros s. simpl sat. reflexivity.
   * intros s. simpl sat. reflexivity.
-  * intro s. simpl sat.  simpl Vars in ht.
+  * intro s. simpl sat.  simpl BV in ht.
     apply unshadowed_neg in ht.
     rewrite ih. reflexivity. exact ht.
   * intro s. simpl sat.
@@ -556,7 +583,11 @@ Proof.
     apply (reassign_non_free hx) in h. exact h.
 Qed.
 
-Theorem uq_elim Γ A x t: unshadowed t A →
+(* Soundness of each inference rule *)
+(* ================================ *)
+
+Theorem uq_elim_is_sound Γ A x t:
+  unshadowed t A →
   (Γ ⊨ UQ x A) → (Γ ⊨ (subst A x t)).
 Proof.
   intros ht h. unfold valid. intros M s hM.
@@ -568,7 +599,8 @@ Proof.
   * exact ht.
 Qed.
 
-Theorem eq_intro Γ A x t: unshadowed t A →
+Theorem eq_intro_is_sound Γ A x t:
+  unshadowed t A →
   (Γ ⊨ (subst A x t)) → (Γ ⊨ EQ x A).
 Proof.
   intros ht h. unfold valid. intros M s hM.
@@ -579,17 +611,18 @@ Proof.
   * exact (h M s hM).
 Qed.
 
-Theorem uq_intro Γ A x:
-  (Γ ⊨ A) ∧ not_in_FV x Γ → (Γ ⊨ UQ x A).
+Theorem uq_intro_is_sound Γ A x:
+  not_in_FV x Γ → (Γ ⊨ A) → (Γ ⊨ UQ x A).
 Proof.
-  intros (h, hx). unfold valid. intros M s hM.
+  intros hx h. unfold valid. intros M s hM.
   simpl sat. intro u. unfold valid in h.
   apply h.
   assert (hequi := @reassign_non_free_set M s x u Γ hx).
   apply hequi. exact hM.
 Qed.
 
-Theorem eq_elim Γ A B x: not_in_FV x Γ → x ∉ FV B →
+Theorem eq_elim_is_sound Γ A B x:
+  not_in_FV x Γ → x ∉ FV B →
   (Γ ⊨ EQ x A) → (Γ ∪ {A,} ⊨ B) → (Γ ⊨ B).
 Proof.
   intros hx hxB. intros h hB.
@@ -608,4 +641,215 @@ Proof.
     apply hM. exact hl.
   * apply Singleton_inv in hr. rewrite <- hr.
     exact hu.
+Qed.
+
+Theorem basic_seq_intro_is_sound A:
+  {A,} ⊨ A.
+Proof.
+  unfold valid. intros M s hM.
+  unfold sat_set in hM. apply hM.
+  apply Singleton_intro. reflexivity.
+Qed.
+
+Theorem weakening_is_sound Γ A B:
+  (Γ ⊨ B) → (Γ ∪ {A,} ⊨ B).
+Proof.
+  intro h. unfold valid. intros M s hM.
+  unfold valid in h. apply h.
+  unfold sat_set. intros X hX.
+  unfold sat_set in hM. apply hM.
+  apply Union_introl. exact hX.
+Qed.
+
+Theorem conj_intro_is_sound Γ A B:
+  (Γ ⊨ A) → (Γ ⊨ B) → (Γ ⊨ A ∧ B).
+Proof.
+  intros hA hB. unfold valid. intros M s. intros hM.
+  unfold valid in hA. unfold valid in hB.
+  assert (hA := hA M s hM).
+  assert (hB := hB M s hM).
+  simpl sat. exact (conj hA hB).
+Qed.
+
+Theorem conj_eliml_is_sound Γ A B:
+  (Γ ⊨ A ∧ B) → (Γ ⊨ A).
+Proof.
+  intro h. unfold valid. intros M s. intros hM.
+  unfold valid in h. apply h in hM.
+  simpl sat in hM. exact (proj1 hM).
+Qed.
+
+Theorem conj_elimr_is_sound Γ A B:
+  (Γ ⊨ A ∧ B) → (Γ ⊨ B).
+Proof.
+  intro h. unfold valid. intros M s. intros hM.
+  unfold valid in h. apply h in hM.
+  simpl sat in hM. exact (proj2 hM).
+Qed.
+
+Theorem disj_introl_is_sound Γ A B:
+  (Γ ⊨ A) → (Γ ⊨ A ∨ B).
+Proof.
+  intro h. unfold valid. intros M s. intro hM.
+  simpl sat. left. unfold valid in h.
+  apply h. exact hM.
+Qed.
+
+Theorem disj_intror_is_sound Γ A B:
+  (Γ ⊨ B) → (Γ ⊨ A ∨ B).
+Proof.
+  intro h. unfold valid. intros M s. intro hM.
+  simpl sat. right. unfold valid in h.
+  apply h. exact hM.
+Qed.
+
+Theorem sat_union {M s Γ A}:
+  sat_set M s Γ → sat M s A → sat_set M s (Γ ∪ {A,}).
+Proof.
+  intros h1 h2. unfold sat_set. intros X hX.
+  apply Union_inv in hX. destruct hX as [hl | hr].
+  * unfold sat_set in h1. apply h1. exact hl.
+  * apply Singleton_inv in hr. rewrite <- hr. exact h2.
+Qed.
+
+Theorem disj_elim_is_sound Γ A B C:
+  (Γ ⊨ A ∨ B) → (Γ ∪ {A,} ⊨ C) → (Γ ∪ {B,} ⊨ C) → (Γ ⊨ C).
+Proof.
+  intros hAB hA hB. unfold valid. intros M s. intro hM.
+  unfold valid in hAB. assert (h := hAB M s hM).
+  simpl sat in h. destruct h as [hl | hr].
+  * unfold valid in hA. apply hA.
+    exact (sat_union hM hl).
+  * unfold valid in hB. apply hB.
+    exact (sat_union hM hr).
+Qed.
+
+Theorem impl_intro_is_sound Γ A B:
+  (Γ ∪ {A,} ⊨ B) → (Γ ⊨ A → B).
+Proof.
+  intro h. unfold valid. intros M s hM.
+  simpl sat. intro hMA.
+  unfold valid in h. apply h. clear h.
+  exact (sat_union hM hMA).
+Qed.
+
+Theorem impl_elim_is_sound Γ A B:
+  (Γ ⊨ A → B) → (Γ ⊨ A) → (Γ ⊨ B).
+Proof.
+  intros hAB hA. unfold valid. intros M s hM.
+  unfold valid in hAB.
+  assert (hAB := hAB M s hM). simpl sat in hAB.
+  apply hAB. clear hAB. unfold valid in hA.
+  apply hA. exact hM.
+Qed.
+
+Theorem neg_intro_is_sound Γ A:
+  (Γ ∪ {A,} ⊨ ⊥) → (Γ ⊨ ¬A).
+Proof.
+  intro h. unfold valid. intros M s hM.
+  simpl sat. intro hA. unfold valid in h.
+  simpl sat in h. apply (h M s).
+  exact (sat_union hM hA).
+Qed.
+
+Theorem neg_elim_is_sound Γ A:
+  (Γ ⊨ ¬A) → (Γ ⊨ A) → (Γ ⊨ ⊥).
+Proof.
+  intros hnA hA. unfold valid. intros M s hM.
+  simpl sat. unfold valid in hnA.
+  assert (hnA := hnA M s hM). simpl sat in hnA.
+  unfold valid in hA.
+  assert (hA := hA M s hM).
+  exact (hnA hA).
+Qed.
+
+Theorem dne_is_sound Γ A:
+  (Γ ⊨ ¬¬A) → (Γ ⊨ A).
+Proof.
+  intro h. unfold valid. intros M s. intro hM.
+  apply DNE. unfold valid in h. simpl sat in h.
+  apply (h M s). exact hM.
+Qed.
+
+(* Soundness of the full calculus *)
+(* ============================== *)
+
+(* The type of proofs *)
+Inductive Prf: Ensemble Formula → Formula → Prop :=
+| basic_seq_intro: ∀A, Prf {A,} A
+| weakening: ∀Γ A B,
+    Prf Γ B → Prf (Γ ∪ {A,}) B
+| conj_intro: ∀Γ A B,
+    Prf Γ A → Prf Γ B → Prf Γ (A ∧ B)
+| conj_eliml: ∀Γ A B,
+    Prf Γ (A ∧ B) → Prf Γ A
+| conj_elimr: ∀Γ A B,
+    Prf Γ (A ∧ B) → Prf Γ B
+| disj_introl: ∀Γ A B,
+    Prf Γ A → Prf Γ (A ∨ B)
+| disj_intror: ∀Γ A B,
+    Prf Γ B → Prf Γ (A ∨ B)
+| disj_elim: ∀Γ A B C,
+    Prf Γ (A ∨ B) → Prf (Γ ∪ {A,}) C → Prf (Γ ∪ {B,}) C →
+    Prf Γ C
+| impl_intro: ∀Γ A B,
+    Prf (Γ ∪ {A,}) B → Prf Γ (A → B)
+| impl_elim: ∀Γ A B,
+    Prf Γ (A → B) → Prf Γ A → Prf Γ B
+| neg_intro: ∀Γ A,
+    Prf (Γ ∪ {A,}) ⊥ → Prf Γ (¬A)
+| neg_elim: ∀Γ A,
+    Prf Γ (¬A) → Prf Γ A → Prf Γ ⊥
+| dne: ∀Γ A,
+    Prf Γ (¬¬A) → Prf Γ A
+| uq_intro: ∀Γ A x, not_in_FV x Γ →
+    Prf Γ A → Prf Γ (UQ x A)
+| uq_elim: ∀Γ A x t, unshadowed t A →
+    Prf Γ (UQ x A) → Prf Γ (subst A x t)
+| eq_intro: ∀Γ A x t, unshadowed t A →
+    Prf Γ (subst A x t) → Prf Γ (EQ x A)
+| eq_elim: ∀Γ A B x, not_in_FV x Γ → x ∉ FV B →
+    Prf Γ (EQ x A) → Prf (Γ ∪ {A,}) B → Prf Γ B.
+
+Notation "Γ ⊢ A" := (Prf Γ A) (at level 100).
+
+Theorem soundness_of_natural_deduction:
+  ∀Γ A, (Γ ⊢ A) → (Γ ⊨ A).
+Proof.
+  intros Γ A. intro h.
+  induction h as [A
+  | Γ A B _ ih
+  | Γ A B _ ihA _ ihB
+  | Γ A B _ ih
+  | Γ A B _ ih
+  | Γ A B _ ih
+  | Γ A B _ ih
+  | Γ A B C _ ih _ ihA _ ihB
+  | Γ A B _ ih
+  | Γ A B _ ihAB _ ihA
+  | Γ A _ ih
+  | Γ A _ ihnA _ ihA
+  | Γ A _ ih
+  | Γ A x hx _ ih
+  | Γ A x t ht _ ih
+  | Γ A x t ht _ ih
+  | Γ A B x hx hxB _ ih1 _ ih2
+  ].
+  * exact (basic_seq_intro_is_sound A).
+  * exact (weakening_is_sound Γ A B ih).
+  * exact (conj_intro_is_sound Γ A B ihA ihB).
+  * exact (conj_eliml_is_sound Γ A B ih).
+  * exact (conj_elimr_is_sound Γ A B ih).
+  * exact (disj_introl_is_sound Γ A B ih).
+  * exact (disj_intror_is_sound Γ A B ih).
+  * exact (disj_elim_is_sound Γ A B C ih ihA ihB).
+  * exact (impl_intro_is_sound Γ A B ih).
+  * exact (impl_elim_is_sound Γ A B ihAB ihA).
+  * exact (neg_intro_is_sound Γ A ih).
+  * exact (neg_elim_is_sound Γ A ihnA ihA).
+  * exact (dne_is_sound Γ A ih).
+  * exact (uq_intro_is_sound Γ A x hx ih).
+  * exact (uq_elim_is_sound Γ A x t ht ih).
+  * exact (eq_intro_is_sound Γ A x t ht ih).
+  * exact (eq_elim_is_sound Γ A B x hx hxB ih1 ih2).
 Qed.
