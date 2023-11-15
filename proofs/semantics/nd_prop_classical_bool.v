@@ -209,7 +209,7 @@ Proof.
     exact (h I).
 Qed.
 
-Lemma basic_seq_intro_is_sound A:
+Lemma basic_seq_intro_is_valid A:
   Cons Empty A ⊨ A.
 Proof.
   unfold valid. intro I. intro h.
@@ -217,7 +217,7 @@ Proof.
   exact (andb_proj1 h).
 Qed.
 
-Lemma weakening_is_sound Γ A B:
+Lemma weakening_is_valid Γ A B:
   (Γ ⊨ B) → (Cons Γ A ⊨ B).
 Proof.
   intro h. unfold valid. intro I. intro hI.
@@ -225,7 +225,7 @@ Proof.
   exact (h I (andb_proj2 hI)).
 Qed.
 
-Lemma conj_intro_is_sound Γ A B:
+Lemma conj_intro_is_valid Γ A B:
   (Γ ⊨ A) → (Γ ⊨ B) → (Γ ⊨ A ∧ B).
 Proof.
   intros hA hB. unfold valid.
@@ -237,7 +237,7 @@ Proof.
   exact (andb_intro hIA hIB).
 Qed.
 
-Lemma conj_eliml_is_sound Γ A B:
+Lemma conj_eliml_is_valid Γ A B:
   (Γ ⊨ A ∧ B) → (Γ ⊨ A).
 Proof.
   intro h. unfold valid. intro I. intro hI.
@@ -245,7 +245,7 @@ Proof.
   simpl sat in hI. exact (andb_proj1 hI).
 Qed.
 
-Lemma conj_elimr_is_sound Γ A B:
+Lemma conj_elimr_is_valid Γ A B:
   (Γ ⊨ A ∧ B) → (Γ ⊨ B).
 Proof.
   intro h. unfold valid. intro I. intro hI.
@@ -253,7 +253,7 @@ Proof.
   simpl sat in hI. exact (andb_proj2 hI).
 Qed.
 
-Lemma disj_introl_is_sound Γ A B:
+Lemma disj_introl_is_valid Γ A B:
   (Γ ⊨ A) → (Γ ⊨ A ∨ B).
 Proof.
   intro h. unfold valid. intro I. intro hI.
@@ -261,7 +261,7 @@ Proof.
   simpl sat. apply orb_introl. exact hI.
 Qed.
 
-Lemma disj_intror_is_sound Γ A B:
+Lemma disj_intror_is_valid Γ A B:
   (Γ ⊨ B) → (Γ ⊨ A ∨ B).
 Proof.
   intro h. unfold valid. intro I. intro hI.
@@ -269,7 +269,7 @@ Proof.
   simpl sat. apply orb_intror. exact hI.
 Qed.
 
-Lemma disj_elim_is_sound Γ A B C:
+Lemma disj_elim_is_valid Γ A B C:
   (Γ ⊨ A ∨ B) → (Cons Γ A ⊨ C) → (Cons Γ B ⊨ C) → (Γ ⊨ C).
 Proof.
   intros hAB hA hB. unfold valid. intro I. intro hI.
@@ -282,7 +282,7 @@ Proof.
     exact (hB I (andb_intro hIB hI)).
 Qed.
 
-Lemma impl_intro_is_sound Γ A B:
+Lemma impl_intro_is_valid Γ A B:
   (Cons Γ A ⊨ B) → (Γ ⊨ A → B).
 Proof.
   intro h. unfold valid. intro I. intro hI.
@@ -291,7 +291,7 @@ Proof.
   exact (h I (andb_intro hIA hI)).
 Qed.
 
-Lemma impl_elim_is_sound Γ A B:
+Lemma impl_elim_is_valid Γ A B:
   (Γ ⊨ A → B) → (Γ ⊨ A) → (Γ ⊨ B).
 Proof.
   intros hAB hA. unfold valid. intro I. intro hI.
@@ -301,7 +301,7 @@ Proof.
   exact (h' (hA I hI)).
 Qed.
 
-Lemma neg_intro_is_sound Γ A:
+Lemma neg_intro_is_valid Γ A:
   (Cons Γ A ⊨ ⊥) → (Γ ⊨ ¬A).
 Proof.
   intro h. unfold valid. intro I. intro hI.
@@ -311,7 +311,7 @@ Proof.
   exact (h I (andb_intro hIA hI)).
 Qed.
 
-Lemma neg_elim_is_sound Γ A:
+Lemma neg_elim_is_valid Γ A:
   (Γ ⊨ ¬A) → (Γ ⊨ A) → (Γ ⊨ ⊥).
 Proof.
   intros hnA hA. unfold valid. intro I. intro hI.
@@ -322,7 +322,7 @@ Proof.
   exact (hInA hIA).
 Qed.
 
-Lemma contraction_is_sound Γ Γ' A B:
+Lemma contraction_is_valid Γ Γ' A B:
   (concat (Cons (Cons Γ A) A) Γ' ⊨ B)
   → (concat (Cons Γ A) Γ' ⊨ B).
 Proof.
@@ -339,7 +339,7 @@ Proof.
     - apply ih. exact hI2. 
 Qed.
 
-Lemma exchange_is_sound Γ Γ' A B C:
+Lemma exchange_is_valid Γ Γ' A B C:
   (concat (Cons (Cons Γ A) B) Γ' ⊨ C)
   → (concat (Cons (Cons Γ B) A) Γ' ⊨ C).
 Proof.
@@ -359,7 +359,7 @@ Proof.
     - apply ih. exact hI2.
 Qed.
 
-Lemma dne_is_sound Γ A:
+Lemma dne_is_valid Γ A:
   (Γ ⊨ ¬¬A) → (Γ ⊨ A).
 Proof.
   intro h. unfold valid. intro I. intro hI.
@@ -422,21 +422,21 @@ Proof.
   | Γ A pi hpi
   | Γ A pinA hpinA piA hpiA
   | Γ A pi hpi].
-  * exact (basic_seq_intro_is_sound A). 
-  * exact (weakening_is_sound Γ A B hpi).
-  * exact (contraction_is_sound Γ Γ' A B hpi).
-  * exact (exchange_is_sound Γ Γ' A B C hpi).
-  * exact (conj_intro_is_sound Γ A B hpiA hpiB).
-  * exact (conj_eliml_is_sound Γ A B hpi).
-  * exact (conj_elimr_is_sound Γ A B hpi).
-  * exact (disj_introl_is_sound Γ A B hpi).
-  * exact (disj_intror_is_sound Γ A B hpi).
-  * exact (disj_elim_is_sound Γ A B C hpi hpiA hpiB).
-  * exact (impl_intro_is_sound Γ A B hpi).
-  * exact (impl_elim_is_sound Γ A B hpiAB hpiA).
-  * exact (neg_intro_is_sound Γ A hpi).
-  * exact (neg_elim_is_sound Γ A hpinA hpiA).
-  * exact (dne_is_sound Γ A hpi).
+  * exact (basic_seq_intro_is_valid A). 
+  * exact (weakening_is_valid Γ A B hpi).
+  * exact (contraction_is_valid Γ Γ' A B hpi).
+  * exact (exchange_is_valid Γ Γ' A B C hpi).
+  * exact (conj_intro_is_valid Γ A B hpiA hpiB).
+  * exact (conj_eliml_is_valid Γ A B hpi).
+  * exact (conj_elimr_is_valid Γ A B hpi).
+  * exact (disj_introl_is_valid Γ A B hpi).
+  * exact (disj_intror_is_valid Γ A B hpi).
+  * exact (disj_elim_is_valid Γ A B C hpi hpiA hpiB).
+  * exact (impl_intro_is_valid Γ A B hpi).
+  * exact (impl_elim_is_valid Γ A B hpiAB hpiA).
+  * exact (neg_intro_is_valid Γ A hpi).
+  * exact (neg_elim_is_valid Γ A hpinA hpiA).
+  * exact (dne_is_valid Γ A hpi).
 Qed.
 
 Theorem general_weakening_is_admissble Γ Γ' A:

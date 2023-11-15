@@ -586,7 +586,7 @@ Qed.
 (* Soundness of each inference rule *)
 (* ================================ *)
 
-Theorem uq_elim_is_sound Γ A x t:
+Theorem uq_elim_is_valid Γ A x t:
   unshadowed t A →
   (Γ ⊨ UQ x A) → (Γ ⊨ (subst A x t)).
 Proof.
@@ -599,7 +599,7 @@ Proof.
   * exact ht.
 Qed.
 
-Theorem eq_intro_is_sound Γ A x t:
+Theorem eq_intro_is_valid Γ A x t:
   unshadowed t A →
   (Γ ⊨ (subst A x t)) → (Γ ⊨ EQ x A).
 Proof.
@@ -611,7 +611,7 @@ Proof.
   * exact (h M s hM).
 Qed.
 
-Theorem uq_intro_is_sound Γ A x:
+Theorem uq_intro_is_valid Γ A x:
   not_in_FV x Γ → (Γ ⊨ A) → (Γ ⊨ UQ x A).
 Proof.
   intros hx h. unfold valid. intros M s hM.
@@ -621,7 +621,7 @@ Proof.
   apply hequi. exact hM.
 Qed.
 
-Theorem eq_elim_is_sound Γ A B x:
+Theorem eq_elim_is_valid Γ A B x:
   not_in_FV x Γ → x ∉ FV B →
   (Γ ⊨ EQ x A) → (Γ ∪ {A,} ⊨ B) → (Γ ⊨ B).
 Proof.
@@ -643,7 +643,7 @@ Proof.
     exact hu.
 Qed.
 
-Theorem basic_seq_intro_is_sound A:
+Theorem basic_seq_intro_is_valid A:
   {A,} ⊨ A.
 Proof.
   unfold valid. intros M s hM.
@@ -651,7 +651,7 @@ Proof.
   apply Singleton_intro. reflexivity.
 Qed.
 
-Theorem weakening_is_sound Γ A B:
+Theorem weakening_is_valid Γ A B:
   (Γ ⊨ B) → (Γ ∪ {A,} ⊨ B).
 Proof.
   intro h. unfold valid. intros M s hM.
@@ -661,7 +661,7 @@ Proof.
   apply Union_introl. exact hX.
 Qed.
 
-Theorem conj_intro_is_sound Γ A B:
+Theorem conj_intro_is_valid Γ A B:
   (Γ ⊨ A) → (Γ ⊨ B) → (Γ ⊨ A ∧ B).
 Proof.
   intros hA hB. unfold valid. intros M s. intros hM.
@@ -671,7 +671,7 @@ Proof.
   simpl sat. exact (conj hA hB).
 Qed.
 
-Theorem conj_eliml_is_sound Γ A B:
+Theorem conj_eliml_is_valid Γ A B:
   (Γ ⊨ A ∧ B) → (Γ ⊨ A).
 Proof.
   intro h. unfold valid. intros M s. intros hM.
@@ -679,7 +679,7 @@ Proof.
   simpl sat in hM. exact (proj1 hM).
 Qed.
 
-Theorem conj_elimr_is_sound Γ A B:
+Theorem conj_elimr_is_valid Γ A B:
   (Γ ⊨ A ∧ B) → (Γ ⊨ B).
 Proof.
   intro h. unfold valid. intros M s. intros hM.
@@ -687,7 +687,7 @@ Proof.
   simpl sat in hM. exact (proj2 hM).
 Qed.
 
-Theorem disj_introl_is_sound Γ A B:
+Theorem disj_introl_is_valid Γ A B:
   (Γ ⊨ A) → (Γ ⊨ A ∨ B).
 Proof.
   intro h. unfold valid. intros M s. intro hM.
@@ -695,7 +695,7 @@ Proof.
   apply h. exact hM.
 Qed.
 
-Theorem disj_intror_is_sound Γ A B:
+Theorem disj_intror_is_valid Γ A B:
   (Γ ⊨ B) → (Γ ⊨ A ∨ B).
 Proof.
   intro h. unfold valid. intros M s. intro hM.
@@ -712,7 +712,7 @@ Proof.
   * apply Singleton_inv in hr. rewrite <- hr. exact h2.
 Qed.
 
-Theorem disj_elim_is_sound Γ A B C:
+Theorem disj_elim_is_valid Γ A B C:
   (Γ ⊨ A ∨ B) → (Γ ∪ {A,} ⊨ C) → (Γ ∪ {B,} ⊨ C) → (Γ ⊨ C).
 Proof.
   intros hAB hA hB. unfold valid. intros M s. intro hM.
@@ -724,7 +724,7 @@ Proof.
     exact (sat_union hM hr).
 Qed.
 
-Theorem impl_intro_is_sound Γ A B:
+Theorem impl_intro_is_valid Γ A B:
   (Γ ∪ {A,} ⊨ B) → (Γ ⊨ A → B).
 Proof.
   intro h. unfold valid. intros M s hM.
@@ -733,7 +733,7 @@ Proof.
   exact (sat_union hM hMA).
 Qed.
 
-Theorem impl_elim_is_sound Γ A B:
+Theorem impl_elim_is_valid Γ A B:
   (Γ ⊨ A → B) → (Γ ⊨ A) → (Γ ⊨ B).
 Proof.
   intros hAB hA. unfold valid. intros M s hM.
@@ -743,7 +743,7 @@ Proof.
   apply hA. exact hM.
 Qed.
 
-Theorem neg_intro_is_sound Γ A:
+Theorem neg_intro_is_valid Γ A:
   (Γ ∪ {A,} ⊨ ⊥) → (Γ ⊨ ¬A).
 Proof.
   intro h. unfold valid. intros M s hM.
@@ -752,7 +752,7 @@ Proof.
   exact (sat_union hM hA).
 Qed.
 
-Theorem neg_elim_is_sound Γ A:
+Theorem neg_elim_is_valid Γ A:
   (Γ ⊨ ¬A) → (Γ ⊨ A) → (Γ ⊨ ⊥).
 Proof.
   intros hnA hA. unfold valid. intros M s hM.
@@ -763,7 +763,7 @@ Proof.
   exact (hnA hA).
 Qed.
 
-Theorem dne_is_sound Γ A:
+Theorem dne_is_valid Γ A:
   (Γ ⊨ ¬¬A) → (Γ ⊨ A).
 Proof.
   intro h. unfold valid. intros M s. intro hM.
@@ -835,21 +835,21 @@ Proof.
   | Γ A x t ht _ ih
   | Γ A B x hx hxB _ ih1 _ ih2
   ].
-  * exact (basic_seq_intro_is_sound A).
-  * exact (weakening_is_sound Γ A B ih).
-  * exact (conj_intro_is_sound Γ A B ihA ihB).
-  * exact (conj_eliml_is_sound Γ A B ih).
-  * exact (conj_elimr_is_sound Γ A B ih).
-  * exact (disj_introl_is_sound Γ A B ih).
-  * exact (disj_intror_is_sound Γ A B ih).
-  * exact (disj_elim_is_sound Γ A B C ih ihA ihB).
-  * exact (impl_intro_is_sound Γ A B ih).
-  * exact (impl_elim_is_sound Γ A B ihAB ihA).
-  * exact (neg_intro_is_sound Γ A ih).
-  * exact (neg_elim_is_sound Γ A ihnA ihA).
-  * exact (dne_is_sound Γ A ih).
-  * exact (uq_intro_is_sound Γ A x hx ih).
-  * exact (uq_elim_is_sound Γ A x t ht ih).
-  * exact (eq_intro_is_sound Γ A x t ht ih).
-  * exact (eq_elim_is_sound Γ A B x hx hxB ih1 ih2).
+  * exact (basic_seq_intro_is_valid A).
+  * exact (weakening_is_valid Γ A B ih).
+  * exact (conj_intro_is_valid Γ A B ihA ihB).
+  * exact (conj_eliml_is_valid Γ A B ih).
+  * exact (conj_elimr_is_valid Γ A B ih).
+  * exact (disj_introl_is_valid Γ A B ih).
+  * exact (disj_intror_is_valid Γ A B ih).
+  * exact (disj_elim_is_valid Γ A B C ih ihA ihB).
+  * exact (impl_intro_is_valid Γ A B ih).
+  * exact (impl_elim_is_valid Γ A B ihAB ihA).
+  * exact (neg_intro_is_valid Γ A ih).
+  * exact (neg_elim_is_valid Γ A ihnA ihA).
+  * exact (dne_is_valid Γ A ih).
+  * exact (uq_intro_is_valid Γ A x hx ih).
+  * exact (uq_elim_is_valid Γ A x t ht ih).
+  * exact (eq_intro_is_valid Γ A x t ht ih).
+  * exact (eq_elim_is_valid Γ A B x hx hxB ih1 ih2).
 Qed.
