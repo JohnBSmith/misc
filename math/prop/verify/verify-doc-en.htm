@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>verify &ndash; manual</title>
+  <style>
+body{
+  font-family: "DejaVu Sans", "Verdana", sans-serif;
+  color: #30302a;
+  line-height: 1.5;
+  max-width: 46em;
+  margin-top: 2em;
+  margin-left: 10%;
+  margin-bottom: 10em;
+  padding-left: 4%;
+  padding-right: 4%;
+}
+pre, code{
+  font-family: "DejaVu Sans Mono", "Menlo", "Consolas", monospace;
+}
+@media(max-width: 64em){
+  body{margin-left: auto; margin-right: auto;}
+}
+h2{
+  font-weight: normal;
+  border-bottom: 2px solid #b4b4b0;
+}
+a{color: #20506a; text-decoration: none;}
+a:hover{color: #102a40; text-decoration: underline;}
+.indent {
+  margin-left: 1.6em;
+}
+.ibox {
+  background-color: #f4f4e6;
+  border-left: 6px solid #d2d2c8;
+  padding: 8px 12px;
+}
+.cmd {
+  background-color: #303040;
+  color: #f0f0f0;
+  border-left: 6px solid #909090;
+  padding: 6px 12px;
+}
+  </style>
+</head>
+<body>
+
+<br>
+<h1>verify &mdash; A tiny proof verifier</h1>
+
+<h2>Table of contents</h2>
+<ol>
+<li><a href="#Introduction">Introduction</a>
+<li><a href="#Manual">A brief manual</a>
+<li><a href="#ND">Natural deduction</a>
+</ol>
+
+<h2 id="Introduction">Introduction</h2>
+
+<p>The program <code>verify.py</code> is a minimalistic proof checker
+for Hilbert calculi of propositional logic.
+
+<p>The verifier processes a single inference rule, the modus ponens. The
+axioms of the Hilbert calculus under consideration are not coded in the
+program itself, but are specified in the input file, preferably all of
+them at the beginning.
+
+<p>The program works exclusively with schemas, which means that each axiom
+and each theorem represents a schema. This means that the variables
+occurring in the propositional formula are metalinguistic variables
+that can be replaced by any formula. Genuine atomic variables, which
+may only be valid in a certain interpretation, are not available. This
+means that the system works exclusively with schemas corresponding to
+tautologies.
+
+<h2 id="Manual">A brief manual</h2>
+
+<p>We first write a file <code>proofs.txt</code> with the following
+content. The logical connectives may be entered in ASCII notation.
+
+<pre class="ibox">
+ax1. A -&gt; (B -&gt; A), axiom.
+ax2. (A -&gt; (A -&gt; B)) -&gt; (A -&gt; B), axiom.
+ax3. (A -&gt; B) -&gt; ((B -&gt; C) -&gt; (A -&gt; B)), axiom.
+
+1. A -&gt; (A -&gt; A), ax1.
+basic. A -&gt; A, ax2 1.
+</pre>
+
+<p>The three axioms are taken from <i>Grundlangen der Mathematik 1</i> by
+David Hilbert and Paul Bernays. This is followed by the very short proof
+of the theorem <var>A</var>&nbsp;→&nbsp;<var>A</var>, which receives
+the name <code>basic</code>. The proof consists of two steps.
+In the first step, the formula
+<var>A</var>&nbsp;→&nbsp;(<var>A</var>&nbsp;→&nbsp;<var>A</var>)
+is derived from the axiom <code>ax1</code> by simultaneous substitution
+<var>A</var>&nbsp;:=&nbsp;<var>A</var> and
+<var>B</var>&nbsp;:=&nbsp;<var>A</var>. In the second step, the modus
+ponens is applied to the axiom <code>ax2</code> and the first formula,
+whereby the variables of <code>ax2</code> are automatically substituted
+as before.
+
+<p>For verification, the program is now called with the file as an argument:
+
+<pre class="cmd">
+verify.py proofs.txt
+</pre>
+
+<p>If you wish, the ASCII notation can also be formatted by:
+
+<pre class="cmd">
+verify.py -f proofs.txt proofs.txt
+</pre>
+
+<p>One obtains:
+
+<pre class="ibox">
+ax1. A → (B → A), axiom.
+ax2. (A → (A → B)) → (A → B), axiom.
+ax3. (A → B) → ((B → C) → (A → B)), axiom.
+
+1. A → (A → A), ax1.
+basic. A → A, ax2 1.
+</pre>
+
+<p>Since the subjunction is right-associative,
+some brackets may be omitted.
+
+<pre class="ibox">
+ax1. A → B → A, axiom.
+ax2. (A → A → B) → A → B, axiom.
+ax3. (A → B) → (B → C) → A → B, axiom.
+
+1. A → A → A, ax1.
+basic. A → A, ax2 1.
+</pre>
+
+<h2 id="ND">Natural deduction</h2>
+
+<p>It is possible to represent natural deduction in a certain way in
+the form of a Hilbert calculus. The common notation
+Γ&nbsp;⊢&nbsp;<var>A</var> means that the formula <var>A</var> can be
+derived from the formulas of the formula set Γ. If Γ is finite, this
+notion can be shifted from the metalanguage into the calculus itself
+and is then referred to as a sequent. In sequent natural deduction,
+sequents are derived from existing sequents. We now summarize the
+formulas of Γ into a conjunction <var>H</var>, which stands for
+hypothesis. One is aware that the two judgments
+<var>H</var>&nbsp;⊢&nbsp;<var>A</var> and
+⊢&nbsp;<var>H</var>&nbsp;→&nbsp;<var>A</var> are equivalent.
+
+<p>The inference rule of conjunction introduction, which says that
+
+<p class="indent">from Γ&nbsp;⊢&nbsp;<var>A</var> and Γ&nbsp;⊢&nbsp;<var>A</var>
+the sequent Γ&nbsp;⊢&nbsp;<var>A</var>&nbsp;∧&nbsp;<var>B</var>
+
+<p>may be inferred, can be expressed as the schema
+
+<p class="indent">(<var>H</var> → <var>A</var>) → (<var>H</var> → <var>B</var>)
+→ (<var>H</var> → <var>A</var> ∧ <var>B</var>),
+
+<p>which turns out to be tautological as desired, as can be checked by
+means of a truth table. To be able to work with the formula, only the
+modus ponens is required.
+
+<p>For example, the proof of <var>A</var>&nbsp;∧&nbsp;<var>B</var>&nbsp;→
+<var>B</var>&nbsp;∧&nbsp;<var>A</var> proceeds as follows.
+
+<pre class="ibox">
+basic. H → H, axiom.
+conj_eliml. (H → A ∧ B) → (H → A), axiom.
+conj_elimr. (H → A ∧ B) → (H → B), axiom.
+conj_intro. (H → A) → (H → B) → (H → A ∧ B), axiom.
+
+1. A ∧ B → A ∧ B, basic.
+2. A ∧ B → A, conj_eliml 1.
+3. A ∧ B → B, conj_elimr 1.
+conj_comm. A ∧ B → B ∧ A, conj_intro 3 2.
+</pre>
+
+</body>
+</html>
+
