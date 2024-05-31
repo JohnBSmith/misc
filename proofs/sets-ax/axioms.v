@@ -156,14 +156,6 @@ Proof.
   * exfalso. exact (h hr).
 Qed.
 
-Theorem neg_ex {X: Type} {P: X → Prop}:
-  (¬∃x, P x) → (∀x, ¬P x).
-Proof.
-  intro hn. intro x. intro hx.
-  assert (h := ex_intro P x hx).
-  exact (hn h).
-Qed.
-
 Lemma ext_rev {A B}:
   A = B → ∀x, x ∈ A ↔ x ∈ B.
 Proof.
@@ -188,6 +180,14 @@ Lemma empty_set_property {x}:
   x ∉ ∅.
 Proof.
   intro h. apply comp_elim in h. exact h.
+Qed.
+
+Theorem non_empty_from_ex {A}:
+  (∃x, x ∈ A) → A ≠ ∅.
+Proof.
+  intro h. destruct h as (x, hx).
+  intro hcontra. rewrite hcontra in hx.
+  apply (empty_set_property hx).
 Qed.
 
 Theorem subclass1_pair_set x y:
@@ -268,7 +268,9 @@ Theorem non_empty_class A:
   A ≠ ∅ → ∃x, x ∈ A.
 Proof.
   intro h. apply DNE. intro hn.
-  assert (hn' := neg_ex hn). simpl in hn'.
+  assert (hn': ∀x, x ∉ A). {
+    intros x hx. apply hn. exists x. exact hx.
+  }
   assert (h0: A = ∅). {
     apply ext. intro x. split.
     * intro hx. exfalso. exact (hn' x hx).

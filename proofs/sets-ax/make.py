@@ -19,6 +19,8 @@ def build(modules):
 
 build([
     "axioms",
+    "prop_calc",
+    "pred_calc",
     "basic",
     "relations",
     "mappings",

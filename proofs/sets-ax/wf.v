@@ -5,6 +5,8 @@ Require Import basic.
 Require Import relations.
 Require Import mappings.
 Require Import nat.
+Require Import prop_calc.
+Require Import pred_calc.
 
 Definition is_minimal R y A :=
   y ∈ A ∧ ¬∃x, x ∈ A ∧ R x y.
@@ -16,7 +18,7 @@ Definition well_founded M R :=
 Definition DCC M (R: Class → Class → Prop) :=
   ¬∃f, mapping f ℕ M ∧ ∀n, n ∈ ℕ → R (app f (succ n)) (app f n).
 
-Definition wf_induction M R := ∀A, A ⊆ M →
+Definition wf_induction M (R: Class → Class → Prop) := ∀A, A ⊆ M →
   (∀x, x ∈ M → (∀y, y ∈ M → R y x → y ∈ A) → x ∈ A) → A = M.
 
 Theorem well_founded_implies_antireflexive M R:
@@ -72,14 +74,6 @@ Proof.
       unfold y. reflexivity.
 Qed.
 
-Theorem non_empty_from_ex {A}:
-  (∃x, x ∈ A) → A ≠ ∅.
-Proof.
-  intro h. destruct h as (x, hx).
-  intro hcontra. rewrite hcontra in hx.
-  apply (empty_set_property hx).
-Qed.
-
 Theorem img_non_empty_domain {f X Y}:
   mapping f X Y → X ≠ ∅ → img f X ≠ ∅.
 Proof.
@@ -125,13 +119,6 @@ Proof.
   exact (hcontra h2).
 Qed.
 
-Theorem neg_ex {A: Class → Prop}:
-  ¬(∃x, A x) → ∀x, ¬A x.
-Proof.
-  intro h. intro x. intro hx.
-  apply h. exists x. exact hx.
-Qed.
-
 Theorem well_founded_implies_wf_induction M R:
   well_founded M R → wf_induction M R.
 Proof.
@@ -173,4 +160,95 @@ Proof.
   unfold B in ha. apply difference_elim in ha.
   apply proj2 in ha.
   exact (ha h).
+Qed.
+
+Theorem wf_induction_implies_well_founded M R:
+  wf_induction M R → well_founded M R.
+Proof.
+  intro hwfi. unfold well_founded.
+  intros B hBM hB.
+  unfold wf_induction in hwfi.
+  pose (A := M \ B).
+  assert (hAM: A ⊆ M). {
+    unfold A. unfold subclass. intros x hx.
+    apply difference_elim in hx.
+    exact (proj1 hx).
+  }
+  assert (hwfi := hwfi A hAM).
+  assert (hA: A ≠ M). {
+    unfold A. intro hcontra.
+    symmetry in hcontra.
+    apply subclass_from_eq in hcontra.
+    apply hB. apply subclass_antisym. split.
+    * unfold subclass. intros x hx. exfalso.
+      assert (hcontra := hcontra x (hBM x hx)).
+      apply difference_elim in hcontra.
+      apply proj2 in hcontra.
+      exact (hcontra hx).
+    * unfold subclass. intros x hx. exfalso.
+      exact (empty_set_property hx).
+  }
+  assert (h1 := contraposition hwfi). clear hwfi.
+  assert (h1 := h1 hA).
+  apply DNE. intro hcontra.
+  apply h1. clear h1.
+  intros a ha h2.
+  assert (h3 := neg_ex hcontra).
+  simpl in h3. clear hcontra.
+  assert (h3 := h3 a). unfold is_minimal in h3.
+  assert (h4 := neg_conj h3). clear h3.
+  destruct h4 as [hl | hr].
+  * unfold A. apply difference_intro. split.
+    - exact ha.
+    - exact hl.
+  * exfalso. apply DNE in hr.
+    destruct hr as (b, (hb, hba)).
+    assert (h5 := h2 b (hBM b hb) hba).
+    unfold A in h5. apply difference_elim in h5.
+    apply proj2 in h5. exact (h5 hb).
+Qed.
+
+Theorem well_founded_set_implies_LEM:
+  (∃M R, well_founded M R ∧ (∃x y, x ∈ M ∧ y ∈ M ∧ R y x)) →
+  ∀Q, Q ∨ ¬Q.
+Proof.
+  intro h.
+  destruct h as (M, (R, (hwf, h))).
+  intro Q.
+  destruct h as (x, (y, (hx, (hy, hyx)))).
+  pose (P := {a | a ∈ M ∧ (a = x ∨ R a x ∧ Q)}).
+  assert(hxP: x ∈ P). {
+    unfold P. apply comp. split; [| split].
+    * exact (set_intro hx).
+    * exact hx.
+    * left. reflexivity.
+  }
+  assert (h1: P ≠ ∅). {
+    apply non_empty_from_ex.
+    exists x. exact hxP.
+  }
+  assert (hPM: P ⊆ M). {
+    unfold subclass. intros a ha.
+    unfold P in ha. apply comp_elim in ha.
+    exact (proj1 ha).
+  }
+  unfold well_founded in hwf.
+  assert (h2 := hwf P hPM h1). clear hwf.
+  destruct h2 as (m, hm).
+  unfold is_minimal in hm.
+  destruct hm as (hm, hnex).
+
+  unfold P in hm. apply comp_elim in hm.
+  destruct hm as (hmM, hm).
+  destruct hm as [hl | hr].
+  * right. intro hQ.
+    assert (h3: y ∈ P). {
+      unfold P. apply comp. split; [| split].
+      - exact (set_intro hy).
+      - exact hy.
+      - right. exact (conj hyx hQ).
+    }
+    apply hnex. exists y.
+    rewrite hl. exact (conj h3 hyx).
+  * left. exact (proj2 hr).
 Qed.
