@@ -1275,3 +1275,19 @@ Proof.
     - rewrite heq in hx. exact hx.
 Qed.
 
+Theorem bounded_uq_union2 A B (P: Class → Prop):
+  (∀x, x ∈ A ∪ B → P x) ↔ (∀x, x ∈ A → P x) ∧ (∀x, x ∈ B → P x).
+Proof.
+  split.
+  * intro h. split.
+    - intros x hx. apply (h x).
+      apply union2_intro. left. exact hx.
+    - intros x hx. apply (h x).
+      apply union2_intro. right. exact hx.
+  * intro h. destruct h as (hA, hB).
+    intros x hx. apply union2_elim in hx.
+    destruct hx as [hl | hr].
+    - exact (hA x hl).
+    - exact (hB x hr).
+Qed.
+

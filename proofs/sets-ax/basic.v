@@ -198,6 +198,29 @@ Proof.
     - exact (hx A hA).
 Qed.
 
+Theorem subclass_iff_difference_is_empty A B:
+  A ⊆ B ↔ A \ B = ∅.
+Proof.
+  split.
+  * intro hAB. apply ext. intro x. split.
+    - intro h. apply difference_elim in h.
+      destruct h as (hB, hnA). apply comp.
+      split.
+      -- exact (set_intro hB).
+      -- apply hnA. exact (hAB x hB).
+    - intro h. exfalso.
+      exact (empty_set_property h).
+  * intro h. unfold subclass. intros x hx.
+    apply subclass_from_eq in h. unfold subclass in h.
+    assert (h := h x). apply DNE. intro hxnB.
+    assert (hcontra: x ∈ A \ B). {
+      apply difference_intro. split.
+      - exact hx.
+      - exact hxnB.
+    }
+    exact (empty_set_property (h hcontra)).
+Qed.
+
 Theorem prod_left_empty Y:
   ∅ × Y = ∅.
 Proof.
