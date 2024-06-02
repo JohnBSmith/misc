@@ -1,0 +1,21 @@
+
+# Stating a Hilbert system as the metalogic calculus.
+
+ax1. (A → (B → A)), axiom.
+ax2. (A → (A → B)) → (A → B), axiom.
+ax3. (A → B) → (B → C) → (A → B), axiom.
+
+1. (A → (A → A)), ax1.
+3. (A → A), ax2 1.
+
+# Alternatively, one can state the Hilbert system as a system
+# handling sequents.
+
+mp. (⊢ A → B) → (⊢ A) → (⊢ B), axiom.
+ax1. ⊢ A → (B → A), axiom.
+ax2. ⊢ (A → (A → B)) → (A → B), axiom.
+ax3. ⊢ (A → B) → ((B → C) → (A → B)), axiom.
+
+1. ⊢ A → (A → A), ax1.
+2. ⊢ (A → (A → A)) → (A → A), ax2.
+3. ⊢ A → A, mp 2 1.
