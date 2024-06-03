@@ -27,7 +27,7 @@ kw_tab = {"and": "&", "or": "|", "not": "~", "false": "_|_"}
 def scan(s):
     i = 0; n = len(s); a = []; line = 1
     while i < n:
-        if s[i].isalpha() or s[i] == '_':
+        if s[i].isalpha():
             j = i
             while i < n and (s[i].isalpha() or s[i].isdigit() or s[i] == '_'):
                 i += 1

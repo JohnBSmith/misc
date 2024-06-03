@@ -33,7 +33,7 @@ kw_tab = {"and": "&", "or": "|", "not": "~", "false": "_|_", "true": "#t",
 def scan(s):
     i = 0; n = len(s); a = []; line = 1
     while i < n:
-        if s[i].isalpha() or s[i] == '_':
+        if s[i].isalpha():
             j = i
             while i < n and (s[i].isalpha() or s[i].isdigit() or s[i] == '_'):
                 i += 1
@@ -200,17 +200,22 @@ def parse(s):
         i, stmt = parse_statement(i, a)
         statements.append(stmt)
     return statements
-    
+
+def subst_rec(A, subst):
+    if isinstance(A, str):
+        return subst[A] if A in subst else A
+    else:
+        return (A[0],) + tuple(subst_rec(X, subst) for X in A[1:])
+
 def conj_set(A, subst):
     if A == ("true",):
         return set()
     elif isinstance(A, tuple) and A[0] == "conj":
         return conj_set(A[1], subst) | conj_set(A[2], subst)
+    elif not subst is None:
+        return conj_set(subst_rec(A, subst), None)
     else:
-        if not subst is None and A in subst:
-            return conj_set(subst[A], None)
-        else:
-            return {A}
+        return {A}
 
 def unify_seq(A, pattern, subst):
     if conj_set(A[1], None) != conj_set(pattern[1], subst):
