@@ -2,13 +2,19 @@
 # The examples show the derivation of admissible rules by intertwining
 # logic and metalogic calculus.
 
-N. (⊢ A) → (⊢ H ⊢ A), axiom.
-K. (G ⊢ H ⊢ A → B) → (G ⊢ (H ⊢ A) → (H ⊢ B)), axiom.
-
+nec. (A → (H ⊢ A)), axiom.
 lift. (⊢ A) → A, axiom.
 
-# This means (⊢ A) → (⊢ ⊢ A), so it should be fine.
-lower. (A → (⊢ A)), axiom.
+1. (A → (H ⊢ A)) → (⊢ A → (H ⊢ A)), nec.
+2. (A → (H ⊢ A)), nec.
+3. ⊢ A → (H ⊢ A), 1 2.
+N. (⊢ A) → (⊢ H ⊢ A), subj_elim 3.
+
+1. (H ⊢ A → B) → (H ⊢ A) → (H ⊢ B), subj_elim.
+2. (G ⊢ (H ⊢ A → B) → (H ⊢ A) → (H ⊢ B)), nec 1.
+K. (G ⊢ H ⊢ A → B) → (G ⊢ (H ⊢ A) → (H ⊢ B)), subj_elim 2.
+
+lower. (A → (⊢ A)), nec.
 
 1. 1 ⊢ ¬B, basic.
 2. 2 ⊢ A → B, basic.
