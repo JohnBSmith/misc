@@ -203,7 +203,8 @@ def parse(s):
 
 def subst_rec(A, subst):
     if isinstance(A, str):
-        return subst[A] if A in subst else A
+        if not A in subst: subst[A] = A
+        return subst[A]
     else:
         return (A[0],) + tuple(subst_rec(X, subst) for X in A[1:])
 
