@@ -2,19 +2,65 @@
 # The examples show the derivation of admissible rules by intertwining
 # logic and metalogic calculus.
 
-nec. (A → (H ⊢ A)), axiom.
 lift. (⊢ A) → A, axiom.
 
-1. (A → (H ⊢ A)) → (⊢ A → (H ⊢ A)), nec.
-2. (A → (H ⊢ A)), nec.
-3. ⊢ A → (H ⊢ A), 1 2.
-N. (⊢ A) → (⊢ H ⊢ A), subj_elim 3.
+
+# Derivation of some auxiliary rules.
 
 1. (H ⊢ A → B) → (H ⊢ A) → (H ⊢ B), subj_elim.
-2. (G ⊢ (H ⊢ A → B) → (H ⊢ A) → (H ⊢ B)), nec 1.
-K. (G ⊢ H ⊢ A → B) → (G ⊢ (H ⊢ A) → (H ⊢ B)), subj_elim 2.
+2. (G ⊢ (H ⊢ A → B) → (H ⊢ A) → (H ⊢ B)), nec_seq 1.
+msubj_elimh. (G ⊢ H ⊢ A → B) → (G ⊢ (H ⊢ A) → (H ⊢ B)), subj_elim 2.
 
-lower. (A → (⊢ A)), nec.
+1. 1 ⊢ (H ⊢ A → B → C), basic.
+2. 1 ⊢ (H ⊢ A) → (H ⊢ B → C), msubj_elimh 1.
+3. 3 ⊢ (H ⊢ A), basic.
+4. 1, 3 ⊢ (H ⊢ B → C), subj_elim 2 3.
+5. 1, 3 ⊢ (H ⊢ B) → (H ⊢ C), msubj_elimh 4.
+6. 1 ⊢ (H ⊢ A) → (H ⊢ B) → (H ⊢ C), subj_intro 5.
+7. ⊢ (H ⊢ A → B → C) → (H ⊢ A) → (H ⊢ B) → (H ⊢ C), subj_intro 6.
+subj_elim3. (H ⊢ A → B → C) → (H ⊢ A) → (H ⊢ B) → (H ⊢ C), lift 7.
+
+1. (⊢ A) → (true ∧ H ⊢ A), wk.
+2. (⊢ A) → (H ⊢ A), 1.
+3. (G ⊢ (⊢ A) → (H ⊢ A)), nec_seq 2.
+wk_inner. (G ⊢ ⊢ A) → (G ⊢ H ⊢ A), subj_elim 3.
+
+rule_intro2. (⊢ A → B) → (H ⊢ A) → (H ⊢ B), subj_elim.
+
+1. 1 ⊢ (⊢ A → B → C), basic.
+2. 1 ⊢ (H ⊢ A → B → C), wk_inner 1.
+3. (G ⊢ (H ⊢ A → B → C) → (H ⊢ A) → (H ⊢ B) → (H ⊢ C)), nec_seq subj_elim3.
+4. (G ⊢ H ⊢ A → B → C) → (G ⊢ (H ⊢ A) → (H ⊢ B) → (H ⊢ C)), subj_elim 3.
+5. 1 ⊢ (H ⊢ A) → (H ⊢ B) → (H ⊢ C), 4 2.
+6. ⊢ (⊢ A → B → C) → (H ⊢ A) → (H ⊢ B) → (H ⊢ C), subj_intro 5.
+rule_intro3. (⊢ A → B → C) → (H ⊢ A) → (H ⊢ B) → (H ⊢ C), lift 6.
+
+
+# Derivation of meta calculus natural deduction rules.
+
+1. (H ∧ A ⊢ B) → (H ⊢ A → B), subj_intro.
+2. ⊢ (H ∧ A ⊢ B) → (H ⊢ A → B), nec_seq 1.
+msubj_intro. (G ⊢ H ∧ A ⊢ B) → (G ⊢ H ⊢ A → B), rule_intro2 2.
+
+1. (H ⊢ A → B) → (H ⊢ A) → (H ⊢ B), subj_elim.
+2. ⊢ (H ⊢ A → B) → (H ⊢ A) → (H ⊢ B), nec_seq 1.
+msubj_elim. (G ⊢ H ⊢ A → B) → (G ⊢ H ⊢ A) → (G ⊢ H ⊢ B), rule_intro3 2.
+
+
+# Derivation of a new inference rule.
+
+1. 1 ⊢ (H ∧ A ⊢ B), basic.
+2. 2 ⊢ (H ⊢ A), basic.
+3. 1, 2 ⊢ (H ∧ A ⊢ B), wk 1.
+4. 2, 1 ⊢ (H ⊢ A), wk 2.
+6. 1, 2 ⊢ (H ⊢ A → B), msubj_intro 3.
+7. 1, 2 ⊢ (H ⊢ B), msubj_elim 6 4.
+8. 1 ⊢ (H ⊢ A) → (H ⊢ B), subj_intro 7.
+9. ⊢ (H ∧ A ⊢ B) → (H ⊢ A) → (H ⊢ B), subj_intro 8.
+cut. (H ∧ A ⊢ B) → (H ⊢ A) → (H ⊢ B), lift 9.
+
+
+# Derivation of modus tollens from its schema.
 
 1. 1 ⊢ ¬B, basic.
 2. 2 ⊢ A → B, basic.
@@ -23,38 +69,6 @@ lower. (A → (⊢ A)), nec.
 5. 1, 2, 3 ⊢ ⊥, neg_elim 1 4.
 6. 2, 1 ⊢ ¬A, neg_intro 5.
 7. 2 ⊢ ¬B → ¬A, subj_intro 6.
-contraposition. ⊢ (A → B) → ¬B → ¬A, subj_intro 7.
-
-1. ⊢ H ⊢ (A → B) → ¬B → ¬A, N contraposition.
-2. ⊢ (H ⊢ A → B) → (H ⊢ ¬B → ¬A), K 1.
-3. 3 ⊢ (H ⊢ A → B), basic.
-4. 3 ⊢ (H ⊢ ¬B → ¬A), subj_elim 2 3.
-5. 3 ⊢ (H ⊢ ¬B) → (H ⊢ ¬A), K 4.
-6. ⊢ (H ⊢ A → B) → (H ⊢ ¬B) → (H ⊢ ¬A), subj_intro 5.
-modus_tollens. (H ⊢ A → B) → (H ⊢ ¬B) → (H ⊢ ¬A), lift 6.
-
-1. (⊢ A) → (true ∧ H ⊢ A), wk.
-2. (⊢ A) → (H ⊢ A), 1.
-3. ⊢ (⊢ A) → (H ⊢ A), lower 2.
-4. ⊢ G ⊢ (⊢ A) → (H ⊢ A), N 3.
-5. ⊢ (G ⊢ ⊢ A) → (G ⊢ H ⊢ A), K 4.
-wk_inner. (G ⊢ ⊢ A) → (G ⊢ H ⊢ A), lift 5.
-
-1. 1 ⊢ (⊢ A → B), basic.
-2. 1 ⊢ (H ⊢ A → B), wk_inner 1.
-3. 1 ⊢ (H ⊢ A) → (H ⊢ B), K 2.
-4. ⊢ (⊢ A → B) → (H ⊢ A) → (H ⊢ B), subj_intro 3.
-rule_intro2. (⊢ A → B) → (H ⊢ A) → (H ⊢ B), lift 4.
-
-1. 1 ⊢ (⊢ A → B → C), basic.
-2. 1 ⊢ (H ⊢ A → B → C), wk_inner 1.
-3. 1 ⊢ (H ⊢ A) → (H ⊢ B → C), K 2.
-4. 4 ⊢ (H ⊢ A), basic.
-5. 1, 4 ⊢ (H ⊢ B → C), subj_elim 3 4.
-6. 1, 4 ⊢ (H ⊢ B) → (H ⊢ C), K 5.
-7. 1 ⊢ (H ⊢ A) → (H ⊢ B) → (H ⊢ C), subj_intro 6.
-8. ⊢ (⊢ A → B → C) → (H ⊢ A) → (H ⊢ B) → (H ⊢ C), subj_intro 7.
-rule_intro3. (⊢ A → B → C) → (H ⊢ A) → (H ⊢ B) → (H ⊢ C), lift 8.
-
-contra. (H ⊢ A → B) → (H ⊢ ¬B → ¬A), subj_elim contraposition.
-modus_tollens. (H ⊢ A → B) → (H ⊢ ¬B) → (H ⊢ ¬A), rule_intro3 contraposition.
+8. ⊢ (A → B) → ¬B → ¬A, subj_intro 7.
+contraposition. (H ⊢ A → B) → (H ⊢ ¬B → ¬A), rule_intro2 8.
+modus_tollens. (H ⊢ A → B) → (H ⊢ ¬B) → (H ⊢ ¬A), rule_intro3 8.

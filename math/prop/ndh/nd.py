@@ -256,6 +256,12 @@ def modus_ponens(line, book, B, args):
         raise LogicError(line,
             "unification failed for {}, in conclusion".format(args[0]))
 
+def nec_seq(line, book, B, args):
+    assert len(args) == 2
+    A = book[args[1]]; subst = {"A": A}
+    if not unify(B, ("seq", "H", "A"), subst):
+        raise LogicError(line, "unification failed for nec_seq")
+
 def verify(book, s):
     try:
         statements = parse(s)
@@ -270,7 +276,9 @@ def verify(book, s):
                 book[label] = B
             else:
                 book[label] = B
-            if rule[0] != "axiom":
+            if rule[0] == "nec_seq":
+                nec_seq(line, book, B, rule)
+            elif rule[0] != "axiom":
                 modus_ponens(line, book, B, rule)
     except SyntaxError as e:
         print("Syntax error in line {}:\n{}".format(e.line, e.text))
@@ -340,6 +348,7 @@ bij_intro. (H1 ⊢ A → B) → (H2 ⊢ B → A) → (H1 ∧ H2 ⊢ A ↔ B), ax
 bij_eliml. (H ⊢ A ↔ B) → (H ⊢ A → B), axiom.
 bij_elimr. (H ⊢ A ↔ B) → (H ⊢ B → A), axiom.
 wk. (H ⊢ B) → (H ∧ A ⊢ B), axiom.
+exch. (H ⊢ A) → (H ⊢ A), axiom.
 """
 
 def main():
