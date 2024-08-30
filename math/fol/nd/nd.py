@@ -64,7 +64,7 @@ def scan(s):
     while i < n:
         if s[i].isalpha():
             j = i
-            while i < n and (s[i].isalpha() or s[i].isdigit() or s[i] == '_'):
+            while i < n and (s[i].isalpha() or s[i].isdigit() or s[i] in "_'"):
                 i += 1
             s0 = s[j:i]
             if s0 in keywords: s0 = keywords[s0]
@@ -495,26 +495,37 @@ def parse(s):
         statements.append(stmt)
     return statements
 
+def lookup(book, key, line):
+    if not key in book:
+        raise LogicError(line, f"label '{key}' not found")
+    else:
+        return book[key]
+
+def expect_len(line, args, n, rule_name):
+    s = "" if n == 1 else "s"
+    raise LogicError(line,
+        f"rule {rule_name} expects {n} argument{s}, but got {len(args)}")
+
 def is_connective(A, symbol):
     return isinstance(A, Formula) and isinstance(A.node, tuple) and A.node[0] == symbol
 
 def basic_seq(line, book, S, args):
-    assert len(args) == 0
+    if len(args) != 0: expect_len(line, args, 0, "basic")
     Gamma, A = S
     if not form_in(A, Gamma):
         raise LogicError(line, "not a basic sequent")
 
 def conj_intro(line, book, S, args):
-    assert len(args) == 2
-    Gamma1, A = book[args[0]]
-    Gamma2, B = book[args[1]]
+    if len(args) != 2: expect_len(line, args, 2, "conj_intro")
+    Gamma1, A = lookup(book, args[0], line)
+    Gamma2, B = lookup(book, args[1], line)
     S0 = (union(Gamma1, Gamma2), Formula(("conj", A, B)))
     if not seq_eq(S, S0):
         raise LogicError(line, "conj_intro produces different sequent")
 
 def conj_eliml(line, book, S, args):
-    assert len(args) == 1
-    Gamma, C = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "conj_eliml")
+    Gamma, C = lookup(book, args[0], line)
     if not is_connective(C, "conj"):
         raise LogicError(line, "conj_eliml expected a conjunction")
     S0 = (Gamma, C.node[1])
@@ -522,8 +533,8 @@ def conj_eliml(line, book, S, args):
         raise LogicError(line, "conj_eliml produces different sequent")
 
 def conj_elimr(line, book, S, args):
-    assert len(args) == 1
-    Gamma, C = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "conj_elimr")
+    Gamma, C = lookup(book, args[0], line)
     if not is_connective(C, "conj"):
         raise LogicError(line, "conj_elimr expected a conjunction")
     S0 = (Gamma, C.node[2])
@@ -531,8 +542,8 @@ def conj_elimr(line, book, S, args):
         raise LogicError(line, "conj_elimr produces different sequent")
 
 def subj_intro(line, book, S, args):
-    assert len(args) == 1
-    Gamma, B = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "subj_intro")
+    Gamma, B = lookup(book, args[0], line)
     C = S[1]
     if not is_connective(C, "subj"):
         raise LogicError(line, "subj_intro produces different sequent")
@@ -544,9 +555,9 @@ def subj_intro(line, book, S, args):
         raise LogicError(line, "subj_intro produces different sequent")
 
 def subj_elim(line, book, S, args):
-    assert len(args) == 2
-    Gamma1, C = book[args[0]]
-    Gamma2, A = book[args[1]]
+    if len(args) != 2: expect_len(line, args, 2, "subj_elim")
+    Gamma1, C = lookup(book, args[0], line)
+    Gamma2, A = lookup(book, args[1], line)
     if not is_connective(C, "subj") or not form_eq(C.node[1], A):
         raise LogicError(line, "subj_elim expected a matching subjunction")
     S0 = (union(Gamma1, Gamma2), C.node[2])
@@ -554,8 +565,8 @@ def subj_elim(line, book, S, args):
         raise LogicError(line, "subj_elim produces different sequent")
 
 def neg_intro(line, book, S, args):
-    assert len(args) == 1
-    Gamma, B = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "neg_intro")
+    Gamma, B = lookup(book, args[0], line)
     C = S[1]
     if not is_connective(C, "neg"):
         raise LogicError(line, "neg_intro produces different sequent")
@@ -569,9 +580,9 @@ def neg_intro(line, book, S, args):
         raise LogicError(line, "neg_intro produces different sequent")
 
 def neg_elim(line, book, S, args):
-    assert len(args) == 2
-    Gamma1, C = book[args[0]]
-    Gamma2, A = book[args[1]]
+    if len(args) != 2: expect_len(line, args, 2, "neg_elim")
+    Gamma1, C = lookup(book, args[0], line)
+    Gamma2, A = lookup(book, args[1], line)
     if not is_connective(C, "neg") or not form_eq(C.node[1], A):
         raise LogicError(line, "neg_elim expected a matching negation")
     S0 = (union(Gamma1, Gamma2), Formula(("false",)))
@@ -579,8 +590,8 @@ def neg_elim(line, book, S, args):
         raise LogicError(line, "neg_elim produces different sequent")
 
 def disj_introl(line, book, S, args):
-    assert len(args) == 1
-    Gamma, A = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "disj_introl")
+    Gamma, A = lookup(book, args[0], line)
     C = S[1]
     if not is_connective(C, "disj"):
         raise LogicError(line, "disj_introl produces different sequent")
@@ -589,8 +600,8 @@ def disj_introl(line, book, S, args):
         raise LogicError(line, "disj_introl produces different sequent")
 
 def disj_intror(line, book, S, args):
-    assert len(args) == 1
-    Gamma, A = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "disj_intror")
+    Gamma, A = lookup(book, args[0], line)
     C = S[1]
     if not is_connective(C, "disj"):
         raise LogicError(line, "disj_introl produces different sequent")
@@ -599,10 +610,10 @@ def disj_intror(line, book, S, args):
         raise LogicError(line, "disj_introl produces different sequent")
 
 def disj_elim(line, book, S, args):
-    assert len(args) == 3
-    Gamma1, D = book[args[0]]
-    Gamma2, C2 = book[args[1]]
-    Gamma3, C3 = book[args[2]]
+    if len(args) != 3: expect_len(line, args, 3, "disj_elim")
+    Gamma1, D = lookup(book, args[0], line)
+    Gamma2, C2 = lookup(book, args[1], line)
+    Gamma3, C3 = lookup(book, args[2], line)
     if not is_connective(D, "disj"):
         raise LogicError(line, "disj_elim expects a disjunction")
     if not form_eq(C2, C3):
@@ -613,9 +624,9 @@ def disj_elim(line, book, S, args):
         raise LogicError(line, "disj_elim produces different sequent")
 
 def bij_intro(line, book, S, args):
-    assert len(args) == 2
-    Gamma1, A = book[args[0]]
-    Gamma2, B = book[args[1]]
+    if len(args) != 2: expect_len(line, args, 2, "bij_intro")
+    Gamma1, A = lookup(book, args[0], line)
+    Gamma2, B = lookup(book, args[1], line)
     if (not is_connective(A, "subj") or not is_connective(B, "subj") or
         not form_eq(A.node[1], B.node[2]) or not form_eq(A.node[2], B.node[1])):
         raise LogicError(line, "bij_intro expects matching subjunctions")
@@ -624,8 +635,8 @@ def bij_intro(line, book, S, args):
         raise LogicError(line, "bij_intro produces different sequent")
 
 def bij_eliml(line, book, S, args):
-    assert len(args) == 1
-    Gamma, A = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "bij_eliml")
+    Gamma, A = lookup(book, args[0], line)
     if not is_connective(A, "bij"):
         raise LogicError(line, "bij_eliml expects a bijunction")
     S0 = (Gamma, Formula(("subj", A.node[1], A.node[2])))
@@ -633,8 +644,8 @@ def bij_eliml(line, book, S, args):
         raise LogicError(line, "bij_eliml produces different sequent")
 
 def bij_elimr(line, book, S, args):
-    assert len(args) == 1
-    Gamma, A = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "bij_elimr")
+    Gamma, A = lookup(book, args[0], line)
     if not is_connective(A, "bij"):
         raise LogicError(line, "bij_elimr expects a bijunction")
     S0 = (Gamma, Formula(("subj", A.node[2], A.node[1])))
@@ -642,7 +653,7 @@ def bij_elimr(line, book, S, args):
         raise LogicError(line, "bij_elimr produces different sequent")
 
 def axiom(line, book, S, args):
-    assert len(args) == 0
+    if len(args) != 0: expect_len(line, args, 0, "axiom")
     if not S[0] == ():
         raise LogicError(line, "axiom expects empty context")
 
@@ -670,7 +681,8 @@ def unify(A, pattern, subst):
         return pattern == A
     elif isinstance(pattern, Formula) or isinstance(pattern, Term):
         if type(A) != type(pattern): return False
-        if pattern.node[0] == "app" and not pattern.node[1] in predicate_symbols:
+        if (isinstance(pattern, Formula) and pattern.node[0] == "app"
+        and not pattern.node[1] in predicate_symbols):
             return unify_pred(A, pattern, subst)
         if not isinstance(A.node, tuple): return False
         if not len(A.node) == len(pattern.node): return False
@@ -721,8 +733,8 @@ def unify_quant(A, pattern, subst):
         raise Exception("unreachable")
 
 def substitution(line, book, S, args):
-    assert len(args) == 1
-    Gamma, A = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "subst")
+    Gamma, A = lookup(book, args[0], line)
     if len(Gamma) != 0:
         raise LogicError(line, "subst expects a theorem")
     if len(S[0]) != 0:
@@ -731,8 +743,8 @@ def substitution(line, book, S, args):
         raise LogicError(line, "subst: unification failed")
 
 def term_substitution(line, book, S, args):
-    assert len(args) == 1
-    Gamma, A = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "tsubst")
+    Gamma, A = lookup(book, args[0], line)
     if len(Gamma) != 0:
         raise LogicError(line, "tsubst expects a theorem")
     if len(S[0]) != 0:
@@ -741,8 +753,8 @@ def term_substitution(line, book, S, args):
         raise LogicError(line, "tsubst: unification failed")
 
 def box_intro(line, book, S, args):
-    assert len(args) == 1
-    Gamma, A = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "box_intro")
+    Gamma, A = lookup(book, args[0], line)
     if len(Gamma) != 0:
         raise LogicError(line, "box_intro expects a theorem")
     if len(S[0]) != 0:
@@ -752,8 +764,8 @@ def box_intro(line, book, S, args):
         raise LogicError(line, "box_intro produces different sequent")
 
 def uq_intro(line, book, S, args):
-    assert len(args) == 1
-    Gamma, A = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "uq_intro")
+    Gamma, A = lookup(book, args[0], line)
     uqA = S[1]
     if not is_connective(uqA, "forall"):
         raise LogicError(line, "uq_intro produces a universal quantifier")
@@ -771,8 +783,8 @@ def uq_intro(line, book, S, args):
         raise LogicError(line, "uq_intro produces different sequent")
 
 def uq_elim(line, book, S, args):
-    assert len(args) == 1
-    Gamma, A = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "uq_elim")
+    Gamma, A = lookup(book, args[0], line)
     if not is_connective(A, "forall"):
         raise LogicError(line, "uq_elim expects a universal quantifier")
     subs = {}
@@ -782,8 +794,8 @@ def uq_elim(line, book, S, args):
         raise LogicError(line, "uq_elim produces different sequent")
 
 def ex_intro(line, book, S, args):
-    assert len(args) == 1
-    Gamma, A = book[args[0]]
+    if len(args) != 1: expect_len(line, args, 1, "ex_intro")
+    Gamma, A = lookup(book, args[0], line)
     if not is_connective(S[1], "exists"):
         raise LogicError(line, "ex_intro produces a existential quantifier")
     exA = S[1]; subs = {}
@@ -793,9 +805,9 @@ def ex_intro(line, book, S, args):
         raise LogicError(line, "ex_intro produces different sequent")
 
 def ex_elim(line, book, S, args):
-    assert len(args) == 2
-    Gamma1, exA = book[args[0]]
-    Gamma2, B = book[args[1]]
+    if len(args) != 2: expect_len(line, args, 2, "ex_elim")
+    Gamma1, exA = lookup(book, args[0], line)
+    Gamma2, B = lookup(book, args[1], line)
     if not is_connective(exA, "exists"):
         raise LogicError(line, "ex_elim expects an existential quantifier")
     if not len(Gamma2) != 0:
@@ -820,7 +832,7 @@ def ex_elim(line, book, S, args):
         raise LogicError(line, "ex_elim produces different sequent")
 
 def definition(line, book, S, args):
-    assert len(args) == 0
+    if len(args) != 0: expect_len(line, args, 0, "def")
     Gamma, C = S
     if len(Gamma) != 0:
         raise LogicError(line, "definition expects empty context")
@@ -879,11 +891,14 @@ def verify_plain(s):
     book = {}
     for (line, label, Gamma, A, rule) in statements:
         book[label] = (None, A)
-        Gamma = tuple(book[k][1] for k in Gamma)
+        Gamma = tuple(lookup(book, k, line)[1] for k in Gamma)
         book[label] = (Gamma, A)
         if not rule[0] in verify_tab:
             raise LogicError(line, "rule {} not found".format(rule[0]))
-        verify_tab[rule[0]](line, book, (Gamma, A), rule[1:])
+        args = rule[1:]
+        if label in args:
+            raise LogicError(line, "cyclic deduction")
+        verify_tab[rule[0]](line, book, (Gamma, A), args)
 
 def verify(s):
     try:

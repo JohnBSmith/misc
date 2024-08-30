@@ -1,0 +1,32 @@
+
+# A basic example of group theory.
+
+eq_refl. ⊢ x = x, axiom.
+eq_symm. ⊢ x = y → y = x, axiom.
+eq_trans. ⊢ x = y → y = z → x = z, axiom.
+
+0. ⊢ mul a b = some_function, def.
+assoc. ⊢ mul a (mul b c) = mul (mul a b) c, axiom.
+neut_equi. ⊢ neut e ↔ ∀a. mul e a = a ∧ mul a e = a, def.
+neut. ⊢ ∃e. neut e, axiom.
+
+neut_unfold. ⊢ neut e → ∀a. mul e a = a ∧ mul a e = a,
+  bij_eliml neut_equi.
+
+1. 1 ⊢ neut e ∧ neut f, basic.
+2. 1 ⊢ neut e, conj_eliml 1.
+3. 1 ⊢ neut f, conj_elimr 1.
+4. 1 ⊢ ∀a. mul e a = a ∧ mul a e = a, subj_elim neut_unfold 2.
+5. ⊢ neut f → ∀a. mul f a = a ∧ mul a f = a, tsubst neut_unfold.
+6. 1 ⊢ ∀a. mul f a = a ∧ mul a f = a, subj_elim 5 3.
+7. 1 ⊢ mul e f = f ∧ mul f e = f, uq_elim 4.
+8. 1 ⊢ mul f e = e ∧ mul e f = e, uq_elim 6.
+9. 1 ⊢ mul e f = f, conj_eliml 7.
+10. 1 ⊢ mul e f = e, conj_elimr 8.
+11. ⊢ mul e f = e → e = mul e f, tsubst eq_symm.
+12. 1 ⊢ e = mul e f, subj_elim 11 10.
+13. ⊢ e = mul e f → mul e f = f → e = f, tsubst eq_trans.
+14. 1 ⊢ mul e f = f → e = f, subj_elim 13 12.
+15. 1 ⊢ e = f, subj_elim 14 9.
+neut_unique. ⊢ neut e ∧ neut f → e = f, subj_intro 15.
+
