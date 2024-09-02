@@ -21,27 +21,19 @@ class LogicError(ValueError):
         self.line = line
         self.text = text
 
-class Formula:
-    def __init__(self, node):
-        self.node = node
-    def __repr__(self):
-        if isinstance(self.node, tuple):
-            return "FORM(" + ", ".join(str(x) for x in self.node) + ")"
-        else:
-            return "FORM " + str(self.node)
-    def __eq__(self, y):
-        return isinstance(y, Formula) and self.node == y.node
-
 class Term:
-    def __init__(self, node):
-        self.node = node
+    def __init__(self, node, type):
+        self.node = node; self.type = type
     def __repr__(self):
         if isinstance(self.node, tuple):
-            return "TERM(" + ", ".join(str(x) for x in self.node) + ")"
+            return f"{self.type}(" + ", ".join(str(x) for x in self.node) + ")"
         else:
-            return "TERM " + str(self.node)
+            return f"{self.type} " + str(self.node)
     def __eq__(self, y):
-        return isinstance(y, Term) and self.node == y.node
+        return isinstance(y, Term) and self.type == y.type and self.node == y.node
+
+Prop = "Prop"
+Ind = "Ind"
 
 sym2 = {"->": "->", "=>": "->", "|-": "|-", "/\\": "&", "\\/": "\\/"}
 sym3 = {"<->": "<->", "<=>": "<->", "_|_": "#f"}
@@ -113,47 +105,42 @@ def is_unique_variable(t):
     return isinstance(t, str) and t[0] == '$'
 
 var_count = 0
-def unique_variable():
+def unique_variable(type):
     global var_count
     var_count += 1
-    return "$" + str(var_count)
+    return Term("$" + str(var_count), type)
 
 def substitute_term(t, x, u):
-    if isinstance(t, Formula):
+    if isinstance(t, Term):
         if isinstance(t.node, tuple):
-            return Formula((t.node[0],) + tuple(substitute_term(s, x, u) for s in t.node[1:]))
-        else:
-            return t
-    elif isinstance(t, Term):
-        if is_unique_variable(t.node) or is_identifier(t.node):
+            return Term((t.node[0],) + tuple(substitute_term(s, x, u) for s in t.node[1:]), t.type)
+        elif is_unique_variable(t.node) or is_identifier(t.node):
             if isinstance(x, list):
                 for i in range(len(x)):
-                    return u[i] if t == x[i] else t
+                    return u[i] if t.node == x[i].node else t
             else:
-                return u if t == x else t
+                return u if t.node == x.node else t
         else:
-            return Term((t.node[0],) + tuple(substitute_term(s, x, u) for s in t.node[1:]))
+            return t
     else:
         return t
 
 def free_variables(t, fv):
-    if isinstance(t, Formula) and is_identifier(t.node):
-        return fv
-    elif isinstance(t, Term) and is_identifier(t.node):
-        fv.add(t.node)
-        return fv
-    elif (isinstance(t, Formula) or isinstance(t, Term)
-    and isinstance(t.node, tuple)):
-        if t.node[0] == "app":
-            for s in t.node[2:]:
+    if isinstance(t, Term):
+        if is_identifier(t.node):
+            if t.type != Prop:
+                return fv.add(t.node)
+            return fv
+        elif isinstance(t.node, tuple):
+            start = 2 if t.node[0] == "app" else 1
+            for s in t.node[start:]:
                 free_variables(s, fv)
+            return fv
+        elif isinstance(t.node, str) and t.node[0] == "$":
+            return fv
         else:
-            for s in t.node[1:]:
-                free_variables(s, fv)
-        return fv
+            raise Exception("unreachable")
     elif isinstance(t, str) and t[0] == "$":
-        return fv
-    elif isinstance(t, Term) and isinstance(t.node, str) and t.node[0] == "$":
         return fv
     else:
         raise Exception("unreachable")
@@ -164,16 +151,16 @@ def free_variables_context(Gamma, fv):
     return fv
 
 def form_eq(A, B):
-    if isinstance(A, Formula) or isinstance(A, Term):
-        if type(A) != type(B): return False
+    if isinstance(A, Term):
+        if A.type != B.type: return False
         if isinstance(A.node, tuple):
             if not isinstance(B.node, tuple) or len(A.node) != len(B.node):
                 return False
             if A.node[0] != B.node[0]: return False
             if A.node[0] == "forall" or A.node[0] == "exists" or A.node[0] == "lambda":
-                u = unique_variable()
-                A = substitute_term(A.node[2], Term(A.node[1]), Term(u))
-                B = substitute_term(B.node[2], Term(B.node[1]), Term(u))
+                u = unique_variable(Ind)
+                A = substitute_term(A.node[2], Term(A.node[1], Ind), u)
+                B = substitute_term(B.node[2], Term(B.node[1], Ind), u)
                 return form_eq(A, B)
             else:
                 for i in range(len(A.node)):
@@ -202,25 +189,33 @@ def seq_eq(S1, S2):
     return ctx_eq(Gamma1, Gamma2) and form_eq(A, B)
 
 def ensure_formula(t, line):
-    if isinstance(t, Formula):
-        return t
-    elif isinstance(t, Term):
-        raise SyntaxError(line, "expected a formula")
+    if isinstance(t, Term):
+        if t.type == None:
+            t.type = Prop
+            return t
+        elif t.type == Prop:
+            return t
+        else:
+            raise SyntaxError(line, "expected a formula")
     else:
-        return Formula(t)
+        raise Exception("unreachable")
 
 def ensure_term(t, line):
     if isinstance(t, Term):
-        return t
-    elif isinstance(t, Formula):
-        raise SyntaxError(line, "expected a term")
+        if t.type == Ind:
+            return t
+        elif t.type == None:
+            t.type = Ind
+            return t
+        else:
+            raise SyntaxError(line, "expected a term")
     else:
-        return Term(t)
+        raise Exception("unreachable")
 
 def quantifier(a, i, op):
     token = a[i][0]
     if is_identifier(token):
-        var = Term(token); i += 1
+        var = Term(token, Ind); i += 1
     else:
         raise SyntaxError(a[i][1], "expected a variable")
     if a[i][0] == ":" or a[i][0] == ".":
@@ -230,14 +225,14 @@ def quantifier(a, i, op):
     line = a[i][1]
     i, x = bijunction(a, i)
     x = ensure_formula(x, line)
-    u = unique_variable()
-    x = substitute_term(x, var, Term(u))
-    return i, (op, u, x)
+    u = unique_variable(Ind)
+    x = substitute_term(x, var, u)
+    return i, Term((op, u.node, x), Prop)
 
 def lambda_term(a, i):
     token = a[i][0]
     if is_identifier(token):
-        var = Term(token); i += 1
+        var = Term(token, Ind); i += 1
     else:
         raise SyntaxError(a[i][1], "expected a variable")
     if a[i][0] == ":" or a[i][0] == ".":
@@ -245,15 +240,16 @@ def lambda_term(a, i):
     else:
         raise SyntaxError(a[i][1], "expected ':'")
     i, x = bijunction(a, i)
-    u = unique_variable()
-    x = substitute_term(x, var, Term(u))
-    return i, Term(("lambda", u, x))
+    u = unique_variable(Ind)
+    x = substitute_term(x, var, u)
+    return i, Term(("lambda", u.node, x), (Ind, Prop))
 
 def set_literal(a, i, x):
-    x = ("app", "sg", x)
+    x = Term(("app", "sg", ensure_term(x, a[i][1])), Ind)
     while a[i][0] == ",":
         i, y = addition(a, i + 1)
-        x = ("app", "union2", x, ("app", "sg", y))
+        y = Term(("app", "sg", ensure_term(y, a[i][1])), Ind)
+        x = Term(("app", "union2", x, y), Ind)
     if a[i][0] != "}":
         raise SyntaxError(a[i][1], "expected '}'")
     return i + 1, x
@@ -265,59 +261,55 @@ def comprehension(a, i):
         return set_literal(a, i, x)
     elif a[i][0] != "|":
         raise SyntaxError(a[i][1], "expected '|'")
-    if is_identifier(x):
-        x = Term(x)
-    else:
+    if not isinstance(x, Term) or not is_identifier(x.node):
         raise SyntaxError(line, "expected identifier after '{'")
+    x.type = Ind
     line = a[i][1]
     i, A = bijunction(a, i + 1)
     A = ensure_formula(A, line)
     if a[i][0] != "}":
         raise SyntaxError(a[i][1], "expected '}'")
-    u = unique_variable()
-    A = substitute_term(A, x, Term(u))
-    return i + 1, Term(("app", "comp", Term(("lambda", u, A))))
+    u = unique_variable(Ind)
+    A = substitute_term(A, x, u)
+    pred = Term(("lambda", u.node, A), (Ind, Prop))
+    return i + 1, Term(("app", "comp", pred), Ind)
 
-def typed(t, token, SortArgs, SortValue):
+def typed(t, token, TypeArgs, TypeValue):
     line = token[1]
     if isinstance(t, tuple):
-        acc = []
-        if t[0] == "app":
-            acc.append(t[1])
-            start_index = 2
-        else:
-            start_index = 1
+        start_index = 2 if t[0] == "app" else 1
         for x in t[start_index:]:
-            if isinstance(x, SortArgs):
-                acc.append(x)
-            elif isinstance(x, str) or isinstance(x, tuple):
-                acc.append(SortArgs(x))
+            if isinstance(x, Term):
+                if x.type == None:
+                    x.type = TypeArgs
+                elif x.type != TypeArgs:
+                    sort = "term" if TypeArgs == Ind else "formula"
+                    raise SyntaxError(line, f"{token[0]} expects a {sort}")
             else:
-                sort = "term" if SortArgs == Term else "formula"
-                raise SyntaxError(line, f"{token[0]} expects a {sort}")
-        return SortValue((t[0],) + tuple(acc))
+                raise Exception("unreachable")
+        return Term(t, TypeValue)
     else:
         raise Exception("unreachable")
 
-def formula(t, token, Sort):
-    return typed(t, token, Sort, Formula)
+def formula(t, token, TypeArgs):
+    return typed(t, token, TypeArgs, Prop)
 
-def term(t, token, Sort):
-    return typed(t, token, Sort, Term)
+def term(t, token, TypeArgs):
+    return typed(t, token, TypeArgs, Ind)
 
 def atom(a, i):
     token = a[i][0]
     if is_identifier(token):
-        return i + 1, token
+        return i + 1, Term(token, None)
     elif token == "#f" or token == "⊥":
-        return i + 1, Formula(("false",))
+        return i + 1, Term(("false",), Prop)
     elif token == "#t":
-        return i + 1, Formula(("true",))
+        return i + 1, Term(("true",), Prop)
     elif token == "(":
         i, x = bijunction(a, i + 1)
         if a[i][0] == ",":
             i, y = addition(a, i + 1)
-            x = term(("app", "pair", x, y), a[i], Term)
+            x = term(("app", "pair", x, y), a[i], Ind)
         if a[i][0] != ")":
             raise SyntaxError(a[i][1], "expected ')'")
         return i + 1, x
@@ -333,14 +325,17 @@ def atom(a, i):
         raise SyntaxError(a[i][1], "expected an atom, but got '{}'".format(token))
 
 def application(a, i):
+    line0 = a[i][1]
     i, x = atom(a, i)
     if is_identifier(a[i][0]) or a[i][0] == "(" or a[i][0] == "{":
         args = []
         while is_identifier(a[i][0]) or a[i][0] == "(" or a[i][0] == "{":
             line = a[i][1]
             i, y = atom(a, i)
-            args.append(ensure_term(y, line))
-        return i, ("app", x) + tuple(args)
+            args.append(y)
+        if not isinstance(x, Term) or not isinstance(x.node, str):
+            raise SyntaxError(line0, "predicate or function must be an identifier")
+        return i, Term(("app", x.node) + tuple(args), None)
     else:
         return i, x
 
@@ -349,7 +344,7 @@ def multiplication(a, i):
     while a[i][0] == "#cap" or a[i][0] == "∩":
         token = a[i]
         i, y = application(a, i + 1)
-        x = term(("app", "intersection", x, y), token, Term)
+        x = term(("app", "intersection", x, y), token, Ind)
     return i, x
 
 def addition(a, i):
@@ -357,7 +352,7 @@ def addition(a, i):
     while a[i][0] == "#cup" or a[i][0] == "∪":
         token = a[i]
         i, y = multiplication(a, i + 1)
-        x = term(("app", "union", x, y), token, Term)
+        x = term(("app", "union", x, y), token, Ind)
     return i, x
 
 def relation(a, i):
@@ -365,13 +360,13 @@ def relation(a, i):
     token = a[i]
     if a[i][0] == "#in" or a[i][0] == "∈":
         i, y = addition(a, i + 1)
-        return i, formula(("app", "element", x, y), token, Term)
+        return i, formula(("app", "element", x, y), token, Ind)
     elif a[i][0] == "#sub" or a[i][0] == "⊆":
         i, y = addition(a, i + 1)
-        return i, formula(("app", "subset", x, y), token, Term)
+        return i, formula(("app", "subset", x, y), token, Ind)
     elif a[i][0] == "=":
         i, y = addition(a, i + 1)
-        return i, formula(("app", "eq", x, y), token, Term)
+        return i, formula(("app", "eq", x, y), token, Ind)
     else:
         return i, x
 
@@ -379,13 +374,13 @@ def negation(a, i):
     token = a[i]
     if token[0] == "~" or token[0] == "¬":
         i, x = negation(a, i + 1)
-        return i, formula(("neg", x), token, Formula)
+        return i, formula(("neg", x), token, Prop)
     elif token[0] == "#box" or token[0] == "□":
         i, x = negation(a, i + 1)
-        return i, formula(("box", x), token, Formula)
+        return i, formula(("box", x), token, Prop)
     elif token[0] == "#dia" or token[0] == "◇":
         i, x = negation(a, i + 1)
-        return i, formula(("dia", x), token, Formula)
+        return i, formula(("dia", x), token, Prop)
     else:
         return relation(a, i)
 
@@ -394,7 +389,7 @@ def conjunction(a, i):
     while a[i][0] == "&" or a[i][0] == "∧":
         token = a[i]
         i, y = negation(a, i + 1)
-        x = formula(("conj", x, y), token, Formula)
+        x = formula(("conj", x, y), token, Prop)
     return i, x
 
 def disjunction(a, i):
@@ -402,7 +397,7 @@ def disjunction(a, i):
     while a[i][0] == "\\/" or a[i][0] == "∨":
         token = a[i]
         i, y = conjunction(a, i + 1)
-        x = formula(("disj", x, y), token, Formula)
+        x = formula(("disj", x, y), token, Prop)
     return i, x
     
 def subjunction(a, i):
@@ -410,7 +405,7 @@ def subjunction(a, i):
     token = a[i]
     if token[0] == "->" or token[0] == "→" or token[0] == "⇒":
         i, y = subjunction(a, i + 1)
-        return i, formula(("subj", x, y), token, Formula)
+        return i, formula(("subj", x, y), token, Prop)
     else:
         return i, x
 
@@ -419,9 +414,24 @@ def bijunction(a, i):
     token = a[i]
     if token[0] == "<->" or token[0] == "↔" or token[0] == "⇔":
         i, y = subjunction(a, i + 1)
-        return i, formula(("bij", x, y), token, Formula)
+        return i, formula(("bij", x, y), token, Prop)
     else:
         return i, x
+
+def type_check(line, t, record):
+    if isinstance(t, Term) and isinstance(t.node, str):
+        if t.node in record:
+            if record[t.node] != t.type:
+                if t.type == None:
+                    t.type = record[t.node]
+                else:
+                    raise LogicError(line, f"Type error for {t.node}")
+        else:
+            if t.type == None: t.type = Ind
+            record[t.node] = t.type
+    elif isinstance(t, Term) and isinstance(t.node, tuple):
+        for x in t.node:
+            type_check(line, x, record)
 
 def context(a, i):
     acc = []
@@ -442,6 +452,7 @@ def sequent(a, i):
         line = a[i][1]
         i, x = bijunction(a, i + 1)
         x = ensure_formula(x, line)
+        type_check(line, x, {})
         return i, (ctx, x)
     else:
         raise SyntaxError(a[i][1], "expected context")
@@ -507,7 +518,7 @@ def expect_len(line, args, n, rule_name):
         f"rule {rule_name} expects {n} argument{s}, but got {len(args)}")
 
 def is_connective(A, symbol):
-    return isinstance(A, Formula) and isinstance(A.node, tuple) and A.node[0] == symbol
+    return isinstance(A, Term) and isinstance(A.node, tuple) and A.node[0] == symbol
 
 def basic_seq(line, book, S, args):
     if len(args) != 0: expect_len(line, args, 0, "basic")
@@ -519,7 +530,7 @@ def conj_intro(line, book, S, args):
     if len(args) != 2: expect_len(line, args, 2, "conj_intro")
     Gamma1, A = lookup(book, args[0], line)
     Gamma2, B = lookup(book, args[1], line)
-    S0 = (union(Gamma1, Gamma2), Formula(("conj", A, B)))
+    S0 = (union(Gamma1, Gamma2), Term(("conj", A, B), Prop))
     if not seq_eq(S, S0):
         raise LogicError(line, "conj_intro produces different sequent")
 
@@ -550,7 +561,7 @@ def subj_intro(line, book, S, args):
     A = C.node[1]
     if not form_in(A, Gamma):
         raise LogicError(line, "subj_intro failed: {} not in {}".format(A, Gamma))
-    S0 = (difference(Gamma, A), Formula(("subj", A, B)))
+    S0 = (difference(Gamma, A), Term(("subj", A, B), Prop))
     if not seq_eq(S, S0):
         raise LogicError(line, "subj_intro produces different sequent")
 
@@ -570,12 +581,12 @@ def neg_intro(line, book, S, args):
     C = S[1]
     if not is_connective(C, "neg"):
         raise LogicError(line, "neg_intro produces different sequent")
-    if B != Formula(("false",)):
+    if B != Term(("false",), Prop):
         raise LogicError(line, "neg_intro expects ⊥")
     A = C.node[1]
     if not form_in(A, Gamma):
         raise LogicError(line, "neg_intro failed: {} not in {}".format(A, Gamma))
-    S0 = (difference(Gamma, A), Formula(("neg", A)))
+    S0 = (difference(Gamma, A), Term(("neg", A), Prop))
     if not seq_eq(S, S0):
         raise LogicError(line, "neg_intro produces different sequent")
 
@@ -585,7 +596,7 @@ def neg_elim(line, book, S, args):
     Gamma2, A = lookup(book, args[1], line)
     if not is_connective(C, "neg") or not form_eq(C.node[1], A):
         raise LogicError(line, "neg_elim expected a matching negation")
-    S0 = (union(Gamma1, Gamma2), Formula(("false",)))
+    S0 = (union(Gamma1, Gamma2), Term(("false",), Prop))
     if not seq_eq(S, S0):
         raise LogicError(line, "neg_elim produces different sequent")
 
@@ -595,7 +606,7 @@ def disj_introl(line, book, S, args):
     C = S[1]
     if not is_connective(C, "disj"):
         raise LogicError(line, "disj_introl produces different sequent")
-    S0 = (Gamma, Formula(("disj", A, C.node[2])))
+    S0 = (Gamma, Term(("disj", A, C.node[2]), Prop))
     if not seq_eq(S, S0):
         raise LogicError(line, "disj_introl produces different sequent")
 
@@ -605,7 +616,7 @@ def disj_intror(line, book, S, args):
     C = S[1]
     if not is_connective(C, "disj"):
         raise LogicError(line, "disj_introl produces different sequent")
-    S0 = (Gamma, Formula(("disj", C.node[1], A)))
+    S0 = (Gamma, Term(("disj", C.node[1], A), Prop))
     if not seq_eq(S, S0):
         raise LogicError(line, "disj_introl produces different sequent")
 
@@ -630,7 +641,7 @@ def bij_intro(line, book, S, args):
     if (not is_connective(A, "subj") or not is_connective(B, "subj") or
         not form_eq(A.node[1], B.node[2]) or not form_eq(A.node[2], B.node[1])):
         raise LogicError(line, "bij_intro expects matching subjunctions")
-    S0 = (union(Gamma1, Gamma2), Formula(("bij", A.node[1], A.node[2])))
+    S0 = (union(Gamma1, Gamma2), Term(("bij", A.node[1], A.node[2]), Prop))
     if not seq_eq(S, S0):
         raise LogicError(line, "bij_intro produces different sequent")
 
@@ -639,7 +650,7 @@ def bij_eliml(line, book, S, args):
     Gamma, A = lookup(book, args[0], line)
     if not is_connective(A, "bij"):
         raise LogicError(line, "bij_eliml expects a bijunction")
-    S0 = (Gamma, Formula(("subj", A.node[1], A.node[2])))
+    S0 = (Gamma, Term(("subj", A.node[1], A.node[2]), Prop))
     if not seq_eq(S, S0):
         raise LogicError(line, "bij_eliml produces different sequent")
 
@@ -648,7 +659,7 @@ def bij_elimr(line, book, S, args):
     Gamma, A = lookup(book, args[0], line)
     if not is_connective(A, "bij"):
         raise LogicError(line, "bij_elimr expects a bijunction")
-    S0 = (Gamma, Formula(("subj", A.node[2], A.node[1])))
+    S0 = (Gamma, Term(("subj", A.node[2], A.node[1]), Prop))
     if not seq_eq(S, S0):
         raise LogicError(line, "bij_elimr produces different sequent")
 
@@ -668,63 +679,36 @@ def unify_pred(A, pattern, subst):
         subst[P] = lambda argv: substitute_term(A, args, argv)
         return True
 
-def unify(A, pattern, subst):
-    if isinstance(pattern, Formula) and isinstance(pattern.node, str):
-        if pattern.node in predicate_symbols or pattern.node in function_symbols:
+def unify(A, pattern, subst, single = None):
+    if isinstance(pattern, Term) and isinstance(pattern.node, str):
+        if single != None and pattern.node != single:
+            return pattern == A
+        elif pattern.node in predicate_symbols or pattern.node in function_symbols:
             return pattern == A
         elif pattern.node in subst:
             if not form_eq(subst[pattern.node], A): return False
         else:
+            if pattern.type != A.type:
+                return False
             subst[pattern.node] = A
         return True
-    elif isinstance(pattern, Term) and isinstance(pattern.node, str):
-        return pattern == A
-    elif isinstance(pattern, Formula) or isinstance(pattern, Term):
-        if type(A) != type(pattern): return False
-        if (isinstance(pattern, Formula) and pattern.node[0] == "app"
+    elif isinstance(pattern, Term):
+        if A.type != pattern.type: return False
+        if single == None and (pattern.type == Prop and pattern.node[0] == "app"
         and not pattern.node[1] in predicate_symbols):
-            return unify_pred(A, pattern, subst)
+            if not (isinstance(A.node, tuple) and A.node[0] == "app"
+            and pattern.node[1] == A.node[1]):
+                return unify_pred(A, pattern, subst)
         if not isinstance(A.node, tuple): return False
         if not len(A.node) == len(pattern.node): return False
         if not A.node[0] == pattern.node[0]: return False
         if A.node[0] == "forall" or A.node[0] == "exists" or A.node[0] == "lambda":
-            u = unique_variable()
-            A = substitute_term(A.node[2], Term(A.node[1]), Term(u))
-            B = substitute_term(pattern.node[2], Term(pattern.node[1]), Term(u))
-            return unify(A, B, subst)
+            u = unique_variable(Ind)
+            A = substitute_term(A.node[2], Term(A.node[1], Ind), u)
+            B = substitute_term(pattern.node[2], Term(pattern.node[1], Ind), u)
+            return unify(A, B, subst, single)
         for i in range(1, len(A.node)):
-            if not unify(A.node[i], pattern.node[i], subst):
-                return False
-        return True
-    elif isinstance(pattern, str):
-        return pattern == A
-    else:
-        raise Exception("unreachable")
-
-def unify_quant(A, pattern, subst):
-    if isinstance(pattern, Term) and isinstance(pattern.node, str):
-        if pattern.node in predicate_symbols or pattern.node in function_symbols:
-            return pattern == A
-        elif pattern.node in subst:
-            if not form_eq(subst[pattern.node], A):
-                return False
-        else:
-            subst[pattern.node] = A
-        return True
-    elif isinstance(pattern, Formula) and isinstance(pattern.node, str):
-        return pattern == A
-    elif isinstance(pattern, Formula) or isinstance(pattern, Term):
-        if type(A) != type(pattern): return False        
-        if not isinstance(A.node, tuple): return False
-        if not len(A.node) == len(pattern.node): return False
-        if not A.node[0] == pattern.node[0]: return False
-        if A.node[0] == "forall" or A.node[0] == "exists" or A.node[0] == "lambda":
-            u = unique_variable()
-            A = substitute_term(A.node[2], Term(A.node[1]), Term(u))
-            B = substitute_term(pattern.node[2], Term(pattern.node[1]), Term(u))
-            return unify_quant(A, B, subst)
-        for i in range(1, len(A.node)):
-            if not unify_quant(A.node[i], pattern.node[i], subst):
+            if not unify(A.node[i], pattern.node[i], subst, single):
                 return False
         return True
     elif isinstance(pattern, str):
@@ -742,16 +726,6 @@ def substitution(line, book, S, args):
     if not unify(S[1], A, {}):
         raise LogicError(line, "subst: unification failed")
 
-def term_substitution(line, book, S, args):
-    if len(args) != 1: expect_len(line, args, 1, "tsubst")
-    Gamma, A = lookup(book, args[0], line)
-    if len(Gamma) != 0:
-        raise LogicError(line, "tsubst expects a theorem")
-    if len(S[0]) != 0:
-        raise LogicError(line, "tsubst produces a theorem")
-    if not unify_quant(S[1], A, {}):
-        raise LogicError(line, "tsubst: unification failed")
-
 def box_intro(line, book, S, args):
     if len(args) != 1: expect_len(line, args, 1, "box_intro")
     Gamma, A = lookup(book, args[0], line)
@@ -759,7 +733,7 @@ def box_intro(line, book, S, args):
         raise LogicError(line, "box_intro expects a theorem")
     if len(S[0]) != 0:
         raise LogicError(line, "box_intro produces a theorem")
-    S0 = (Gamma, ("box", A))
+    S0 = (Gamma, Term(("box", A), Prop))
     if not seq_eq(S, S0):
         raise LogicError(line, "box_intro produces different sequent")
 
@@ -770,15 +744,15 @@ def uq_intro(line, book, S, args):
     if not is_connective(uqA, "forall"):
         raise LogicError(line, "uq_intro produces a universal quantifier")
     subs = {}
-    if not unify_quant(A, uqA.node[2], subs):
+    if not unify(A, uqA.node[2], subs, uqA.node[1]):
         raise LogicError(line, "uq_intro: unification failed")
     var = uqA.node[1]
     if var in subs:
         var = subs[var]
-        if not isinstance(var, Term) or not isinstance(var.node, str):
+        if not isinstance(var, Term) or var.type == Prop or not isinstance(var.node, str):
             raise LogicError(line, "uq_intro expects a variable")
         if var.node in free_variables_context(Gamma, set()):
-            raise LogicError(line, f"uq_intro: variable {var} cannot be generalized")
+            raise LogicError(line, f"uq_intro: variable {var.node} cannot be generalized")
     if not ctx_eq(Gamma, S[0]):
         raise LogicError(line, "uq_intro produces different sequent")
 
@@ -788,7 +762,7 @@ def uq_elim(line, book, S, args):
     if not is_connective(A, "forall"):
         raise LogicError(line, "uq_elim expects a universal quantifier")
     subs = {}
-    if not unify_quant(S[1], A.node[2], subs):
+    if not unify(S[1], A.node[2], subs, A.node[1]):
         raise LogicError(line, "uq_elim: unification failed")
     if not ctx_eq(Gamma, S[0]):
         raise LogicError(line, "uq_elim produces different sequent")
@@ -799,7 +773,7 @@ def ex_intro(line, book, S, args):
     if not is_connective(S[1], "exists"):
         raise LogicError(line, "ex_intro produces a existential quantifier")
     exA = S[1]; subs = {}
-    if not unify_quant(A, exA.node[2], subs):
+    if not unify(A, exA.node[2], subs, exA.node[1]):
         raise LogicError(line, "ex_intro: unification failed")
     if not ctx_eq(Gamma, S[0]):
         raise LogicError(line, "ex_intro produces different sequent")
@@ -814,19 +788,19 @@ def ex_elim(line, book, S, args):
         raise LogicError(line, "ex_elim context of second sequent is empty")
     A = Gamma2[-1]; Gamma2 = Gamma2[:-1]
     subs = {}
-    if not unify_quant(A, exA.node[2], subs):
+    if not unify(A, exA.node[2], subs, exA.node[1]):
         raise LogicError(line, "ex_elim: unification failed")
     var = exA.node[1]
     if var in subs:
         var = subs[var]
-        if not isinstance(var, Term) or not isinstance(var.node, str):
+        if not isinstance(var, Term) or var.type == Prop or not isinstance(var.node, str):
             raise LogicError(line, "ex_elim expects a variable")
         var = var.node
         if (var in free_variables_context(Gamma1, set()) or
             var in free_variables_context(Gamma2, set()) or
             var in free_variables(B, set()) or
             var in free_variables(exA, set())):
-            raise LogicError(line, f"ex_elim: formulas depend on variable {var}")
+            raise LogicError(line, f"ex_elim: formulas depend on variable {var.node}")
     S0 = (union(Gamma1, Gamma2), B)
     if not seq_eq(S, S0):
         raise LogicError(line, "ex_elim produces different sequent")
@@ -843,8 +817,7 @@ def definition(line, book, S, args):
         if A.node[1] in predicate_symbols:
             raise LogicError(line, "already defined")
         predicate_symbols[A.node[1]] = len(A.node) - 2
-    elif (isinstance(C, Formula) and isinstance(C.node, tuple)
-    and C.node[0] == "app" and C.node[1] == "eq"):
+    elif is_connective(C, "app") and C.node[1] == "eq":
         A = C.node[2]; B = C.node[3]
         if isinstance(A.node, str):
             if A.node in function_symbols:
@@ -876,7 +849,6 @@ verify_tab = {
     "bij_elimr": bij_elimr,
     "mp": subj_elim,
     "subst": substitution,
-    "tsubst": term_substitution,
     "axiom": axiom,
     "box_intro": box_intro,
     "uq_intro": uq_intro,

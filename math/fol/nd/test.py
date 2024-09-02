@@ -220,29 +220,29 @@ DNE. |- ~~A -> A, axiom.
 """), # It's fine, 1 is more general than 2.
 ("5.7", Ok, """
 1. |- forall y. P y y, axiom.
-2. |- forall x. P x y, subst 1.
+2. |- forall x. Q x y, subst 1.
 """), # Also fine, this time because P is schematic.
 ("5.8", Ok, """
 1. |- forall x. x in y, axiom.
-2. |- forall y. y in y, tsubst 1.
+2. |- forall y. y in y, subst 1.
 """), # Same argument as 5.6.
 ("5.9", ErrLogic, """
 1. |- forall y. y in y, axiom.
-2. |- forall x. x in y, tsubst 1.
+2. |- forall x. x in y, subst 1.
 """), # This time it needs to fail.
 ("5.10", Ok, """
 1. |- p x y <-> true, def.
 2. |- forall x. p x y, axiom.
-3. |- forall y. p y y, tsubst 2.
+3. |- forall y. p y y, subst 2.
 """),
 ("5.11", ErrLogic, """
 1. |- p x y <-> true, def.
 2. |- forall y. p y y, axiom.
-3. |- forall x. p x y, tsubst 2.
+3. |- forall x. p x y, subst 2.
 """),
 ("5.12", Ok, """
 1. |- P x, axiom.
-2. |- P x y, subst 1.
+2. |- Q x y, subst 1.
 """),
 ("5.12", ErrLogic, """
 1. |- p x <-> true, def.
