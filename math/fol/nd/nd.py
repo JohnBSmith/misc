@@ -98,6 +98,13 @@ def fmt_ast(t):
 def fmt_subst(subst):
     return "{" + ", ".join(f"{A}: {fmt_ast(B)}" for (A, B) in subst.items()) + "}"
 
+def occurs_as_fn(x, t):
+    if isinstance(t, Term) and isinstance(t.node, tuple):
+        if t.node[0] == "app" and t.node[1] == x:
+            return True
+        return any(occurs_as_fn(x, s) for s in t.node[2:])
+    return False
+
 def is_identifier(t):
     return isinstance(t, str) and t[0].isalpha()
 
@@ -117,7 +124,8 @@ def substitute_term(t, x, u):
         elif is_unique_variable(t.node) or is_identifier(t.node):
             if isinstance(x, list):
                 for i in range(len(x)):
-                    return u[i] if t.node == x[i].node else t
+                    if t.node == x[i].node: return u[i]
+                return t
             else:
                 return u if t.node == x.node else t
         else:
@@ -226,6 +234,8 @@ def quantifier(a, i, op):
     i, x = bijunction(a, i)
     x = ensure_formula(x, line)
     u = unique_variable(Ind)
+    if occurs_as_fn(var.node, x):
+        raise LogicError(line, "cannot quantify over a predicate/function")
     x = substitute_term(x, var, u)
     return i, Term((op, u.node, x), Prop)
 
