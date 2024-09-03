@@ -1,0 +1,75 @@
+
+# The axioms of Zermelo-Fraenkel set theory with choice
+# in unfolded form, without definitional extensions.
+
+dne. ⊢ ¬¬A → A, axiom.
+eq_refl. ⊢ x = x, axiom.
+eq_subst. ⊢ x = y → P x → P y, axiom.
+
+ax_ext. ⊢ (∀z. z ∈ x ↔ z ∈ y) → x = y, axiom.
+ax_sep. ⊢ ∃y. ∀x. x ∈ y ↔ x ∈ z ∧ P x, axiom.
+ax_pair. ⊢ ∃z. x ∈ z ∧ y ∈ z, axiom.
+ax_union. ⊢ ∃u. ∀y. ∀x. x ∈ y ∧ y ∈ s → x ∈ u, axiom. 
+ax_power. ⊢ ∃y. ∀z. (∀u. u ∈ z → u ∈ x) → z ∈ y, axiom.
+ax_inf. ⊢ ∃I. (∃o. o ∈ I ∧ ¬∃n. n ∈ o) ∧
+  ∀x. x ∈ I → ∃y. y ∈ I ∧ ∀a. a ∈ y → a ∈ x ∨ a = x, axiom.
+ax_fd. ⊢ (∃a. a ∈ x) → ∃y. y ∈ x ∧ ¬∃z. z ∈ y ∧ z ∈ x, axiom.
+ax_repl. ⊢ (∀x. x ∈ A → ∃y. P x y ∧ ∀z. P x z → y = z) →
+  ∃B. ∀x. x ∈ A → ∃y. y ∈ B ∧ P x y, axiom.
+ax_choice. ⊢ (∃o. o ∈ x ∧ ¬∃n. n ∈ o) ∨
+  (∃a. ∃b. ∃c. a ∈ x ∧ b ∈ x ∧ c ∈ a ∧ c ∈ b ∧ ¬(a = b)) ∨
+  (∃c. ∀e. e ∈ x → ∃a. a ∈ e ∧ a ∈ c ∧ ∀b. b ∈ e ∧ b ∈ c → a = b),
+  axiom.
+
+
+# The existence of the empty set follows solely from ax_sep, the
+# axiom schema of separation.
+
+1. ⊢ ∃y. ∀x. x ∈ y ↔ x ∈ z ∧ ⊥, subst ax_sep.
+2. 2 ⊢ ∀x. x ∈ y ↔ x ∈ z ∧ ⊥, basic.
+3. 2 ⊢ x ∈ y ↔ x ∈ z ∧ ⊥, uq_elim 2.
+4. 2 ⊢ x ∈ y → x ∈ z ∧ ⊥, bij_eliml 3.
+5. 5 ⊢ x ∈ y, basic.
+6. 2, 5 ⊢ x ∈ z ∧ ⊥, subj_elim 4 5.
+7. 2, 5 ⊢ ⊥, conj_elimr 6.
+8. 2 ⊢ ¬x ∈ y, neg_intro 7.
+9. 2 ⊢ ∀x. ¬x ∈ y, uq_intro 8.
+10. 2 ⊢ ∃y. ∀x. ¬x ∈ y, ex_intro 9.
+empty_set_exists. ⊢ ∃y. ∀x. ¬x ∈ y, ex_elim 1 10.
+
+
+# The logical lemma ex falso quodlibet follows from dne, the
+# axiom schema of double negation elimination.
+
+1. 1 ⊢ ¬A, basic.
+2. 2 ⊢ ⊥, basic.
+3. 1, 2 ⊢ ⊥, basic.
+4. 2 ⊢ ¬¬A, neg_intro 3.
+5. 2 ⊢ A, subj_elim dne 4.
+efq. ⊢ ⊥ → A, subj_intro 5.
+
+
+# The uniqueness of the empty set follows solely from ax_ext, the
+# axiom of extensionality.
+
+1. 1 ⊢ (∀x. ¬x ∈ y) ∧ (∀x. ¬x ∈ y'), basic.
+2. 1 ⊢ (∀x. ¬x ∈ y), conj_eliml 1.
+3. 1 ⊢ (∀x. ¬x ∈ y'), conj_elimr 1.
+4. 1 ⊢ ¬x ∈ y, uq_elim 2.
+5. 1 ⊢ ¬x ∈ y', uq_elim 3.
+6. 6 ⊢ x ∈ y, basic.
+7. 7 ⊢ x ∈ y', basic.
+8. 1, 6 ⊢ ⊥, neg_elim 4 6.
+9. ⊢ ⊥ → x ∈ y', subst efq.
+10. 1, 6 ⊢ x ∈ y', subj_elim 9 8.
+11. 1 ⊢ x ∈ y → x ∈ y', subj_intro 10.
+12. 1, 7 ⊢ ⊥, neg_elim 5 7.
+13. ⊢ ⊥ → x ∈ y, subst efq.
+14. 1, 7 ⊢ x ∈ y, subj_elim 13 12.
+15. 1 ⊢ x ∈ y' → x ∈ y, subj_intro 14.
+16. 1 ⊢ x ∈ y ↔ x ∈ y', bij_intro 11 15.
+17. 1 ⊢ ∀x. x ∈ y ↔ x ∈ y', uq_intro 16.
+18. ⊢ (∀x. x ∈ y ↔ x ∈ y') → y = y', subst ax_ext.
+19. 1 ⊢ y = y', subj_elim 18 17.
+empty_set_is_unique.
+  ⊢ (∀x. ¬x ∈ y) ∧ (∀x. ¬x ∈ y') → y = y', subj_intro 19.

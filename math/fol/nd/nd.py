@@ -810,7 +810,7 @@ def ex_elim(line, book, S, args):
             var in free_variables_context(Gamma2, set()) or
             var in free_variables(B, set()) or
             var in free_variables(exA, set())):
-            raise LogicError(line, f"ex_elim: formulas depend on variable {var.node}")
+            raise LogicError(line, f"ex_elim: formulas depend on variable {var}")
     S0 = (union(Gamma1, Gamma2), B)
     if not seq_eq(S, S0):
         raise LogicError(line, "ex_elim produces different sequent")

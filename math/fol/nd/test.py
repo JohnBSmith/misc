@@ -268,6 +268,37 @@ DNE. |- ~~A -> A, axiom.
 1. |- A = {x | x = x}, def.
 2. |- x in A, axiom.
 3. |- x in B, subst 2.
+"""),
+
+("8.1", ErrLogic, """
+1. |- A /\ x in A, axiom.
+"""),
+("8.2", ErrLogic, """
+1. |- P x, axiom.
+2. |- forall P. P x, uq_intro 1.
+"""),
+("8.3", ErrLogic, """
+1. |- P x, axiom.
+2. |- P (A /\ B), subst 1.
+"""),
+("8.4", ErrLogic, """
+1. |- A, axiom.
+2. |- forall A. A, uq_intro 1.
+"""),
+("8.5", ErrLogic, """
+1. |- A /\ B, axiom.
+2. |- forall A. A /\ B, uq_intro 1.
+"""),
+("8.6", Ok, """
+1. |- forall x. P x y, axiom.
+2. |- P u y, uq_elim 1.
+"""),
+("8.7", ErrLogic, """
+1. |- forall x. P x y, axiom.
+2. |- P u v, uq_elim 1.
+"""),
+("8.8", ErrLogic, """
+1. |- A, subst 1.
 """)
 ]
 
