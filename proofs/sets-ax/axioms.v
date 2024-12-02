@@ -127,8 +127,8 @@ Axiom comp: ∀P: Class → Prop,
 Axiom ext: ∀(A B: Class),
   A = B ↔ (∀x, x ∈ A ↔ x ∈ B).
 
-Axiom subset: ∀(A B: Class),
-  set B → A ⊆ B → set A.
+Axiom subset: ∀{A B: Class},
+  A ⊆ B → set B → set A.
 
 Axiom pair_set: ∀(x y: Class),
   set x ∧ set y → set (PairSet x y).
@@ -256,12 +256,18 @@ Proof.
     exact (conj hx hy).
 Qed.
 
+Theorem sep_is_subclass (A: Class) (P: Class → Prop):
+  {x | x ∈ A ∧ P x} ⊆ A.
+Proof.
+  unfold subclass. intros x hx.
+  apply comp_elim in hx. exact (proj1 hx).
+Qed.
+
 Theorem sep_is_set (A: Class) (P: Class → Prop):
   set A → set {x | x ∈ A ∧ P x}.
 Proof.
-  intro h. apply (subset _ A h).
-  unfold subclass. intro x. intro hx.
-  apply comp_elim in hx. exact (proj1 hx).
+  intro h. apply (subset (sep_is_subclass A P)).
+  exact h.
 Qed.
 
 Theorem non_empty_class A:
@@ -279,14 +285,21 @@ Proof.
   exact (h h0).
 Qed.
 
+Theorem intersection_is_minimal {M A}:
+  A ∈ M → ⋂M ⊆ A.
+Proof.
+  intro h. unfold subclass. intros x hx.
+  apply comp_elim in hx. apply hx. exact h.
+Qed.
+
 Theorem intersection_is_set M:
   M ≠ ∅ → set (⋂M).
 Proof.
   intro hM. apply non_empty_class in hM.
   destruct hM as (A, hA).
-  apply (subset _ A (set_intro hA)).
-  unfold subclass. intros x hx.
-  apply comp_elim in hx. exact (hx A hA).
+  assert (hsA := set_intro hA).
+  apply intersection_is_minimal in hA.
+  apply (subset hA). exact hsA.
 Qed.
 
 Theorem difference_is_set {A B}:
@@ -297,7 +310,7 @@ Proof.
     apply comp_elim in hx.
     exact (proj1 hx).
   }
-  intro hA. exact (subset _ A hA h).
+  intro hA. apply (subset h). exact hA.
 Qed.
 
 
@@ -528,8 +541,8 @@ Theorem UnivCl_is_proper:
   ¬set UnivCl.
 Proof.
   assert (hR := DiagCl_subclass_UnivCl).
-  intro h. apply (subset DiagCl UnivCl h) in hR.
-  exact (DiagCl_is_proper hR).
+  intro h. apply (subset hR) in h.
+  exact (DiagCl_is_proper h).
 Qed.
 
 Theorem compl_empty_set:
@@ -605,10 +618,8 @@ Theorem pair_set_is_set_rev x y:
   set (PairSet x y) → set x ∧ set y.
 Proof.
   intro h. 
-  assert (h1 := subclass1_pair_set x y).
-  assert (h2 := subclass2_pair_set x y).
-  apply (subset _ _ h) in h1.
-  apply (subset _ _ h) in h2.
+  assert (h1 := subset (subclass1_pair_set x y) h).
+  assert (h2 := subset (subclass2_pair_set x y) h).
   apply sg_is_set_rev in h1.
   apply sg_is_set_rev in h2.
   exact (conj h1 h2).
@@ -1103,9 +1114,7 @@ Proof.
     apply power_set. apply power_set.
     exact (union2_is_set A B hsA hsB).
   }
-  apply (subset (A × B) (Power (Power (A ∪ B)))).
-  * exact hsPP.
-  * exact hsub.
+  apply (subset hsub). exact hsPP.
 Qed.
 
 (* Unique existence and definite description *)

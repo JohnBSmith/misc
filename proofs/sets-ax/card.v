@@ -30,7 +30,7 @@ Proof.
   apply comp.
   assert (h := sep_is_subclass X P). fold A in h.
   split.
-  * exact (subset A X hsX h).
+  * apply (subset h). exact hsX.
   * exact h.
 Qed.
 

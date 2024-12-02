@@ -144,7 +144,7 @@ Proof.
   assert (hnat := nat.nat_is_set).
   assert (hprod := prod_is_set hnat hnat).
   assert (hsub := int_class_subclass_prod x y).
-  exact (subset _ _ hprod hsub).
+  apply (subset hsub). exact hprod.
 Qed.
 
 Theorem add_is_well_defined {z1 z2}: z1 ∈ ℤ → z2 ∈ ℤ →

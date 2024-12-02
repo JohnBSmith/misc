@@ -40,7 +40,7 @@ Proof.
   }
   apply comp.
   split; [| split; [| split; [| split]]].
-  * exact (subset _ U hsU hM).
+  * apply (subset hM). exact hsU.
   * exact hM.
   * unfold subclass. intros x hx. apply comp. split.
     - exact (set_intro hx).
@@ -222,7 +222,7 @@ Proof.
       apply union2_intro. left.
       apply union_intro. exists (img f Y). split.
       -- apply comp. split.
-         --- assert (h := subset Y U hsU hYU).
+         --- assert (h := subset hYU hsU).
              apply hF1 in hf. apply comp_elim in hf.
              exact (replacement U U f Y hf hYU h).
          --- exists f. split.
@@ -241,7 +241,7 @@ Proof.
       apply union2_intro. right.
       apply union_intro. exists (img f (Y × Y)). split.
       -- apply comp. split.
-         --- assert (h := subset Y U hsU hYU).
+         --- assert (h := subset hYU hsU).
              apply hF2 in hf. apply comp_elim in hf.
              assert (hYYUU := prod_subclass_prod hYU hYU).
              apply (replacement (U × U) U f (Y × Y) hf).
@@ -284,7 +284,7 @@ Proof.
       simpl in h. rewrite h. apply comp. split; [| split].
       * assert (hX := intersection_inductive_sets hsU hBU hF1 hF2).
         simpl in hX. fold X in hX. apply set_intro in hX.
-        exact (subset _ X hX hsub).
+        apply (subset hsub). exact hX.
       * exact (subclass_trans (conj hsub hXU)).
       * fold F. apply (F_is_monotone hsU hF1 hF2).
         - exact hXU.

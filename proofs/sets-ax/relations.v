@@ -169,7 +169,7 @@ Proof.
   intros hR hsX hsY.
   apply inv_relation_subset in hR.
   assert (hprod := prod_is_set hsY hsX).
-  exact (subset _ _ hprod hR).
+  apply (subset hR). exact hprod.
 Qed.
 
 Theorem dom_subclass_left {R X Y}:

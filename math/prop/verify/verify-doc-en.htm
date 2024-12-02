@@ -81,16 +81,16 @@ content. The logical connectives may be entered in ASCII notation.
 <pre class="ibox">
 ax1. A -&gt; (B -&gt; A), axiom.
 ax2. (A -&gt; (A -&gt; B)) -&gt; (A -&gt; B), axiom.
-ax3. (A -&gt; B) -&gt; ((B -&gt; C) -&gt; (A -&gt; B)), axiom.
+ax3. (A -&gt; B) -&gt; ((B -&gt; C) -&gt; (A -&gt; C)), axiom.
 
 1. A -&gt; (A -&gt; A), ax1.
 basic. A -&gt; A, ax2 1.
 </pre>
 
 <p>The three axioms are taken from <i>Grundlangen der Mathematik 1</i> by
-David Hilbert and Paul Bernays. This is followed by the very short proof
-of the theorem <var>A</var>&nbsp;→&nbsp;<var>A</var>, which receives
-the name <code>basic</code>. The proof consists of two steps.
+David Hilbert and Paul Bernays on page 65. This is followed by the very
+short proof of the theorem <var>A</var>&nbsp;→&nbsp;<var>A</var>, which
+receives the name <code>basic</code>. The proof consists of two steps.
 In the first step, the formula
 <var>A</var>&nbsp;→&nbsp;(<var>A</var>&nbsp;→&nbsp;<var>A</var>)
 is derived from the axiom <code>ax1</code> by simultaneous substitution
@@ -117,7 +117,7 @@ verify.py -f proofs.txt proofs.txt
 <pre class="ibox">
 ax1. A → (B → A), axiom.
 ax2. (A → (A → B)) → (A → B), axiom.
-ax3. (A → B) → ((B → C) → (A → B)), axiom.
+ax3. (A → B) → ((B → C) → (A → C)), axiom.
 
 1. A → (A → A), ax1.
 basic. A → A, ax2 1.
@@ -129,7 +129,7 @@ some brackets may be omitted.
 <pre class="ibox">
 ax1. A → B → A, axiom.
 ax2. (A → A → B) → A → B, axiom.
-ax3. (A → B) → (B → C) → A → B, axiom.
+ax3. (A → B) → (B → C) → A → C, axiom.
 
 1. A → A → A, ax1.
 basic. A → A, ax2 1.

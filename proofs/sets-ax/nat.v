@@ -11,7 +11,7 @@ Proof.
   assert (h := hA). apply comp in h.
   destruct h as (hsA, _).
   apply intersection_is_lower_bound in hA.
-  fold ℕ in hA.  exact (subset ℕ A hsA hA).
+  fold ℕ in hA. apply (subset hA). exact hsA.
 Qed.
 
 Theorem succ_is_set n:
@@ -49,9 +49,8 @@ Proof.
   intros h hind. apply subclass_antisym. split.
   * unfold ℕ.
     apply intersection_is_lower_bound.
-    apply (subset A ℕ nat_is_set) in h.
-    apply comp.
-    exact (conj h hind).
+    assert (hsA := subset h nat_is_set).
+    apply comp. exact (conj hsA hind).
   * exact h.
 Qed.
 
@@ -259,7 +258,7 @@ Proof.
       }
       assert (hsM: set M). {
         assert (h := power_set _ (set_intro hprod)).
-        exact (subset M _ h hsub).
+        apply (subset hsub). exact h.
       }
       apply intersection_is_set. intro hM.
       rewrite hM in hprod.
@@ -496,7 +495,7 @@ Proof.
       exists f0. split; [| split].
       - apply proj_relation in hf0.
         assert (hprod := prod_is_set hsX hsY).
-        exact (subset _ _ hprod hf0).
+        apply (subset hf0). exact hprod.
       - exact hf0.
       - exact h0.
     * intros f1 f2 ((_, h1), (_, h2)).

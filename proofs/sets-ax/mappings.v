@@ -467,7 +467,7 @@ Proof.
   apply set_intro in hy.
   apply app_graph_from_set.
   * exact hx.
-  * exact (subset _ _ hy h).
+  * apply (subset h). exact hy.
 Qed.
 
 Theorem dom_subclass_inv_img_cod X Y f:
@@ -674,7 +674,7 @@ Proof.
   intros hf hsX hsY.
   assert (hprod := prod_is_set hsX hsY).
   apply proj_relation in hf.
-  exact (subset _ _ hprod hf).
+  apply (subset hf). exact hprod.
 Qed.
 
 Theorem expand_graph {X Y f}:
@@ -699,7 +699,7 @@ Proof.
   assert (hsrng := rng_is_set_from_dom hf hsX).
   assert (hprod := prod_is_set hsX hsrng).
   assert (hsub := graph_subclass_dom_times_rng hf).
-  exact (subset f _ hprod hsub).
+  apply (subset hsub). exact hprod.
 Qed.
 
 (* Alternative proof. *)
@@ -762,7 +762,7 @@ Theorem inv_img_is_set_from_dom {X Y f} B:
 Proof.
   intros hf hsX.
   apply (inv_img_subclass_dom X Y B f) in hf.
-  exact (subset _ X hsX hf).
+  apply (subset hf). exact hsX.
 Qed.
 
 Theorem inv_img_is_set_from_graph {X Y f} B:
@@ -856,7 +856,7 @@ Theorem restr_is_set_from_graph f M:
   set f → set (restr f M).
 Proof.
   intro hf. assert (h := restr_subclass_graph f M).
-  exact (subset _ f hf h).
+  apply (subset h). exact hf.
 Qed.
 
 Theorem restr_is_set {f X Y M}:
@@ -866,10 +866,10 @@ Proof.
   assert (hsub := restr_subclass_prod hf hMX).
   assert (h: set (M × Y)). {
     apply prod_is_set.
-    * exact (subset M X hsX hMX).
+    * apply (subset hMX). exact hsX.
     * exact hsY.
   }
-  apply (subset _ _ h hsub).
+  apply (subset hsub). exact h.
 Qed.
 
 Theorem composition_assoc {A B C D f g h}:
@@ -1170,7 +1170,7 @@ Proof.
   intros A hA. apply comp. split.
   * apply comp in hA as (hsA, hA).
     assert (h := rel_img_subclass_cod hR hA).
-    exact (subset (img R A) Y hsY h).
+    apply (subset h). exact hsY.
   * unfold subclass. intros y hy.
     apply comp_elim in hy.
     destruct hy as (x, (hx, hxy)).
@@ -1188,7 +1188,7 @@ Proof.
   intros B hB. apply comp. split.
   * apply comp in hB as (hsB, hB).
     assert (h := rel_inv_img_subclass_src hR hB).
-    exact (subset (inv_img R B) X hsX h).
+    apply (subset h). exact hsX.
   * unfold subclass. intros x hx.
     apply comp_elim in hx.
     destruct hx as (y, (hy, hxy)).
