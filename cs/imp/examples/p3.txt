@@ -1,0 +1,23 @@
+
+{Berechnet die Primzahlen n mit 0 ≤ n ≤ 100}
+
+False := 0; True := 1;
+n := 0;
+while n <= 100 do
+   if n <= 1 then
+      prime := False
+   else
+      prime := True;
+      k := 2;
+      while k <= n - 1 do
+         if n - k*(n/k) = 0 then
+            prime := False
+         else skip end;
+         k := k + 1
+      end
+   end;
+   if prime = True then
+      print n
+   else skip end;
+   n := n + 1
+end

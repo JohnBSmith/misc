@@ -1,0 +1,12 @@
+
+x := 2; n := 10;
+
+y := 1; a := x; k := n;
+while 2 <= k do
+   q := k/2; r := k - 2*q;
+   if r = 1 then y := y*a else skip end;
+   k := q; a := a*a
+end;
+if k = 1 then y := y*a else skip end;
+
+print y

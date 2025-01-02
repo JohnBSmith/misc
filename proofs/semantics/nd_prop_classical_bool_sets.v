@@ -54,7 +54,7 @@ Inductive Formulas: Set :=
 | cons: Formulas → Formula → Formulas.
 
 Inductive Prf: Formulas → Formula → Set :=
-| basic_sequent: forall A, Prf (cons nil A) A
+| basic_sequent A: Prf (cons nil A) A
 | weakening Γ A B: Prf Γ B → Prf (cons Γ A) B
 | conj_intro Γ A B: Prf Γ A → Prf Γ B → Prf Γ (A ∧ B)
 | conj_eliml Γ A B: Prf Γ (A ∧ B) → Prf Γ A
