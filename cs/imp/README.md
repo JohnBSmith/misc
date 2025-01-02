@@ -16,4 +16,4 @@ Example programs:
 
 * `p1.txt` &ndash; Naive exponentiation.
 * `p2.txt` &ndash; Exponentiation by squaring.
-` `p3.txt` &ndash; Generates prime numbers.
+* `p3.txt` &ndash; Generates prime numbers.

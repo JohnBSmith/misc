@@ -1,0 +1,21 @@
+
+atomic-term ::= identifier | integer-literal | "(" term ")";
+mul-term ::= atomic-term {("*" | "/") atomic-term};
+add-term ::= mul-term {("+" | "-") mul_term};
+term ::= add-term;
+
+atomic-expression ::= "false" | "true" | "(" expression ")"
+| term ("=" | "<=") term;
+not-expression ::= atomic-expression | "not" not-expression;
+and-expression ::= not-expression {"and" not-expression};
+or-expression ::= and-expression {"or" and-expression};
+expression ::= or-expression;
+
+atomic-command ::=
+  "skip"
+| identifier ":=" term
+| "if" expression "then" command "else" command "end"
+| "while" expression "do" command "end
+| "print" term;
+seq-command ::= atomic-command {";" atomic-command};
+command ::= seq-command;
