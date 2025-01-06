@@ -5,16 +5,26 @@
 from sys import argv
 from imp import read, scan, parse, C, SyntaxError
 
-py_keywords = {"True", "False"}
+py_escape = {"True", "False", "sgn", "div", "abs"}
 precedence = {
     "or": 10, "and": 20, "not": 30, "=": 40, "<=": 40,
-    "+": 50, "-": 50, "*": 60, "/": 60
+    "+": 50, "-": 50, "*": 60, "/": 5
 }
 
+div_needed = False
+div_impl = """\
+def sgn(x):
+    return 0 if x == 0 else -1 if x < 0 else 1
+
+def div(x, y):
+    return 0 if y == 0 else sgn(y)*(x//abs(y))
+"""
+
 def ident(a):
-    return a + "_" if a in py_keywords else a
+    return a + "_" if a in py_escape else a
 
 def A(a, parent_prec = 0):
+    global div_needed
     if type(a) is int:
         return a
     if type(a) is str:
@@ -29,7 +39,8 @@ def A(a, parent_prec = 0):
         elif op == "*":
             s = f"{x}*{y}"
         elif op == "/":
-            s = f"{x}//{y}"
+            div_needed = True
+            s = f"div({x}, {y})"
         return f"({s})" if prec <= parent_prec else s
     raise ValueError("unreachable")
 
@@ -85,8 +96,9 @@ def main():
         c = parse(tokens)
         acc = []
         s = C(c, acc, 0)
-        with open("out.py", "w") as out:
-            out.write("\n".join(acc))
+        if div_needed:
+            print(div_impl)
+        print("\n".join(acc))
     except SyntaxError as e:
         print(f"Syntax error in line {e.line + 1}, col {e.col + 1}:")
         print(f"{e.text}.")

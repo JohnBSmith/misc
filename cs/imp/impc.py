@@ -5,12 +5,11 @@
 from sys import argv
 from imp import read, scan, parse, idiv, SyntaxError
 
-opcode = {
-    "load": 0, "save": 1, "push": 2, "pop": 3,
-    "add": 4, "sub": 5, "mul": 6, "div": 7,
-    "not": 8, "and": 9, "or": 10, "eq": 11, "le": 12,
-    "jmp": 13, "jz": 14, "halt": 15, "print": 16, "alloc": 17
-}
+operations = [
+    "add", "sub", "mul", "div", "not", "and", "or", "eq", "le",
+    "load", "store", "push", "jmp", "jz", "halt", "print", "alloc"
+]
+opcode = dict((op, code) for (code, op) in enumerate(operations))
 
 def invert(d):
     return dict((y, x) for (x, y) in d.items())
@@ -76,7 +75,7 @@ def compile_command(c, acc, var_map):
     if type(c) is tuple:
         if c[0] == ":=":
             compile_aexp(c[2], acc, var_map)
-            acc.append(opcode["save"])
+            acc.append(opcode["store"])
             acc.append(var_map[c[1]])
         elif c[0] == "skip":
             pass
@@ -131,10 +130,11 @@ def disassemble(program):
     acc = []
     while i < n:
         op = decode_op[program[i]]
-        if op in ("load", "save", "push", "pop", "jmp", "jz", "alloc"):
+        if op in ("load", "store", "push", "jmp", "jz", "alloc"):
             acc.append(f"{i:04} {op} {program[i + 1]}")
             i += 2
-        elif op in ("add", "sub", "mul", "div", "not", "and", "or", "eq", "le", "halt", "print"):
+        elif op in ("add", "sub", "mul", "div", "not", "and", "or",
+            "eq", "le", "halt", "print"):
             acc.append(f"{i:04} {op}")
             i += 1
         else:
@@ -186,7 +186,7 @@ def load_dispatch_table():
         value = stack[index]
         stack.append(value)
         return ip + 2
-    def save(stack, program, ip):
+    def store(stack, program, ip):
         index = program[ip + 1]
         value = stack.pop()
         stack[index] = value
@@ -208,25 +208,22 @@ def load_dispatch_table():
         return ip + 2
     def halt(stack, program, ip):
         return ip
-    return {
-        opcode["add"]: add, opcode["sub"]: sub,
-        opcode["mul"]: mul, opcode["div"]: div,
-        opcode["and"]: land, opcode["or"]: lor, opcode["not"]: lnot,
-        opcode["eq"]: eq, opcode["le"]: le,
-        opcode["push"]: push, opcode["load"]: load, opcode["save"]: save,
-        opcode["jmp"]: jmp, opcode["jz"]: jz, opcode["alloc"]: alloc,
-        opcode["print"]: println, opcode["halt"]: halt
-    }
-    
+    return dict((opcode[key], value) for (key, value) in {
+        "add": add, "sub": sub, "mul": mul, "div": div,
+        "and": land, "or": lor, "not": lnot, "eq": eq, "le": le,
+        "push": push, "load": load, "store": store, "jmp": jmp,
+        "jz": jz, "alloc": alloc, "print": println, "halt": halt
+    }.items())
+
 def run(program):
     dispatch = load_dispatch_table()
     ip = 0
     stack = []
     while True:
         op = program[ip]
-        i0 = ip
+        ip_last = ip
         ip = dispatch[op](stack, program, ip)
-        if ip == i0:
+        if ip == ip_last:
             break
 
 def main():
