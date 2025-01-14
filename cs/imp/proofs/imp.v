@@ -3,6 +3,7 @@ Require Import ZArith.ZArith.
 Require Import Bool.Bool.
 
 Definition Loc := nat.
+Definition State := Loc -> Z.
 
 Inductive Aexpr :=
 | int (n: Z)
@@ -27,8 +28,6 @@ Inductive Com :=
 | If (b: Bexpr) (c1 c2: Com)
 | While (b: Bexpr) (c: Com).
 
-Definition State := Loc -> Z.
-
 Fixpoint evA (a: Aexpr) (s: State): Z :=
   match a with
   | int n => n
@@ -49,7 +48,7 @@ Fixpoint evB (b: Bexpr) (s: State): bool :=
   | bor b1 b2 => orb (evB b1 s) (evB b2 s)
   end.
 
-Definition reassign (s: State) (X: Loc) (n: Z): State :=
+Definition variant (s: State) (X: Loc) (n: Z): State :=
   fun Y => if Nat.eqb X Y then n else s Y.
 
 Fixpoint iter (ev: State -> State -> Prop)
@@ -64,7 +63,7 @@ Fixpoint iter (ev: State -> State -> Prop)
 Fixpoint evC (c: Com) (s s1: State): Prop :=
   match c with
   | Skip => s1 = s
-  | Assign X a => s1 = reassign s X (evA a s)
+  | Assign X a => s1 = variant s X (evA a s)
   | Seq c1 c2 => exists s0, evC c1 s s0 /\ evC c2 s0 s1
   | If b c1 c2 => if evB b s then evC c1 s s1 else evC c2 s s1
   | While b c => exists N, iter (evC c) N b s s1
@@ -77,7 +76,7 @@ Definition valid (A: Assertion) (c: Com) (B: Assertion) :=
   forall s, sat s A -> forall s', evC c s s' -> sat s' B.
 
 Definition subst (A: Assertion) (X: Loc) (a: Aexpr): Assertion :=
-  fun s => A (reassign s X (evA a s)).
+  fun s => A (variant s X (evA a s)).
 
 Theorem rule_skip_is_valid A:
   valid A Skip A.
@@ -109,56 +108,23 @@ Qed.
 Definition Conj (A: Assertion) (b: Bexpr) :=
   fun s => sat s A /\ evB b s = true.
 
-Theorem evB_bnot b s:
-  negb (evB b s) = evB (bnot b) s.
-Proof.
-  simpl evB. reflexivity.
-Qed.
-
 Theorem rule_if_is_valid A b C c1 c2:
   valid (Conj A b) c1 C ->
   valid (Conj A (bnot b)) c2 C ->
   valid A (If b c1 c2) C.
 Proof.
-  intros h1 h2. unfold valid. intros s hs. intros s1 hs1.
+  intros h1 h2. unfold valid. intros s hs s1 hs1.
   simpl evC in hs1.
-  unfold valid in h1. unfold sat in h1. unfold Conj in h1.
-  unfold valid in h2. unfold sat in h2. unfold Conj in h2.
-  assert (h1 := h1 s). assert (h2 := h2 s).
-  rewrite <- (evB_bnot b s) in h2.
-  destruct (evB b s).
-  * apply h1.
-    - exact (conj hs (eq_refl true)).
+  destruct (evB b s) eqn:heq.
+  * unfold valid in h1. apply (h1 s).
+    - unfold sat. unfold Conj. rewrite heq.
+      exact (conj hs (eq_refl true)).
     - exact hs1.
-  * apply h2.
-    - simpl. exact (conj hs (eq_refl true)).
+  * unfold valid in h2. apply (h2 s).
+    - unfold sat. unfold Conj.
+      simpl evB. rewrite heq. simpl.
+      exact (conj hs (eq_refl true)).
     - exact hs1.
-Qed.
-
-Definition invariant ev A b := forall s s',
-  sat s A /\ evB b s = true -> ev s s' -> sat s' A.
-
-Theorem iter_lemma (ev: State -> State -> Prop) N b A:
-  invariant ev A b ->
-  (forall s s', sat s A -> iter ev N b s s' ->
-    sat s' A /\ evB b s' = false).
-Proof.
-  intro h.
-  induction N as [| N ih].
-  * intros s s1. intros hsA hiter.
-    simpl iter in hiter. exfalso. exact hiter.
-  * intros s s1. intros hsA hiter.
-    simpl iter in hiter.
-    destruct (evB b s) eqn:heq.
-    - destruct hiter as (s0, (h00, h01)).
-      apply (ih s0 s1).
-      -- unfold invariant in h. apply (h s s0).
-         --- exact (conj hsA heq).
-         --- exact h00.
-      -- exact h01.
-    - rewrite hiter. split.
-      -- exact hsA.
-      -- exact heq.
 Qed.
 
 Theorem rule_while_is_valid A b c:
@@ -167,18 +133,19 @@ Theorem rule_while_is_valid A b c:
 Proof.
   intro h. unfold valid. intros s hs. intros s2 hs2.
   simpl evC in hs2. destruct hs2 as (N, hiter).
-  assert (h0: invariant (evC c) A b). {
-    unfold invariant.
-    intros s0 s1. intros (hs0A, hs0b) h01. unfold valid in h.
-    apply (h s0).
-    * unfold sat. unfold Conj. split.
-      - exact hs0A.
-      - exact hs0b.
-    * exact h01.
-  }
-  assert (h1 := iter_lemma (evC c) N b A h0 s s2 hs hiter).
-  destruct h1 as (hs2A, hbs2).
-  unfold sat. unfold Conj. split.
-  * exact hs2A.
-  * simpl evB. rewrite hbs2. simpl. reflexivity.
+  revert s s2 hs hiter.
+  induction N as [| N ih].
+  * intros s s2 hs hiter. simpl iter in hiter.
+    exfalso. exact hiter.
+  * intros s s2 hs hiter. simpl iter in hiter.
+    destruct (evB b s) eqn:heq.
+    - destruct hiter as (s1, (h11, h12)).
+      apply (ih s1 s2). clear ih.
+      -- unfold valid in h. apply (h s). clear h.
+         --- unfold sat. unfold Conj. exact (conj hs heq).
+         --- exact h11.
+      -- exact h12.
+    - rewrite hiter. unfold sat. unfold Conj. split.
+      -- exact hs.
+      -- simpl evB. rewrite heq. simpl. reflexivity.
 Qed.
