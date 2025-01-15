@@ -48,8 +48,8 @@ Fixpoint evB (b: Bexpr) (s: State): bool :=
   | bor b1 b2 => orb (evB b1 s) (evB b2 s)
   end.
 
-Definition variant (s: State) (X: Loc) (a: Aexpr): State :=
-  fun Y => if Nat.eqb X Y then evA a s else s Y.
+Definition variant (s: State) (X: Loc) (n: Z): State :=
+  fun Y => if Nat.eqb X Y then n else s Y.
 
 Fixpoint iter (ev: State -> State -> Prop)
 (N: nat) (b: Bexpr) (s s1: State): Prop :=
@@ -63,7 +63,7 @@ Fixpoint iter (ev: State -> State -> Prop)
 Fixpoint evC (c: Com) (s s1: State): Prop :=
   match c with
   | Skip => s1 = s
-  | Assign X a => s1 = variant s X a
+  | Assign X a => s1 = variant s X (evA a s)
   | Seq c1 c2 => exists s0, evC c1 s s0 /\ evC c2 s0 s1
   | If b c1 c2 => if evB b s then evC c1 s s1 else evC c2 s s1
   | While b c => exists N, iter (evC c) N b s s1
@@ -76,7 +76,7 @@ Definition valid (A: Assertion) (c: Com) (B: Assertion) :=
   forall s, sat s A -> forall s1, evC c s s1 -> sat s1 B.
 
 Definition subst (A: Assertion) (X: Loc) (a: Aexpr): Assertion :=
-  fun s => A (variant s X a).
+  fun s => A (variant s X (evA a s)).
 
 Theorem skip_intro_is_valid A:
   valid A Skip A.
