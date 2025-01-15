@@ -1,4 +1,7 @@
 
+(* A computer-assisted formalization of the IMP language,
+   its denotational semantics and the Hoare calculus. *)
+
 Require Import ZArith.ZArith.
 Require Import Bool.Bool.
 
