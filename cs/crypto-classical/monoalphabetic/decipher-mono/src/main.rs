@@ -13,7 +13,7 @@ struct Scorer {
 }
 
 fn error_in_line(i: usize, filename: &str) -> ! {
-    panic!("Datei '{}' scheint in Zeile {} fehlerhaft zu sein.",
+    panic!("Die Datei '{}' scheint in Zeile {} fehlerhaft zu sein.",
         filename, i + 1)
 }
 
@@ -75,7 +75,7 @@ fn random_key(rng: &mut Rng) -> Vec<u8> {
 }
 
 fn hill_climb(rng: &mut Rng, mut key: Vec<u8>, ciphertext: &[u8],
-    scorer: &Scorer, max_iterations: u32
+    scorer: &Scorer, iterations: u32
 ) -> (f64, Vec<u8>)
 {
     let mut plain: Vec<u8> = vec![0; ciphertext.len()];
@@ -85,7 +85,7 @@ fn hill_climb(rng: &mut Rng, mut key: Vec<u8>, ciphertext: &[u8],
     let mut best_key = key.clone();
     let temp = 0.1;
 
-    for _ in 0..max_iterations {
+    for _ in 0..iterations {
         let mut candidate_key = key.clone();
         let i = rng.rand_bounded_usize(LEN);
         let mut j = rng.rand_bounded_usize(LEN);
@@ -110,14 +110,14 @@ fn hill_climb(rng: &mut Rng, mut key: Vec<u8>, ciphertext: &[u8],
 }
 
 fn hill_climb_multi(rng: &mut Rng, ciphertext: &[u8],
-    scorer: &Scorer, multi: u32, max_iter: u32
+    scorer: &Scorer, multi: u32, iterations: u32
 ) -> (Vec<u8>, Vec<u8>) {
     let mut best_score = -f64::INFINITY;
     let mut best_key: Vec<u8> = AZ.to_vec();
     for _ in 0..multi {
         let start_key = random_key(rng);
         let (score, key) = hill_climb(rng, start_key, ciphertext,
-            &scorer, max_iter);
+            &scorer, iterations);
         if score > best_score {
             best_score = score;
             best_key = key;
