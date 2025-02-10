@@ -21,14 +21,14 @@ from sys import argv
 def mod_inverse(a, m):
     if m == 1: return 0
     m0 = m
-    x0, x1 = 0, 1
+    x, y = 0, 1
     while m != 0:
         q = a//m
         a, m = m, a%m
-        x0, x1 = x1 - q*x0, x0
+        x, y = y - q*x, x
     if a != 1:
         raise ValueError("a und m sind nicht teilerfremd")
-    return x1%m0
+    return y%m0
 
 class AffineCipher:
     def __init__(self, a, b, alphabet):

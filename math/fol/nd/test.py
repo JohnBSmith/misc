@@ -35,15 +35,15 @@ tests = [
 ("1.2", Ok, """
 1. 1 |- A, basic.
 2. 2 |- B, basic.
-3. 1, 2 |- A /\ B, conj_intro 1 2.
+3. 1, 2 |- A /\\ B, conj_intro 1 2.
 """),
 ("1.3", Ok, """
 1. 1 |- A, basic.
-2. 1 |- A \/ B, disj_introl 1.
+2. 1 |- A \\/ B, disj_introl 1.
 """),
 ("1.4", Ok, """
 1. 1 |- B, basic.
-2. 1 |- A \/ B, disj_intror 1.
+2. 1 |- A \\/ B, disj_intror 1.
 """),
 ("1.5", Ok, """
 1. 1 |- false, basic.
@@ -55,11 +55,11 @@ tests = [
 3. 1, 2 |- A <-> B, bij_intro 1 2.
 """),
 ("1.7", Ok, """
-1. 1 |- A /\ B, basic.
+1. 1 |- A /\\ B, basic.
 2. 1 |- A, conj_eliml 1.
 """),
 ("1.8", Ok, """
-1. 1 |- A /\ B, basic.
+1. 1 |- A /\\ B, basic.
 2. 1 |- B, conj_elimr 1.
 """),
 ("1.9", Ok, """
@@ -75,27 +75,27 @@ tests = [
 5. |- A -> ~~A, subj_intro 4.
 """),
 ("1.11", Ok, """
-1. 1 |- (A -> B) /\ A, basic.
+1. 1 |- (A -> B) /\\ A, basic.
 2. 1 |- A -> B, conj_eliml 1.
 3. 1 |- A, conj_elimr 1.
 4. 1 |- B, subj_elim 2 3.
-5. |- (A -> B) /\ A -> B, subj_intro 4.
+5. |- (A -> B) /\\ A -> B, subj_intro 4.
 """),
 ("1.12", Ok, """
-1. 1 |- A /\ B, basic.
+1. 1 |- A /\\ B, basic.
 2. 1 |- A, conj_eliml 1.
 3. 1 |- B, conj_elimr 1.
-4. 1 |- B /\ A, conj_intro 3 2.
-5. |- A /\ B -> B /\ A, subj_intro 4.
+4. 1 |- B /\\ A, conj_intro 3 2.
+5. |- A /\\ B -> B /\\ A, subj_intro 4.
 """),
 ("1.13", Ok, """
-1. 1 |- A \/ B, basic.
+1. 1 |- A \\/ B, basic.
 2. 2 |- A, basic.
-3. 2 |- B \/ A, disj_intror 2.
+3. 2 |- B \\/ A, disj_intror 2.
 4. 4 |- B, basic.
-5. 4 |- B \/ A, disj_introl 4.
-6. 1 |- B \/ A, disj_elim 1 3 5.
-7. |- A \/ B -> B \/ A, subj_intro 6.
+5. 4 |- B \\/ A, disj_introl 4.
+6. 1 |- B \\/ A, disj_elim 1 3 5.
+7. |- A \\/ B -> B \\/ A, subj_intro 6.
 """),
 ("1.14", Ok, """
 1. 1 |- ~B, basic.
@@ -118,16 +118,16 @@ DNE. |- ~~A -> A, axiom.
 """),
 ("1.16", Ok, """
 DNE. |- ~~A -> A, axiom.
-1. 1 |- ~(A \/ ~A), basic.
+1. 1 |- ~(A \\/ ~A), basic.
 2. 2 |- A, basic.
 3. 2 |- A ∨ ~A, disj_introl 2.
 4. 1, 2 |- false, neg_elim 1 3.
 5. 1 |- ~A, neg_intro 4.
-6. 1 |- A \/ ~A, disj_intror 5.
+6. 1 |- A \\/ ~A, disj_intror 5.
 7. 1 |- ⊥, neg_elim 1 6.
-8. |- ~~(A \/ ~A), neg_intro 7.
-9. |- ~~(A \/ ~A) -> A \/ ~A, subst DNE.
-10. |- A \/ ~A, subj_elim 9 8.
+8. |- ~~(A \\/ ~A), neg_intro 7.
+9. |- ~~(A \\/ ~A) -> A \\/ ~A, subst DNE.
+10. |- A \\/ ~A, subj_elim 9 8.
 """),
 
 ("2.1", ErrLogic, """
@@ -146,8 +146,8 @@ DNE. |- ~~A -> A, axiom.
 2. 1 |- A u, uq_elim 1.
 """),
 ("3.2", Ok, """
-1. 1 |- forall x. A x /\ B x, basic.
-2. 1 |- A u /\ B u, uq_elim 1.
+1. 1 |- forall x. A x /\\ B x, basic.
+2. 1 |- A u /\\ B u, uq_elim 1.
 """),
 ("3.3", Ok, """
 1. 1 |- A u, basic.
@@ -251,18 +251,18 @@ DNE. |- ~~A -> A, axiom.
 """),
 
 ("6.1", Ok, """
-1. |- forall x. P x /\ Q x, axiom.
-2. |- P u /\ Q u, uq_elim 1.
+1. |- forall x. P x /\\ Q x, axiom.
+2. |- P u /\\ Q u, uq_elim 1.
 """),
 ("6.2", ErrLogic, """
-1. |- forall x. P x /\ Q x, axiom.
-2. |- P u /\ Q v, uq_elim 1.
+1. |- forall x. P x /\\ Q x, axiom.
+2. |- P u /\\ Q v, uq_elim 1.
 """),
 ("6.3", ErrLogic, """
 1. |- p x <-> true, def.
 2. |- q x <-> true, def.
-3. |- forall x. p x /\ q x, axiom.
-4. |- p u /\ p u, uq_elim 3.
+3. |- forall x. p x /\\ q x, axiom.
+4. |- p u /\\ p u, uq_elim 3.
 """),
 ("7.1", ErrLogic, """
 1. |- A = {x | x = x}, def.
@@ -271,7 +271,7 @@ DNE. |- ~~A -> A, axiom.
 """),
 
 ("8.1", ErrLogic, """
-1. |- A /\ x in A, axiom.
+1. |- A /\\ x in A, axiom.
 """),
 ("8.2", ErrLogic, """
 1. |- P x, axiom.
@@ -279,15 +279,15 @@ DNE. |- ~~A -> A, axiom.
 """),
 ("8.3", ErrLogic, """
 1. |- P x, axiom.
-2. |- P (A /\ B), subst 1.
+2. |- P (A /\\ B), subst 1.
 """),
 ("8.4", ErrLogic, """
 1. |- A, axiom.
 2. |- forall A. A, uq_intro 1.
 """),
 ("8.5", ErrLogic, """
-1. |- A /\ B, axiom.
-2. |- forall A. A /\ B, uq_intro 1.
+1. |- A /\\ B, axiom.
+2. |- forall A. A /\\ B, uq_intro 1.
 """),
 ("8.6", Ok, """
 1. |- forall x. P x y, axiom.

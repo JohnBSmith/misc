@@ -83,6 +83,9 @@ def scan(s):
                 if s[i] == '\n': line += 1
                 i += 1
             i += 2
+        elif s[i] == "∅":
+            a.append(("empty_set", line))
+            i += 1
         else:
             a.append((s[i], line))
             i += 1
@@ -259,7 +262,7 @@ def set_literal(a, i, x):
     while a[i][0] == ",":
         i, y = addition(a, i + 1)
         y = Term(("app", "sg", ensure_term(y, a[i][1])), Ind)
-        x = Term(("app", "union2", x, y), Ind)
+        x = Term(("app", "union", x, y), Ind)
     if a[i][0] != "}":
         raise SyntaxError(a[i][1], "expected '}'")
     return i + 1, x
@@ -359,10 +362,11 @@ def multiplication(a, i):
 
 def addition(a, i):
     i, x = multiplication(a, i)
-    while a[i][0] == "#cup" or a[i][0] == "∪":
+    while a[i][0] == "#cup" or a[i][0] == "∪" or a[i][0] == "\\":
+        f = "diff" if a[i][0] == "\\" else "union"
         token = a[i]
         i, y = multiplication(a, i + 1)
-        x = term(("app", "union", x, y), token, Ind)
+        x = term(("app", f, x, y), token, Ind)
     return i, x
 
 def relation(a, i):
@@ -895,7 +899,8 @@ fmt2_tab = {"->": "→", "=>": "→", "|-": "⊢", "/\\": "∧", "\\/": "∨"}
 fmt3_tab = {"<->": "↔", "<=>": "↔", "_|_": "⊥"}
 fmt_kw_tab = {"not": "¬", "and": "∧", "or": "∨", "false": "⊥",
    "box": "□", "dia": "◇", "forall": "∀", "exists": "∃",
-   "in": "∈", "sub": "⊆", "cap": "∩", "cup": "∪"}
+   "in": "∈", "sub": "⊆", "cap": "∩", "cup": "∪",
+   "empty_set": "∅"}
 trim_tab = {"¬", "□", "◇", "∀", "∃"}
 
 def format_source_code(s):
