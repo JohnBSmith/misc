@@ -1,0 +1,30 @@
+
+(1 (1) (conj A B) (basic))
+(2 (1) A (conj_eliml 1))
+(3 (1) B (conj_elimr 1))
+(4 (1) (conj B A) (conj_intro 3 2))
+(5 () (subj (conj A B) (conj B A)) (subj_intro 4))
+
+
+(1 (1) (disj A B) (basic))
+(2 (2) A (basic))
+(3 (3) B (basic))
+(4 (3) (disj B A) (disj_introl 3))
+(5 (2) (disj B A) (disj_intror 2))
+(6 (1) (disj B A) (disj_elim 1 5 4))
+(7 () (subj (disj A B) (disj B A)) (subj_intro 6))
+
+(1 (1) (subj A B) (basic))
+(2 (2) (neg B) (basic))
+(3 (3) A (basic))
+(4 (1 3) B (subj_elim 1 3))
+(5 (1 2 3) (false) (neg_elim 2 4))
+(6 (1 2) (neg A) (neg_intro 5))
+(7 (1) (subj (neg B) (neg A)) (subj_intro 6))
+(8 () (subj (subj A B) (subj (neg B) (neg A))) (subj_intro 7))
+
+(1 (1) A (basic))
+(2 (2) B (basic))
+(3 (1 2) A (wk 1))
+(4 (1) (subj B A) (subj_intro 3))
+(5 () (subj A (subj B A)) (subj_intro 4))

@@ -276,6 +276,8 @@ def verify(book, s):
                 book[label] = B
             else:
                 book[label] = B
+            if label in rule:
+                raise LogicError(line, "cyclic deduction")
             if rule[0] == "nec_seq":
                 nec_seq(line, book, B, rule)
             elif rule[0] != "axiom":
