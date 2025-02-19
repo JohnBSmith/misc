@@ -51,7 +51,7 @@ def nud(a, i):
         i, x = parse(a, i + 1, bp)
         return i, (op, x)
     else:
-        raise SyntaxError(f"unexpected symbol: '{t}'")
+        raise SyntaxError(f"unexpected symbol: '{token}'")
 
 def parse(a, i, rbp):
     i, x = nud(a, i)

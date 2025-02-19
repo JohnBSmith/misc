@@ -32,8 +32,7 @@ def atom(a, i):
     elif token == "(":
         i, x = expression(a, i + 1)
         if expect_token(a, i) != ")":
-            raise SyntaxError(
-                f"')' was expected, but got '{a[i]}'")
+            raise SyntaxError(f"')' was expected, but got '{a[i]}'")
         return i + 1, x
     else:
         raise SyntaxError(f"unexpected symbol: '{token}'")
