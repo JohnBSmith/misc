@@ -96,24 +96,30 @@ def type_check(line, t, record, residual):
     if type(t) is Term and type(t.node) is str:
         if t.node in record:
             if record[t.node] != t.type:
-                if t.type == None:
+                if t.type is None:
                     t.type = record[t.node]
                 else:
                     raise LogicError(line, f"Type error for {t}")
         else:
-            if t.type == None:
+            if t.type is None:
                 residual.append(t)
             else:
                 record[t.node] = t.type
     elif type(t) is Term and type(t.node) is tuple:
         for x in t.node:
             type_check(line, x, record, residual)
+        if t.type is None:
+            residual.append(t)
 
 def is_connective(A, symbol):
     return type(A) is Term and type(A.node) is tuple and A.node[0] == symbol
 
-predicate_symbols = {"element": 2, "eq": 2}
-function_symbols = {"comp": 1}
+def init_tables():
+    global predicate_symbols, function_symbols
+    predicate_symbols = {"element": 2, "eq": 2}
+    function_symbols = {"comp": 1}
+
+init_tables()
 
 sym2 = {"->": "->", "=>": "->", "/\\": "&", "\\/": "|", "|-": "|-"}
 sym3 = {"<->": "<->", "<=>": "<->", "_|_": "_|_"}
@@ -321,6 +327,7 @@ def application(a, i):
             args.append(y)
         if not type(x) is Term or not type(x.node) is str:
             raise SyntaxError(line0, "predicate or function must be an identifier")
+        x.type = Fn
         return i, Term(("app", x) + tuple(args), None)
     else:
         return i, x
@@ -533,7 +540,7 @@ def unify(A, pattern, subst):
     elif type(pattern) is str:
         return None if A == pattern else UErr(A, pattern)
     else:
-        raise ValueError("unreachable")
+        return UErr(A, pattern)
 
 def side_condition(C, conds, subst):
     if is_connective(C, "subj") and is_connective(C.node[1], "app") and C.node[1].node[1].node == "nf":

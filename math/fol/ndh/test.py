@@ -1,6 +1,6 @@
 
 import traceback
-from nd import verify_plain, rules
+from nd import rules, verify_plain, init_tables
 
 Ok = 0
 ErrSyntax = 1
@@ -8,6 +8,7 @@ ErrLogic = 2
 ErrAssert = 3
 
 def check(test_id, expected_result, code):
+    init_tables()
     book = {}
     verify_plain(book, rules)
     try:
@@ -301,6 +302,46 @@ const_conj. ⊢ (∀x. A ∧ P x) → A ∧ (∀x. P x), subj_intro 6.
 8. 1 ⊢ (∃x. P x) ∧ (∃x. Q x), ex_elim 1 7.
 9. ⊢ (∃x. P x ∧ Q x) → (∃x. P x) ∧ (∃x. Q x), subj_intro 8.
 """),
+("03.12", Ok, """
+1. ⊢ A x → A x, axiom.
+2. ⊢ B x → B x, 1.
+"""),
+("03.13", Ok, """
+1. ⊢ A x → A x, axiom.
+2. ⊢ A y → A y, 1.
+"""),
+("03.14", Ok, """
+1. ⊢ A x → A x, axiom.
+2. ⊢ B y → B y, 1.
+"""),
+("03.15", Ok, """
+1. ⊢ P x A → P x A, axiom.
+2. ⊢ x ∈ A → x ∈ A, 1.
+"""),
+("03.16", Ok, """
+1. ⊢ P x A → P x A, axiom.
+2. ⊢ y ∈ A → y ∈ A, 1.
+"""),
+("03.17", Ok, """
+1. ⊢ P x A → P x A, axiom.
+2. ⊢ y ∈ B → y ∈ B, 1.
+"""),
+("03.18", Ok, """
+1. ⊢ ∀x. A x, axiom.
+2. ⊢ ∀x. A x, 1.
+"""),
+("03.19", Ok, """
+1. ⊢ ∀x. A x, axiom.
+2. ⊢ ∀y. A y, 1.
+"""),
+("03.20", Ok, """
+1. ⊢ ∀x. A x, axiom.
+2. ⊢ ∀x. B x, 1.
+"""),
+("03.21", Ok, """
+1. ⊢ ∀x. A x, axiom.
+2. ⊢ ∀y. B y, 1.
+"""),
 
 ("04.01", ErrLogic, """
 1. 1 ⊢ ∀x. A x, basic.
@@ -321,6 +362,92 @@ const_conj. ⊢ (∀x. A ∧ P x) → A ∧ (∀x. P x), subj_intro 6.
 ("04.05", ErrLogic, """
 1. 1 ⊢ B u, basic.
 2. 1 ⊢ ∃x. A x, ex_intro 1.
+"""),
+("04.06", ErrLogic, """
+1. 1 ⊢ A x, basic.
+2. ⊢ A x → A y, subj_intro 1.
+"""),
+("04.07", ErrLogic, """
+1. ⊢ A x → A x, axiom.
+2. ⊢ A x → B x, 1.
+"""),
+("04.08", ErrLogic, """
+1. ⊢ A x → A x, axiom.
+2. ⊢ A x → A y, 1.
+"""),
+("04.09", ErrLogic, """
+1. ⊢ A x → A x, axiom.
+2. ⊢ A x → B y, 1.
+"""),
+("04.10", ErrLogic, """
+1. ⊢ P x A → P x A, axiom.
+2. ⊢ x ∈ A → x ∈ B, 1.
+"""),
+("04.11", ErrLogic, """
+1. ⊢ P x A → P x A, axiom.
+2. ⊢ x ∈ A → y ∈ A, 1.
+"""),
+("04.12", ErrLogic, """
+1. 1 ⊢ A x, axiom.
+2. 1 ⊢ B x, 1.
+"""),
+("04.13", ErrLogic, """
+1. 1 ⊢ A x, axiom.
+2. 1 ⊢ A y, 1.
+"""),
+("04.14", ErrLogic, """
+1. 1 ⊢ A x, axiom.
+2. 1 ⊢ B y, 1.
+"""),
+
+("05.01", Ok, """
+1. ⊢ A x → A x, axiom.
+2. ⊢ A (f a) → A (f a), 1.
+"""),
+("05.02", Ok, """
+0. ⊢ f x = some_function, def.
+1. ⊢ A x → A x, axiom.
+2. ⊢ A (f a) → A (f a), 1.
+"""),
+("05.03", Ok, """
+1. ⊢ A x → A x, axiom.
+2. ⊢ A (f a b) → A (f a b), 1.
+"""),
+("05.04", Ok, """
+0. ⊢ f x y = some_function, def.
+1. ⊢ A x → A x, axiom.
+2. ⊢ A (f a b) → A (f a b), 1.
+"""),
+("05.05", Ok, """
+0. |- add x y = some_function, def.
+1. |- x = x, axiom.
+2. |- a + b = a + b, 1.
+"""),
+("05.06", Ok, """
+0. |- add x y = some_function, def.
+1. |- A x → A x, axiom.
+2. |- A (a + b) → A (a + b), 1.
+"""),
+
+("06.01", ErrLogic, """
+0. ⊢ p x ↔ some_predicate, def.
+1. ⊢ p x → p x, axiom.
+2. ⊢ A x → A x, 1.
+"""),
+("06.02", ErrLogic, """
+0. |- add x y = some_function, def.
+1. |- x = x, axiom.
+2. |- a + b = a + c, 1.
+"""),
+("06.03", ErrLogic, """
+0. |- add x y = some_function, def.
+1. |- x = x, axiom.
+2. |- x = a, 1.
+"""),
+("06.04", ErrLogic, """
+0. |- add x y = some_function, def.
+1. |- A x → A x, axiom.
+2. |- A (a + b) → A (a + c), 1.
 """)
 ]
 
