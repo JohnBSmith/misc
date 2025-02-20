@@ -1,0 +1,23 @@
+
+# Examples of first order logic with equality.
+
+eq_refl. ⊢ x = x, axiom.
+eq_subst. ⊢ x = y → P x → P y, axiom.
+
+3. ⊢ x = y → x = u → y = u, eq_subst.
+4. ⊢ ∀u. x = y → x = u → y = u, uq_intro 3.
+5. ⊢ x = y → x = x → y = x, uq_elim 4.
+6. ⊢ x = x, eq_refl.
+7. 7 ⊢ x = y, basic.
+8. 7 ⊢ x = x → y = x, subj_elim 5 7.
+9. 7 ⊢ y = x, subj_elim 8 6.
+10. ⊢ x = y → y = x, subj_intro 9.
+11. ⊢ ∀y. x = y → y = x, uq_intro 10.
+eq_symm. ⊢ ∀x. ∀y. x = y → y = x, uq_intro 11.
+
+1. ⊢ x = x, eq_refl.
+2. 2 ⊢ A x, basic.
+3. 2 ⊢ x = x ∧ A x, conj_intro 1 2.
+4. 2 ⊢ ∃y. x = y ∧ A y, ex_intro 3.
+5. ⊢ A x → ∃y. x = y ∧ A y, subj_intro 4.
+6. ⊢ ∀x. A x → ∃y. x = y ∧ A y, uq_intro 5.

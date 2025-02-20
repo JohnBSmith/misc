@@ -158,26 +158,37 @@ def scan(s):
     a.append((None, line))
     return a
 
-def logical(ident):
+def infix_logical(ident):
     def cb(line, x, y):
         x = ensure_type(x, line, Prop)
         y = ensure_type(y, line, Prop)
         return Term((ident, x, y), Prop)
     return cb
 
-def app_op(line, f, x):
-    if is_connective(f, "app"):
-        return Term(("app", *f.node[1:], x), None)
-    else:
-        return Term(("app", f, x), None)
+def infix_pred(ident):
+    def cb(line, x, y):
+        x = ensure_type(x, line, Ind)
+        y = ensure_type(y, line, Ind)
+        return Term((ident, x, y), Prop)
+    return cb
+
+def prefix_logical(ident):
+    def cb(line, x):
+        x = ensure_type(x, line, Prop)
+        return Term((ident, x), Prop)
+    return cb
+
+def prefix_seq(line, x):
+    x = ensure_type(x, line, Prop)
+    return Term(("seq", Term(("true",), Prop), x), Prop)
 
 infix_table = {
-    "#app": (60, "left", app_op),
-    "∧": (50, "left", logical("conj")),
-    "∨": (40, "left", logical("disj")),
-    "→": (30, "right", logical("subj")),
-    "↔": (20, "left", logical("bij")),
-    "⊢": (10, "right", logical("seq")),
+    "=": (70, "left", infix_pred("eq")),
+    "∧": (50, "left", infix_logical("conj")),
+    "∨": (40, "left", infix_logical("disj")),
+    "→": (30, "right", infix_logical("subj")),
+    "↔": (20, "left", infix_logical("bij")),
+    "⊢": (10, "right", infix_logical("seq"))
 }
 def infix_synonyms(synonyms):
     for (key, value) in synonyms:
@@ -186,8 +197,9 @@ infix_synonyms([
     ("&", "∧"), ("->", "→"), ("<->", "↔"),  ("|-", "⊢")])
 
 prefix_table = {
-    "~": ("neg", 60), "¬": ("neg", 60),
-    "□": ("nec", 60), "◇": ("pos", 60)
+    "~": (60, prefix_logical("neg")), "¬": (60, prefix_logical("neg")),
+    "□": (60, prefix_logical("nec")), "◇": (60, prefix_logical("pos")),
+    "⊢": (10, prefix_seq), "|-": (10, prefix_seq)
 }
 
 def is_identifier(t):
@@ -230,10 +242,9 @@ def nud(a, i):
             raise SyntaxError(a[i][1], f"')' was expected, but got '{a[i][0]}'")
         return i + 1, x
     elif token in prefix_table:
-        op, bp = prefix_table[token[0]]
+        bp, op = prefix_table[token[0]]
         i, x = formula(a, i + 1, bp)
-        x = ensure_type(x, line, Prop) # todo
-        return i, Term((op, x), Prop)
+        return i, op(line, x)
     elif token == "#forall" or token == "∀":
         return quantifier(a, i + 1, "forall")
     elif token == "#exists" or token == "∃":
@@ -269,10 +280,11 @@ def formula(a, i, rbp=0):
 def formula_type_checked(a, i):
     line = a[i][1]
     i, x = formula(a, i)
+    x = ensure_type(x, line, Prop)
     residual = []
     type_check(line, x, {}, residual)
     for t in residual:
-        if t.type is None: t.type == Ind
+        if t.type is None: t.type = Ind
     return i, x
 
 def is_identifier(t):
@@ -310,7 +322,6 @@ def ref_sequent(a, i):
     i, ctx = ref_context(a, i)
     if a[i][0] == "|-" or a[i][0] == "⊢":
         i, x = formula_type_checked(a, i + 1)
-        x = ensure_type(x, a[i][1], Prop)
         return i, ("ref_seq", ctx, x)
     else:
         raise SyntaxError(a[i][1], "expected context")
@@ -399,7 +410,6 @@ def unify_args(A, pattern, subst):
         result = unify(A.node[i], pattern.node[i], subst)
         if result:
             if is_connective(pattern, "seq"):
-                # todo: Vergleich der Vorderformeln befüllt subst nicht.
                 # todo: subst auf subst_copy setzen, sonst fürs
                 # Debugging unsichtbar.
                 return unify_seq(A, pattern, subst_copy)
@@ -465,14 +475,12 @@ def unify(A, pattern, subst):
     else:
         raise ValueError("unreachable")
 
-def side_condition(C, conds, subst, args, index):
+def side_condition(C, conds, subst):
     if is_connective(C, "subj") and is_connective(C.node[1], "app") and C.node[1].node[1].node == "nf":
         x, A = C.node[1].node[2:]
-        assert type(args[index]) is str, f"{args[index]}, {type(args[index])}"
-        subst[x.node] = Term(args[index], Ind)
-        conds.append((args[index], A))
-        return side_condition(C.node[2], conds, subst, args, index + 1)
-    return C, index
+        conds.append((x, A))
+        return side_condition(C.node[2], conds, subst)
+    return C
 
 def free_in(x, A, subst):
     if type(A) is Term:
@@ -497,15 +505,21 @@ def free_in(x, A, subst):
     else:
         raise ValueError("unreachable")
 
-def uerr_info(A, B, result, subst):
-    print("Konnte nicht unifizieren:")
-    print(f"    {result.A}\nmit {result.pattern}")
-    print("\nKontext:")
-    print(f"    {A}")
-    print(f"mit {B}")
-    print("\nSubstitutionen:")
-    print(subst)
-    print()
+def is_parameter(x):
+    return type(x) is Term and type(x.node) is str and not x.node[0] in "?$"
+
+def is_quantifier_rule(C):
+    if is_connective(C, "subj") and is_connective(C.node[2], "seq"):
+        A = C.node[2].node[2]
+        return is_connective(A, "forall") or is_connective(A, "exists")
+    return False
+
+def conclusion(line, B, C, subst, args):
+    result = unify(B, C, subst)
+    if result:
+        # dev.uerr_info(B, C, result, subst)
+        raise LogicError(line,
+            f"unification failed for {args[0]}, in conclusion")
 
 def modus_ponens(line, book, B, args):
     assert len(args) >= 1
@@ -513,31 +527,28 @@ def modus_ponens(line, book, B, args):
     C = scheme(C)
     subst = {}
     conds = []
-    C, start = side_condition(C, conds, subst, args, 1)
-    for i in range(start, len(args)):
+    C = side_condition(C, conds, subst)
+    reverse = False
+    if is_quantifier_rule(C):
+        conclusion(line, B, C.node[2], subst, args)
+        reverse = True
+    for i in range(1, len(args)):
         A = book[args[i]]
         if not is_connective(C, "subj"):
             raise LogicError(line, "expected a rule/subjunction")
         result = unify(A, C.node[1], subst)
         if result:
-            # uerr_info(A, C.node[1], result, subst)
+            # dev.uerr_info(A, C.node[1], result, subst)
             raise LogicError(line,
                 f"unification failed for {args[0]}, argument {i}")
         C = C.node[2]
-    result = unify(B, C, subst)
-    if result:
-        # uerr_info(B, C, result, subst)
-        raise LogicError(line,
-            f"unification failed for {args[0]}, in conclusion")
+    if not reverse:
+        conclusion(line, B, C, subst, args)
     for (x, A) in conds:
-        if free_in(x, A, subst):
+        if x.node in subst:
+            x = subst[x.node]
+        if not is_parameter(x) or free_in(x, A, subst):
             raise LogicError(line, f"in {args[0]}: {x} occurs free in {A}")
-
-def nec_seq(line, book, B, args):
-    assert len(args) == 2
-    A = book[args[1]]; subst = {"A": A}
-    if not unify(B, ("seq", "H", "A"), subst):
-        raise LogicError(line, "unification failed for nec_seq")
 
 def verify_plain(book, s):
     statements = parse(s)
@@ -554,9 +565,7 @@ def verify_plain(book, s):
             book[label] = B
         if label in rule:
             raise LogicError(line, "cyclic deduction")
-        if rule[0] == "nec_seq":
-            nec_seq(line, book, B, rule)
-        elif rule[0] != "axiom":
+        if rule[0] != "axiom":
             modus_ponens(line, book, B, rule)
 
 def verify(book, s):
@@ -632,8 +641,11 @@ bij_eliml. (H ⊢ A ↔ B) → (H ⊢ A → B), axiom.
 bij_elimr. (H ⊢ A ↔ B) → (H ⊢ B → A), axiom.
 wk. (H ⊢ B) → (H ∧ A ⊢ B), axiom.
 exch. (H ⊢ A) → (H ⊢ A), axiom.
-uq_intro. (nf u H) → (H ⊢ A u) → (H ⊢ ∀x. A x), axiom.
-uq_elim. (H ⊢ ∀x. A x) → (H ⊢ A u), axiom.
+uq_intro. (nf u (H ∧ ∀x. A x)) → (H ⊢ A u) → (H ⊢ ∀x. A x), axiom.
+uq_elim. (H ⊢ ∀x. A x) → (H ⊢ A t), axiom.
+ex_intro. (H ⊢ A t) → (H ⊢ ∃x. A x), axiom.
+ex_elim. (nf u (H1 ∧ H2 ∧ B ∧ ∃x. A x)) →
+  (H1 ⊢ ∃x. A x) → (H2 ∧ A u ⊢ B) → (H1 ∧ H2 ⊢ B), axiom.
 """
 
 def main():

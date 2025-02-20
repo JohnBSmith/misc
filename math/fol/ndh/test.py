@@ -252,7 +252,54 @@ tests = [
 ("03.05", Ok, """
 1. 1 ⊢ A u, basic.
 2. ⊢ A u → A u, subj_intro 1.
-3. ⊢ ∀x. A x → A x, uq_intro u 2.
+3. ⊢ ∀x. A x → A x, uq_intro 2.
+"""),
+("03.06", Ok, """
+1. 1 ⊢ A u, basic.
+2. 1 ⊢ ∃x. A x, ex_intro 1.
+"""),
+("03.07", Ok, """
+1. 1 ⊢ A u ∧ B u, basic.
+2. 1 ⊢ ∃x. A x ∧ B x, ex_intro 1.
+"""),
+("03.08", Ok, """
+1. 1 ⊢ A u ∧ B u, basic.
+2. 1 ⊢ A u, conj_eliml 1.
+3. 1 ⊢ B u, conj_elimr 1.
+4. 1 ⊢ B u ∧ A u, conj_intro 3 2.
+5. 1 ⊢ ∃x. B x ∧ A x, ex_intro 4.
+6. 6 ⊢ ∃x. A x ∧ B x, basic.
+7. 6 ⊢ ∃x. B x ∧ A x, ex_elim 6 5.
+8. ⊢ (∃x. A x ∧ B x) → (∃x. B x ∧ A x), subj_intro 7.
+"""),
+("03.09", Ok, """
+1. 1 ⊢ ∀x. A x ∧ B x, basic.
+2. 1 ⊢ A u ∧ B u, uq_elim 1.
+3. 1 ⊢ A u, conj_eliml 2.
+4. 1 ⊢ B u, conj_elimr 2.
+5. 1 ⊢ B u ∧ A u, conj_intro 4 3.
+6. 1 ⊢ ∀x. B x ∧ A x, uq_intro 5.
+7. ⊢ (∀x. A x ∧ B x) → (∀x. B x ∧ A x), subj_intro 6.
+"""),
+("03.10", Ok, """
+1. 1 ⊢ ∀x. A ∧ P x, basic.
+2. 1 ⊢ A ∧ P u, uq_elim 1.
+3. 1 ⊢ A, conj_eliml 2.
+4. 1 ⊢ P u, conj_elimr 2.
+5. 1 ⊢ ∀x. P x, uq_intro 4.
+6. 1 ⊢ A ∧ ∀x. P x, conj_intro 3 5.
+const_conj. ⊢ (∀x. A ∧ P x) → A ∧ (∀x. P x), subj_intro 6.
+"""),
+("03.11", Ok, """
+1. 1 ⊢ ∃x. P x ∧ Q x, basic.
+2. 2 ⊢ P u ∧ Q u, basic.
+3. 2 ⊢ P u, conj_eliml 2.
+4. 2 ⊢ Q u, conj_elimr 2.
+5. 2 ⊢ ∃x. P x, ex_intro 3.
+6. 2 ⊢ ∃x. Q x, ex_intro 4.
+7. 2 ⊢ (∃x. P x) ∧ (∃x. Q x), conj_intro 5 6.
+8. 1 ⊢ (∃x. P x) ∧ (∃x. Q x), ex_elim 1 7.
+9. ⊢ (∃x. P x ∧ Q x) → (∃x. P x) ∧ (∃x. Q x), subj_intro 8.
 """),
 
 ("04.01", ErrLogic, """
@@ -269,7 +316,11 @@ tests = [
 """),
 ("04.04", ErrLogic, """
 1. 1 ⊢ A u, basic.
-2. 1 ⊢ ∀x. A x, uq_intro u 1.
+2. 1 ⊢ ∀x. A x, uq_intro 1.
+"""),
+("04.05", ErrLogic, """
+1. 1 ⊢ B u, basic.
+2. 1 ⊢ ∃x. A x, ex_intro 1.
 """)
 ]
 
