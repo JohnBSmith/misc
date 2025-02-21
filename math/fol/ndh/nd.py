@@ -133,7 +133,7 @@ def scan(s):
     while i < n:
         if s[i].isalpha():
             j = i
-            while i < n and (s[i].isalpha() or s[i].isdigit() or s[i] == '_'):
+            while i < n and (s[i].isalpha() or s[i].isdigit() or s[i] in "_'"):
                 i += 1
             if s[j:i] in kw_tab:
                 a.append((kw_tab[s[j:i]], line))
@@ -304,7 +304,7 @@ def nud(a, i):
             raise SyntaxError(a[i][1], f"expected ')', but got '{a[i][0]}'")
         return i + 1, x
     elif token in prefix_table:
-        bp, op = prefix_table[token[0]]
+        bp, op = prefix_table[token]
         i, x = formula(a, i + 1, bp)
         return i, op(line, x)
     elif token == "#forall" or token == "∀":
@@ -503,7 +503,7 @@ def unify_pred(A, pattern, subst):
         return None
 
 def is_scheme_var(A):
-    return type(A.node) is str and A.node[0] == '?'
+    return type(A) is Term and type(A.node) is str and A.node[0] == '?'
 
 class UErr:
     def __init__(self, A, pattern):
@@ -684,7 +684,7 @@ def verify(book, s):
         print("Logic error in line {}:\n{}".format(e.line, e.text))
 
 fmt_tab = {
-    "&": "∧", "|": "∨", "~": "¬", "->": "→", "=>": "→",
+    "&": "∧", "~": "¬", "->": "→", "=>": "→",
     "/\\": "∧", "\\/": "∨", "|-": "⊢",
     "<->": "↔", "<=>": "↔", "_|_": "⊥", "*": "⋅"
 }
@@ -705,9 +705,9 @@ def format_source_code(s):
                 acc.append(fmt_tab[s[i:i+k]])
                 i += k; fmt = True; break
         if not fmt:
-            if s[i].isalpha() or s[i] == '_':
+            if s[i].isalpha():
                 j = i
-                while i < n and (s[i].isalpha() or s[i].isdigit() or s[i] == '_'):
+                while i < n and (s[i].isalpha() or s[i].isdigit() or s[i] in "_'"):
                     i += 1
                 sji = s[j:i]; sf = fmt_kw_tab.get(sji)
                 acc.append(sji if sf is None else sf)
@@ -755,6 +755,8 @@ uq_elim. (H ⊢ ∀x. A x) → (H ⊢ A t), axiom.
 ex_intro. (H ⊢ A t) → (H ⊢ ∃x. A x), axiom.
 ex_elim. (nf u (H1 ∧ H2 ∧ B ∧ ∃x. A x)) →
   (H1 ⊢ ∃x. A x) → (H2 ∧ A u ⊢ B) → (H1 ∧ H2 ⊢ B), axiom.
+lift_impl. (⊢ A → B) → (H ⊢ A) → (H ⊢ B), axiom.
+lift_impl_ii. (⊢ A → B → C) → (H1 ⊢ A) → (H2 ⊢ B) → (H1 ∧ H2 ⊢ C), axiom.
 """
 
 def main():
