@@ -62,7 +62,8 @@ def unique_variable(typ):
 def substitute_term(t, x, u):
     if type(t) is Term:
         if type(t.node) is tuple:
-            return Term((t.node[0],) + tuple(substitute_term(s, x, u) for s in t.node[1:]), t.type)
+            return Term((t.node[0],) + tuple(substitute_term(s, x, u)
+                for s in t.node[1:]), t.type)
         elif is_unique_variable(t.node) or is_identifier(t.node):
             if type(x) is list:
                 for i in range(len(x)):
@@ -121,7 +122,7 @@ def init_tables():
 
 init_tables()
 
-sym2 = {"->": "->", "=>": "->", "/\\": "&", "\\/": "|", "|-": "|-"}
+sym2 = {"->": "->", "=>": "->", "/\\": "&", "\\/": "|", "|-": "|-", "<=": "≤"}
 sym3 = {"<->": "<->", "<=>": "<->", "_|_": "_|_"}
 kw_tab = {"and": "&", "or": "|", "not": "~", "false": "_|_", "true": "#t",
     "box": "□", "dia": "◇", "forall": "#forall", "exists": "#exists",
@@ -207,6 +208,8 @@ infix_table = {
     "\\":(90, "left", infix_op_app("diff", Ind, Ind)),
     "+": (80, "left", infix_op_app("add", Ind, Ind)),
     "∪": (80, "left", infix_op_app("union", Ind, Ind)),
+    "<": (70, "left", infix_op_app("lt", Ind, Prop)),
+    "≤": (70, "left", infix_op_app("le", Ind, Prop)),
     "⊆": (70, "left", infix_op_app("subset", Ind, Prop)),
     "∈": (70, "left", infix_op_app("element", Ind, Prop)),
     "=": (70, "left", infix_op_app("eq", Ind, Prop)),
@@ -365,7 +368,7 @@ def rule_app(a, i):
         token = a[i][0]
         if type(token) is int or is_identifier(token):
             acc.append(token); i += 1
-        elif a[i][0] == ".":
+        elif a[i][0] == "." or a[i][0] == ",":
             return i, acc
         else:
             raise SyntaxError(a[i][1], "expected identifier or label")
@@ -402,9 +405,13 @@ def parse_statement(i, a):
     if a[i][0] != ",":
         raise SyntaxError(a[i][1], "expected ','")
     i, rule = rule_app(a, i + 1)
+    if a[i][0] == ",":
+        i, hint = formula_type_checked(a, i + 1)
+    else:
+        hint = None
     if a[i][0] != ".":
         raise SyntaxError(a[i][1], "expected '.'")
-    return i + 1, (line, label, A, rule)
+    return i + 1, (line, label, A, rule, hint)
 
 def parse(s):
     a = scan(s); i = 0; statements = []
@@ -572,6 +579,15 @@ def free_in(x, A, subst):
     else:
         raise ValueError("unreachable")
 
+def unification_hint(line, hint, subst):
+    if is_connective(hint, "bij"):
+        lhs = hint.node[1]; rhs = hint.node[2]
+        if is_connective(lhs, "app"):
+            P = lhs.node[1]; args = list(lhs.node[2:])
+            subst["?" + P.node] = Substitution(rhs, args)
+            return None
+    raise LogicError(line, f"invalid unification hint: {hint}")
+
 def is_parameter(x):
     return type(x) is Term and type(x.node) is str and not x.node[0] in "?$"
 
@@ -588,7 +604,7 @@ def conclusion(line, B, C, subst, args):
         raise LogicError(line,
             f"unification failed for {args[0]}, in conclusion")
 
-def modus_ponens(line, book, B, args):
+def modus_ponens(line, book, B, args, hint):
     assert len(args) >= 1
     C = lookup(book, args[0], line)
     C = scheme(C)
@@ -596,6 +612,8 @@ def modus_ponens(line, book, B, args):
     conds = []
     C = side_condition(C, conds, subst)
     reverse = False
+    if not hint is None:
+        unification_hint(line, hint, subst)
     if is_quantifier_rule(C):
         conclusion(line, B, C.node[2], subst, args)
         reverse = True
@@ -657,7 +675,7 @@ def lookup(book, key, line):
 
 def verify_plain(book, s):
     statements = parse(s)
-    for (line, label, B, rule) in statements:
+    for (line, label, B, rule, hint) in statements:
         if type(B) is tuple and B[0] == "ref_seq":
             Gamma = B[1]; A = B[2]
             book[label] = Term(("seq", None, A), Prop)
@@ -673,7 +691,7 @@ def verify_plain(book, s):
         if rule[0] == "def":
             definition(line, book, B, rule[1:])
         elif rule[0] != "axiom":
-            modus_ponens(line, book, B, rule)
+            modus_ponens(line, book, B, rule, hint)
 
 def verify(book, s):
     try:
@@ -684,9 +702,8 @@ def verify(book, s):
         print("Logic error in line {}:\n{}".format(e.line, e.text))
 
 fmt_tab = {
-    "&": "∧", "~": "¬", "->": "→", "=>": "→",
-    "/\\": "∧", "\\/": "∨", "|-": "⊢",
-    "<->": "↔", "<=>": "↔", "_|_": "⊥", "*": "⋅"
+    "&": "∧", "~": "¬", "->": "→", "=>": "→", "/\\": "∧", "\\/": "∨",
+    "|-": "⊢", "<->": "↔", "<=>": "↔", "_|_": "⊥", "*": "⋅", "<=": "≤"
 }
 fmt_kw_tab = {
     "and": "∧", "or": "∨", "not": "¬", "box": "□", "dia": "◇",
