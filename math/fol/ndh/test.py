@@ -23,197 +23,206 @@ def check(test_id, expected_result, code):
             return False
     return True
 
+def run_examples():
+    names = ["prop", "fol", "eq", "modal", "MK", "nat", "repl"]
+    for name in names:
+        with open(f"examples/{name}.txt") as f:
+            code = f.read()
+        if not check(name, Ok, code):
+            return
+
 def main():
     for (test_id, result, code) in tests:
         if not check(test_id, result, code):
-            break
+            return
+    run_examples()
 
 tests = [
 ("01.01", Ok, ""),
 ("01.02", Ok, """
-1. 1 ⊢ A, basic.
+1. 1 ⊢ A, hypo.
 2. ⊢ A → A, subj_intro 1.
 """),
 ("01.03", Ok, """
-1. 1 ⊢ A ∧ B, basic.
+1. 1 ⊢ A ∧ B, hypo.
 2. ⊢ A ∧ B → A ∧ B, subj_intro 1.
 """),
 ("01.04", Ok, """
-1. 1 ⊢ A ∧ B ∧ C, basic.
+1. 1 ⊢ A ∧ B ∧ C, hypo.
 2. ⊢ A ∧ B ∧ C → A ∧ B ∧ C, subj_intro 1.
 """),
 ("01.05", Ok, """
-1. 1 ⊢ A ∧ B ∧ C ∧ D, basic.
+1. 1 ⊢ A ∧ B ∧ C ∧ D, hypo.
 2. ⊢ A ∧ B ∧ C ∧ D → A ∧ B ∧ C ∧ D, subj_intro 1.
 """),
 ("01.06", Ok, """
-1. 1 ⊢ A → B, basic.
+1. 1 ⊢ A → B, hypo.
 2. ⊢ (A → B) → A → B, subj_intro 1.
 """),
 ("01.07", Ok, """
-1. 1 ⊢ A → B → C, basic.
+1. 1 ⊢ A → B → C, hypo.
 2. ⊢ (A → B → C) → A → B → C, subj_intro 1.
 """),
 ("01.08", Ok, """
-1. 1 ⊢ A, basic.
-2. 2 ⊢ B, basic.
+1. 1 ⊢ A, hypo.
+2. 2 ⊢ B, hypo.
 3. 1, 2 ⊢ A ∧ B, conj_intro 1 2.
 """),
 ("01.09", Ok, """
-1. 1 ⊢ A, basic.
-2. 2 ⊢ B, basic.
+1. 1 ⊢ A, hypo.
+2. 2 ⊢ B, hypo.
 3. 2, 1 ⊢ A ∧ B, conj_intro 1 2.
 """),
 ("01.10", Ok, """
-1. 1 ⊢ A, basic.
-2. 2 ⊢ B, basic.
+1. 1 ⊢ A, hypo.
+2. 2 ⊢ B, hypo.
 3. 1, 2 ⊢ B ∧ A, conj_intro 2 1.
 """),
 ("01.11", Ok, """
-1. 1 ⊢ A, basic.
-2. 2 ⊢ B, basic.
-3. 3 ⊢ C, basic.
+1. 1 ⊢ A, hypo.
+2. 2 ⊢ B, hypo.
+3. 3 ⊢ C, hypo.
 4. 1, 2 ⊢ A ∧ B, conj_intro 1 2.
 5. 1, 2, 3 ⊢ A ∧ B ∧ C, conj_intro 4 3.
 """),
 ("01.12", Ok, """
-1. 1 ⊢ A, basic.
-2. 2 ⊢ B, basic.
-3. 3 ⊢ C, basic.
+1. 1 ⊢ A, hypo.
+2. 2 ⊢ B, hypo.
+3. 3 ⊢ C, hypo.
 4. 1, 2 ⊢ A ∧ B, conj_intro 1 2.
 5. 3, 2, 1 ⊢ A ∧ B ∧ C, conj_intro 4 3.
 """),
 ("01.13", Ok, """
-1. 1 ⊢ A, basic.
-2. 2 ⊢ B, basic.
-3. 3 ⊢ C, basic.
+1. 1 ⊢ A, hypo.
+2. 2 ⊢ B, hypo.
+3. 3 ⊢ C, hypo.
 4. 1, 2 ⊢ A ∧ B, conj_intro 1 2.
 5. 3, 1, 2 ⊢ C ∧ (A ∧ B), conj_intro 3 4.
 """),
 ("01.14", Ok, """
-1. 1 ⊢ A, basic.
-2. 2 ⊢ B, basic.
-3. 3 ⊢ C, basic.
+1. 1 ⊢ A, hypo.
+2. 2 ⊢ B, hypo.
+3. 3 ⊢ C, hypo.
 4. 2, 1 ⊢ A ∧ B, conj_intro 1 2.
 5. 1, 2, 3 ⊢ C ∧ (A ∧ B), conj_intro 3 4.
 """),
 ("01.15", Ok, """
-1. 1 ⊢ A, basic.
+1. 1 ⊢ A, hypo.
 2. 1 ⊢ A ∨ B, disj_introl 1.
 """),
 ("01.16", Ok, """
-1. 1 ⊢ A, basic.
+1. 1 ⊢ A, hypo.
 2. 1 ⊢ B ∨ A, disj_intror 1.
 """),
 ("01.17", Ok, """
-1. 1 ⊢ A, basic.
+1. 1 ⊢ A, hypo.
 2. 1 ⊢ A ∨ A, disj_introl 1.
 """),
 ("01.18", Ok, """
-1. 1 ⊢ A, basic.
+1. 1 ⊢ A, hypo.
 2. 1 ⊢ A ∨ A, disj_intror 1.
 """),
 ("01.19", Ok, """
-1. 1 ⊢ A ∧ B, basic.
+1. 1 ⊢ A ∧ B, hypo.
 2. 1 ⊢ A ∧ B ∨ C, disj_introl 1.
 """),
 ("01.20", Ok, """
-1. 1 ⊢ A ∧ B, basic.
+1. 1 ⊢ A ∧ B, hypo.
 2. 1 ⊢ C ∨ A ∧ B, disj_intror 1.
 """),
 ("01.21", Ok, """
-1. 1 ⊢ A ∧ B, basic.
+1. 1 ⊢ A ∧ B, hypo.
 2. 1 ⊢ A ∧ B ∨ A ∧ B, disj_introl 1.
 """),
 ("01.22", Ok, """
-1. 1 ⊢ A ∧ B, basic.
+1. 1 ⊢ A ∧ B, hypo.
 2. 1 ⊢ A ∧ B ∨ A ∧ B, disj_intror 1.
 """),
 ("01.23", Ok, """
-1. 1 ⊢ ⊥, basic.
+1. 1 ⊢ ⊥, hypo.
 2. ⊢ ¬⊥, neg_intro 1.
 """),
 ("01.24", Ok, """
-1. 1 ⊢ A → B, basic.
-2. 2 ⊢ B → A, basic.
+1. 1 ⊢ A → B, hypo.
+2. 2 ⊢ B → A, hypo.
 3. 1, 2 ⊢ A ↔ B, bij_intro 1 2.
 """),
 ("01.25", Ok, """
-1. 1 ⊢ A ∧ B, basic.
+1. 1 ⊢ A ∧ B, hypo.
 2. 1 ⊢ A, conj_eliml 1.
 """),
 ("01.26", Ok, """
-1. 1 ⊢ A ∧ B, basic.
+1. 1 ⊢ A ∧ B, hypo.
 2. 1 ⊢ B, conj_elimr 1.
 """),
 ("01.27", Ok, """
-1. 1 ⊢ A ∧ B ∧ C, basic.
+1. 1 ⊢ A ∧ B ∧ C, hypo.
 2. 1 ⊢ A ∧ B, conj_eliml 1.
 """),
 ("01.28", Ok, """
-1. 1 ⊢ A ∧ B ∧ C, basic.
+1. 1 ⊢ A ∧ B ∧ C, hypo.
 2. 1 ⊢ C, conj_elimr 1.
 """),
 ("01.29", Ok, """
-1. 1 ⊢ A → B, basic.
-2. 2 ⊢ A, basic.
+1. 1 ⊢ A → B, hypo.
+2. 2 ⊢ A, hypo.
 3. 1, 2 ⊢ B, subj_elim 1 2.
 """),
 ("01.30", Ok, """
-1. 1 ⊢ A ∧ B → C ∧ D, basic.
-2. 2 ⊢ A ∧ B, basic.
+1. 1 ⊢ A ∧ B → C ∧ D, hypo.
+2. 2 ⊢ A ∧ B, hypo.
 3. 1, 2 ⊢ C ∧ D, subj_elim 1 2.
 """),
 ("01.31", Ok, """
-1. 1 ⊢ A → B → C, basic.
-2. 2 ⊢ A, basic.
+1. 1 ⊢ A → B → C, hypo.
+2. 2 ⊢ A, hypo.
 3. 1, 2 ⊢ B → C, subj_elim 1 2.
-4. 4 ⊢ B, basic.
+4. 4 ⊢ B, hypo.
 5. 1, 2, 4 ⊢ C, subj_elim 3 4.
 6. 4, 2, 1 ⊢ C, subj_elim 3 4.
 """),
 ("01.32", Ok, """
-1. 1 ⊢ A ↔ B, basic.
+1. 1 ⊢ A ↔ B, hypo.
 2. 1 ⊢ A → B, bij_eliml 1.
 """),
 ("01.33", Ok, """
-1. 1 ⊢ A ↔ B, basic.
+1. 1 ⊢ A ↔ B, hypo.
 2. 1 ⊢ B → A, bij_elimr 1.
 """),
 ("01.34", Ok, """
-1. 1 ⊢ ¬A, basic.
-2. 2 ⊢ A, basic.
+1. 1 ⊢ ¬A, hypo.
+2. 2 ⊢ A, hypo.
 3. 2, 1 ⊢ ⊥, neg_elim 1 2.
 4. 2 ⊢ ¬¬A, neg_intro 3.
 5. ⊢ A → ¬¬A, subj_intro 4.
 """),
 ("01.35", Ok, """
-1. 1 ⊢ (A → B) ∧ A, basic.
+1. 1 ⊢ (A → B) ∧ A, hypo.
 2. 1 ⊢ A → B, conj_eliml 1.
 3. 1 ⊢ A, conj_elimr 1.
 4. 1 ⊢ B, subj_elim 2 3.
 5. ⊢ (A → B) ∧ A → B, subj_intro 4.
 """),
 ("01.36", Ok, """
-1. 1 ⊢ A ∧ B, basic.
+1. 1 ⊢ A ∧ B, hypo.
 2. 1 ⊢ A, conj_eliml 1.
 3. 1 ⊢ B, conj_elimr 1.
 4. 1 ⊢ B ∧ A, conj_intro 3 2.
 5. ⊢ A ∧ B → B ∧ A, subj_intro 4.
 """),
 ("01.37", Ok, """
-1. 1 ⊢ A ∨ B, basic.
-2. 2 ⊢ A, basic.
+1. 1 ⊢ A ∨ B, hypo.
+2. 2 ⊢ A, hypo.
 3. 2 ⊢ B ∨ A, disj_intror 2.
-4. 4 ⊢ B, basic.
+4. 4 ⊢ B, hypo.
 5. 4 ⊢ B ∨ A, disj_introl 4.
 6. 1 ⊢ B ∨ A, disj_elim 1 3 5.
 7. ⊢ A ∨ B → B ∨ A, subj_intro 6.
 """),
 ("01.38", Ok, """
-1. 1 ⊢ ¬B, basic.
-2. 2 ⊢ A → B, basic.
-3. 3 ⊢ A, basic.
+1. 1 ⊢ ¬B, hypo.
+2. 2 ⊢ A → B, hypo.
+3. 3 ⊢ A, hypo.
 4. 2, 3 ⊢ B, subj_elim 2 3.
 5. 2, 1, 3 ⊢ ⊥, neg_elim 1 4.
 6. 2, 1 ⊢ ¬A, neg_intro 5.
@@ -222,59 +231,59 @@ tests = [
 """),
 
 ("02.01", ErrLogic, """
-1. 1 ⊢ A, basic.
+1. 1 ⊢ A, hypo.
 2. ⊢ B → A, subj_intro 1.
 """),
 ("02.02", ErrLogic, """
-1. 1 ⊢ A, basic.
+1. 1 ⊢ A, hypo.
 2. ⊢ A → B, subj_intro 1.
 """),
 ("02.03", ErrLogic, """
-1. 1 ⊢ A ∧ B, basic.
+1. 1 ⊢ A ∧ B, hypo.
 2. ⊢ A ∧ A → A ∧ A, subj_intro 1.
 """),
 
 ("03.01", Ok, """
-1. 1 ⊢ ∀x. A x, basic.
+1. 1 ⊢ ∀x. A x, hypo.
 2. 1 ⊢ A u, uq_elim 1.
 """),
 ("03.02", Ok, """
-1. 1 ⊢ ∀x. A x, basic.
+1. 1 ⊢ ∀x. A x, hypo.
 2. 1 ⊢ A w, uq_elim 1.
 """),
 ("03.03", Ok, """
-1. 1 ⊢ ∀x. A x, basic.
+1. 1 ⊢ ∀x. A x, hypo.
 2. 1 ⊢ A x, uq_elim 1.
 """),
 ("03.04", Ok, """
-1. 1 ⊢ ∀x. A x ∧ B x, basic.
+1. 1 ⊢ ∀x. A x ∧ B x, hypo.
 2. 1 ⊢ A u ∧ B u, uq_elim 1.
 """),
 ("03.05", Ok, """
-1. 1 ⊢ A u, basic.
+1. 1 ⊢ A u, hypo.
 2. ⊢ A u → A u, subj_intro 1.
 3. ⊢ ∀x. A x → A x, uq_intro 2.
 """),
 ("03.06", Ok, """
-1. 1 ⊢ A u, basic.
+1. 1 ⊢ A u, hypo.
 2. 1 ⊢ ∃x. A x, ex_intro 1.
 """),
 ("03.07", Ok, """
-1. 1 ⊢ A u ∧ B u, basic.
+1. 1 ⊢ A u ∧ B u, hypo.
 2. 1 ⊢ ∃x. A x ∧ B x, ex_intro 1.
 """),
 ("03.08", Ok, """
-1. 1 ⊢ A u ∧ B u, basic.
+1. 1 ⊢ A u ∧ B u, hypo.
 2. 1 ⊢ A u, conj_eliml 1.
 3. 1 ⊢ B u, conj_elimr 1.
 4. 1 ⊢ B u ∧ A u, conj_intro 3 2.
 5. 1 ⊢ ∃x. B x ∧ A x, ex_intro 4.
-6. 6 ⊢ ∃x. A x ∧ B x, basic.
+6. 6 ⊢ ∃x. A x ∧ B x, hypo.
 7. 6 ⊢ ∃x. B x ∧ A x, ex_elim 6 5.
 8. ⊢ (∃x. A x ∧ B x) → (∃x. B x ∧ A x), subj_intro 7.
 """),
 ("03.09", Ok, """
-1. 1 ⊢ ∀x. A x ∧ B x, basic.
+1. 1 ⊢ ∀x. A x ∧ B x, hypo.
 2. 1 ⊢ A u ∧ B u, uq_elim 1.
 3. 1 ⊢ A u, conj_eliml 2.
 4. 1 ⊢ B u, conj_elimr 2.
@@ -283,7 +292,7 @@ tests = [
 7. ⊢ (∀x. A x ∧ B x) → (∀x. B x ∧ A x), subj_intro 6.
 """),
 ("03.10", Ok, """
-1. 1 ⊢ ∀x. A ∧ P x, basic.
+1. 1 ⊢ ∀x. A ∧ P x, hypo.
 2. 1 ⊢ A ∧ P u, uq_elim 1.
 3. 1 ⊢ A, conj_eliml 2.
 4. 1 ⊢ P u, conj_elimr 2.
@@ -292,8 +301,8 @@ tests = [
 const_conj. ⊢ (∀x. A ∧ P x) → A ∧ (∀x. P x), subj_intro 6.
 """),
 ("03.11", Ok, """
-1. 1 ⊢ ∃x. P x ∧ Q x, basic.
-2. 2 ⊢ P u ∧ Q u, basic.
+1. 1 ⊢ ∃x. P x ∧ Q x, hypo.
+2. 2 ⊢ P u ∧ Q u, hypo.
 3. 2 ⊢ P u, conj_eliml 2.
 4. 2 ⊢ Q u, conj_elimr 2.
 5. 2 ⊢ ∃x. P x, ex_intro 3.
@@ -344,27 +353,27 @@ const_conj. ⊢ (∀x. A ∧ P x) → A ∧ (∀x. P x), subj_intro 6.
 """),
 
 ("04.01", ErrLogic, """
-1. 1 ⊢ ∀x. A x, basic.
+1. 1 ⊢ ∀x. A x, hypo.
 2. 1 ⊢ B u, uq_elim 1.
 """),
 ("04.02", ErrLogic, """
-1. 1 ⊢ ∀x. A x ∧ B x, basic.
+1. 1 ⊢ ∀x. A x ∧ B x, hypo.
 2. 1 ⊢ A u ∧ A u, uq_elim 1.
 """),
 ("04.03", ErrLogic, """
-1. 1 ⊢ ∀x. A x ∧ B x, basic.
+1. 1 ⊢ ∀x. A x ∧ B x, hypo.
 2. 1 ⊢ A u ∧ B w, uq_elim 1.
 """),
 ("04.04", ErrLogic, """
-1. 1 ⊢ A u, basic.
+1. 1 ⊢ A u, hypo.
 2. 1 ⊢ ∀x. A x, uq_intro 1.
 """),
 ("04.05", ErrLogic, """
-1. 1 ⊢ B u, basic.
+1. 1 ⊢ B u, hypo.
 2. 1 ⊢ ∃x. A x, ex_intro 1.
 """),
 ("04.06", ErrLogic, """
-1. 1 ⊢ A x, basic.
+1. 1 ⊢ A x, hypo.
 2. ⊢ A x → A y, subj_intro 1.
 """),
 ("04.07", ErrLogic, """

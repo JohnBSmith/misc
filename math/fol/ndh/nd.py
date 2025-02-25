@@ -296,7 +296,7 @@ def nud(a, i):
         return i + 1, Term(token, None)
     elif token == "_|_" or token == "⊥":
         return i + 1, Term(("false",), Prop)
-    elif token == "#t":
+    elif token == "#t" or token == "⊤":
         return i + 1, Term(("true",), Prop)
     elif token == "(":
         i, x = formula(a, i + 1, 0)
@@ -586,6 +586,12 @@ def unification_hint(line, hint, subst):
             P = lhs.node[1]; args = list(lhs.node[2:])
             subst["?" + P.node] = Substitution(rhs, args)
             return None
+    elif is_connective(hint, "app") and hint.node[1].node == "eq":
+        lhs = hint.node[2]; rhs = hint.node[3]
+        if is_connective(lhs, "app"):
+            f = lhs.node[1]; args = list(lhs.node[2:])
+            subst["?" + f.node] = Substitution(rhs, args)
+            return None
     raise LogicError(line, f"invalid unification hint: {hint}")
 
 def is_parameter(x):
@@ -647,11 +653,16 @@ def definition(line, book, S, args):
     C = S.node[2]
     if is_connective(C, "bij"):
         A = C.node[1]; B = C.node[2]
-        if not isinstance(A.node, tuple) or A.node[0] != "app":
-            raise LogicError(line, "malformed definition")
-        if A.node[1].node in predicate_symbols:
-            raise LogicError(line, "already defined")
-        predicate_symbols[A.node[1].node] = len(A.node) - 2
+        if type(A.node) is str:
+            if A.node in predicate_symbols:
+                raise LogicError(line, "already defined")
+            predicate_symbols[A.node] = 0
+        else:
+            if not isinstance(A.node, tuple) or A.node[0] != "app":
+                raise LogicError(line, "malformed definition")
+            if A.node[1].node in predicate_symbols:
+                raise LogicError(line, "already defined")
+            predicate_symbols[A.node[1].node] = len(A.node) - 2
     elif is_connective(C, "app") and C.node[1].node == "eq":
         A = C.node[2]; B = C.node[3]
         if isinstance(A.node, str):
@@ -750,7 +761,7 @@ def read_all(path):
         return f.read()
 
 rules = """
-basic. (true ∧ H ⊢ H), axiom.
+hypo. (⊤ ∧ A ⊢ A), axiom.
 conj_intro. (H1 ⊢ A) → (H2 ⊢ B) → (H1 ∧ H2 ⊢ A ∧ B), axiom.
 conj_eliml. (H ⊢ A ∧ B) → (H ⊢ A), axiom.
 conj_elimr. (H ⊢ A ∧ B) → (H ⊢ B), axiom.

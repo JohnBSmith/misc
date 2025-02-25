@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Anleitung zu nd</title>
+  <style>
+body{
+  font-family: "DejaVu Sans", "Verdana", sans-serif;
+  color: #30302a;
+  line-height: 1.5;
+  max-width: 46em;
+  margin-top: 2em;
+  margin-left: 10%;
+  margin-bottom: 10em;
+  padding-left: 4%;
+  padding-right: 4%;
+}
+pre, code{
+  font-family: "DejaVu Sans Mono", "Menlo", "Consolas", monospace;
+}
+@media(max-width: 64em){
+  body{margin-left: auto; margin-right: auto;}
+}
+h2{
+  font-weight: normal;
+  border-bottom: 2px solid #b4b4b0;
+}
+a{color: #20506a; text-decoration: none;}
+a:hover{color: #102a40; text-decoration: underline;}
+.indent {
+  margin-left: 1.6em;
+}
+.ibox {
+  background-color: #f4f4e6;
+  border-left: 6px solid #d2d2c8;
+  padding: 8px 12px;
+}
+.cmd {
+  background-color: #303030;
+  color: #f0f0f0;
+  border-left: 6px solid #a0a0a0;
+  padding: 6px 12px;
+}
+table.bt{border-collapse: collapse;}
+table.bt td, table.bt th{
+  padding-left: 0.8em;
+  padding-right: 0.8em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  vertical-align: top;
+}
+table.bt td{
+  border-bottom: 2px solid #d0d0c0;
+  background-color: #fafaf0;
+}
+table.bt th{
+  border-top: 2px solid #c0c0b0;
+  border-bottom: 2px solid #c0c0b0;
+  background-color: #eaeada;
+}
+  </style>
+</head>
+<body>
+
+<br>
+<h1>nd &mdash; Ein Beweisprüfer fürs natürliche Schließen</h1>
+
+<h2>Inhaltsverzeichnis</h2>
+<ol>
+<li><a href="#Einfuehrung">Einführung</a>
+<li><a href="#Ablauf">Allgemeiner Ablauf</a>
+<li><a href="#Darstellung">Zur Darstellung</a>
+<li><a href="#Aussagenlogik">Aussagenlogik</a>
+<li><a href="#Funktionsweise">Funktionsweise</a>
+</ol>
+
+<h2 id="Einfuehrung">Einführung</h2>
+
+<p>Das Programm <code>nd.py</code>, für <i>natural deduction</i>, ist ein schlanker Beweisprüfer fürs natürliche Schließen zur Logik erster Stufe, worunter man einen logischen Kalkül versteht, der die in der Mathematik, Informatik und Philosophie übliche Beweisführung formalisiert.
+
+<p>Die Beweise müssen suppesschen Stil, also in tabellarischer Form, abgefasst sein. Intern verwendet das Programm Sequenzen, wie von Gentzen 1935 zunächst mit dem Sequenzenkalkül und 1936 daraufhin auch fürs natürliche Schließen beschrieben. Außerdem handelt es sich eigentlich um eine Art von axiomatischen Kalkül, der als Regel allein den Modus ponens nutzt. Die eigentlichen Schlussregeln sind nicht fest ins System verbaut, sondern werden mit der Eingabe des Präludiums als Axiomenschemata geladen. Es sind sogar höhere Regeln darstellbar, die es gestatten, aus Theoremschemata induzierte Regeln zu erhalten.
+
+<h2 id="Ablauf">Allgemeiner Ablauf</h2>
+
+<p>Wir tragen den zu prüfenden Beweis in ASCII-Syntax in eine Datei ein. Welchen Namen die Datei trägt, spielt keine Rolle. Nennen wir sie »<code>Beweise.txt</code>«. Hier zum Beispiel der Beweis zur Kontraposition:
+
+<pre class="ibox">
+1. 1 |- ~B, hypo.
+2. 2 |- A -&gt; B, hypo.
+3. 3 |- A, hypo.
+4. 2, 3 |- B, subj_elim 2 3.
+5. 1, 2, 3 |- _|_, neg_elim 1 4.
+6. 2, 1 |- ~A, neg_intro 5.
+7. 2 |- ~B -&gt; ~A, subj_intro 6.
+8. ⊢ (A -> B) -&gt; ~B -&gt; ~A, subj_intro 7.
+</pre>
+
+<p>Mit dem Programmaufruf
+
+<pre class="cmd">
+$ ./nd.py Beweise.txt
+</pre>
+
+<p>wird der Beweis nun maschinell geprüft. Das Programm verbleibt nur bei korrekten Beweisen ruhig. Gelingt der Abgleich eines Schrittes mit einer Regel dagegen nicht, bricht es mit der entsprechenden Meldung ab.
+
+<p><small>Die Syntax der Eingabe ist recht flexibel. Die Konjunktion <code>A&nbsp;∧&nbsp;B</code> kann zum Beispiel auch als <code>A&nbsp;/\&nbsp;B</code>, als <code>A&nbsp;&amp;&nbsp;B</code> oder als <code>A&nbsp;and&nbsp;B</code> geschrieben werden. Man kann Schlüsselwörter wie <code>and</code> sowie die Namen der Regeln auch unschwer in die eigene Muttersprache umbenennen.</small>
+
+<h2 id="Darstellung">Zur Darstellung</h2>
+
+<p>Mit dem Programmaufruf
+
+<pre class="cmd">
+$ ./nd.py -f Beweise.txt Beweise.txt
+</pre>
+
+<p>wird die Eingabe optional mit den richtigen Unicode-Zeichen formatiert.
+Man erhält:
+
+<table class="bt">
+<tr><th>Suppes-Style</th>
+<tr><td>
+<pre class="ibox">
+1. 1 ⊢ ¬B, hypo.
+2. 2 ⊢ A → B, hypo.
+3. 3 ⊢ A, hypo.
+4. 2, 3 ⊢ B, subj_elim 2 3.
+5. 1, 2, 3 ⊢ ⊥, neg_elim 1 4.
+6. 2, 1 ⊢ ¬A, neg_intro 5.
+7. 2 ⊢ ¬B → ¬A, subj_intro 6.
+8. ⊢ (A → B) → ¬B → ¬A, subj_intro 7.
+</pre>
+</table>
+
+<p>Diese Darstellung im suppesschen Stil erscheint allerdings recht unübersichtlich.
+Sie kann daher noch so formatiert werden, dass die Baumstruktur zum
+Vorschein kommt. Dazu wird "<code>⊢</code>" mit den Prämissen bei einem
+Schluss am besten um zwei Leerzeichen eingerückt.
+
+<table class="bt">
+<tr><th>Suppes-Style zzgl. Gentzen-Style
+<tr><td>
+<pre class="ibox">
+1. 1         ⊢ ¬B, hypo.
+2. 2           ⊢ A → B, hypo.
+3. 3           ⊢ A, hypo.
+4. 2, 3      ⊢ B, subj_elim 2 3.
+5. 1, 2, 3 ⊢ ⊥, neg_elim 1 4.
+6. 2, 1  ⊢ ¬A, neg_intro 5.
+7. 2   ⊢ ¬B → ¬A, subj_intro 6.
+8.   ⊢ (A → B) → ¬B → ¬A, subj_intro 7.
+</pre>
+</table>
+
+<p>Gemeint ist damit eine Verdrehung dieses Beweisbaums:
+
+<pre class="indent" style="line-height: 0.8">
+            ─────────      ─────
+            2 ⊢ A → B      3 ⊢ A
+──────      ────────────────────
+1 ⊢ ¬B            2, 3 ⊢ B
+──────────────────────────
+       1, 2, 3 ⊢ ⊥
+       ───────────
+        2, 1 ⊢ ¬A
+       ───────────
+       2 ⊢ ¬B → ¬A
+   ───────────────────
+   ⊢ (A → B) → ¬B → ¬A
+</pre>
+
+
+<p>Statt die Prämissen der Schlüsse einzurücken, kann man alternativ die Unterbeweise beginnend mit ihren Hypothesen einrücken.
+Auf diese Weise kann man den Beweis gleichzeitig im Suppes-Style und im Fitch-Style lesen. Hierfür ist allerdings im obigen Beweis die Reihenfolge der Schritte geringfügig zu ändern, da Hypothesen im Fitch-Style genau in der umgekehrten Reihenfolge getilgt werden müssen, wie sie gemacht wurden, so dass eine Verschachtlung von Unterbeweisen entsteht.
+
+<table class="bt">
+<tr><th>Suppes-Style zzgl. Fitch-Style
+<tr><td>
+<pre class="ibox">
+1. 1   ⊢ A → B, hypo.
+2. 2     ⊢ ¬B, hypo.
+3. 3       ⊢ A, hypo.
+4. 1, 3    ⊢ B, subj_elim 1 3.
+5. 1, 2, 3 ⊢ ⊥, neg_elim 2 4.
+6. 1, 2  ⊢ ¬A, neg_intro 5.
+7. 1   ⊢ ¬B → ¬A, subj_intro 6.
+8.   ⊢ (A → B) → ¬B → ¬A, subj_intro 7.
+</pre>
+</table>
+
+<p>Gemeint ist damit eine Nachahmung dieser Darstellung:
+
+<pre class="indent" style="line-height: 1.2">
+1. │ A → B, hypo.
+   ├─────────────
+2. │ │ ¬B, hypo.
+   │ ├──────────
+3. │ │ │ A, hypo.
+   │ │ ├─────────
+4. │ │ │ B, subj_elim 1 3.
+5. │ │ │ ⊥, neg_elim 2 4.
+6. │ │ ¬A, neg_intro 5.
+7. │ ¬B → ¬A, subj_intro 6.
+8. (A → B) → ¬B → ¬A, subj_intro 7.
+</pre>
+
+<h2 id="Aussagenlogik">Aussagenlogik</h2>
+
+<p>Wir legen die Regeln zu einem Fragment des natürlichen Schließens
+fest und leiten damit ein Theorem ab.
+
+<pre class="ibox">
+# Regel zur Aufstellung Grundsequenzen bzw. für temporäre
+# Annahmen. Diese Schlussregel kommt ohne Prämissen aus.
+hypo. (⊤ ∧ A ⊢ A), axiom.
+
+# Regel zur Konjunktionseinführung
+conj_intro. (H1 ⊢ A) → (H2 ⊢ B) → (H1 ∧ H2 ⊢ A ∧ B), axiom.
+
+# Regeln zur Konjunktionsbeseitigung
+conj_eliml. (H ⊢ A ∧ B) → (H ⊢ A), axiom.
+conj_elimr. (H ⊢ A ∧ B) → (H ⊢ B), axiom.
+
+# Regel zu Subjuktionseinführung
+subj_intro. (H ∧ A ⊢ B) → (H ⊢ A → B), axiom.
+
+# Teilbeweis des Kommutativgesetzes
+1. 1 ⊢ A ∧ B, hypo.
+2. 1 ⊢ A, conj_eliml 1.
+3. 1 ⊢ B, conj_elimr 1.
+4. 1 ⊢ B ∧ A, conj_intro 3 2.
+conj_comm. ⊢ A ∧ B → B ∧ A, subj_intro 4.
+</pre>
+
+<p>Zu beachten ist, dass es sich bei <code>conj_comm</code> eigentlich nicht um ein einzelnes Theorem, sondern um ein Schema von Theoremen handelt. Zur Ableitung konkreter Theoreme legen wir zunächst atomare Formeln fest:
+
+<pre class="ibox">
+0. ⊢ p ↔ some_atom, def.
+0. ⊢ q ↔ some_atom, def. 
+</pre>
+
+<p>Nun können wir unterschiedliche Theoreme als Substitutionsinstanzen von <code>conj_comm</code> erhalten:
+
+<pre class="ibox">
+1. ⊢ p ∧ p → p ∧ p, conj_comm.
+2. ⊢ p ∧ q → q ∧ p, conj_comm.
+3. ⊢ p ∧ (p ∧ q) → (p ∧ q) ∧ p, conj_comm.
+</pre>
+
+<p>Die drei Theoreme selbst lassen sich allerdings nicht zur abermaligen Ableitung von Substitutionsinstanzen nutzen, da <code>p</code>,&nbsp;<code>q</code> im Gegensatz zu <code>A</code>,&nbsp;<code>B</code> keine Schemavariablen sind.
+
+<h2 id="Funktionsweise">Funktionsweise</h2>
+
+<p>In der Eingabe
+
+<pre class="ibox">
+1. 1 ⊢ A ∧ B, hypo.
+2. 1 ⊢ A, conj_eliml 1.
+3. 1 ⊢ B, conj_eliml 1.
+4. 1 ⊢ B ∧ A, conj_intro 3 2.
+</pre>
+
+werden zunächst die Referenzen auf die Vorderformeln der Sequenzen aufgelöst. Es ergibt sich:
+
+<pre class="ibox">
+1. ⊤ ∧ (A ∧ B) ⊢ A ∧ B, hypo.
+2. ⊤ ∧ (A ∧ B) ⊢ A, conj_eliml 1.
+3. ⊤ ∧ (A ∧ B) ⊢ B, conj_eliml 1.
+4. ⊤ ∧ (A ∧ B) ⊢ B ∧ A, conj_intro 3 2.
+</pre>
+
+<p>Die scheinbar sinnlose Hinzufügung der Konjunktion mit <code>⊤</code> existiert aus technischen Gründen, da andernfalls zwei unterschiedliche Regeln zur Subjunktionseinführung erforderlich wären. Nun wird die Regel <code>hypo</code> als Muster betrachtet, wobei ihren Schemavariablen ein Fragezeichen vorangestellt bekommen, um Zweideutigkeiten bzw. Verwechslungen aus dem Weg zu gehen. Die Anwendung der Regel <code>hypo</code> bekommt keine Argumente bzw. Prämissen. Daher bleibt lediglich das Muster
+
+<p class="indent"><code>⊤ ∧ ?A ⊢ ?A</code> mit <code>⊤ ∧ (A ∧ B) ⊢ A ∧ B</code> abzugleichen,
+
+<p>was mit dem Unifizierer <code>?A</code> := <code>(A ∧ B)</code> zum Erfolg führt. Die Prüfung dieses Schrittes ist damit abgeschlossen, der Unifizierer wird gelöscht. Im nächsten Schritt ist bzgl. <code>conj_eliml</code> das Muster
+
+<p class="indent"><code>(?H ⊢ ?A ∧ ?B) → (?H ⊢ ?A)</code>,
+
+<p>also zunächst
+
+<p class="indent"><code>?H ⊢ ?A ∧ ?B</code> mit <code>⊤ ∧ (A ∧ B) ⊢ A&nbsp;∧&nbsp;B</code>,
+
+<p>der ersten und einzigen Prämisse, abzugleichen. Der draus enstehende Unifizierer
+ist gegeben durch <code>?H</code> := <code>(⊤&nbsp;∧&nbsp;(A&nbsp;∧&nbsp;B))</code> und <code>?A</code> := <code>A</code>
+sowie <code>?B</code> := <code>B</code>. Es verbleibt zu prüfen, ob die richtige Konklusion vorliegt. Dazu wird nun das Muster
+
+<p class="indent"><code>?H ⊢ ?A</code> mit <code>⊤ ∧ (A ∧ B) ⊢ A</code>
+
+<p>abgeglichen. Weil <code>?H</code>, <code>?A</code> bereits im Unifizierer vorkommen, wirkt dieser als Substitution auf die linke Seite, deren Resultat genau gleich der rechten Seite ist, was den erfolgreichen Abschluss des Abgleichs bedeutet. Der Unifizierer wird gelöscht. Der nächst Schritt verläuft analog. Im letzten Schritt wird bzgl. der Regel <code>conj_elim</code> das Muster
+
+<p class="indent"><code>(?H1 ⊢ ?A) → (?H2 ⊢ ?B) → (?H1 ∧ ?H2 ⊢ ?A ∧ ?B)</code>
+
+<p>mit den beiden Prämissen und der Konklusion abgeglichen. Zunächst ergibt sich aus dem Abgleich mit den Prämissen der Unifizierer
+
+<pre class="indent">
+?H1 := (⊤ ∧ (A ∧ B)),
+?H2 := (⊤ ∧ (A ∧ B)),
+?A := B,
+?B := A.
+</pre>
+
+<p>Es verbleibt wieder zu prüfen, ob die richtige Konklusion vorliegt. Dazu wird
+
+<p class="indent"><code>?H1 ∧ ?H2 ⊢ ?A ∧ ?B</code> mit <code>⊤ ∧ (A ∧ B) ⊢ B ∧ A</code>
+
+<p>abgeglichen. Der bisherige Unifizierer wirkt wieder als Substitution auf die linke Seite, womit diese zu
+
+<p class="indent"><code>(⊤ ∧ (A ∧ B)) ∧ (⊤ ∧ (A ∧ B)) ⊢ B ∧ A</code>
+
+<p>wird. Die Hinterformeln sind gleich. Bei den Vorderformeln schlägt der Vergleich allerdings erst einmal fehl. Daher werden nun bezüglich der Konjunktion Umformungen mit dem Assoziativ-, dem Kommuativ- und dem Idempotenzgesetz gestattet, die in jedem Verband, also auch in der booleschen und der heytingschen Algebra gültig sind, weshalb sie sowohl in der klassischen als auch der intuitionistischen Logik äquivalente Umformungen schaffen. Es läuft darauf hinaus, dass die Operanden der Konjunktion zu einer Menge angesammelt werden dürfen. Die Menge der linken wird insofern mit der auf der rechten Seite verglichen. Das heißt, jeder Operand der Konjunktion auf der linken Seite muss mindestens einmal als Operand der Konjunktion auf der rechten Seite vorkommen und umgekehrt. Diese Art von Vergleich ist hier letztlich erfolgreich. Die Prüfung des letzten Schritts ist damit abgeschlossen.
+
+</body>
+</html>

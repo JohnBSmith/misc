@@ -8,6 +8,12 @@ eq_subst_rule. (H1 ⊢ x = y) → (H2 ⊢ P x) → (H1 ∧ H2 ⊢ P y),
 eq_symm_rule. (H ⊢ x = y) → (H ⊢ y = x), lift_impl eq_symm.
 eq_trans_rule. (H1 ⊢ x = y) → (H2 ⊢ y = z) → (H1 ∧ H2 ⊢ x = z),
   lift_impl_ii eq_trans.
+  
+1. 1 ⊢ x = y, hypo.
+2. ⊢ f x = f x, eq_refl.
+3. 1 ⊢ f x = f y, eq_subst_rule 1 2, P u ↔ f x = f u.
+4. ⊢ x = y → f x = f y, subj_intro 3.
+f_equal. (H ⊢ x = y) → (H ⊢ f x = f y), lift_impl 4.
 
 0. ⊢ O = some_constant, def.
 0. ⊢ S a = some_function, def.
@@ -39,26 +45,23 @@ induction. (H1 ⊢ P O) → (H2 ⊢ ∀n. P n → P (S n)) →
 6. ⊢ a + b + O = a + (b + O), eq_trans_rule 1 5.
 
 # Induction step
-7. 7 ⊢ a + b + n = a + (b + n), basic.
-8. ⊢ S (a + b + n) = S (a + b + n), eq_refl.
-9. 7 ⊢ S (a + b + n) = S(a + (b + n)), eq_subst_rule 7 8,
-  P x ↔ S (a + b + n) = S x.
-10. ⊢ a + b + S n = S (a + b + n), add_succ.
-11. 7 ⊢ a + b + S n = S (a + (b + n)), eq_trans_rule 10 9.
-12. ⊢ b + S n = S (b + n), add_succ.
-13. ⊢ S (b + n) = b + S n, eq_symm_rule 12.
-14. ⊢ a + S (b + n) = a + S (b + n), eq_refl.
-15. ⊢ a + S (b + n) = a + (b + S n), eq_subst_rule 13 14,
-  P x ↔ a + S (b + n) = a + x.
-16. ⊢ a + S (b + n) = S(a + (b + n)), add_succ.
-17. ⊢ S(a + (b + n)) = a + S (b + n), eq_symm_rule 16.
-18. ⊢ S(a + (b + n)) = a + (b + S n), eq_trans_rule 17 15.
-19. 7 ⊢ a + b + S n = a + (b + S n), eq_trans_rule 11 18.
-20. ⊢ a + b + n = a + (b + n) → a + b + S n = a + (b + S n),
-  subj_intro 19.
-21. ⊢ ∀n. a + b + n = a + (b + n) → a + b + S n = a + (b + S n),
-  uq_intro 20.
+7. 7 ⊢ a + b + n = a + (b + n), hypo.
+8. 7 ⊢ S (a + b + n) = S (a + (b + n)), f_equal 7.
+9. ⊢ a + b + S n = S (a + b + n), add_succ.
+10. 7 ⊢ a + b + S n = S (a + (b + n)), eq_trans_rule 9 8.
+11. ⊢ b + S n = S (b + n), add_succ.
+12. ⊢ S (b + n) = b + S n, eq_symm_rule 11.
+13. ⊢ a + S (b + n) = a + (b + S n), f_equal 12, f x = a + x.
+14. ⊢ a + S (b + n) = S (a + (b + n)), add_succ.
+15. ⊢ S (a + (b + n)) = a + S (b + n), eq_symm_rule 14.
+16. ⊢ S (a + (b + n)) = a + (b + S n), eq_trans_rule 15 13.
+17. 7 ⊢ a + b + S n = a + (b + S n), eq_trans_rule 10 16.
+18. ⊢ a + b + n = a + (b + n) → a + b + S n = a + (b + S n),
+  subj_intro 17.
+19. ⊢ ∀n. a + b + n = a + (b + n) → a + b + S n = a + (b + S n),
+  uq_intro 18.
 
 # Proof by induction
-22. ⊢ ∀n. (a + b) + n = a + (b + n), induction 6 21.
+20. ⊢ ∀n. (a + b) + n = a + (b + n), induction 6 19.
+add_assoc. ⊢ (a + b) + c = a + (b + c), uq_elim 20.
 

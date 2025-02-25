@@ -1,0 +1,32 @@
+
+# This example shows an application of the admissible replacement rule.
+# Given an absolute equivalence, we can substitute the left hand side
+# for the right hand side in any formula, formally
+equi_subst. (⊢ A ↔ B) → (H ⊢ P A) → (H ⊢ P B), axiom.
+
+# Let us derive some equivalence.
+1. 1 ⊢ A ∧ B → C, hypo.
+2. 2 ⊢ A, hypo.
+3. 3 ⊢ B, hypo.
+4. 2, 3 ⊢ A ∧ B, conj_intro 2 3.
+5. 1, 2, 3 ⊢ C, subj_elim 1 4.
+6. 1, 2 ⊢ B → C, subj_intro 5.
+7. 1 ⊢ A → B → C, subj_intro 6.
+8. ⊢ (A ∧ B → C) → (A → B → C), subj_intro 7.
+9. 9 ⊢ A → B → C, hypo.
+10. 10 ⊢ A ∧ B, hypo.
+11. 10 ⊢ A, conj_eliml 10.
+12. 10 ⊢ B, conj_elimr 10.
+13. 9, 10 ⊢ B → C, subj_elim 9 11.
+14. 9, 10 ⊢ C, subj_elim 13 12.
+15. 9, ⊢ A ∧ B → C, subj_intro 14.
+16. ⊢ (A → B → C) → (A ∧ B → C), subj_intro 15.
+export. ⊢ (A ∧ B → C) ↔ (A → B → C), bij_intro 8 16.
+
+# Now an example application.
+1. 1 ⊢ A ∧ (B ∧ C) → D, hypo.
+2. ⊢ (A ∧ (B ∧ C) → D) ↔ (A → (B ∧ C) → D), export.
+3. 1 ⊢ A → (B ∧ C) → D, equi_subst 2 1, P X ↔ X.
+4. ⊢ (B ∧ C → D) ↔ (B → C → D), export.
+5. 1 ⊢ A → B → C → D, equi_subst 4 3, P X ↔ (A → X).
+

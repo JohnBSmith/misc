@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Guide to nd</title>
+  <style>
+body{
+  font-family: "DejaVu Sans", "Verdana", sans-serif;
+  color: #30302a;
+  line-height: 1.5;
+  max-width: 46em;
+  margin-top: 2em;
+  margin-left: 10%;
+  margin-bottom: 10em;
+  padding-left: 4%;
+  padding-right: 4%;
+}
+pre, code{
+  font-family: "DejaVu Sans Mono", "Menlo", "Consolas", monospace;
+}
+@media(max-width: 64em){
+  body{margin-left: auto; margin-right: auto;}
+}
+h2{
+  font-weight: normal;
+  border-bottom: 2px solid #b4b4b0;
+}
+a{color: #20506a; text-decoration: none;}
+a:hover{color: #102a40; text-decoration: underline;}
+.indent {
+  margin-left: 1.6em;
+}
+.ibox {
+  background-color: #f4f4e6;
+  border-left: 6px solid #d2d2c8;
+  padding: 8px 12px;
+}
+.cmd {
+  background-color: #303030;
+  color: #f0f0f0;
+  border-left: 6px solid #a0a0a0;
+  padding: 6px 12px;
+}
+table.bt{border-collapse: collapse;}
+table.bt td, table.bt th{
+  padding-left: 0.8em;
+  padding-right: 0.8em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  vertical-align: top;
+}
+table.bt td{
+  border-bottom: 2px solid #d0d0c0;
+  background-color: #fafaf0;
+}
+table.bt th{
+  border-top: 2px solid #c0c0b0;
+  border-bottom: 2px solid #c0c0b0;
+  background-color: #eaeada;
+}
+  </style>
+</head>
+<body>
+
+<br>
+<h1>nd &mdash; A natural deduction proof verifier</h1>
+
+<h2>Table of contents</h2>
+<ol>
+<li><a href="#Introduction">Introduction</a>
+<li><a href="#Workflow">Workflow</a>
+<li><a href="#Presentation">Presentation</a>
+<li><a href="#Prop">Propositional logic</a>
+<li><a href="#How-it-works">How it works</a>
+</ol>
+
+<h2 id="Introduction">Introduction</h2>
+
+<p>The program <code>nd.py</code> is a small proof checker for natural deduction with respect to first order logic, which is a logical calculus that formalizes the usual proofs in mathematics, computer science and philosophy.
+
+<p>The proofs must be written in Suppes-Style, i.e. in tabular form. Internally, the program uses sequents, as first described by Gentzen in 1935 with the sequent calculus and then in 1936 for natural deduction. Furthermore, the specific implementation is actually a type of axiomatic calculus that uses only the modus ponens as a rule. The actual inference rules are not hard-wired into the system, but are loaded as axiom schemas when the prelude is entered. It is even possible to represent higher rules that allow rules induced from theorem schemas to be obtained.
+
+<h2 id="Workflow">Workflow</h2>
+
+<p>We enter the proof to be checked in ASCII syntax in a file. The filename does not matter. Let's call it "<code>Proofs.txt</code>". Here, for example, is the proof for the theorem corresponding to the rule of contraposition:
+
+<pre class="ibox">
+1. 1 |- ~B, hypo.
+2. 2 |- A -&gt; B, hypo.
+3. 3 |- A, hypo.
+4. 2, 3 |- B, subj_elim 2 3.
+5. 1, 2, 3 |- _|_, neg_elim 1 4.
+6. 2, 1 |- ~A, neg_intro 5.
+7. 2 |- ~B -&gt; ~A, subj_intro 6.
+8. ⊢ (A -> B) -&gt; ~B -&gt; ~A, subj_intro 7.
+</pre>
+
+<p>When called with the command:
+
+<pre class="cmd">
+$ ./nd.py Proofs.txt
+</pre>
+
+<p>the proof is now checked automatically. The program remains silent only if the proof is correct. If a step fails to match a rule, it aborts with a corresponding message.
+
+<p><small>The input syntax is quite flexible. For example, the conjunction <code>A ∧ B</code> can also be written as <code>A /\ B</code>, as <code>A &amp; B</code>, or as <code>A and B</code>. Keywords like <code>and</code>, as well as rule names, may easily be renamed to ones native language.</small>
+
+<h2 id="Presentation">Presentation</h2>
+
+<p>When called with the command:
+
+<pre class="cmd">
+$ ./nd.py -f Proofs.txt Proofs.txt
+</pre>
+
+<p>the input can optionally be formatted with the correct Unicode characters.
+You get:
+
+<table class="bt">
+<tr><th>Suppes-Style</th>
+<tr><td>
+<pre class="ibox">
+1. 1 ⊢ ¬B, hypo.
+2. 2 ⊢ A → B, hypo.
+3. 3 ⊢ A, hypo.
+4. 2, 3 ⊢ B, subj_elim 2 3.
+5. 1, 2, 3 ⊢ ⊥, neg_elim 1 4.
+6. 2, 1 ⊢ ¬A, neg_intro 5.
+7. 2 ⊢ ¬B → ¬A, subj_intro 6.
+8. ⊢ (A → B) → ¬B → ¬A, subj_intro 7.
+</pre>
+</table>
+
+<p>However, this presentation in the Suppes style appears quite unclear. Therefore, it can be further formatted so that the tree structure becomes visible. To do this, the premises of an inference are best indented by two spaces from "<code>⊢</code>" on.
+
+<table class="bt">
+<tr><th>Suppes-Style plus Gentzen-Style
+<tr><td>
+<pre class="ibox">
+1. 1         ⊢ ¬B, hypo.
+2. 2           ⊢ A → B, hypo.
+3. 3           ⊢ A, hypo.
+4. 2, 3      ⊢ B, subj_elim 2 3.
+5. 1, 2, 3 ⊢ ⊥, neg_elim 1 4.
+6. 2, 1  ⊢ ¬A, neg_intro 5.
+7. 2   ⊢ ¬B → ¬A, subj_intro 6.
+8.   ⊢ (A → B) → ¬B → ¬A, subj_intro 7.
+</pre>
+</table>
+
+<p>It is meant to be a rotation of this proof tree:
+
+<pre class="indent" style="line-height: 0.8">
+            ─────────      ─────
+            2 ⊢ A → B      3 ⊢ A
+──────      ────────────────────
+1 ⊢ ¬B            2, 3 ⊢ B
+──────────────────────────
+       1, 2, 3 ⊢ ⊥
+       ───────────
+        2, 1 ⊢ ¬A
+       ───────────
+       2 ⊢ ¬B → ¬A
+   ───────────────────
+   ⊢ (A → B) → ¬B → ¬A
+</pre>
+
+<p>Instead of indenting the premises of the inferences, one can alternatively indent the subproofs starting with their hypotheses. In this way, the proof may be read simultaneously in the Suppes-Style and in the Fitch-Style. For this, however, the order of the steps in the proof above must be changed slightly, because hypotheses in the Fitch-Style must be canceled in exactly the reverse order in which they were made, so that a nesting of subproofs arises.
+
+<table class="bt">
+<tr><th>Suppes-Style plus Fitch-Style
+<tr><td>
+<pre class="ibox">
+1. 1   ⊢ A → B, hypo.
+2. 2     ⊢ ¬B, hypo.
+3. 3       ⊢ A, hypo.
+4. 1, 3    ⊢ B, subj_elim 1 3.
+5. 1, 2, 3 ⊢ ⊥, neg_elim 2 4.
+6. 1, 2  ⊢ ¬A, neg_intro 5.
+7. 1   ⊢ ¬B → ¬A, subj_intro 6.
+8.   ⊢ (A → B) → ¬B → ¬A, subj_intro 7.
+</pre>
+</table>
+
+<p>It is meant to be an imitation of this presentation:
+
+<pre class="indent" style="line-height: 1.2">
+1. │ A → B, hypo.
+   ├─────────────
+2. │ │ ¬B, hypo.
+   │ ├──────────
+3. │ │ │ A, hypo.
+   │ │ ├─────────
+4. │ │ │ B, subj_elim 1 3.
+5. │ │ │ ⊥, neg_elim 2 4.
+6. │ │ ¬A, neg_intro 5.
+7. │ ¬B → ¬A, subj_intro 6.
+8. (A → B) → ¬B → ¬A, subj_intro 7.
+</pre>
+
+<h2 id="Prop">Propositional logic</h2>
+
+<p>We define the rules for a fragment of natural deduction and derive a theorem from them.
+
+<pre class="ibox">
+# Rule for setting up initial sequents, i. e. temporary
+# assumptions. This inference rule comes without premises.
+hypo. (⊤ ∧ A ⊢ A), axiom.
+
+# Rule for conjunction introduction
+conj_intro. (H1 ⊢ A) → (H2 ⊢ B) → (H1 ∧ H2 ⊢ A ∧ B), axiom.
+
+# Rules for conjunction elimination
+conj_eliml. (H ⊢ A ∧ B) → (H ⊢ A), axiom.
+conj_elimr. (H ⊢ A ∧ B) → (H ⊢ B), axiom.
+
+# Rule for subjunction introduction
+subj_intro. (H ∧ A ⊢ B) → (H ⊢ A → B), axiom.
+
+# Subproof of the commutative law
+1. 1 ⊢ A ∧ B, hypo.
+2. 1 ⊢ A, conj_eliml 1.
+3. 1 ⊢ B, conj_elimr 1.
+4. 1 ⊢ B ∧ A, conj_intro 3 2.
+conj_comm. ⊢ A ∧ B → B ∧ A, subj_intro 4.
+</pre>
+
+<p>Note that <code>conj_comm</code> is not actually a single theorem, but a schema of theorems. To derive concrete theorems, we first define atomic formulas:
+
+<pre class="ibox">
+0. ⊢ p ↔ some_atom, def.
+0. ⊢ q ↔ some_atom, def. 
+</pre>
+
+<p>Now we can obtain different theorems as substitution instances of <code>conj_comm</code>:
+
+<pre class="ibox">
+1. ⊢ p ∧ p → p ∧ p, conj_comm.
+2. ⊢ p ∧ q → q ∧ p, conj_comm.
+3. ⊢ p ∧ (p ∧ q) → (p ∧ q) ∧ p, conj_comm.
+</pre>
+
+<p>However, the three theorems themselves cannot be used for repeated derivation of substitution instances, since <code>p</code>, <code>q</code>, in contrast to <code>A</code>, <code>B</code>, are not schema variables.
+
+<h2 id="How-it-works">How it works</h2>
+
+<p>In the input
+
+<pre class="ibox">
+1. 1 ⊢ A ∧ B, hypo.
+2. 1 ⊢ A, conj_eliml 1.
+3. 1 ⊢ B, conj_eliml 1.
+4. 1 ⊢ B ∧ A, conj_intro 3 2.
+</pre>
+
+first the references to the antecedent formulas of the sequents are resolved. This results in:
+
+<pre class="ibox">
+1. ⊤ ∧ (A ∧ B) ⊢ A ∧ B, hypo.
+2. ⊤ ∧ (A ∧ B) ⊢ A, conj_eliml 1.
+3. ⊤ ∧ (A ∧ B) ⊢ B, conj_eliml 1.
+4. ⊤ ∧ (A ∧ B) ⊢ B ∧ A, conj_intro 3 2.
+</pre>
+
+<p>The seemingly pointless addition of the conjunction with <code>⊤</code> exists for technical reasons, because otherwise two different rules for subjunction introduction would be required. Now the rule <code>hypo</code> is considered as a pattern, with its schema variables prefixed with a question mark to avoid ambiguities or confusion. The application of the rule <code>hypo</code> does not receive any arguments or premises. Therefore, only the pattern
+
+<p class="indent"><code>⊤ ∧ ?A ⊢ ?A</code> is to be matched with <code>⊤ ∧ (A ∧ B) ⊢ A ∧ B</code>,
+
+<p>which succeeds with the unifier <code>?A</code> := <code>(A ∧ B)</code>. The check of this step is thus completed, and the unifier is deleted. In the next step, regarding <code>conj_eliml</code>, the pattern
+
+<p class="indent"><code>(?H ⊢ ?A ∧ ?B) → (?H ⊢ ?A)</code>,
+
+<p>is matched. The first step is thus to match
+
+<p class="indent"><code>?H ⊢ ?A ∧ ?B</code> with <code>⊤ ∧ (A ∧ B) ⊢ A ∧ B</code>,
+
+<p>the first and only premise. The resulting unifier is given by <code>?H</code> := <code>(⊤ ∧ (A ∧ B))</code> and <code>?A</code> := <code>A</code> and <code>?B</code> := <code>B</code>. It remains to check whether the correct conclusion is present. For this, the pattern
+
+<p class="indent"><code>?H ⊢ ?A</code> is matched with <code>⊤ ∧ (A ∧ B) ⊢ A</code>.
+
+<p>Because <code>?H</code>, <code>?A</code> already occur in the unifier, it acts as a substitution on the left-hand side, which results exactly in the right-hand side, which means the successful completion of the match. The unifier is deleted. The next step proceeds analogously. In the last step, regarding the rule <code>conj_elim</code>, the pattern
+
+<p class="indent"><code>(?H1 ⊢ ?A) → (?H2 ⊢ ?B) → (?H1 ∧ ?H2 ⊢ ?A ∧ ?B)</code>
+
+<p>is matched with the two premises and the conclusion. First, from the match with the premises, the unifier
+
+<pre class="indent">
+?H1 := (⊤ ∧ (A ∧ B)),
+?H2 := (⊤ ∧ (A ∧ B)),
+?A := B,
+?B := A
+</pre>
+
+<p>is obtained. It remains to check whether the correct conclusion is present. For this,
+
+<p class="indent"><code>?H1 ∧ ?H2 ⊢ ?A ∧ ?B</code> is matched with <code>⊤ ∧ (A ∧ B) ⊢ B ∧ A</code>.
+
+<p>The previous unifier again acts as a substitution on the left-hand side, making it
+
+<p class="indent"><code>(⊤ ∧ (A ∧ B)) ∧ (⊤ ∧ (A ∧ B)) ⊢ B ∧ A</code>
+
+<p>The succedents are equal. However, the comparison initially fails for the antecedents. Therefore the associative, commutative, and idempotent laws for conjunctions are now permitted, which are valid in every lattice, including the Boolean and Heyting algebras, which is why they create equivalences in both classical and intuitionistic logic. Thus the operands of the conjunction may be collected into a set. The set on the left is then compared with the one on the right. That is, each operand of the conjunction on the left-hand side must occur at least once as an operand of the conjunction on the right-hand side, and vice versa. This type of comparison is ultimately successful here. The check of the last step is thus completed.
+
+</body>
+</html>
