@@ -10,7 +10,7 @@ eq_subst. ⊢ ∀x. ∀y. x = y → P x → P y, axiom.
 4. ⊢ ∀u. x = y → x = u → y = u, uq_intro 3.
 5. ⊢ x = y → x = x → y = x, uq_elim 4.
 6. ⊢ x = x, uq_elim eq_refl.
-7. 7 ⊢ x = y, basic.
+7. 7 ⊢ x = y, hypo.
 8. 7 ⊢ x = x → y = x, subj_elim 5 7.
 9. 7 ⊢ y = x, subj_elim 8 6.
 10. ⊢ x = y → y = x, subj_intro 9.
@@ -18,7 +18,7 @@ eq_subst. ⊢ ∀x. ∀y. x = y → P x → P y, axiom.
 eq_symm. ⊢ ∀x. ∀y. x = y → y = x, uq_intro 11.
 
 1. ⊢ x = x, uq_elim eq_refl.
-2. 2 ⊢ A x, basic.
+2. 2 ⊢ A x, hypo.
 3. 2 ⊢ x = x ∧ A x, conj_intro 1 2.
 4. 2 ⊢ ∃y. x = y ∧ A y, ex_intro 3.
 5. ⊢ A x → ∃y. x = y ∧ A y, subj_intro 4.

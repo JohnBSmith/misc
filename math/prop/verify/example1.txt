@@ -1,7 +1,7 @@
 
 (* An embedding of natural deduction in Hilbert calculus *)
 
-basic. A → A, axiom.
+hypo. A → A, axiom.
 wk. A → (H → A), axiom.
 conj_eliml. (H → A ∧ B) → (H → A), axiom.
 conj_elimr. (H → A ∧ B) → (H → B), axiom.
@@ -11,7 +11,7 @@ neg_elim. (H → ¬A) → (H → A) → (H → ⊥), axiom.
 neg_intro. (H ∧ A → ⊥) → (H → ¬A), axiom.
 DNE. ¬¬A → A, axiom.
 
-1. (A → B) ∧ ¬B ∧ A → (A → B) ∧ ¬B ∧ A, basic.
+1. (A → B) ∧ ¬B ∧ A → (A → B) ∧ ¬B ∧ A, hypo.
 2. (A → B) ∧ ¬B ∧ A → (A → B) ∧ ¬B, conj_eliml 1.
 3. (A → B) ∧ ¬B ∧ A → (A → B), conj_eliml 2.
 4. (A → B) ∧ ¬B ∧ A → ¬B, conj_elimr 2.
@@ -21,7 +21,7 @@ DNE. ¬¬A → A, axiom.
 8. (A → B) ∧ ¬B → ¬A, neg_intro 7.
 contraposition. (A → B) → (¬B → ¬A), subj_intro 8.
 
-1. ⊥ ∧ ¬A → ⊥ ∧ ¬A, basic.
+1. ⊥ ∧ ¬A → ⊥ ∧ ¬A, hypo.
 2. ⊥ ∧ ¬A → ⊥, conj_eliml 1.
 3. ⊥ → ¬¬A, neg_intro 2.
 4. ⊥ → ¬¬A → A, wk DNE.

@@ -1,7 +1,7 @@
 
 # A derivation in intuitionistic sequent calculus.
 
-basic. (true ∧ H ⊢ H), axiom.
+hypo. (true ∧ H ⊢ H), axiom.
 wk. (H ⊢ B) → (H ∧ A ⊢ B), axiom.
 exch. (H ⊢ A) → (H ⊢ A), axiom.
 
@@ -16,13 +16,13 @@ Ldisj. (H1 ∧ A ⊢ C) → (H2 ∧ B ⊢ C) → (H1 ∧ H2 ∧ (A ∨ B) ⊢ C)
 Lsubj. (H1 ∧ (A → B) ⊢ A) → (H2 ∧ B ⊢ C) → (H1 ∧ H2 ∧ (A → B) ⊢ C), axiom.
 Lneg. (H1 ∧ ¬A ⊢ A) → (H2 ∧ ⊥ ⊢ C) → (H1 ∧ H2 ∧ ¬A ⊢ C), axiom.
 
-1. 1 ⊢ A, basic.
-2. 2 ⊢ A → B, basic.
+1. 1 ⊢ A, hypo.
+2. 2 ⊢ A → B, hypo.
 3. 1, 2 ⊢ A, wk 1.
-4. 4 ⊢ B, basic.
-5. 5 ⊢ ¬B, basic.
+4. 4 ⊢ B, hypo.
+5. 5 ⊢ ¬B, hypo.
 6. 4, 5 ⊢ B, wk 4.
-7. 7 ⊢ ⊥, basic.
+7. 7 ⊢ ⊥, hypo.
 8. 5, 4 ⊢ ⊥, Lneg 6 7.
 9. 2, 5, 1 ⊢ ⊥, Lsubj 3 8.
 10. 2, 5 ⊢ ¬A, Rneg 9.
@@ -32,7 +32,7 @@ Lneg. (H1 ∧ ¬A ⊢ A) → (H2 ∧ ⊥ ⊢ C) → (H1 ∧ H2 ∧ ¬A ⊢ C), a
 # A derivation in intuitionistic sequent calculus,
 # without union of different contexts.
 
-basic. (H ∧ A ⊢ A), axiom.
+hypo. (H ∧ A ⊢ A), axiom.
 wk. (H ⊢ B) → (H ∧ A ⊢ B), axiom.
 exch. (H ⊢ A) → (H ⊢ A), axiom.
 
@@ -47,11 +47,11 @@ Ldisj. (H ∧ A ⊢ C) → (H ∧ B ⊢ C) → (H ∧ (A ∨ B) ⊢ C), axiom.
 Lsubj. (H ∧ (A → B) ⊢ A) → (H ∧ B ⊢ C) → (H ∧ (A → B) ⊢ C), axiom.
 Lneg. (H ∧ ¬A ⊢ A) → (H ∧ ⊥ ⊢ C) → (H ∧ ¬A ⊢ C), axiom.
 
-1. (¬B ∧ (A → B) ∧ A ⊢ A), basic.
+1. (¬B ∧ (A → B) ∧ A ⊢ A), hypo.
 2. (¬B ∧ A ∧ (A → B) ⊢ A), exch 1.
-3. (A ∧ ¬B ∧ B ⊢ B), basic.
+3. (A ∧ ¬B ∧ B ⊢ B), hypo.
 4. (A ∧ B ∧ ¬B ⊢ B), exch 3.
-5. (A ∧ B ∧ ⊥ ⊢ ⊥), basic.
+5. (A ∧ B ∧ ⊥ ⊢ ⊥), hypo.
 6. (¬B ∧ A ∧ B ⊢ ⊥), Lneg 4 5.
 7. ((A → B) ∧ ¬B ∧ A ⊢ ⊥), Lsubj 2 6.
 8. ((A → B) ∧ ¬B ⊢ ¬A), Rneg 7.

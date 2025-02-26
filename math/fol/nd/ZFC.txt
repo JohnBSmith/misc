@@ -26,10 +26,10 @@ ax_choice. ⊢ (∃o. o ∈ x ∧ ¬∃n. n ∈ o) ∨
 # axiom schema of separation.
 
 1. ⊢ ∃y. ∀x. x ∈ y ↔ x ∈ z ∧ ⊥, subst ax_sep.
-2. 2 ⊢ ∀x. x ∈ y ↔ x ∈ z ∧ ⊥, basic.
+2. 2 ⊢ ∀x. x ∈ y ↔ x ∈ z ∧ ⊥, hypo.
 3. 2 ⊢ x ∈ y ↔ x ∈ z ∧ ⊥, uq_elim 2.
 4. 2 ⊢ x ∈ y → x ∈ z ∧ ⊥, bij_eliml 3.
-5. 5 ⊢ x ∈ y, basic.
+5. 5 ⊢ x ∈ y, hypo.
 6. 2, 5 ⊢ x ∈ z ∧ ⊥, subj_elim 4 5.
 7. 2, 5 ⊢ ⊥, conj_elimr 6.
 8. 2 ⊢ ¬x ∈ y, neg_intro 7.
@@ -41,9 +41,9 @@ empty_set_exists. ⊢ ∃y. ∀x. ¬x ∈ y, ex_elim 1 10.
 # The logical lemma ex falso quodlibet follows from dne, the
 # axiom schema of double negation elimination.
 
-1. 1 ⊢ ¬A, basic.
-2. 2 ⊢ ⊥, basic.
-3. 1, 2 ⊢ ⊥, basic.
+1. 1 ⊢ ¬A, hypo.
+2. 2 ⊢ ⊥, hypo.
+3. 1, 2 ⊢ ⊥, hypo.
 4. 2 ⊢ ¬¬A, neg_intro 3.
 5. 2 ⊢ A, subj_elim dne 4.
 efq. ⊢ ⊥ → A, subj_intro 5.
@@ -52,13 +52,13 @@ efq. ⊢ ⊥ → A, subj_intro 5.
 # The uniqueness of the empty set follows solely from ax_ext, the
 # axiom of extensionality.
 
-1. 1 ⊢ (∀x. ¬x ∈ y) ∧ (∀x. ¬x ∈ y'), basic.
+1. 1 ⊢ (∀x. ¬x ∈ y) ∧ (∀x. ¬x ∈ y'), hypo.
 2. 1 ⊢ (∀x. ¬x ∈ y), conj_eliml 1.
 3. 1 ⊢ (∀x. ¬x ∈ y'), conj_elimr 1.
 4. 1 ⊢ ¬x ∈ y, uq_elim 2.
 5. 1 ⊢ ¬x ∈ y', uq_elim 3.
-6. 6 ⊢ x ∈ y, basic.
-7. 7 ⊢ x ∈ y', basic.
+6. 6 ⊢ x ∈ y, hypo.
+7. 7 ⊢ x ∈ y', hypo.
 8. 1, 6 ⊢ ⊥, neg_elim 4 6.
 9. ⊢ ⊥ → x ∈ y', subst efq.
 10. 1, 6 ⊢ x ∈ y', subj_elim 9 8.

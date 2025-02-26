@@ -140,11 +140,11 @@ eq_subst_rev. (H1 ⊢ y = x) → (H2 ⊢ P x) → (H1 ∧ H2 ⊢ P y),
 
 1. ⊢ u ∈ {x | P x} ↔ set u ∧ P u, comp.
 2. ⊢ u ∈ {x | P x} → set u ∧ P u, bij_eliml 1.
-comp_unfold. (H ⊢ u ∈ {x | P x}) → (H ⊢ set u ∧ P u), lift_impl 2.
+comp_elim. (H ⊢ u ∈ {x | P x}) → (H ⊢ set u ∧ P u), lift_impl 2.
 
 1. ⊢ u ∈ {x | P x} ↔ set u ∧ P u, comp.
 2. ⊢ set u ∧ P u → u ∈ {x | P x}, bij_elimr 1.
-comp_fold. (H ⊢ set u ∧ P u) → (H ⊢ u ∈ {x | P x}), lift_impl 2.
+comp_intro. (H ⊢ set u ∧ P u) → (H ⊢ u ∈ {x | P x}), lift_impl 2.
 
 1. 1 ⊢ A ↔ ¬A, hypo.
 2. 1 ⊢ A → ¬A, bij_eliml 1.
@@ -162,7 +162,7 @@ diag_contra. ⊢ ¬(A ↔ ¬A), neg_intro 9.
 1. 1 ⊢ R = {x | ¬x ∈ x}, hypo.
 2. 2 ⊢ u ∈ R, hypo.
 3. 1, 2 ⊢ u ∈ {x | ¬x ∈ x}, eq_subst_rule 1 2.
-4. 1, 2 ⊢ set u ∧ ¬u ∈ u, comp_unfold 3.
+4. 1, 2 ⊢ set u ∧ ¬u ∈ u, comp_elim 3.
 5. 1, 2 ⊢ ¬u ∈ u, conj_elimr 4.
 6. 1 ⊢ u ∈ R → ¬u ∈ u, subj_intro 5.
 7. 1 ⊢ R ∈ R → ¬R ∈ R, 6.
@@ -170,7 +170,7 @@ diag_contra. ⊢ ¬(A ↔ ¬A), neg_intro 9.
 8. 8 ⊢ set R, hypo.
 9. 9 ⊢ ¬R ∈ R, hypo.
 10. 8, 9 ⊢ set R ∧ ¬R ∈ R, conj_intro 8 9.
-11. 8, 9 ⊢ R ∈ {x | ¬x ∈ x}, comp_fold 10.
+11. 8, 9 ⊢ R ∈ {x | ¬x ∈ x}, comp_intro 10.
 12. 1, 8, 9 ⊢ R ∈ R, eq_subst_rev 1 11, P x ↔ R ∈ x.
 13. 1, 8 ⊢ ¬R ∈ R → R ∈ R, subj_intro 12.
 

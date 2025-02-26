@@ -535,7 +535,7 @@ def is_connective(A, symbol):
     return isinstance(A, Term) and isinstance(A.node, tuple) and A.node[0] == symbol
 
 def basic_seq(line, book, S, args):
-    if len(args) != 0: expect_len(line, args, 0, "basic")
+    if len(args) != 0: expect_len(line, args, 0, "hypo")
     Gamma, A = S
     if not form_in(A, Gamma):
         raise LogicError(line, "not a basic sequent")
@@ -847,7 +847,7 @@ def definition(line, book, S, args):
         raise LogicError(line, "malformed definition")
 
 verify_tab = {
-    "basic": basic_seq,
+    "hypo": basic_seq,
     "conj_intro": conj_intro,
     "conj_eliml": conj_eliml,
     "conj_elimr": conj_elimr,

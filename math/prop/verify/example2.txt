@@ -1,7 +1,7 @@
 
 (* Another embedding of natural deduction in Hilbert calculus *)
 
-basic. A → A, axiom.
+hypo. A → A, axiom.
 assoc. (H1 ∧ (H2 ∧ H3) → A) → (H1 ∧ H2 ∧ H3 → A), axiom.
 comm. (H1 ∧ H2 → A) → (H2 ∧ H1 → A), axiom.
 
@@ -10,9 +10,9 @@ subj_intro. (H ∧ A → B) → (H → A → B), axiom.
 neg_elim. (H1 → ¬A) → (H2 → A) → (H1 ∧ H2 → ⊥), axiom.
 neg_intro. (H ∧ A → ⊥) → (H → ¬A), axiom.
 
-1. (A → B) → (A → B), basic.
-2. ¬B → ¬B, basic.
-3. A → A, basic.
+1. (A → B) → (A → B), hypo.
+2. ¬B → ¬B, hypo.
+3. A → A, hypo.
 4. (A → B) ∧ A → B, subj_elim 1 3.
 5. ¬B ∧ ((A → B) ∧ A) → ⊥, neg_elim 2 4.
 6. ¬B ∧ (A → B) ∧ A → ⊥, assoc 5.

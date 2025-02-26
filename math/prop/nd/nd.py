@@ -385,7 +385,7 @@ def box_intro(line, book, S, args):
         raise LogicError(line, "box_intro produces different sequent")
 
 verify_tab = {
-    "basic": basic_seq,
+    "hypo": basic_seq,
     "conj_intro": conj_intro,
     "conj_eliml": conj_eliml,
     "conj_elimr": conj_elimr,

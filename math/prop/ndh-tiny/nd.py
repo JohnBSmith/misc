@@ -138,7 +138,7 @@ def read_all(path):
         return f.read()
 
 rules = """
-(basic (seq (conj (true) H) H) (axiom))
+(hypo (seq (conj (true) A) A) (axiom))
 (conj_intro (subj (seq H1 A) (subj (seq H2 B)
   (seq (conj H1 H2) (conj A B)))) (axiom))
 (conj_eliml (subj (seq H (conj A B)) (seq H A)) (axiom))

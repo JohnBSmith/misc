@@ -29,78 +29,78 @@ def main():
 tests = [
 ("1.0", Ok, ""),
 ("1.1", Ok, """
-1. 1 |- A, basic.
+1. 1 |- A, hypo.
 2. |- A -> A, subj_intro 1.
 """),
 ("1.2", Ok, """
-1. 1 |- A, basic.
-2. 2 |- B, basic.
+1. 1 |- A, hypo.
+2. 2 |- B, hypo.
 3. 1, 2 |- A /\\ B, conj_intro 1 2.
 """),
 ("1.3", Ok, """
-1. 1 |- A, basic.
+1. 1 |- A, hypo.
 2. 1 |- A \\/ B, disj_introl 1.
 """),
 ("1.4", Ok, """
-1. 1 |- B, basic.
+1. 1 |- B, hypo.
 2. 1 |- A \\/ B, disj_intror 1.
 """),
 ("1.5", Ok, """
-1. 1 |- false, basic.
+1. 1 |- false, hypo.
 2. |- ~false, neg_intro 1.
 """),
 ("1.6", Ok, """
-1. 1 |- A -> B, basic.
-2. 2 |- B -> A, basic.
+1. 1 |- A -> B, hypo.
+2. 2 |- B -> A, hypo.
 3. 1, 2 |- A <-> B, bij_intro 1 2.
 """),
 ("1.7", Ok, """
-1. 1 |- A /\\ B, basic.
+1. 1 |- A /\\ B, hypo.
 2. 1 |- A, conj_eliml 1.
 """),
 ("1.8", Ok, """
-1. 1 |- A /\\ B, basic.
+1. 1 |- A /\\ B, hypo.
 2. 1 |- B, conj_elimr 1.
 """),
 ("1.9", Ok, """
-1. 1 |- A -> B, basic.
-2. 2 |- A, basic.
+1. 1 |- A -> B, hypo.
+2. 2 |- A, hypo.
 3. 1, 2 |- B, subj_elim 1 2.
 """),
 ("1.10", Ok, """
-1. 1 |- ~A, basic.
-2. 2 |- A, basic.
+1. 1 |- ~A, hypo.
+2. 2 |- A, hypo.
 3. 1, 2 |- false, neg_elim 1 2.
 4. 2 |- ~~A, neg_intro 3.
 5. |- A -> ~~A, subj_intro 4.
 """),
 ("1.11", Ok, """
-1. 1 |- (A -> B) /\\ A, basic.
+1. 1 |- (A -> B) /\\ A, hypo.
 2. 1 |- A -> B, conj_eliml 1.
 3. 1 |- A, conj_elimr 1.
 4. 1 |- B, subj_elim 2 3.
 5. |- (A -> B) /\\ A -> B, subj_intro 4.
 """),
 ("1.12", Ok, """
-1. 1 |- A /\\ B, basic.
+1. 1 |- A /\\ B, hypo.
 2. 1 |- A, conj_eliml 1.
 3. 1 |- B, conj_elimr 1.
 4. 1 |- B /\\ A, conj_intro 3 2.
 5. |- A /\\ B -> B /\\ A, subj_intro 4.
 """),
 ("1.13", Ok, """
-1. 1 |- A \\/ B, basic.
-2. 2 |- A, basic.
+1. 1 |- A \\/ B, hypo.
+2. 2 |- A, hypo.
 3. 2 |- B \\/ A, disj_intror 2.
-4. 4 |- B, basic.
+4. 4 |- B, hypo.
 5. 4 |- B \\/ A, disj_introl 4.
 6. 1 |- B \\/ A, disj_elim 1 3 5.
 7. |- A \\/ B -> B \\/ A, subj_intro 6.
 """),
 ("1.14", Ok, """
-1. 1 |- ~B, basic.
-2. 2 |- A -> B, basic.
-3. 3 |- A, basic.
+1. 1 |- ~B, hypo.
+2. 2 |- A -> B, hypo.
+3. 3 |- A, hypo.
 4. 2, 3 |- B, subj_elim 2 3.
 5. 1, 2, 3 |- false, neg_elim 1 4.
 6. 1, 2 |- ~A, neg_intro 5.
@@ -109,17 +109,17 @@ tests = [
 """),
 ("1.15", Ok, """
 DNE. |- ~~A -> A, axiom.
-1. 1 |- ~A, basic.
-2. 2 |- false, basic.
-3. 1, 2 ⊢ false, basic.
+1. 1 |- ~A, hypo.
+2. 2 |- false, hypo.
+3. 1, 2 ⊢ false, hypo.
 4. 2 ⊢ ~~A, neg_intro 3.
 5. 2 ⊢ A, subj_elim DNE 4.
 6. ⊢ false -> A, subj_intro 5.
 """),
 ("1.16", Ok, """
 DNE. |- ~~A -> A, axiom.
-1. 1 |- ~(A \\/ ~A), basic.
-2. 2 |- A, basic.
+1. 1 |- ~(A \\/ ~A), hypo.
+2. 2 |- A, hypo.
 3. 2 |- A ∨ ~A, disj_introl 2.
 4. 1, 2 |- false, neg_elim 1 3.
 5. 1 |- ~A, neg_intro 4.
@@ -131,46 +131,46 @@ DNE. |- ~~A -> A, axiom.
 """),
 
 ("2.1", ErrLogic, """
-1. 1 |- A, basic.
+1. 1 |- A, hypo.
 2. |- A -> A, subj_intro 1.
 3. |- A -> B, subst 2.
 """),
 ("2.2", ErrLogic, """
-1. 1 |- A, basic.
+1. 1 |- A, hypo.
 2. |- A -> A, subj_intro 1.
 3. |- (A -> A) -> (A -> B), subst 2.
 """),
 
 ("3.1", Ok, """
-1. 1 |- forall x. A x, basic.
+1. 1 |- forall x. A x, hypo.
 2. 1 |- A u, uq_elim 1.
 """),
 ("3.2", Ok, """
-1. 1 |- forall x. A x /\\ B x, basic.
+1. 1 |- forall x. A x /\\ B x, hypo.
 2. 1 |- A u /\\ B u, uq_elim 1.
 """),
 ("3.3", Ok, """
-1. 1 |- A u, basic.
+1. 1 |- A u, hypo.
 2. 1 |- exists x. A x, ex_intro 1.
 """),
 ("3.4", Ok, """
-1. 1 |- A x, basic.
+1. 1 |- A x, hypo.
 2. |- A x -> A x, subj_intro 1.
 3. |- forall x. A x -> A x, uq_intro 2.
 """),
 ("3.5", Ok, """
-1. 1 |- A y, basic.
+1. 1 |- A y, hypo.
 2. 1 |- exists x. A x, ex_intro 1.
 3. |- A y -> exists x. A x, subj_intro 2.
 4. |- forall y. A y -> exists x. A x, uq_intro 3.
 """),
 
 ("4.1", Ok, """
-1. 1 |- P x, basic.
+1. 1 |- P x, hypo.
 2. |- P x -> P x, subj_intro 1.
 """),
 ("4.2", ErrLogic, """
-1. 1 |- P x, basic.
+1. 1 |- P x, hypo.
 2. |- P x -> P y, subj_intro 1.
 """),
 ("4.3", Ok, """

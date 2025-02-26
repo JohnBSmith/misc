@@ -85,13 +85,13 @@ ax2. (A -&gt; (A -&gt; B)) -&gt; (A -&gt; B), axiom.
 ax3. (A -&gt; B) -&gt; ((B -&gt; C) -&gt; (A -&gt; C)), axiom.
 
 1. A -&gt; (A -&gt; A), ax1.
-basic. A -&gt; A, ax2 1.
+hypo. A -&gt; A, ax2 1.
 </pre>
 
 <p>Die drei Axiome sind aus <i>Grundlangen der Mathematik&nbsp;1</i>
 von David Hilbert und Paul Bernays auf S.&nbsp;65 entnommen. Daraufhin folgt
 der sehr kurze Beweis des Theorems <var>A</var>&nbsp;→&nbsp;<var>A</var>,
-das den Namen <code>basic</code> erhält. Der Beweis besteht aus
+das den Namen <code>hypo</code> erhält. Der Beweis besteht aus
 zwei Schritten. Im ersten Schritt wird die Formel
 <var>A</var>&nbsp;→&nbsp;(<var>A</var>&nbsp;→&nbsp;<var>A</var>) per
 simultaner Substitution <var>A</var>&nbsp;:=&nbsp;<var>A</var> und
@@ -120,7 +120,7 @@ ax2. (A → (A → B)) → (A → B), axiom.
 ax3. (A → B) → ((B → C) → (A → C)), axiom.
 
 1. A → (A → A), ax1.
-basic. A → A, ax2 1.
+hypo. A → A, ax2 1.
 </pre>
 
 <p>Da die Subjunktion rechtsassoziativ ist, dürfen einige Klammern
@@ -132,7 +132,7 @@ ax2. (A → A → B) → A → B, axiom.
 ax3. (A → B) → (B → C) → A → C, axiom.
 
 1. A → A → A, ax1.
-basic. A → A, ax2 1.
+hypo. A → A, ax2 1.
 </pre>
 
 <h2 id="KdnS">Natürliches Schließen</h2>
@@ -168,12 +168,12 @@ können, bedarf es lediglich des Modus ponens.
 folgendermaßen ab.
 
 <pre class="ibox">
-basic. H → H, axiom.
+hypo. H → H, axiom.
 conj_eliml. (H → A ∧ B) → (H → A), axiom.
 conj_elimr. (H → A ∧ B) → (H → B), axiom.
 conj_intro. (H → A) → (H → B) → (H → A ∧ B), axiom.
 
-1. A ∧ B → A ∧ B, basic.
+1. A ∧ B → A ∧ B, hypo.
 2. A ∧ B → A, conj_eliml 1.
 3. A ∧ B → B, conj_elimr 1.
 conj_comm. A ∧ B → B ∧ A, conj_intro 3 2.

@@ -1,7 +1,7 @@
 
 # Examples of pure first order logic.
 
-1. 1 ⊢ ∀x. A ∧ P x, basic.
+1. 1 ⊢ ∀x. A ∧ P x, hypo.
 2. 1 ⊢ A ∧ P u, uq_elim 1.
 3. 1 ⊢ A, conj_eliml 2.
 4. 1 ⊢ P u, conj_elimr 2.
@@ -9,8 +9,8 @@
 6. 1 ⊢ A ∧ ∀x. P x, conj_intro 3 5.
 const_conj. ⊢ (∀x. A ∧ P x) → A ∧ (∀x. P x), subj_intro 6.
 
-1. 1 ⊢ ∃x. P x ∧ Q x, basic.
-2. 2 ⊢ P u ∧ Q u, basic.
+1. 1 ⊢ ∃x. P x ∧ Q x, hypo.
+2. 2 ⊢ P u ∧ Q u, hypo.
 3. 2 ⊢ P u, conj_eliml 2.
 4. 2 ⊢ Q u, conj_elimr 2.
 5. 2 ⊢ ∃x. P x, ex_intro 3.

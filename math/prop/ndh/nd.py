@@ -334,7 +334,7 @@ def read_all(path):
         return f.read()
 
 rules = """
-basic. (true ∧ H ⊢ H), axiom.
+hypo. (true ∧ H ⊢ H), axiom.
 conj_intro. (H1 ⊢ A) → (H2 ⊢ B) → (H1 ∧ H2 ⊢ A ∧ B), axiom.
 conj_eliml. (H ⊢ A ∧ B) → (H ⊢ A), axiom.
 conj_elimr. (H ⊢ A ∧ B) → (H ⊢ B), axiom.

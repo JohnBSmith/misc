@@ -352,8 +352,8 @@ def read_all(path):
     with open(path) as f:
         return f.read()
 
-rules = """
-basic. (sq {A} ⊢ A), axiom.
+rules = r"""
+hypo. (sq {A} ⊢ A), axiom.
 conj_intro. (sq Γ1 ⊢ A) → (sq Γ2 ⊢ B) → (sq Γ1, Γ2 ⊢ A ∧ B), axiom.
 conj_eliml. (sq Γ ⊢ A ∧ B) → (sq Γ ⊢ A), axiom.
 conj_elimr. (sq Γ ⊢ A ∧ B) → (sq Γ ⊢ B), axiom.
