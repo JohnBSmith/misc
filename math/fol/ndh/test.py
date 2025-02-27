@@ -444,19 +444,98 @@ const_conj. ⊢ (∀x. A ∧ P x) → A ∧ (∀x. P x), subj_intro 6.
 2. ⊢ A x → A x, 1.
 """),
 ("06.02", ErrLogic, """
-0. |- add x y = some_function, def.
-1. |- x = x, axiom.
-2. |- a + b = a + c, 1.
+0. ⊢ add x y = some_function, def.
+1. ⊢ x = x, axiom.
+2. ⊢ a + b = a + c, 1.
 """),
 ("06.03", ErrLogic, """
-0. |- add x y = some_function, def.
-1. |- x = x, axiom.
-2. |- x = a, 1.
+0. ⊢ add x y = some_function, def.
+1. ⊢ x = x, axiom.
+2. ⊢ x = a, 1.
 """),
 ("06.04", ErrLogic, """
-0. |- add x y = some_function, def.
-1. |- A x → A x, axiom.
-2. |- A (a + b) → A (a + c), 1.
+0. ⊢ add x y = some_function, def.
+1. ⊢ A x → A x, axiom.
+2. ⊢ A (a + b) → A (a + c), 1.
+"""),
+("06.05", ErrLogic, """
+1. ⊢ f x → f (¬A), axiom.
+"""),
+("06.06", ErrLogic, """
+1. ⊢ f x y → f (¬A) y, axiom.
+"""),
+("06.07", ErrLogic, """
+1. ⊢ f x y → f x (¬A), axiom.
+"""),
+("06.08", ErrLogic, """
+1. ⊢ f x, axiom.
+2. ⊢ f (¬A), 1.
+"""),
+("06.09", ErrLogic, """
+1. ⊢ f x y, axiom.
+2. ⊢ f (¬A) y, 1.
+"""),
+("06.10", ErrLogic, """
+1. ⊢ f x y, axiom.
+2. ⊢ f x (¬A), 1.
+"""),
+
+("07.01", Ok, """
+0. ⊢ a = some_constant, def.
+0. ⊢ b = some_constant, def.
+0. ⊢ x + y = some_function, def.
+c_eq. ⊢ c = a + b, def.
+"""),
+("07.02", Ok, """
+0. ⊢ a = some_constant, def.
+0. ⊢ b = some_constant, def.
+0. ⊢ x + y = some_function, def.
+p_equi. ⊢ p ↔ a = b, def.
+"""),
+("07.03", Ok, """
+0. ⊢ p x ↔ some_predicate, def.
+0. ⊢ q x ↔ some_predicate, def.
+r_equi. ⊢ r x ↔ p x ∧ q x, def.
+"""),
+("07.04", Ok, """
+0. ⊢ p x ↔ some_predicate, def.
+0. ⊢ q x ↔ some_predicate, def.
+r_equi. ⊢ r ↔ ∀x. p x ∧ q x, def.
+"""),
+("07.05", Ok, """
+0. ⊢ f x = some_function, def.
+0. ⊢ g x = some_function, def.
+h_eq. ⊢ h x = g (f x), def.
+"""),
+("07.06", Ok, """
+0. ⊢ f x = some_function, def.
+0. ⊢ g x = some_function, def.
+r_equi. ⊢ r ↔ ∀x. f x = g x, def.
+"""),
+
+("08.01", ErrLogic, """
+1. ⊢ a = b, def.
+"""),
+("08.02", ErrLogic, """
+1. ⊢ a = a, def.
+"""),
+("08.03", ErrLogic, """
+1. ⊢ p ↔ q, def.
+"""),
+("08.04", ErrLogic, """
+1. ⊢ p ↔ p, def.
+"""),
+("08.05", ErrLogic, """
+1. ⊢ f x = f x, def.
+"""),
+("08.06", ErrLogic, """
+1. ⊢ f x = g x, def.
+"""),
+("08.07", ErrLogic, """
+1. ⊢ p x ↔ p x, def.
+"""),
+("08.08", ErrLogic, """
+1. ⊢ p x ↔ q x, def.
 """)
 ]
 

@@ -6,13 +6,13 @@
 incl_equi. ⊢ A ⊆ B ↔ ∀x. x ∈ A → x ∈ B, def.
 set_equi. ⊢ set x ↔ ∃C. x ∈ C, def.
 empty_set_eq. ⊢ ∅ = {x | ⊥}, def.
+union_eq. ⊢ A ∪ B = {x | x ∈ A ∨ x ∈ B}, def.
 sg_eq. ⊢ {a} = {x | set a → x = a}, def.
 pair_eq. ⊢ (x, y) = {{x}, {x, y}}, def.
 # {x, y} is syntactic sugar for {x} ∪ {y}.
 
 power_eq. ⊢ power M = {A | A ⊆ M}, def.
 intersection_eq. ⊢ A ∩ B = {x | x ∈ A ∧ x ∈ B}, def.
-union_eq. ⊢ A ∪ B = {x | x ∈ A ∨ x ∈ B}, def.
 diff_eq. ⊢ A \ B = {x | x ∈ A ∧ ¬x ∈ B}, def.
 Union_eq. ⊢ ⋃M = {x | ∃A. A ∈ M ∧ x ∈ A}, def.
 Intersection_eq. ⊢ ⋂M = {x | ∀A. A ∈ M → x ∈ A}, def.

@@ -42,7 +42,6 @@ Fn = "Fn"
 
 def ensure_type(t, line, typ):
     if not type(t) is Term:
-        print(t)
         raise ValueError("unreachable")
     if t.type is None:
         t.type = typ
@@ -111,6 +110,19 @@ def type_check(line, t, record, residual):
             type_check(line, x, record, residual)
         if t.type is None:
             residual.append(t)
+
+def type_check_apps(line, t, record):
+    if type(t) is Term and type(t.node) is tuple:
+        if t.node[0] == "app" and not type(t.node[1]) is str and t.node[1].type == Fn:
+            f = t.node[1]
+            f.type = tuple(x.type for x in t.node[2:])+ (t.type,)
+            if f.node in record:
+                if record[f.node] != f.type:
+                    raise LogicError(line, f"Type error for {f.node}: {f.type} != {record[f.node]}")
+            else:
+                record[f.node] = f.type
+        for x in t.node:
+            type_check_apps(line, x, record)
 
 def is_connective(A, symbol):
     return type(A) is Term and type(A.node) is tuple and A.node[0] == symbol
@@ -353,6 +365,7 @@ def formula_type_checked(a, i):
     type_check(line, x, {}, residual)
     for t in residual:
         if t.type is None: t.type = Ind
+    type_check_apps(line, x, {})
     return i, x
 
 def is_identifier(t):
@@ -464,8 +477,8 @@ def subset(a, b):
 def set_eq(a, b):
     return subset(a, b) and subset(b, a)
 
-def unify_seq(A, pattern, subst):
-    result = unify(A.node[2], pattern.node[2], subst)
+def unify_seq(line, A, pattern, subst):
+    result = unify(line, A.node[2], pattern.node[2], subst)
     if result: return result
     L = conj_list(pattern.node[1], subst)
     return None if set_eq(conj_list(A.node[1], None), L) else UErr(A, pattern)
@@ -478,21 +491,23 @@ class Substitution:
     def __repr__(self):
         return f"argv ↦ {self.A}[argv/{self.args}]"
 
-def unify_args(A, pattern, subst):
+def unify_args(line, A, pattern, subst):
     subst_copy = subst.copy()
     for i in range(1, len(A.node)):
-        result = unify(A.node[i], pattern.node[i], subst)
+        result = unify(line, A.node[i], pattern.node[i], subst)
         if result:
             if is_connective(pattern, "seq"):
                 # todo: subst auf subst_copy setzen, sonst fürs
                 # Debugging unsichtbar.
-                return unify_seq(A, pattern, subst_copy)
+                return unify_seq(line, A, pattern, subst_copy)
             return result
     return None
 
-def unify_pred(A, pattern, subst):
-    if is_connective(A, "app") and A.type == pattern.type and len(A.node) == len(pattern.node):
-        result = unify_args(A, pattern, subst)
+def unify_pred(line, A, pattern, subst):
+    if is_connective(A, "app") and len(A.node) == len(pattern.node):
+        if A.type != pattern.type:
+            raise LogicError(line, f"Type error for {A}")
+        result = unify_args(line, A, pattern, subst)
     else:
         result = UErr(A, pattern)
     if result is None or not is_scheme_var(pattern.node[1]):
@@ -502,7 +517,7 @@ def unify_pred(A, pattern, subst):
         P = subst[P.node]
         if not callable(P): return UErr(A, pattern)
         B = P(args)
-        return unify(A, B, subst)
+        return unify(line, A, B, subst)
     else:
         for i in range(len(args)):
             if args[i].node in subst: args[i] = subst[args[i].node]
@@ -516,12 +531,14 @@ class UErr:
     def __init__(self, A, pattern):
         self.A = A; self.pattern = pattern
 
-def unify(A, pattern, subst):
+def unify(line, A, pattern, subst):
     if type(pattern) is Term:
+        if A.type != pattern.type:
+            raise LogicError(line, f"Type error for {A}")
         if is_scheme_var(pattern):
             if pattern.node in subst:
                 B = subst[pattern.node]
-                return unify(A, B, subst)
+                return unify(line, A, B, subst)
             else:
                 if pattern.type != A.type:
                     return UErr(A, pattern)
@@ -531,8 +548,7 @@ def unify(A, pattern, subst):
             return None if term_eq(A, pattern) else UErr(A, pattern)
         elif type(pattern.node) is tuple:
             if is_connective(pattern, "app"):
-                return unify_pred(A, pattern, subst)
-            if A.type != pattern.type: return UErr(A, pattern)
+                return unify_pred(line, A, pattern, subst)
             if not type(A.node) is tuple: return UErr(A, pattern)
             if len(A.node) != len(pattern.node): return UErr(A, pattern)
             if A.node[0] != pattern.node[0]: return UErr(A, pattern)
@@ -540,8 +556,8 @@ def unify(A, pattern, subst):
                 u = unique_variable(Ind)
                 A = substitute_term(A.node[2], Term(A.node[1], Ind), u)
                 B = substitute_term(pattern.node[2], Term(pattern.node[1], Ind), u)
-                return unify(A, B, subst)
-            return unify_args(A, pattern, subst)
+                return unify(line, A, B, subst)
+            return unify_args(line, A, pattern, subst)
         else:
             raise ValueError("unreachable")
     elif type(pattern) is str:
@@ -604,7 +620,7 @@ def is_quantifier_rule(C):
     return False
 
 def conclusion(line, B, C, subst, args):
-    result = unify(B, C, subst)
+    result = unify(line, B, C, subst)
     if result:
         # dev.uerr_info(B, C, result, subst)
         raise LogicError(line,
@@ -627,7 +643,7 @@ def modus_ponens(line, book, B, args, hint):
         A = lookup(book, args[i], line)
         if not is_connective(C, "subj"):
             raise LogicError(line, "expected a rule/subjunction")
-        result = unify(A, C.node[1], subst)
+        result = unify(line, A, C.node[1], subst)
         if result:
             # dev.uerr_info(A, C.node[1], result, subst)
             raise LogicError(line,
@@ -646,7 +662,23 @@ def expect_len(line, args, n, rule_name):
     raise LogicError(line,
         f"rule {rule_name} expects {n} argument{s}, but got {len(args)}")
 
-def definition(line, book, S, args):
+def free_vars(A, s):
+    if type(A) is Term:
+        if type(A.node) is str and A.node[0] != "$":
+            if not A.node in function_symbols and not A.node in predicate_symbols:
+                s.add(A.node)
+        elif type(A.node) is tuple:
+            for B in A.node[1:]:
+                free_vars(B, s)
+    return s
+
+def free_vars_check(line, A, argv, label):
+    s = free_vars(A, set())
+    for x in s:
+        if label != 0 and not any(x == arg.node for arg in argv):
+            raise LogicError(line, f"{x} is free in right hand side of definition")
+
+def definition(line, book, S, args, label):
     if len(args) != 0: expect_len(line, args, 0, "def")
     if not is_connective(S.node[1], "true"):
         raise LogicError(line, "definition expects empty context")
@@ -656,24 +688,28 @@ def definition(line, book, S, args):
         if type(A.node) is str:
             if A.node in predicate_symbols:
                 raise LogicError(line, "already defined")
+            free_vars_check(line, B, [], label)
             predicate_symbols[A.node] = 0
         else:
             if not isinstance(A.node, tuple) or A.node[0] != "app":
                 raise LogicError(line, "malformed definition")
             if A.node[1].node in predicate_symbols:
                 raise LogicError(line, "already defined")
+            free_vars_check(line, B, A.node[2:], label)
             predicate_symbols[A.node[1].node] = len(A.node) - 2
     elif is_connective(C, "app") and C.node[1].node == "eq":
         A = C.node[2]; B = C.node[3]
         if isinstance(A.node, str):
             if A.node in function_symbols:
                 raise LogicError(line, "already defined")
+            free_vars_check(line, B, [], label)
             function_symbols[A.node] = 0
         else:
             if not isinstance(A.node, tuple) or A.node[0] != "app":
                 raise LogicError(line, "malformed definition")
             if A.node[1].node in function_symbols:
                 raise LogicError(line, "already defined")
+            free_vars_check(line, B, A.node[2:], label)
             function_symbols[A.node[1].node] = len(A.node) - 2
     else:
         raise LogicError(line, "malformed definition")
@@ -694,13 +730,12 @@ def verify_plain(book, s):
             for k in Gamma:
                 H = Term(("conj", H, book[k].node[2]), Prop) # todo
             B = Term(("seq", H, A), Prop)
-            book[label] = B
-        else:
+        if label != 0:
             book[label] = B
         if label in rule:
             raise LogicError(line, "cyclic deduction")
         if rule[0] == "def":
-            definition(line, book, B, rule[1:])
+            definition(line, book, B, rule[1:], label)
         elif rule[0] != "axiom":
             modus_ponens(line, book, B, rule, hint)
 
@@ -720,7 +755,7 @@ fmt_kw_tab = {
     "and": "∧", "or": "∨", "not": "¬", "box": "□", "dia": "◇",
     "forall": "∀", "exists": "∃", "in": "∈", "sub": "⊆",
     "cup": "∪", "cap": "∩", "Cap": "⋂", "Cup": "⋃", "times": "×",
-    "empty_set": "∅"
+    "empty_set": "∅", "phi": "φ", "psi": "ψ", "chi": "χ"
 }
 unspace_set = {"not", "box", "dia", "forall", "exists", "Cap", "Cup"}
 
