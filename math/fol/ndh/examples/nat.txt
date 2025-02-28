@@ -15,10 +15,10 @@ eq_trans_rule. (H1 ⊢ x = y) → (H2 ⊢ y = z) → (H1 ∧ H2 ⊢ x = z),
 4. ⊢ x = y → f x = f y, subj_intro 3.
 f_equal. (H ⊢ x = y) → (H ⊢ f x = f y), lift_impl 4.
 
-0. ⊢ O = some_constant, def.
-0. ⊢ S a = some_function, def.
-0. ⊢ a + b = some_function, def.
-0. ⊢ a⋅b = some_function, def.
+0. ⊢ O = _, def.
+0. ⊢ S a = _, def.
+0. ⊢ a + b = _, def.
+0. ⊢ a⋅b = _, def.
 
 add_zero. ⊢ a + O = a, axiom.
 add_succ. ⊢ a + S b = S (a + b), axiom.

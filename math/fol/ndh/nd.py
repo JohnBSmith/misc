@@ -118,7 +118,8 @@ def type_check_apps(line, t, record):
             f.type = tuple(x.type for x in t.node[2:])+ (t.type,)
             if f.node in record:
                 if record[f.node] != f.type:
-                    raise LogicError(line, f"Type error for {f.node}: {f.type} != {record[f.node]}")
+                    raise LogicError(line,
+                        f"Type error for {f.node}: {f.type} != {record[f.node]}")
             else:
                 record[f.node] = f.type
         for x in t.node:
@@ -139,12 +140,12 @@ sym3 = {"<->": "<->", "<=>": "<->", "_|_": "_|_"}
 kw_tab = {"and": "&", "or": "|", "not": "~", "false": "_|_", "true": "#t",
     "box": "□", "dia": "◇", "forall": "#forall", "exists": "#exists",
     "in": "∈", "sub": "⊆", "cap": "∩", "cup": "∪", "Cap": "⋂", "Cup": "⋃",
-    "times": "×"}
+    "times": "×", "phi": "φ", "psi": "ψ", "chi": "χ"}
 
 def scan(s):
     i = 0; n = len(s); a = []; line = 1
     while i < n:
-        if s[i].isalpha():
+        if s[i].isalpha() or s[i] == '_':
             j = i
             while i < n and (s[i].isalpha() or s[i].isdigit() or s[i] in "_'"):
                 i += 1
@@ -248,7 +249,7 @@ prefix_table = {
 }
 
 def is_identifier(t):
-    return type(t) is str and t[0].isalpha()
+    return type(t) is str and (t[0].isalpha() or t[0] == '_')
 
 def expect_token(a, i):
     if a[i][0] is None:
@@ -267,9 +268,6 @@ def quantifier(a, i, op):
     i, x = formula(a, i)
     x = ensure_type(x, line, Prop)
     u = unique_variable(Ind)
-    # todo
-    #if occurs_as_fn(var.node, x):
-    #    raise LogicError(line, "cannot quantify over a predicate/function")
     x = substitute_term(x, var, u)
     return i, Term((op, u.node, x), Prop)
 
@@ -367,9 +365,6 @@ def formula_type_checked(a, i):
         if t.type is None: t.type = Ind
     type_check_apps(line, x, {})
     return i, x
-
-def is_identifier(t):
-    return type(t) is str and t[0].isalpha()
 
 def rule_app(a, i):
     acc = []
@@ -497,8 +492,6 @@ def unify_args(line, A, pattern, subst):
         result = unify(line, A.node[i], pattern.node[i], subst)
         if result:
             if is_connective(pattern, "seq"):
-                # todo: subst auf subst_copy setzen, sonst fürs
-                # Debugging unsichtbar.
                 return unify_seq(line, A, pattern, subst_copy)
             return result
     return None
@@ -728,7 +721,8 @@ def verify_plain(book, s):
             book[label] = Term(("seq", None, A), Prop)
             H = Term(("true",), Prop)
             for k in Gamma:
-                H = Term(("conj", H, book[k].node[2]), Prop) # todo
+                Gammak = lookup(book, k, line).node[2]
+                H = Term(("conj", H, Gammak), Prop)
             B = Term(("seq", H, A), Prop)
         if label != 0:
             book[label] = B
@@ -768,7 +762,7 @@ def format_source_code(s):
                 acc.append(fmt_tab[s[i:i+k]])
                 i += k; fmt = True; break
         if not fmt:
-            if s[i].isalpha():
+            if s[i].isalpha() or s[i] == '_':
                 j = i
                 while i < n and (s[i].isalpha() or s[i].isdigit() or s[i] in "_'"):
                     i += 1

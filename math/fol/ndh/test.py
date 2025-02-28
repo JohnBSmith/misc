@@ -536,6 +536,12 @@ r_equi. ⊢ r ↔ ∀x. f x = g x, def.
 """),
 ("08.08", ErrLogic, """
 1. ⊢ p x ↔ q x, def.
+"""),
+
+("09.01", ErrLogic, """
+1. 1 ⊢ P x, hypo.
+2. ⊢ P x → P x, subj_intro 1.
+3. ⊢ ∀P. P x → P x, uq_intro 2.
 """)
 ]
 
