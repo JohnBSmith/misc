@@ -105,6 +105,15 @@ $ ./nd.py Beweise.txt
 
 <p><small>Die Syntax der Eingabe ist recht flexibel. Die Konjunktion <code>A&nbsp;∧&nbsp;B</code> kann zum Beispiel auch als <code>A&nbsp;/\&nbsp;B</code>, als <code>A&nbsp;&amp;&nbsp;B</code> oder als <code>A&nbsp;and&nbsp;B</code> geschrieben werden. Man kann Schlüsselwörter wie <code>and</code> sowie die Namen der Regeln auch unschwer in die eigene Muttersprache umbenennen.</small>
 
+<p>Unter Umständen möchte man im Rahmen eines größeren Vorhabens die Sammlung der Beweise in mehrere Dateien auftrennen, zum Beispiel »<code>Beweise1.txt</code>«, »<code>Beweise2.txt</code>«, »<code>Beweise3.txt</code>«, wobei die Beweise in der jeweiligen Datei von Theoremen abhängen dürfen, die in den vorangegangenen Dateien aufgeführt sind. Dazu bekommt das Programm sämtliche Dateien gemeinsam als Argumente. Automatisierung schafft bspw. das folgende Skript »<code>make.py</code>«, das man so anpassen kann wie man möchte.
+
+<pre class="ibox">
+#!/usr/bin/env python3
+<b>from</b> subprocess <b>import</b> run
+
+run(["nd.py", "Beweise1.txt", "Beweise2.txt", "Beweise3.txt"])
+</pre>
+
 <h2 id="Darstellung">Zur Darstellung</h2>
 
 <p>Mit dem Programmaufruf
@@ -133,7 +142,7 @@ Man erhält:
 
 <p>Diese Darstellung im suppesschen Stil erscheint allerdings recht unübersichtlich.
 Sie kann daher noch so formatiert werden, dass die Baumstruktur zum
-Vorschein kommt. Dazu wird "<code>⊢</code>" mit den Prämissen bei einem
+Vorschein kommt. Dazu wird »<code>⊢</code>« mit den Prämissen bei einem
 Schluss am besten um zwei Leerzeichen eingerückt.
 
 <table class="bt">
@@ -234,11 +243,11 @@ conj_comm. ⊢ A ∧ B → B ∧ A, subj_intro 4.
 <p>Zu beachten ist, dass es sich bei <code>conj_comm</code> eigentlich nicht um ein einzelnes Theorem, sondern um ein Schema von Theoremen handelt. Zur Ableitung konkreter Theoreme legen wir zunächst atomare Formeln fest:
 
 <pre class="ibox">
-0. ⊢ p ↔ some_atom, def.
-0. ⊢ q ↔ some_atom, def. 
+0. ⊢ p ↔ _, def.
+0. ⊢ q ↔ _, def.
 </pre>
 
-<p>Nun können wir unterschiedliche Theoreme als Substitutionsinstanzen von <code>conj_comm</code> erhalten:
+<p>Da beim Label »0« das Speichern entfällt, wird ausgedrückt, dass <code>p</code>, <code>q</code> existieren, ohne sagen zu müssen, wozu sie äquivalent sind. Bei einem anderen Label wäre eine solche Deklaration ohne rechte Seite nicht durchführbar. Nun können wir unterschiedliche Theoreme als Substitutionsinstanzen von <code>conj_comm</code> erhalten:
 
 <pre class="ibox">
 1. ⊢ p ∧ p → p ∧ p, conj_comm.

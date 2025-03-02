@@ -105,6 +105,15 @@ $ ./nd.py Proofs.txt
 
 <p><small>The input syntax is quite flexible. For example, the conjunction <code>A ∧ B</code> can also be written as <code>A /\ B</code>, as <code>A &amp; B</code>, or as <code>A and B</code>. Keywords like <code>and</code>, as well as rule names, may easily be renamed to ones native language.</small>
 
+<p>As part of a larger project, one may wish to split the collection of proofs into several files, for example "proofs1.txt", "proofs2.txt", "proofs3.txt", whereby the proofs in the respective file may depend on theorems listed in the previous files. For this purpose, the program receives all files together as arguments. For example, the following script "make.py", which you can adapt as you wish, provides automation.
+
+<pre class="ibox">
+#!/usr/bin/env python3
+<b>from</b> subprocess <b>import</b> run
+
+run(["nd.py", "proofs1.txt", "proofs2.txt", "proofs3.txt"])
+</pre>
+
 <h2 id="Presentation">Presentation</h2>
 
 <p>When called with the command:
@@ -228,11 +237,11 @@ conj_comm. ⊢ A ∧ B → B ∧ A, subj_intro 4.
 <p>Note that <code>conj_comm</code> is not actually a single theorem, but a schema of theorems. To derive concrete theorems, we first define atomic formulas:
 
 <pre class="ibox">
-0. ⊢ p ↔ some_atom, def.
-0. ⊢ q ↔ some_atom, def. 
+0. ⊢ p ↔ _, def.
+0. ⊢ q ↔ _, def.
 </pre>
 
-<p>Now we can obtain different theorems as substitution instances of <code>conj_comm</code>:
+<p>Since the label "0" does not involve saving, it is expressed that <code>p</code>, <code>q</code> exist without having to say what they are equivalent to. With another label, such a declaration cannot be made without a right-hand side. Now we can obtain different theorems as substitution instances of <code>conj_comm</code>:
 
 <pre class="ibox">
 1. ⊢ p ∧ p → p ∧ p, conj_comm.

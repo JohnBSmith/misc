@@ -15,7 +15,7 @@
 # nd.py -f proofs.txt output.txt
 #     Format ASCII input to common notation.
 
-from sys import argv
+from sys import argv, exit
 
 class SyntaxError(ValueError):
     def __init__(self, line, text):
@@ -733,13 +733,15 @@ def verify_plain(book, s):
         elif rule[0] != "axiom":
             modus_ponens(line, book, B, rule, hint)
 
-def verify(book, s):
+def verify(book, file, s):
     try:
         verify_plain(book, s)
     except SyntaxError as e:
-        print("Syntax error in line {}:\n{}".format(e.line, e.text))
+        print(f"Syntax error in {file}, line {e.line}:\n{e.text}")
+        exit(1)
     except LogicError as e:
-        print("Logic error in line {}:\n{}".format(e.line, e.text))
+        print(f"Logic error in {file}, line {e.line}:\n{e.text}")
+        exit(1)
 
 fmt_tab = {
     "&": "∧", "~": "¬", "->": "→", "=>": "→", "/\\": "∧", "\\/": "∨",
@@ -826,8 +828,9 @@ def main():
             print(text)
     else:
         book = {}
-        verify(book, rules)
-        verify(book, read_all(argv[1]))
+        verify(book, "prelude", rules)
+        for file in argv[1:]:
+            verify(book, file, read_all(file))
 
 if __name__ == "__main__":
     main()
