@@ -12,7 +12,7 @@
 # nd.py proofs.txt
 #     If the program stays quiet, the deductions should be correct.
 #
-# nd.py -f proofs.txt output.txt
+# nd.py -f proofs.txt [output.txt]
 #     Format ASCII input to common notation.
 
 from sys import argv, exit
@@ -136,8 +136,8 @@ def init_tables():
 init_tables()
 
 sym2 = {"->": "->", "=>": "->", "/\\": "&", "\\/": "|", "|-": "|-", "<=": "≤"}
-sym3 = {"<->": "<->", "<=>": "<->", "_|_": "_|_"}
-kw_tab = {"and": "&", "or": "|", "not": "~", "false": "_|_", "true": "#t",
+sym3 = {"<->": "<->", "<=>": "<->"}
+kw_tab = {"and": "&", "or": "|", "not": "~", "false": "#f", "true": "#t",
     "box": "□", "dia": "◇", "forall": "#forall", "exists": "#exists",
     "in": "∈", "sub": "⊆", "cap": "∩", "cup": "∪", "Cap": "⋂", "Cup": "⋃",
     "times": "×", "phi": "φ", "psi": "ψ", "chi": "χ"}
@@ -304,7 +304,7 @@ def nud(a, i):
     token, line = expect_token(a, i)
     if is_identifier(token):
         return i + 1, Term(token, None)
-    elif token == "_|_" or token == "⊥":
+    elif token == "#f" or token == "⊥":
         return i + 1, Term(("false",), Prop)
     elif token == "#t" or token == "⊤":
         return i + 1, Term(("true",), Prop)
@@ -745,13 +745,13 @@ def verify(book, file, s):
 
 fmt_tab = {
     "&": "∧", "~": "¬", "->": "→", "=>": "→", "/\\": "∧", "\\/": "∨",
-    "|-": "⊢", "<->": "↔", "<=>": "↔", "_|_": "⊥", "*": "⋅", "<=": "≤"
+    "|-": "⊢", "<->": "↔", "<=>": "↔", "*": "⋅", "<=": "≤"
 }
 fmt_kw_tab = {
-    "and": "∧", "or": "∨", "not": "¬", "box": "□", "dia": "◇",
-    "forall": "∀", "exists": "∃", "in": "∈", "sub": "⊆",
-    "cup": "∪", "cap": "∩", "Cap": "⋂", "Cup": "⋃", "times": "×",
-    "empty_set": "∅", "phi": "φ", "psi": "ψ", "chi": "χ"
+    "and": "∧", "or": "∨", "not": "¬", "false": "⊥", "true": "⊤",
+    "box": "□", "dia": "◇", "forall": "∀", "exists": "∃", "in": "∈",
+    "sub": "⊆", "cup": "∪", "cap": "∩", "Cap": "⋂", "Cup": "⋃",
+    "times": "×", "empty_set": "∅", "phi": "φ", "psi": "ψ", "chi": "χ"
 }
 unspace_set = {"not", "box", "dia", "forall", "exists", "Cap", "Cup"}
 
@@ -821,11 +821,9 @@ lift_impl_ii. (⊢ A → B → C) → (H1 ⊢ A) → (H2 ⊢ B) → (H1 ∧ H2 �
 def main():
     if argv[1] == "-f":
         text = format_source_code(read_all(argv[2]))
-        if len(argv) == 4:
-            with open(argv[3], "w") as fout:
-                fout.write(text)
-        else:
-            print(text)
+        path = argv[3 if len(argv) == 4 else 2]
+        with open(path, "w") as fout:
+            fout.write(text)
     else:
         book = {}
         verify(book, "prelude", rules)

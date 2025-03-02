@@ -89,7 +89,7 @@ table.bt th{
 2. 2 |- A -&gt; B, hypo.
 3. 3 |- A, hypo.
 4. 2, 3 |- B, subj_elim 2 3.
-5. 1, 2, 3 |- _|_, neg_elim 1 4.
+5. 1, 2, 3 |- false, neg_elim 1 4.
 6. 2, 1 |- ~A, neg_intro 5.
 7. 2 |- ~B -&gt; ~A, subj_intro 6.
 8. ⊢ (A -> B) -&gt; ~B -&gt; ~A, subj_intro 7.
@@ -119,7 +119,7 @@ run(["nd.py", "Beweise1.txt", "Beweise2.txt", "Beweise3.txt"])
 <p>Mit dem Programmaufruf
 
 <pre class="cmd">
-$ ./nd.py -f Beweise.txt Beweise.txt
+$ ./nd.py -f Beweise.txt
 </pre>
 
 <p>wird die Eingabe optional mit den richtigen Unicode-Zeichen formatiert.

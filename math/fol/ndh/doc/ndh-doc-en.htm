@@ -82,14 +82,14 @@ table.bt th{
 
 <h2 id="Workflow">Workflow</h2>
 
-<p>We enter the proof to be checked in ASCII syntax in a file. The filename does not matter. Let's call it "<code>Proofs.txt</code>". Here, for example, is the proof for the theorem corresponding to the rule of contraposition:
+<p>We enter the proof to be checked in ASCII syntax in a file. The filename does not matter. Let's call it "<code>proofs.txt</code>". Here, for example, is the proof for the theorem corresponding to the rule of contraposition:
 
 <pre class="ibox">
 1. 1 |- ~B, hypo.
 2. 2 |- A -&gt; B, hypo.
 3. 3 |- A, hypo.
 4. 2, 3 |- B, subj_elim 2 3.
-5. 1, 2, 3 |- _|_, neg_elim 1 4.
+5. 1, 2, 3 |- false, neg_elim 1 4.
 6. 2, 1 |- ~A, neg_intro 5.
 7. 2 |- ~B -&gt; ~A, subj_intro 6.
 8. ⊢ (A -> B) -&gt; ~B -&gt; ~A, subj_intro 7.
@@ -98,7 +98,7 @@ table.bt th{
 <p>When called with the command:
 
 <pre class="cmd">
-$ ./nd.py Proofs.txt
+$ ./nd.py proofs.txt
 </pre>
 
 <p>the proof is now checked automatically. The program remains silent only if the proof is correct. If a step fails to match a rule, it aborts with a corresponding message.
@@ -119,7 +119,7 @@ run(["nd.py", "proofs1.txt", "proofs2.txt", "proofs3.txt"])
 <p>When called with the command:
 
 <pre class="cmd">
-$ ./nd.py -f Proofs.txt Proofs.txt
+$ ./nd.py -f proofs.txt
 </pre>
 
 <p>the input can optionally be formatted with the correct Unicode characters.
