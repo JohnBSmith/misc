@@ -103,8 +103,6 @@ $ ./nd.py Beweise.txt
 
 <p>wird der Beweis nun maschinell geprüft. Das Programm verbleibt nur bei korrekten Beweisen ruhig. Gelingt der Abgleich eines Schrittes mit einer Regel dagegen nicht, bricht es mit der entsprechenden Meldung ab.
 
-<p><small>Die Syntax der Eingabe ist recht flexibel. Die Konjunktion <code>A&nbsp;∧&nbsp;B</code> kann zum Beispiel auch als <code>A&nbsp;/\&nbsp;B</code>, als <code>A&nbsp;&amp;&nbsp;B</code> oder als <code>A&nbsp;and&nbsp;B</code> geschrieben werden. Man kann Schlüsselwörter wie <code>and</code> sowie die Namen der Regeln auch unschwer in die eigene Muttersprache umbenennen.</small>
-
 <p>Unter Umständen möchte man im Rahmen eines größeren Vorhabens die Sammlung der Beweise in mehrere Dateien auftrennen, zum Beispiel »<code>Beweise1.txt</code>«, »<code>Beweise2.txt</code>«, »<code>Beweise3.txt</code>«, wobei die Beweise in der jeweiligen Datei von Theoremen abhängen dürfen, die in den vorangegangenen Dateien aufgeführt sind. Dazu bekommt das Programm sämtliche Dateien gemeinsam als Argumente. Automatisierung schafft bspw. das folgende Skript »<code>make.py</code>«, das man so anpassen kann wie man möchte.
 
 <pre class="ibox">
@@ -122,8 +120,7 @@ run(["nd.py", "Beweise1.txt", "Beweise2.txt", "Beweise3.txt"])
 $ ./nd.py -f Beweise.txt
 </pre>
 
-<p>wird die Eingabe optional mit den richtigen Unicode-Zeichen formatiert.
-Man erhält:
+<p>wird die Eingabe optional mit den richtigen Unicode-Zeichen formatiert. Die ideale Darstellung erhält man mit einem Monospace-Font, der die genutzten Unicode-Zeichen abdeckt, zum Beispiel <i>DejaVu Sans Mono</i>. Man erhält:
 
 <table class="bt">
 <tr><th>Suppes-Style</th>
@@ -140,7 +137,33 @@ Man erhält:
 </pre>
 </table>
 
-<p>Diese Darstellung im suppesschen Stil erscheint allerdings recht unübersichtlich.
+<p>Die Syntax der Eingabe ist recht flexibel. Die Konjunktion <code>A&nbsp;∧&nbsp;B</code> kann zum Beispiel auch als <code>A&nbsp;/\&nbsp;B</code>, als <code>A&nbsp;&amp;&nbsp;B</code> oder als <code>A&nbsp;and&nbsp;B</code> geschrieben werden. Man kann Schlüsselwörter wie <code>and</code> sowie die Namen der Regeln auch unschwer in die eigene Muttersprache umbenennen.
+
+<table class="bt">
+<tr><th>Deutung<th>Eingabe-Syntax<th>Formatierung
+<tr><td>Konjunktion<td><code>A and B, A &amp; B, A /\ B</code><td><code>A ∧ B</code>
+<tr><td>Disjunktion<td><code>A or A, A \/ B</code><td><code>A ∨ B</code>
+<tr><td>Negation<td><code>not A, ~A</code><td><code>¬A</code>
+<tr><td>Subjunktion<td><code>A -&gt; B</code><td><code>A → B</code>
+<tr><td>Bijunktion<td><code>A &lt;-&gt; B</code><td><code>A ↔ B</code>
+<tr><td>Falsum<td><code>false</code><td><code>⊥</code>
+<tr><td>Verum<td><code>true</code><td><code>⊤</code>
+<tr><td>Universalquant.<td><code>forall x. A x</code><td><code>∀x. A x</code>
+<tr><td>Existenzquant.<td><code>exists x. A x</code><td><code>∃x. A x</code>
+<tr><td>Notwendigkeit<td><code>box A</code><td><code>□A</code>
+<tr><td>Möglichkeit<td><code>dia A</code><td><code>◇A</code>
+<tr><td>Sequenz<td><code>A |- B</code><td><code>A ⊢ B</code>
+<tr><td>Elementrel.<td><code>x in A</code><td><code>x ∈ A</code>
+<tr><td>Inklusion<td><code>A sub B</code><td><code>A ⊆ B</code>
+<tr><td>Vergleich<td><code>x &lt;= y</code><td><code>x ≤ y</code>
+<tr><td>Schnitt<td><code>A cap B</code><td><code>A ∩ B</code>
+<tr><td>Vereinigung<td><code>A cup B</code><td><code>A ∪ B</code>
+<tr><td>Produkt<td><code>A times B</code><td><code>A × B</code>
+<tr><td>Schnitt<td><code>Cap S</code><td><code>⋂S</code>
+<tr><td>Vereinigung<td><code>Cup S</code><td><code>⋃S</code>
+</table>
+
+<p>Die Darstellung im suppesschen Stil erscheint allerdings recht unübersichtlich.
 Sie kann daher noch so formatiert werden, dass die Baumstruktur zum
 Vorschein kommt. Dazu wird »<code>⊢</code>« mit den Prämissen bei einem
 Schluss am besten um zwei Leerzeichen eingerückt.

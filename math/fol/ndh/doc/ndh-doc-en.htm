@@ -103,8 +103,6 @@ $ ./nd.py proofs.txt
 
 <p>the proof is now checked automatically. The program remains silent only if the proof is correct. If a step fails to match a rule, it aborts with a corresponding message.
 
-<p><small>The input syntax is quite flexible. For example, the conjunction <code>A ∧ B</code> can also be written as <code>A /\ B</code>, as <code>A &amp; B</code>, or as <code>A and B</code>. Keywords like <code>and</code>, as well as rule names, may easily be renamed to ones native language.</small>
-
 <p>As part of a larger project, one may wish to split the collection of proofs into several files, for example "proofs1.txt", "proofs2.txt", "proofs3.txt", whereby the proofs in the respective file may depend on theorems listed in the previous files. For this purpose, the program receives all files together as arguments. For example, the following script "make.py", which you can adapt as you wish, provides automation.
 
 <pre class="ibox">
@@ -122,8 +120,7 @@ run(["nd.py", "proofs1.txt", "proofs2.txt", "proofs3.txt"])
 $ ./nd.py -f proofs.txt
 </pre>
 
-<p>the input can optionally be formatted with the correct Unicode characters.
-You get:
+<p>the input can optionally be formatted with the correct Unicode characters. The ideal presentation is achieved with a monospace font that covers the Unicode characters used, for example <i>DejaVu Sans Mono</i>. You get:
 
 <table class="bt">
 <tr><th>Suppes-Style</th>
@@ -138,6 +135,32 @@ You get:
 7. 2 ⊢ ¬B → ¬A, subj_intro 6.
 8. ⊢ (A → B) → ¬B → ¬A, subj_intro 7.
 </pre>
+</table>
+
+<p>The input syntax is quite flexible. For example, the conjunction <code>A ∧ B</code> can also be written as <code>A /\ B</code>, as <code>A &amp; B</code>, or as <code>A and B</code>. Keywords like <code>and</code>, as well as rule names, may easily be renamed to ones native language.
+
+<table class="bt">
+<tr><th>Meaning<th>Input syntax<th>Formatting
+<tr><td>Conjunction<td><code>A and B, A &amp; B, A /\ B</code><td><code>A ∧ B</code>
+<tr><td>Disjunction<td><code>A or A, A \/ B</code><td><code>A ∨ B</code>
+<tr><td>Negation<td><code>not A, ~A</code><td><code>¬A</code>
+<tr><td>Subjunction<td><code>A -&gt; B</code><td><code>A → B</code>
+<tr><td>Bijunction<td><code>A &lt;-&gt; B</code><td><code>A ↔ B</code>
+<tr><td>Falsum<td><code>false</code><td><code>⊥</code>
+<tr><td>Verum<td><code>true</code><td><code>⊤</code>
+<tr><td>Universal quant.<td><code>forall x. A x</code><td><code>∀x. A x</code>
+<tr><td>Existential quant.<td><code>exists x. A x</code><td><code>∃x. A x</code>
+<tr><td>Necessity<td><code>box A</code><td><code>□A</code>
+<tr><td>Possibility<td><code>dia A</code><td><code>◇A</code>
+<tr><td>Sequent<td><code>A |- B</code><td><code>A ⊢ B</code>
+<tr><td>Element rel.<td><code>x in A</code><td><code>x ∈ A</code>
+<tr><td>Inclusion<td><code>A sub B</code><td><code>A ⊆ B</code>
+<tr><td>Comparison<td><code>x &lt;= y</code><td><code>x ≤ y</code>
+<tr><td>Intersection<td><code>A cap B</code><td><code>A ∩ B</code>
+<tr><td>Union<td><code>A cup B</code><td><code>A ∪ B</code>
+<tr><td>Product<td><code>A times B</code><td><code>A × B</code>
+<tr><td>Intersection<td><code>Cap S</code><td><code>⋂S</code>
+<tr><td>Union<td><code>Cup S</code><td><code>⋃S</code>
 </table>
 
 <p>However, this presentation in the Suppes style appears quite unclear. Therefore, it can be further formatted so that the tree structure becomes visible. To do this, the premises of an inference are best indented by two spaces from "<code>⊢</code>" on.
