@@ -287,7 +287,7 @@ def comprehension(a, i, line):
         return set_literal(a, i, x)
     elif a[i][0] != "|":
         raise SyntaxError(a[i][1], "expected '|'")
-    if not isinstance(x, Term) or not is_identifier(x.node):
+    if not type(x) is Term or not is_identifier(x.node):
         raise SyntaxError(line, "expected identifier after '{'")
     x.type = Ind
     line = a[i][1]
@@ -684,7 +684,7 @@ def definition(line, book, S, args, label):
             free_vars_check(line, B, [], label)
             predicate_symbols[A.node] = 0
         else:
-            if not isinstance(A.node, tuple) or A.node[0] != "app":
+            if not type(A.node) is tuple or A.node[0] != "app":
                 raise LogicError(line, "malformed definition")
             if A.node[1].node in predicate_symbols:
                 raise LogicError(line, "already defined")
@@ -692,13 +692,13 @@ def definition(line, book, S, args, label):
             predicate_symbols[A.node[1].node] = len(A.node) - 2
     elif is_connective(C, "app") and C.node[1].node == "eq":
         A = C.node[2]; B = C.node[3]
-        if isinstance(A.node, str):
+        if type(A.node) is str:
             if A.node in function_symbols:
                 raise LogicError(line, "already defined")
             free_vars_check(line, B, [], label)
             function_symbols[A.node] = 0
         else:
-            if not isinstance(A.node, tuple) or A.node[0] != "app":
+            if not type(A.node) is tuple or A.node[0] != "app":
                 raise LogicError(line, "malformed definition")
             if A.node[1].node in function_symbols:
                 raise LogicError(line, "already defined")

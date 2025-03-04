@@ -76,7 +76,7 @@ table.bt th{
 
 <h2 id="Einfuehrung">Einführung</h2>
 
-<p>Das Programm <code>nd.py</code>, für <i>natural deduction</i>, ist ein schlanker Beweisprüfer fürs natürliche Schließen zur Logik erster Stufe, worunter man einen logischen Kalkül versteht, der die in der Mathematik, Informatik und Philosophie übliche Beweisführung formalisiert.
+<p>Das Programm <code>nd.py</code>, für <i>natural deduction</i>, ist ein kompakter Beweisprüfer fürs natürliche Schließen zur Logik erster Stufe, worunter man einen logischen Kalkül versteht, der die in der Mathematik, Informatik und Philosophie übliche Beweisführung formalisiert.
 
 <p>Die Beweise müssen suppesschen Stil, also in tabellarischer Form, abgefasst sein. Intern verwendet das Programm Sequenzen, wie von Gentzen 1935 zunächst mit dem Sequenzenkalkül und 1936 daraufhin auch fürs natürliche Schließen beschrieben. Außerdem handelt es sich eigentlich um eine Art von axiomatischen Kalkül, der als Regel allein den Modus ponens nutzt. Die eigentlichen Schlussregeln sind nicht fest ins System verbaut, sondern werden mit der Eingabe des Präludiums als Axiomenschemata geladen. Es sind sogar höhere Regeln darstellbar, die es gestatten, aus Theoremschemata induzierte Regeln zu erhalten.
 
@@ -300,23 +300,23 @@ werden zunächst die Referenzen auf die Vorderformeln der Sequenzen aufgelöst. 
 4. ⊤ ∧ (A ∧ B) ⊢ B ∧ A, conj_intro 3 2.
 </pre>
 
-<p>Die scheinbar sinnlose Hinzufügung der Konjunktion mit <code>⊤</code> existiert aus technischen Gründen, da andernfalls zwei unterschiedliche Regeln zur Subjunktionseinführung erforderlich wären. Nun wird die Regel <code>hypo</code> als Muster betrachtet, wobei ihren Schemavariablen ein Fragezeichen vorangestellt bekommen, um Zweideutigkeiten bzw. Verwechslungen aus dem Weg zu gehen. Die Anwendung der Regel <code>hypo</code> bekommt keine Argumente bzw. Prämissen. Daher bleibt lediglich das Muster
+<p>Die scheinbar sinnlose Hinzufügung der Konjunktion mit <code>⊤</code> existiert aus technischen Gründen, da andernfalls zwei unterschiedliche Regeln zur Subjunktionseinführung erforderlich wären. Nun wird die Regel <code>hypo</code> als Muster betrachtet, wobei ihre Schemavariablen ein Fragezeichen vorangestellt bekommen, um Zweideutigkeiten bzw. Verwechslungen aus dem Weg zu gehen. Die Regel <code>hypo</code> bekommt bei ihrer Anwendung keine Argumente bzw. Prämissen. Daher bleibt lediglich das Muster
 
-<p class="indent"><code>⊤ ∧ ?A ⊢ ?A</code> mit <code>⊤ ∧ (A ∧ B) ⊢ A ∧ B</code> abzugleichen,
+<p class="indent"><code>⊤ ∧ ?A ⊢ ?A</code>&emsp;mit&emsp;<code>⊤ ∧ (A ∧ B) ⊢ A ∧ B</code>
 
-<p>was mit dem Unifizierer <code>?A</code> := <code>(A ∧ B)</code> zum Erfolg führt. Die Prüfung dieses Schrittes ist damit abgeschlossen, der Unifizierer wird gelöscht. Im nächsten Schritt ist bzgl. <code>conj_eliml</code> das Muster
+<p>abzugleichen, was mit dem Unifizierer <code>?A</code> := <code>(A ∧ B)</code> zum Erfolg führt. Die Prüfung dieses Schrittes ist damit abgeschlossen, der Unifizierer wird gelöscht. Im nächsten Schritt ist bzgl. <code>conj_eliml</code> das Muster
 
 <p class="indent"><code>(?H ⊢ ?A ∧ ?B) → (?H ⊢ ?A)</code>,
 
 <p>also zunächst
 
-<p class="indent"><code>?H ⊢ ?A ∧ ?B</code> mit <code>⊤ ∧ (A ∧ B) ⊢ A&nbsp;∧&nbsp;B</code>,
+<p class="indent"><code>?H ⊢ ?A ∧ ?B</code>&emsp;mit&emsp;<code>⊤ ∧ (A ∧ B) ⊢ A&nbsp;∧&nbsp;B</code>,
 
 <p>der ersten und einzigen Prämisse, abzugleichen. Der draus enstehende Unifizierer
 ist gegeben durch <code>?H</code> := <code>(⊤&nbsp;∧&nbsp;(A&nbsp;∧&nbsp;B))</code> und <code>?A</code> := <code>A</code>
 sowie <code>?B</code> := <code>B</code>. Es verbleibt zu prüfen, ob die richtige Konklusion vorliegt. Dazu wird nun das Muster
 
-<p class="indent"><code>?H ⊢ ?A</code> mit <code>⊤ ∧ (A ∧ B) ⊢ A</code>
+<p class="indent"><code>?H ⊢ ?A</code>&emsp;mit&emsp;<code>⊤ ∧ (A ∧ B) ⊢ A</code>
 
 <p>abgeglichen. Weil <code>?H</code>, <code>?A</code> bereits im Unifizierer vorkommen, wirkt dieser als Substitution auf die linke Seite, deren Resultat genau gleich der rechten Seite ist, was den erfolgreichen Abschluss des Abgleichs bedeutet. Der Unifizierer wird gelöscht. Der nächst Schritt verläuft analog. Im letzten Schritt wird bzgl. der Regel <code>conj_elim</code> das Muster
 
@@ -333,7 +333,7 @@ sowie <code>?B</code> := <code>B</code>. Es verbleibt zu prüfen, ob die richtig
 
 <p>Es verbleibt wieder zu prüfen, ob die richtige Konklusion vorliegt. Dazu wird
 
-<p class="indent"><code>?H1 ∧ ?H2 ⊢ ?A ∧ ?B</code> mit <code>⊤ ∧ (A ∧ B) ⊢ B ∧ A</code>
+<p class="indent"><code>?H1 ∧ ?H2 ⊢ ?A ∧ ?B</code>&emsp;mit&emsp;<code>⊤ ∧ (A ∧ B) ⊢ B ∧ A</code>
 
 <p>abgeglichen. Der bisherige Unifizierer wirkt wieder als Substitution auf die linke Seite, womit diese zu
 

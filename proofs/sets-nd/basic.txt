@@ -1,0 +1,326 @@
+
+1. ⊢ A ⊆ B → (∀x. x ∈ A → x ∈ B), bij_eliml incl_equi.
+2. 2 ⊢ A ⊆ B, hypo.
+3. 2 ⊢ ∀x. x ∈ A → x ∈ B, subj_elim 1 2.
+4. 2 ⊢ x ∈ A → x ∈ B, uq_elim 3.
+5. ⊢ A ⊆ B → x ∈ A → x ∈ B, subj_intro 4.
+incl_elim. (H1 ⊢ A ⊆ B) → (H2 ⊢ x ∈ A) → (H1 ∧ H2 ⊢ x ∈ B), lift_impl_ii 5.
+
+1. ⊢ (∀x. x ∈ A → x ∈ B) → A ⊆ B, bij_elimr incl_equi.
+incl_intro. (H ⊢ ∀x. x ∈ A → x ∈ B) → (H ⊢ A ⊆ B), lift_impl 1.
+
+1. ⊢ u ∈ {x | P x} ↔ set u ∧ P u, comp.
+2. ⊢ u ∈ {x | P x} → set u ∧ P u, bij_eliml 1.
+comp_elim. (H ⊢ u ∈ {x | P x}) → (H ⊢ set u ∧ P u), lift_impl 2.
+
+1. ⊢ u ∈ {x | P x} ↔ set u ∧ P u, comp.
+2. ⊢ set u ∧ P u → u ∈ {x | P x}, bij_elimr 1.
+comp_intro. (H ⊢ set u ∧ P u) → (H ⊢ u ∈ {x | P x}), lift_impl 2.
+
+1. 1 ⊢ x ∈ A, hypo.
+2. ⊢ x ∈ A → x ∈ A, subj_intro 1.
+3. ⊢ ∀x. x ∈ A → x ∈ A, uq_intro 2.
+incl_refl. ⊢ A ⊆ A, incl_intro 3.
+
+1. 1 ⊢ A ⊆ B, hypo.
+2. 2 ⊢ B ⊆ C, hypo.
+3. 3 ⊢ x ∈ A, hypo.
+4. 1, 3 ⊢ x ∈ B, incl_elim 1 3.
+5. 1, 2, 3 ⊢ x ∈ C, incl_elim 2 4.
+6. 1, 2 ⊢ x ∈ A → x ∈ C, subj_intro 5.
+7. 1, 2 ⊢ ∀x. x ∈ A → x ∈ C, uq_intro 6.
+8. 1, 2 ⊢ A ⊆ C, incl_intro 7.
+9. 1 ⊢ B ⊆ C → A ⊆ C, subj_intro 8.
+10. ⊢ A ⊆ B → B ⊆ C → A ⊆ C, subj_intro 9.
+incl_trans. (H1 ⊢ A ⊆ B) → (H2 ⊢ B ⊆ C) → (H1 ∧ H2 ⊢ A ⊆ C),
+  lift_impl_ii 10.
+
+1. 1 ⊢ A ⊆ B, hypo.
+2. 2 ⊢ x ∈ A, hypo.
+3. 1, 2 ⊢ x ∈ B, incl_elim 1 2.
+4. 1 ⊢ x ∈ A → x ∈ B, subj_intro 3.
+5. 5 ⊢ B ⊆ A, hypo.
+6. 6 ⊢ x ∈ B, hypo.
+7. 5, 6 ⊢ x ∈ A, incl_elim 5 6.
+8. 5 ⊢ x ∈ B → x ∈ A, subj_intro 7.
+9. 1, 5 ⊢ x ∈ A ↔ x ∈ B, bij_intro 4 8.
+10. 1, 5 ⊢ ∀x. x ∈ A ↔ x ∈ B, uq_intro 9.
+11. 1, 5 ⊢ A = B, subj_elim ext 10.
+12. 1 ⊢ B ⊆ A → A = B, subj_intro 11.
+13. ⊢ A ⊆ B → B ⊆ A → A = B, subj_intro 12.
+incl_antisymm. (H1 ⊢ A ⊆ B) → (H2 ⊢ B ⊆ A) → (H1 ∧ H2 ⊢ A = B),
+  lift_impl_ii 13.
+
+1. ⊢ (∃C. x ∈ C) → set x, bij_elimr set_equi.
+2. 2 ⊢ x ∈ A, hypo.
+3. 2 ⊢ ∃C. x ∈ C, ex_intro 2.
+4. 2 ⊢ set x, subj_elim 1 3.
+5. ⊢ x ∈ A → set x, subj_intro 4.
+set_intro. (H ⊢ x ∈ A) → (H ⊢ set x), lift_impl 5.
+
+1. 1 ⊢ x ∈ A ∩ B, hypo.
+2. 1 ⊢ x ∈ {x | x ∈ A ∧ x ∈ B}, eq_subst intersection_eq 1, P X ↔ x ∈ X.
+3. 1 ⊢ set x ∧ (x ∈ A ∧ x ∈ B), comp_elim 2.
+4. 1 ⊢ x ∈ A ∧ x ∈ B, conj_elimr 3.
+5. ⊢ x ∈ A ∩ B → x ∈ A ∧ x ∈ B, subj_intro 4.
+intersection_elim. (H ⊢ x ∈ A ∩ B) → (H ⊢ x ∈ A ∧ x ∈ B), lift_impl 5.
+
+6. 1 ⊢ x ∈ A, conj_eliml 4.
+7. ⊢ x ∈ A ∩ B → x ∈ A, subj_intro 6.
+intersection_eliml. (H ⊢ x ∈ A ∩ B) → (H ⊢ x ∈ A), lift_impl 7.
+
+8. 1 ⊢ x ∈ B, conj_elimr 4.
+9. ⊢ x ∈ A ∩ B → x ∈ B, subj_intro 8.
+intersection_elimr. (H ⊢ x ∈ A ∩ B) → (H ⊢ x ∈ B), lift_impl 9.
+
+1. 1 ⊢ x ∈ A, hypo.
+2. 2 ⊢ x ∈ B, hypo.
+3. 1, 2 ⊢ x ∈ A ∧ x ∈ B, conj_intro 1 2.
+4. 1 ⊢ set x, set_intro 1.
+5. 1, 2 ⊢ set x ∧ (x ∈ A ∧ x ∈ B), conj_intro 4 3.
+6. 1, 2 ⊢ x ∈ {x | x ∈ A ∧ x ∈ B}, comp_intro 5.
+7. 1, 2 ⊢ x ∈ A ∩ B, eq_subst_rev intersection_eq 6, P u ↔ x ∈ u.
+8. 1 ⊢ x ∈ B → x ∈ A ∩ B, subj_intro 7.
+9. ⊢ x ∈ A → x ∈ B → x ∈ A ∩ B, subj_intro 8.
+intersection_intro. (H1 ⊢ x ∈ A) → (H2 ⊢ x ∈ B) → (H1 ∧ H2 ⊢ x ∈ A ∩ B),
+  lift_impl_ii 9.
+  
+1. 1 ⊢ x ∈ A ∨ x ∈ B, hypo.
+2. 2 ⊢ x ∈ A, hypo.
+3. 2 ⊢ set x, set_intro 2.
+4. 1, 2 ⊢ set x ∧ (x ∈ A ∨ x ∈ B), conj_intro 3 1.
+5. 1, 2 ⊢ x ∈ {x | x ∈ A ∨ x ∈ B}, comp_intro 4.
+6. 1, 2 ⊢ x ∈ A ∪ B, eq_subst_rev union_eq 5, P u ↔ x ∈ u.
+7. 7 ⊢ x ∈ B, hypo.
+8. 7 ⊢ set x, set_intro 7.
+9. 1, 7 ⊢ set x ∧ (x ∈ A ∨ x ∈ B), conj_intro 8 1.
+10. 1, 7 ⊢ x ∈ {x | x ∈ A ∨ x ∈ B}, comp_intro 9.
+11. 1, 7 ⊢ x ∈ A ∪ B, eq_subst_rev union_eq 10, P u ↔ x ∈ u.
+12. 1 ⊢ x ∈ A ∪ B, disj_elim 1 6 11.
+13. ⊢ x ∈ A ∨ x ∈ B → x ∈ A ∪ B, subj_intro 12.
+union_intro. (H ⊢ x ∈ A ∨ x ∈ B) → (H ⊢ x ∈ A ∪ B), lift_impl 13.
+
+1. 1 ⊢ x ∈ A, hypo.
+2. 1 ⊢ x ∈ A ∨ x ∈ B, disj_introl 1.
+3. 1 ⊢ x ∈ A ∪ B, union_intro 2.
+4. ⊢ x ∈ A → x ∈ A ∪ B, subj_intro 3.
+union_introl. (H ⊢ x ∈ A) → (H ⊢ x ∈ A ∪ B), lift_impl 4.
+
+1. 1 ⊢ x ∈ B, hypo.
+2. 1 ⊢ x ∈ A ∨ x ∈ B, disj_intror 1.
+3. 1 ⊢ x ∈ A ∪ B, union_intro 2.
+4. ⊢ x ∈ B → x ∈ A ∪ B, subj_intro 3.
+union_intror. (H ⊢ x ∈ B) → (H ⊢ x ∈ A ∪ B), lift_impl 4.
+
+1. 1 ⊢ x ∈ A ∪ B, hypo.
+2. 1 ⊢ x ∈ {x | x ∈ A ∨ x ∈ B}, eq_subst union_eq 1, P u ↔ x ∈ u.
+3. 1 ⊢ set x ∧ (x ∈ A ∨ x ∈ B), comp_elim 2.
+4. 1 ⊢ x ∈ A ∨ x ∈ B, conj_elimr 3.
+5. ⊢ x ∈ A ∪ B → x ∈ A ∨ x ∈ B, subj_intro 4.
+union_elim. (H ⊢ x ∈ A ∪ B) → (H ⊢ x ∈ A ∨ x ∈ B), lift_impl 5.
+
+1. 1 ⊢ x ∈ A ∩ B, hypo.
+2. 1 ⊢ x ∈ A ∧ x ∈ B, intersection_elim 1.
+3. 1 ⊢ x ∈ A, conj_eliml 2.
+4. ⊢ x ∈ A ∩ B → x ∈ A, subj_intro 3.
+5. ⊢ ∀x. x ∈ A ∩ B → x ∈ A, uq_intro 4.
+intersection_incl_left. ⊢ A ∩ B ⊆ A, incl_intro 5.
+
+6. 1 ⊢ x ∈ B, conj_elimr 2.
+7. ⊢ x ∈ A ∩ B → x ∈ B, subj_intro 6.
+8. ⊢ ∀x. x ∈ A ∩ B → x ∈ B, uq_intro 7.
+intersection_incl_right. ⊢ A ∩ B ⊆ B, incl_intro 8.
+
+1. 1 ⊢ x ∈ A, hypo.
+2. 1 ⊢ x ∈ A ∪ B, union_introl 1.
+3. ⊢ x ∈ A → x ∈ A ∪ B, subj_intro 2.
+4. ⊢ ∀x. x ∈ A → x ∈ A ∪ B, uq_intro 3.
+union_incl_left. ⊢ A ⊆ A ∪ B, incl_intro 4.
+
+1. 1 ⊢ x ∈ B, hypo.
+2. 1 ⊢ x ∈ A ∪ B, union_intror 1.
+3. ⊢ x ∈ B → x ∈ A ∪ B, subj_intro 2.
+4. ⊢ ∀x. x ∈ B → x ∈ A ∪ B, uq_intro 3.
+union_incl_right. ⊢ B ⊆ A ∪ B, incl_intro 4.
+
+1. 1 ⊢ x ∈ ⋂M, hypo.
+2. 1 ⊢ x ∈ {x | ∀y. y ∈ M → x ∈ y},
+  eq_subst Intersection_eq 1, P A ↔ x ∈ A.
+3. 1 ⊢ set x ∧ ∀y. y ∈ M → x ∈ y, comp_elim 2.
+4. 1 ⊢ ∀y. y ∈ M → x ∈ y, conj_elimr 3.
+5. 1 ⊢ y ∈ M → x ∈ y, uq_elim 4.
+6. ⊢ x ∈ ⋂M → y ∈ M → x ∈ y, subj_intro 5.
+Intersection_elim. (H1 ⊢ x ∈ ⋂M) → (H2 ⊢ y ∈ M) → (H1 ∧ H2 ⊢ x ∈ y),
+  lift_impl_ii 6.
+
+1. 1 ⊢ set x, hypo.
+2. 2 ⊢ ∀y. y ∈ M → x ∈ y, hypo.
+3. 1, 2 ⊢ set x ∧ ∀y. y ∈ M → x ∈ y, conj_intro 1 2.
+4. 1, 2 ⊢ x ∈ {x | ∀y. y ∈ M → x ∈ y}, comp_intro 3.
+5. 1, 2 ⊢ x ∈ ⋂M, eq_subst_rev Intersection_eq 4, P A ↔ x ∈ A.
+6. 1 ⊢ (∀y. y ∈ M → x ∈ y) → x ∈ ⋂M, subj_intro 5.
+7. ⊢ set x → (∀y. y ∈ M → x ∈ y) → x ∈ ⋂M, subj_intro 6.
+Intersection_intro. (H1 ⊢ set x) → (H2 ⊢ ∀y. y ∈ M → x ∈ y) →
+  (H1 ∧ H2 ⊢ x ∈ ⋂M), lift_impl_ii 7.
+
+1. 1 ⊢ A ⊆ B, hypo.
+2. 2 ⊢ x ∈ ⋂B, hypo.
+3. 3 ⊢ y ∈ A, hypo.
+4. 1, 3 ⊢ y ∈ B, incl_elim 1 3.
+5. 1, 2, 3 ⊢ x ∈ y, Intersection_elim 2 4.
+6. 1, 2 ⊢ y ∈ A → x ∈ y, subj_intro 5.
+7. 1, 2 ⊢ ∀y. y ∈ A → x ∈ y, uq_intro 6.
+8. 2 ⊢ set x, set_intro 2.
+9. 1, 2 ⊢ x ∈ ⋂A, Intersection_intro 8 7.
+10. 1 ⊢ x ∈ ⋂B → x ∈ ⋂A, subj_intro 9.
+11. 1 ⊢ ∀x. x ∈ ⋂B → x ∈ ⋂A, uq_intro 10.
+12. 1 ⊢ ⋂B ⊆ ⋂A, incl_intro 11.
+13. ⊢ A ⊆ B → ⋂B ⊆ ⋂A, subj_intro 12.
+Intersection_dec. (H ⊢ A ⊆ B) → (H ⊢ ⋂B ⊆ ⋂A), lift_impl 13.
+
+# The universal class and Russell's paradox.
+
+1. 1 ⊢ set x, hypo.
+2. ⊢ x = x, eq_refl.
+3. 1 ⊢ set x ∧ x = x, conj_intro 1 2.
+4. 1 ⊢ x ∈ {x | x = x}, comp_intro 3.
+5. 1 ⊢ x ∈ UnivCl, eq_subst_rev UnivCl_eq 4, P A ↔ x ∈ A.
+6. ⊢ set x → x ∈ UnivCl, subj_intro 5.
+UnivCl_intro. (H ⊢ set x) → (H ⊢ x ∈ UnivCl), lift_impl 6.
+
+1. 1 ⊢ x ∈ UnivCl, hypo.
+2. 1 ⊢ set x, set_intro 1.
+3. ⊢ x ∈ UnivCl → set x, subj_intro 2.
+UnivCl_elim. (H ⊢ x ∈ UnivCl) → (H ⊢ set x), lift_impl 3.
+
+1. 1 ⊢ x ∈ A, hypo.
+2. 1 ⊢ set x, set_intro 1.
+3. 1 ⊢ x ∈ UnivCl, UnivCl_intro 2.
+4. ⊢ x ∈ A → x ∈ UnivCl, subj_intro 3.
+5. ⊢ ∀x. x ∈ A → x ∈ UnivCl, uq_intro 4.
+incl_UnivCl. ⊢ A ⊆ UnivCl, incl_intro 5.
+
+1. 1 ⊢ R = {x | ¬x ∈ x}, hypo.
+2. 2 ⊢ u ∈ R, hypo.
+3. 1, 2 ⊢ u ∈ {x | ¬x ∈ x}, eq_subst 1 2.
+4. 1, 2 ⊢ set u ∧ ¬u ∈ u, comp_elim 3.
+5. 1, 2 ⊢ ¬u ∈ u, conj_elimr 4.
+6. 1 ⊢ u ∈ R → ¬u ∈ u, subj_intro 5.
+7. 1 ⊢ R ∈ R → ¬R ∈ R, 6.
+
+8. 8 ⊢ set R, hypo.
+9. 9 ⊢ ¬R ∈ R, hypo.
+10. 8, 9 ⊢ set R ∧ ¬R ∈ R, conj_intro 8 9.
+11. 8, 9 ⊢ R ∈ {x | ¬x ∈ x}, comp_intro 10.
+12. 1, 8, 9 ⊢ R ∈ R, eq_subst_rev 1 11, P x ↔ R ∈ x.
+13. 1, 8 ⊢ ¬R ∈ R → R ∈ R, subj_intro 12.
+
+14. 1, 8 ⊢ R ∈ R ↔ ¬R ∈ R, bij_intro 7 13.
+15. ⊢ ¬(R ∈ R ↔ ¬R ∈ R), diag_contra.
+16. 1, 8 ⊢ ⊥, neg_elim 15 14.
+17. 1 ⊢ ¬set R, neg_intro 16.
+18. ⊢ R = {x | ¬x ∈ x} → ¬set R, subj_intro 17.
+
+19. ⊢ DiagCl = {x | ¬x ∈ x} → ¬set DiagCl, 18.
+DiagCl_is_proper. ⊢ ¬set DiagCl, subj_elim 19 DiagCl_eq.
+
+1. 1 ⊢ x ∈ DiagCl, hypo.
+2. 1 ⊢ set x, set_intro 1.
+3. 1 ⊢ x ∈ UnivCl, UnivCl_intro 2.
+4. ⊢ x ∈ DiagCl → x ∈ UnivCl, subj_intro 3.
+5. ⊢ ∀x. x ∈ DiagCl → x ∈ UnivCl, uq_intro 4.
+6. ⊢ DiagCl ⊆ UnivCl, incl_intro 5.
+7. ⊢ DiagCl ⊆ UnivCl → set UnivCl → set DiagCl, subset.
+8. ⊢ set UnivCl → set DiagCl, subj_elim 7 6.
+9. 9 ⊢ set UnivCl, hypo.
+10. 9 ⊢ set DiagCl, subj_elim 8 9.
+11. 9 ⊢ ⊥, neg_elim DiagCl_is_proper 10.
+UnivCl_is_proper. ⊢ ¬set UnivCl, neg_intro 11.
+
+# Singletons, pair sets and pairs
+
+1. 1 ⊢ set a, hypo.
+2. 2 ⊢ x ∈ {a}, hypo.
+3. 2 ⊢ x ∈ {x | set a → x = a}, eq_subst sg_eq 2, P u ↔ x ∈ u.
+4. 2 ⊢ set x ∧ (set a → x = a), comp_elim 3.
+5. 2 ⊢ set a → x = a, conj_elimr 4.
+6. 1, 2 ⊢ x = a, subj_elim 5 1.
+7. 1 ⊢ x ∈ {a} → x = a, subj_intro 6.
+8. ⊢ set a → x ∈ {a} → x = a, subj_intro 7.
+sg_elim. (H1 ⊢ set a) → (H2 ⊢ x ∈ {a}) → (H1 ∧ H2 ⊢ x = a),
+  lift_impl_ii 8.
+
+9. 9 ⊢ set a, hypo.
+10. 10 ⊢ x = a, hypo.
+11. 9, 10 ⊢ set x, eq_subst_rev 10 9, P u ↔ set u.
+12. 10, 9 ⊢ x = a, wk 10.
+13. 10 ⊢ set a → x = a, subj_intro 12.
+14. 9, 10 ⊢ set x ∧ (set a → x = a), conj_intro 11 13.
+15. 9, 10 ⊢ x ∈ {x | set a → x = a}, comp_intro 14.
+16. 9, 10 ⊢ x ∈ {a}, eq_subst_rev sg_eq 15, P u ↔ x ∈ u.
+17. 9 ⊢ x = a → x ∈ {a}, subj_intro 16.
+18. ⊢ set a → x = a → x ∈ {a}, subj_intro 17.
+sg_intro. (H1 ⊢ set a) → (H2 ⊢ x = a) → (H1 ∧ H2 ⊢ x ∈ {a}),
+  lift_impl_ii 18.
+
+19. 1 ⊢ x ∈ {a} ↔ x = a, bij_intro 7 17.
+20. ⊢ set a → (x ∈ {a} ↔ x = a), subj_intro 19.
+sg_equi. (H ⊢ set a) → (H ⊢ x ∈ {a} ↔ x = a), lift_impl 20.
+
+1. 1 ⊢ set a, hypo.
+2. 2 ⊢ x ∈ ⋂{a}, hypo.
+3. ⊢ a = a, eq_refl.
+4. 1 ⊢ a ∈ {a}, sg_intro 1 3.
+5. 1, 2 ⊢ x ∈ a, Intersection_elim 2 4.
+6. 1 ⊢ x ∈ ⋂{a} → x ∈ a, subj_intro 5.
+7. 1 ⊢ ∀x. x ∈ ⋂{a} → x ∈ a, uq_intro 6.
+8. 1 ⊢ ⋂{a} ⊆ a, incl_intro 7.
+
+9. 9 ⊢ x ∈ a, hypo.
+10. 10 ⊢ y ∈ {a}, hypo.
+11. 1, 10 ⊢ y = a, sg_elim 1 10.
+12. 1, 9, 10 ⊢ x ∈ y, eq_subst_rev 11 9, P u ↔ x ∈ u.
+13. 1, 9 ⊢ y ∈ {a} → x ∈ y, subj_intro 12.
+14. 1, 9 ⊢ ∀y. y ∈ {a} → x ∈ y, uq_intro 13.
+15. 9 ⊢ set x, set_intro 9.
+16. 1, 9 ⊢ x ∈ ⋂{a}, Intersection_intro 15 14.
+17. 1 ⊢ x ∈ a → x ∈ ⋂{a}, subj_intro 16.
+18. 1 ⊢ ∀x. x ∈ a → x ∈ ⋂{a}, uq_intro 17.
+19. 1 ⊢ a ⊆ ⋂{a}, incl_intro 18.
+
+20. 1 ⊢ ⋂{a} = a, incl_antisymm 8 19.
+21. ⊢ set a → ⋂{a} = a, subj_intro 20.
+Intersection_sg. (H ⊢ set a) → (H ⊢ ⋂{a} = a), lift_impl 21.
+
+1. 1 ⊢ set x ∧ set y, hypo.
+2. 1 ⊢ set x, conj_eliml 1.
+3. 1 ⊢ set y, conj_elimr 1.
+4. 4 ⊢ {x} = {y}, hypo.
+5. 4 ⊢ ⋂{x} = ⋂{y}, f_equal 4.
+6. 1 ⊢ ⋂{x} = x, Intersection_sg 2.
+7. 1 ⊢ ⋂{y} = y, Intersection_sg 3.
+8. 1, 4 ⊢ x = ⋂{y}, eq_subst 6 5, P u ↔ u = ⋂{y}.
+9. 1, 4 ⊢ x = y, eq_subst 7 8, P u ↔ x = u.
+10. 1 ⊢ {x} = {y} → x = y, subj_intro 9.
+11. ⊢ set x ∧ set y → {x} = {y} → x = y, subj_intro 10.
+sg_inj. (H1 ⊢ set x ∧ set y) → (H2 ⊢ {x} = {y}) → (H1 ∧ H2 ⊢ x = y),
+  lift_impl_ii 11.
+
+1. 1 ⊢ ¬set A, hypo.
+2. 2 ⊢ set A, hypo.
+3. 1, 2 ⊢ ⊥, neg_elim 1 2.
+4. 1, 2 ⊢ x = A, efq 3.
+5. 1 ⊢ set A → x = A, subj_intro 4.
+6. 6 ⊢ x ∈ UnivCl, hypo.
+7. 6 ⊢ set x, set_intro 6.
+8. 1, 6 ⊢ set x ∧ (set A → x = A), conj_intro 7 5.
+9. 1, 6 ⊢ x ∈ {x | set A → x = A}, comp_intro 8.
+10. ⊢ {A} = {x | set A → x = A}, sg_eq.
+11. 1, 6 ⊢ x ∈ {A}, eq_subst_rev 10 9, P u ↔ x ∈ u.
+12. 1 ⊢ x ∈ UnivCl → x ∈ {A}, subj_intro 11.
+13. 1 ⊢ ∀x. x ∈ UnivCl → x ∈ {A}, uq_intro 12.
+14. 1 ⊢ UnivCl ⊆ {A}, incl_intro 13.
+15. ⊢ {A} ⊆ UnivCl, incl_UnivCl.
+16. 1 ⊢ {A} = UnivCl, incl_antisymm 15 14.
+17. ⊢ ¬set A → {A} = UnivCl, subj_intro 16.
+sg_of_proper_class. (H ⊢ ¬set A) → (H ⊢ {A} = UnivCl), lift_impl 17.
