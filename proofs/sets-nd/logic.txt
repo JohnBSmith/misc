@@ -29,3 +29,30 @@ lem. ⊢ A ∨ ¬A, dne 8.
 8. 1 ⊢ A, subj_elim 7 6.
 9. 1 ⊢ ⊥, neg_elim 6 8.
 diag_contra. ⊢ ¬(A ↔ ¬A), neg_intro 9.
+
+1. 1 ⊢ A, hypo.
+2. 2 ⊢ ¬A, hypo.
+3. 1, 2 ⊢ ⊥, neg_elim 2 1.
+4. 1 ⊢ ¬¬A, neg_intro 3.
+5. ⊢ A → ¬¬A, subj_intro 4.
+dn_intro. (H ⊢ A) → (H ⊢ ¬¬A), lift_impl 5.
+
+1. 1 ⊢ ¬B, hypo.
+2. 2 ⊢ A → B, hypo.
+3. 3 ⊢ A, hypo.
+4. 2, 3 ⊢ B, subj_elim 2 3.
+5. 1, 2, 3 ⊢ ⊥, neg_elim 1 4.
+6. 2, 1 ⊢ ¬A, neg_intro 5.
+7. 2 ⊢ ¬B → ¬A, subj_intro 6.
+8. ⊢ (A → B) → ¬B → ¬A, subj_intro 7.
+contraposition. (H ⊢ A → B) → (H ⊢ ¬B → ¬A), lift_impl 8.
+
+1. 1 ⊢ ¬A → ¬B, hypo.
+2. 1 ⊢ ¬¬B → ¬¬A, contraposition 1.
+3. 3 ⊢ B, hypo.
+4. 3 ⊢ ¬¬B, dn_intro 3.
+5. 1, 3 ⊢ ¬¬A, subj_elim 2 4.
+6. 1, 3 ⊢ A, dne 5.
+7. 1 ⊢ B → A, subj_intro 6.
+8. ⊢ (¬A → ¬B) → (B → A), subj_intro 7.
+contraposition_rev. (H ⊢ ¬A → ¬B) → (H ⊢ B → A), lift_impl 8.

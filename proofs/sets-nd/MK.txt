@@ -14,10 +14,13 @@ pair_eq. ⊢ (x, y) = {{x}, {x, y}}, def.
 power_eq. ⊢ power M = {A | A ⊆ M}, def.
 intersection_eq. ⊢ A ∩ B = {x | x ∈ A ∧ x ∈ B}, def.
 diff_eq. ⊢ A \ B = {x | x ∈ A ∧ ¬x ∈ B}, def.
+compl_eq. ⊢ compl A = {x | ¬x ∈ A}, def.
 Union_eq. ⊢ ⋃M = {x | ∃A. A ∈ M ∧ x ∈ A}, def.
 Intersection_eq. ⊢ ⋂M = {x | ∀A. A ∈ M → x ∈ A}, def.
 prod_eq. ⊢ A × B =
   {t | ∃x. ∃y. x ∈ A ∧ y ∈ B ∧ t = (x, y)}, def.
+fst_eq. ⊢ fst t = ⋂⋂t, def.
+scd_eq. ⊢ scd t = ⋂⋃t ∪ (⋃⋃t \ ⋂⋂t), def.
 UnivCl_eq. ⊢ UnivCl = {x | x = x}, def.
 DiagCl_eq. ⊢ DiagCl = {x | ¬x ∈ x}, def.
 
@@ -48,7 +51,7 @@ dn_elim. ⊢ ¬¬A → A, axiom.
 eq_refl. ⊢ x = x, axiom.
 eq_ind. ⊢ x = y → P x → P y, axiom.
 
-ext. ⊢ (∀x. x ∈ A ↔ x ∈ B) → A = B, axiom.
+extensionality. ⊢ (∀x. x ∈ A ↔ x ∈ B) → A = B, axiom.
 comp. ⊢ u ∈ {x | P x} ↔ set u ∧ P u, axiom.
 pairing. ⊢ set x → set y → set {x, y}, axiom.
 subset. ⊢ A ⊆ B → set B → set A, axiom.

@@ -19,3 +19,12 @@ eq_subst_rev. (H1 ⊢ y = x) → (H2 ⊢ P x) → (H1 ∧ H2 ⊢ P y),
 3. 1 ⊢ f x = f y, eq_subst 1 2, P u ↔ f x = f u.
 4. ⊢ x = y → f x = f y, subj_intro 3.
 f_equal. (H ⊢ x = y) → (H ⊢ f x = f y), lift_impl 4.
+
+1. 1 ⊢ x = y, hypo.
+2. 2 ⊢ y = z, hypo.
+3. 1 ⊢ y = x, eq_symm 1.
+4. 1, 2 ⊢ x = z, eq_subst 3 2, P u ↔ u = z.
+5. 1 ⊢ y = z → x = z, subj_intro 4.
+6. ⊢ x = y → y = z → x = z, subj_intro 5.
+eq_trans. (H1 ⊢ x = y) → (H2 ⊢ y = z) → (H1 ∧ H2 ⊢ x = z),
+  lift_impl_ii 6.
