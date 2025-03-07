@@ -1,0 +1,34 @@
+
+01. 1 ⊢ R ⊆ X × Y, hypo.
+02. 2 ⊢ t ∈ R, hypo.
+03. 1, 2 ⊢ t ∈ X × Y, incl_elim 1 2.
+04. 1, 2 ⊢ ∃x. ∃y. x ∈ X ∧ y ∈ Y ∧ t = (x, y), prod_elim 3.
+05. 5 ⊢ ∃y. x ∈ X ∧ y ∈ Y ∧ t = (x, y), hypo.
+06. 6 ⊢ x ∈ X ∧ y ∈ Y ∧ t = (x, y), hypo.
+07. 6 ⊢ t = (x, y), conj_elimr 6.
+08. 6 ⊢ ∃y. t = (x, y), ex_intro 7.
+09. 6 ⊢ ∃x. ∃y. t = (x, y), ex_intro 8.
+10. 5 ⊢ ∃x. ∃y. t = (x, y), ex_elim 5 9.
+11. 1, 2 ⊢ ∃x. ∃y. t = (x, y), ex_elim 4 10.
+12. 1 ⊢ t ∈ R → ∃x. ∃y. t = (x, y), subj_intro 11.
+13. 1 ⊢ ∀t. t ∈ R → ∃x. ∃y. t = (x, y), uq_intro 12.
+14. ⊢ (∀t. t ∈ R → ∃x. ∃y. t = (x, y)) → relation R,
+  bij_elimr relation_equi.
+15. 1 ⊢ relation R, subj_elim 14 13.
+relation_intro. ⊢ R ⊆ X × Y → relation R, subj_intro 15.
+
+01. 1 ⊢ R ⊆ X × Y, hypo.
+02. 2 ⊢ x ∈ dom R, hypo.
+03. 2 ⊢ x ∈ {x | ∃y. (x, y) ∈ R}, eq_subst dom_eq 2, P u ↔ x ∈ u.
+04. 2 ⊢ set x ∧ ∃y. (x, y) ∈ R, comp_elim 3.
+05. 2 ⊢ ∃y. (x, y) ∈ R, conj_elimr 4.
+06. 6 ⊢ (x, y) ∈ R, hypo.
+07. 1, 6 ⊢ (x, y) ∈ X × Y, incl_elim 1 6.
+08. 1, 6 ⊢ x ∈ X ∧ y ∈ Y, prod_elim_pair 7.
+09. 1, 6 ⊢ x ∈ X, conj_eliml 8.
+10. 1, 2 ⊢ x ∈ X, ex_elim 5 9.
+11. 1 ⊢ x ∈ dom R → x ∈ X, subj_intro 10.
+12. 1 ⊢ ∀x. x ∈ dom R → x ∈ X, uq_intro 11.
+13. 1 ⊢ dom R ⊆ X, incl_intro 12.
+dom_incl. ⊢ R ⊆ X × Y → dom R ⊆ X, subj_intro 13.
+

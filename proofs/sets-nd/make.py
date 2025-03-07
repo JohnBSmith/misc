@@ -2,7 +2,7 @@
 from subprocess import run
 from sys import argv, exit
 
-files = ["MK.txt", "logic.txt", "logic-eq.txt", "basic.txt"]
+files = ["MK.txt", "logic.txt", "logic-eq.txt", "basic.txt", "relations.txt"]
 
 if len(argv) == 2:
     if argv[1] == "-e":

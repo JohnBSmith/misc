@@ -612,6 +612,23 @@ def is_quantifier_rule(C):
         return is_connective(A, "forall") or is_connective(A, "exists")
     return False
 
+def nested_conj(i, n):
+    head = Term("H" + str(i) + "*", Prop)
+    if i == n:
+        return head
+    else:
+        return Term(("conj", head, nested_conj(i + 1, n)), Prop)
+
+def auto_rule(line, A, i, n):
+    if i == n + 1:
+        return Term(("seq", nested_conj(1, n), A), Prop)
+    elif is_connective(A, "subj"):
+        head = Term(("seq", Term("H" + str(i) + "*", Prop), A.node[1]), Prop)
+        tail = auto_rule(line, A.node[2], i + 1, n)
+        return Term(("subj", head, tail), Prop)
+    else:
+        raise LogicError(line, f"expected a subjunction for premise {i}")
+
 def conclusion(line, B, C, subst, args):
     result = unify(line, B, C, subst)
     if result:
@@ -622,6 +639,11 @@ def conclusion(line, B, C, subst, args):
 def modus_ponens(line, book, B, args, hint):
     assert len(args) >= 1
     C = lookup(book, args[0], line)
+    if len(args) > 1 and is_connective(C, "seq"):
+        if not is_connective(C.node[1], "true"):
+            raise LogicError(line,
+                f"'{args[0]}' does not correspond to a rule")
+        C = auto_rule(line, C.node[2], 1, len(args) - 1)
     C = scheme(C)
     subst = {}
     conds = []

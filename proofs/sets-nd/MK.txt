@@ -47,11 +47,11 @@ composition_eq. ⊢ composition g f = {t | ∃x. ∃y. ∃z.
 
 # AXIOMS
 
-dn_elim. ⊢ ¬¬A → A, axiom.
+dne. ⊢ ¬¬A → A, axiom.
 eq_refl. ⊢ x = x, axiom.
-eq_ind. ⊢ x = y → P x → P y, axiom.
+eq_subst. ⊢ x = y → P x → P y, axiom.
 
-extensionality. ⊢ (∀x. x ∈ A ↔ x ∈ B) → A = B, axiom.
+ext. ⊢ (∀x. x ∈ A ↔ x ∈ B) → A = B, axiom.
 comp. ⊢ u ∈ {x | P x} ↔ set u ∧ P u, axiom.
 pairing. ⊢ set x → set y → set {x, y}, axiom.
 subset. ⊢ A ⊆ B → set B → set A, axiom.
