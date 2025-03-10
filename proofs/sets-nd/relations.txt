@@ -17,18 +17,200 @@
 15. 1 ⊢ relation R, subj_elim 14 13.
 relation_intro. ⊢ R ⊆ X × Y → relation R, subj_intro 15.
 
+01. 1 ⊢ x ∈ A, hypo.
+02. 2 ⊢ (x, y) ∈ R, hypo.
+03. 2 ⊢ set (x, y), set_intro 2.
+04. 2 ⊢ set y, setr_from_pair 3.
+05. 1, 2 ⊢ x ∈ A ∧ (x, y) ∈ R, conj_intro 1 2.
+06. 1, 2 ⊢ ∃x. x ∈ A ∧ (x, y) ∈ R, ex_intro 5.
+07. 1, 2 ⊢ y ∈ {y | ∃x. x ∈ A ∧ (x, y) ∈ R}, comp_intro 4 6.
+08. 1, 2 ⊢ y ∈ img R A, eq_subst_rev img_eq 7, P u ↔ y ∈ u.
+09. 1 ⊢ (x, y) ∈ R → y ∈ img R A, subj_intro 8.
+img_intro. ⊢ x ∈ A → (x, y) ∈ R → y ∈ img R A, subj_intro 9.
+
+01. 1 ⊢ y ∈ img R A, hypo.
+02. 1 ⊢ y ∈ {y | ∃x. x ∈ A ∧ (x, y) ∈ R},
+  eq_subst img_eq 1, P u ↔ y ∈ u.
+03. 1 ⊢ ∃x. x ∈ A ∧ (x, y) ∈ R, comp_elim 2.
+img_elim. ⊢ y ∈ img R A → ∃x. x ∈ A ∧ (x, y) ∈ R, subj_intro 3.
+
+01. 1 ⊢ y ∈ B, hypo.
+02. 2 ⊢ (x, y) ∈ R, hypo.
+03. 2 ⊢ set (x, y), set_intro 2.
+04. 2 ⊢ set x, setl_from_pair 3.
+05. 1, 2 ⊢ y ∈ B ∧ (x, y) ∈ R, conj_intro 1 2.
+06. 1, 2 ⊢ ∃y. y ∈ B ∧ (x, y) ∈ R, ex_intro 5.
+07. 1, 2 ⊢ x ∈ {x | ∃y. y ∈ B ∧ (x, y) ∈ R}, comp_intro 4 6.
+08. 1, 2 ⊢ x ∈ inv_img R B, eq_subst_rev inv_img_eq 7, P u ↔ x ∈ u.
+09. 1 ⊢ (x, y) ∈ R → x ∈ inv_img R B, subj_intro 8.
+inv_img_intro. ⊢ y ∈ B → (x, y) ∈ R → x ∈ inv_img R B, subj_intro 9.
+
+01. 1 ⊢ x ∈ inv_img R B, hypo.
+02. 1 ⊢ x ∈ {x | ∃y. y ∈ B ∧ (x, y) ∈ R},
+  eq_subst inv_img_eq 1, P u ↔ x ∈ u.
+03. 1 ⊢ ∃y. y ∈ B ∧ (x, y) ∈ R, comp_elim 2.
+inv_img_elim. ⊢ x ∈ inv_img R B → ∃y. y ∈ B ∧ (x, y) ∈ R, subj_intro 3.
+
+01. 1 ⊢ (x, y) ∈ R, hypo.
+02. 1 ⊢ set (x, y), set_intro 1.
+03. 1 ⊢ set x, setl_from_pair 2.
+04. 1 ⊢ ∃y. (x, y) ∈ R, ex_intro 1.
+05. 1 ⊢ x ∈ {x | ∃y. (x, y) ∈ R}, comp_intro 3 4.
+06. 1 ⊢ x ∈ dom R, eq_subst_rev dom_eq 5, P u ↔ x ∈ u.
+dom_intro. ⊢ (x, y) ∈ R → x ∈ dom R, subj_intro 6.
+
+01. 1 ⊢ x ∈ dom R, hypo.
+02. 1 ⊢ x ∈ {x | ∃y. (x, y) ∈ R}, eq_subst dom_eq 1, P u ↔ x ∈ u.
+03. 1 ⊢ ∃y. (x, y) ∈ R, comp_elim 2.
+dom_elim. ⊢ x ∈ dom R → ∃y. (x, y) ∈ R, subj_intro 3.
+
 01. 1 ⊢ R ⊆ X × Y, hypo.
 02. 2 ⊢ x ∈ dom R, hypo.
-03. 2 ⊢ x ∈ {x | ∃y. (x, y) ∈ R}, eq_subst dom_eq 2, P u ↔ x ∈ u.
-04. 2 ⊢ set x ∧ ∃y. (x, y) ∈ R, comp_elim 3.
-05. 2 ⊢ ∃y. (x, y) ∈ R, conj_elimr 4.
-06. 6 ⊢ (x, y) ∈ R, hypo.
-07. 1, 6 ⊢ (x, y) ∈ X × Y, incl_elim 1 6.
-08. 1, 6 ⊢ x ∈ X ∧ y ∈ Y, prod_elim_pair 7.
-09. 1, 6 ⊢ x ∈ X, conj_eliml 8.
-10. 1, 2 ⊢ x ∈ X, ex_elim 5 9.
-11. 1 ⊢ x ∈ dom R → x ∈ X, subj_intro 10.
-12. 1 ⊢ ∀x. x ∈ dom R → x ∈ X, uq_intro 11.
-13. 1 ⊢ dom R ⊆ X, incl_intro 12.
-dom_incl. ⊢ R ⊆ X × Y → dom R ⊆ X, subj_intro 13.
+03. 2 ⊢ ∃y. (x, y) ∈ R, dom_elim 2.
+04. 4 ⊢ (x, y) ∈ R, hypo.
+05. 1, 4 ⊢ (x, y) ∈ X × Y, incl_elim 1 4.
+06. 1, 4 ⊢ x ∈ X ∧ y ∈ Y, prod_elim_pair 5.
+07. 1, 4 ⊢ x ∈ X, conj_eliml 6.
+08. 1, 2 ⊢ x ∈ X, ex_elim 3 7.
+09. 1 ⊢ x ∈ dom R → x ∈ X, subj_intro 8.
+10. 1 ⊢ ∀x. x ∈ dom R → x ∈ X, uq_intro 9.
+11. 1 ⊢ dom R ⊆ X, incl_intro 10.
+dom_incl. ⊢ R ⊆ X × Y → dom R ⊆ X, subj_intro 11.
+
+01. 1 ⊢ y ∈ img R (A ∪ B), hypo.
+02. 1 ⊢ ∃x. x ∈ A ∪ B ∧ (x, y) ∈ R, img_elim 1.
+03. 3 ⊢ x ∈ A ∪ B ∧ (x, y) ∈ R, hypo.
+04. 3 ⊢ (x, y) ∈ R, conj_elimr 3.
+05. 3 ⊢ x ∈ A ∪ B, conj_eliml 3.
+06. 3 ⊢ x ∈ A ∨ x ∈ B, union_elim 5.
+07. 7 ⊢ x ∈ A, hypo.
+08. 3, 7 ⊢ y ∈ img R A, img_intro 7 4.
+09. 3, 7 ⊢ y ∈ img R A ∪ img R B, union_introl 8.
+10. 10 ⊢ x ∈ B, hypo.
+11. 3, 10 ⊢ y ∈ img R B, img_intro 10 4.
+12. 3, 10 ⊢ y ∈ img R A ∪ img R B, union_intror 11.
+13. 3 ⊢ y ∈ img R A ∪ img R B, disj_elim 6 9 12.
+14. 1 ⊢ y ∈ img R A ∪ img R B, ex_elim 2 13.
+15. ⊢ y ∈ img R (A ∪ B) → y ∈ img R A ∪ img R B, subj_intro 14.
+
+16. 16 ⊢ y ∈ img R A ∪ img R B, hypo.
+17. 16 ⊢ y ∈ img R A ∨ y ∈ img R B, union_elim 16.
+18. 18 ⊢ y ∈ img R A, hypo.
+19. 18 ⊢ ∃x. x ∈ A ∧ (x, y) ∈ R, img_elim 18.
+20. 20 ⊢ x ∈ A ∧ (x, y) ∈ R, hypo.
+21. 20 ⊢ x ∈ A, conj_eliml 20.
+22. 20 ⊢ (x, y) ∈ R, conj_elimr 20.
+23. 20 ⊢ x ∈ A ∪ B, union_introl 21.
+24. 20 ⊢ y ∈ img R (A ∪ B), img_intro 23 22.
+25. 18 ⊢ y ∈ img R (A ∪ B), ex_elim 19 24.
+26. 26 ⊢ y ∈ img R B, hypo.
+27. 26 ⊢ ∃x. x ∈ B ∧ (x, y) ∈ R, img_elim 26.
+28. 28 ⊢ x ∈ B ∧ (x, y) ∈ R, hypo.
+29. 28 ⊢ x ∈ B, conj_eliml 28.
+30. 28 ⊢ (x, y) ∈ R, conj_elimr 28.
+31. 28 ⊢ x ∈ A ∪ B, union_intror 29.
+32. 28 ⊢ y ∈ img R (A ∪ B), img_intro 31 30.
+33. 26 ⊢ y ∈ img R (A ∪ B), ex_elim 27 32.
+34. 16 ⊢ y ∈ img R (A ∪ B), disj_elim 17 25 33.
+35. ⊢ y ∈ img R A ∪ img R B → y ∈ img R (A ∪ B), subj_intro 34.
+
+36. ⊢ y ∈ img R (A ∪ B) ↔ y ∈ img R A ∪ img R B, bij_intro 15 35.
+37. ⊢ ∀y. y ∈ img R (A ∪ B) ↔ y ∈ img R A ∪ img R B, uq_intro 36.
+img_dist_union. ⊢ img R (A ∪ B) = img R A ∪ img R B, ext 37.
+
+01. 1 ⊢ y ∈ img R (A ∩ B), hypo.
+02. 1 ⊢ ∃x. x ∈ A ∩ B ∧ (x, y) ∈ R, img_elim 1.
+03. 3 ⊢ x ∈ A ∩ B ∧ (x, y) ∈ R, hypo.
+04. 3 ⊢ x ∈ A ∩ B, conj_eliml 3.
+05. 3 ⊢ x ∈ A, intersection_eliml 4.
+06. 3 ⊢ x ∈ B, intersection_elimr 4.
+07. 3 ⊢ (x, y) ∈ R, conj_elimr 3.
+08. 3 ⊢ y ∈ img R A, img_intro 5 7.
+09. 3 ⊢ y ∈ img R B, img_intro 6 7.
+10. 3 ⊢ y ∈ img R A ∩ img R B, intersection_intro 8 9.
+11. 1 ⊢ y ∈ img R A ∩ img R B, ex_elim 2 10.
+12. ⊢ y ∈ img R (A ∩ B) → y ∈ img R A ∩ img R B, subj_intro 11.
+13. ⊢ ∀y. y ∈ img R (A ∩ B) → y ∈ img R A ∩ img R B, uq_intro 12.
+img_dist_inter. ⊢ img R (A ∩ B) ⊆ img R A ∩ img R B, incl_intro 13.
+
+01. 1 ⊢ A ⊆ B, hypo.
+02. 1 ⊢ A ∪ B = B, union_from_incl 1.
+03. 1 ⊢ img R (A ∪ B) = img R B, f_equal 2, f u = img R u.
+04. ⊢ img R A ∪ img R B = img R (A ∪ B), eq_symm img_dist_union.
+05. 1 ⊢ img R A ∪ img R B = img R B, eq_trans 4 3.
+06. 1 ⊢ img R A ⊆ img R B, incl_from_union 5.
+img_incl. ⊢ A ⊆ B → img R A ⊆ img R B, subj_intro 6.
+
+01. 1 ⊢ x ∈ inv_img R (A ∩ B), hypo.
+02. 1 ⊢ ∃y. y ∈ A ∩ B ∧ (x, y) ∈ R, inv_img_elim 1.
+03. 3 ⊢ y ∈ A ∩ B ∧ (x, y) ∈ R, hypo.
+04. 3 ⊢ y ∈ A ∩ B, conj_eliml 3.
+05. 3 ⊢ y ∈ A, intersection_eliml 4.
+06. 3 ⊢ y ∈ B, intersection_elimr 4.
+07. 3 ⊢ (x, y) ∈ R, conj_elimr 3.
+08. 3 ⊢ x ∈ inv_img R A, inv_img_intro 5 7.
+09. 3 ⊢ x ∈ inv_img R B, inv_img_intro 6 7.
+10. 3 ⊢ x ∈ inv_img R A ∩ inv_img R B, intersection_intro 8 9.
+11. 1 ⊢ x ∈ inv_img R A ∩ inv_img R B, ex_elim 2 10.
+12. ⊢ x ∈ inv_img R (A ∩ B) → x ∈ inv_img R A ∩ inv_img R B,
+  subj_intro 11.
+13. ⊢ ∀x. x ∈ inv_img R (A ∩ B) → x ∈ inv_img R A ∩ inv_img R B,
+  uq_intro 12.
+inv_img_dist_inter. ⊢ inv_img R (A ∩ B) ⊆ inv_img R A ∩ inv_img R B,
+  incl_intro 13.
+
+01. 1 ⊢ x ∈ inv_img R (A ∪ B), hypo.
+02. 1 ⊢ ∃y. y ∈ A ∪ B ∧ (x, y) ∈ R, inv_img_elim 1.
+03. 3 ⊢ y ∈ A ∪ B ∧ (x, y) ∈ R, hypo.
+04. 3 ⊢ (x, y) ∈ R, conj_elimr 3.
+05. 3 ⊢ y ∈ A ∪ B, conj_eliml 3.
+06. 3 ⊢ y ∈ A ∨ y ∈ B, union_elim 5.
+07. 7 ⊢ y ∈ A, hypo.
+08. 3, 7 ⊢ x ∈ inv_img R A, inv_img_intro 7 4.
+09. 3, 7 ⊢ x ∈ inv_img R A ∪ inv_img R B, union_introl 8.
+10. 10 ⊢ y ∈ B, hypo.
+11. 3, 10 ⊢ x ∈ inv_img R B, inv_img_intro 10 4.
+12. 3, 10 ⊢ x ∈ inv_img R A ∪ inv_img R B, union_intror 11.
+13. 3 ⊢ x ∈ inv_img R A ∪ inv_img R B, disj_elim 6 9 12.
+14. 1 ⊢ x ∈ inv_img R A ∪ inv_img R B, ex_elim 2 13.
+15. ⊢ x ∈ inv_img R (A ∪ B) → x ∈ inv_img R A ∪ inv_img R B,
+  subj_intro 14.
+
+16. 16 ⊢ x ∈ inv_img R A ∪ inv_img R B, hypo.
+17. 16 ⊢ x ∈ inv_img R A ∨ x ∈ inv_img R B, union_elim 16.
+18. 18 ⊢ x ∈ inv_img R A, hypo.
+19. 18 ⊢ ∃y. y ∈ A ∧ (x, y) ∈ R, inv_img_elim 18.
+20. 20 ⊢ y ∈ A ∧ (x, y) ∈ R, hypo.
+21. 20 ⊢ y ∈ A, conj_eliml 20.
+22. 20 ⊢ y ∈ A ∪ B, union_introl 21.
+23. 20 ⊢ (x, y) ∈ R, conj_elimr 20.
+24. 20 ⊢ x ∈ inv_img R (A ∪ B), inv_img_intro 22 23.
+25. 18 ⊢ x ∈ inv_img R (A ∪ B), ex_elim 19 24.
+26. 26 ⊢ x ∈ inv_img R B, hypo.
+27. 26 ⊢ ∃y. y ∈ B ∧ (x, y) ∈ R, inv_img_elim 26.
+28. 28 ⊢ y ∈ B ∧ (x, y) ∈ R, hypo.
+29. 28 ⊢ y ∈ B, conj_eliml 28.
+30. 28 ⊢ y ∈ A ∪ B, union_intror 29.
+31. 28 ⊢ (x, y) ∈ R, conj_elimr 28.
+32. 28 ⊢ x ∈ inv_img R (A ∪ B), inv_img_intro 30 31.
+33. 26 ⊢ x ∈ inv_img R (A ∪ B), ex_elim 27 32.
+34. 16 ⊢ x ∈ inv_img R (A ∪ B), disj_elim 17 25 33.
+35. ⊢ x ∈ inv_img R A ∪ inv_img R B → x ∈ inv_img R (A ∪ B),
+  subj_intro 34.
+
+36. ⊢ x ∈ inv_img R (A ∪ B) ↔ x ∈ inv_img R A ∪ inv_img R B,
+  bij_intro 15 35.
+37. ⊢ ∀x. x ∈ inv_img R (A ∪ B) ↔ x ∈ inv_img R A ∪ inv_img R B,
+  uq_intro 36.
+inv_img_dist_union. ⊢ inv_img R (A ∪ B) = inv_img R A ∪ inv_img R B,
+  ext 37.
+
+01. 1 ⊢ A ⊆ B, hypo.
+02. 1 ⊢ A ∪ B = B, union_from_incl 1.
+03. 1 ⊢ inv_img R (A ∪ B) = inv_img R B, f_equal 2, f u = inv_img R u.
+04. ⊢ inv_img R A ∪ inv_img R B = inv_img R (A ∪ B),
+  eq_symm inv_img_dist_union.
+05. 1 ⊢ inv_img R A ∪ inv_img R B = inv_img R B, eq_trans 4 3.
+06. 1 ⊢ inv_img R A ⊆ inv_img R B, incl_from_union 5.
+inv_img_incl. ⊢ A ⊆ B → inv_img R A ⊆ inv_img R B, subj_intro 6.
 
