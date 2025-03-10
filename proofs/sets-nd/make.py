@@ -6,7 +6,8 @@ modules = [
     ("MK", []),
     ("logic", ["MK"]),
     ("basic", ["MK", "logic"]),
-    ("relations", ["MK", "logic", "basic"])
+    ("relations", ["MK", "logic", "basic"]),
+    ("functions", ["MK", "logic", "basic", "relations"])
 ]
 
 if len(argv) == 2:

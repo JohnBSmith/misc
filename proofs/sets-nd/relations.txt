@@ -1,4 +1,7 @@
 
+relation_intro. ⊢ (∀t. t ∈ R → ∃x. ∃y. t = (x, y)) → relation R,
+  bij_elimr relation_equi.
+
 01. 1 ⊢ R ⊆ X × Y, hypo.
 02. 2 ⊢ t ∈ R, hypo.
 03. 1, 2 ⊢ t ∈ X × Y, incl_elim 1 2.
@@ -15,7 +18,7 @@
 14. ⊢ (∀t. t ∈ R → ∃x. ∃y. t = (x, y)) → relation R,
   bij_elimr relation_equi.
 15. 1 ⊢ relation R, subj_elim 14 13.
-relation_intro. ⊢ R ⊆ X × Y → relation R, subj_intro 15.
+relation_from_incl. ⊢ R ⊆ X × Y → relation R, subj_intro 15.
 
 01. 1 ⊢ x ∈ A, hypo.
 02. 2 ⊢ (x, y) ∈ R, hypo.
