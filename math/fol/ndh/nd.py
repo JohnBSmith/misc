@@ -406,7 +406,7 @@ def parse_statement(i, a):
     label, line = a[i]; i += 1
     if a[i][0] != ".":
         raise SyntaxError(a[i][1], "expected '.'")
-    if a[i+1][0] == "(":
+    if a[i+1][0] == "(" or is_identifier(a[i+1][0]):
         i, A = formula_type_checked(a, i + 1)
     else:
         i, A = ref_sequent(a, i + 1)

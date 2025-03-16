@@ -1,0 +1,57 @@
+
+# Example of a pure Hilbert system
+
+ax1. A → B → A, axiom.
+ax2. (A → B → C) → (A → B) → (A → C), axiom.
+ax3. (¬A → ¬B) → (B → A), axiom.
+
+1. A → (B → A) → A, ax1.
+2. (A → (B → A) → A) → ((A → B → A) → A → A), ax2.
+3. (A → B → A) → A → A, 2 1.
+4. A → B → A, ax1.
+5. A → A, 3 4.
+
+# Note that this derivation may be shortened, omitting step 2.
+# Step 4 may also be omitted, but only because the identifiers
+# conincide.
+
+1. A → (B → A) → A, ax1.
+3. (A → B → A) → A → A, ax2 1.
+5. A → A, 3 ax1.
+
+# These are all schemas. To distinguish between schemas and concrete
+# propositions, we can designate schema variables with Greek letters,
+# while small letters stand for concrete atomic propositions.
+
+ax1. φ → ψ → φ, axiom.
+ax2. (φ → ψ → χ) → (φ → ψ) → (φ → χ), axiom.
+ax3. (¬φ → ¬ψ) → (ψ → φ), axiom.
+
+0. ⊢ p ↔ _, def.
+0. ⊢ q ↔ _, def.
+
+1. p → (q → p) → p, ax1.
+2. (p → (q → p) → p) → ((p → q → p) → p → p), ax2.
+3. (p → q → p) → p → p, 2 1.
+4. p → q → p, ax1.
+5. p → p, 3 4.
+
+# One may state the whole deductive system, including its inference
+# rules. To be extra shure, auto_rule should be turned off in the
+# verifier, because this feature automatically induces mp-like
+# inference rules from theorem schemata due to ergonomical reasons.
+
+mp. (⊢ φ → ψ) → (⊢ φ) → (⊢ ψ), axiom.
+
+ax1. ⊢ φ → ψ → φ, axiom.
+ax2. ⊢ (φ → ψ → χ) → (φ → ψ) → (φ → χ), axiom.
+ax3. ⊢ (¬φ → ¬ψ) → (ψ → φ), axiom.
+
+# 0. ⊢ p ↔ _, def.
+# 0. ⊢ q ↔ _, def.
+
+1. ⊢ p → (q → p) → p, ax1.
+2. ⊢ (p → (q → p) → p) → ((p → q → p) → p → p), ax2.
+3. ⊢ (p → q → p) → p → p, mp 2 1.
+4. ⊢ p → q → p, ax1.
+5. ⊢ p → p, mp 3 4.
