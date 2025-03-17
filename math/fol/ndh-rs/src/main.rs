@@ -26,6 +26,11 @@ fn syntax_error(line: usize, info: String) -> Error {
     Box::new(ErrorRecord {kind: ErrorKind::Syntax, line, info})
 }
 
+fn logic_error(line: usize, info: String) -> Error {
+    Box::new(ErrorRecord {kind: ErrorKind::Logic, line, info})
+}
+
+#[derive(Debug)]
 enum TokenValue {
     Number(Bstr),
     Identifier(Bstr),
@@ -38,6 +43,16 @@ struct Token {
     value: TokenValue
 }
 
+impl Token {
+    fn is_symbol(&self, b: &str) -> bool {
+        match &self.value {
+            TokenValue::Symbol(a) => a.as_slice() == b.as_bytes(),
+            _ => false
+        }
+    }
+}
+
+/*
 impl std::fmt::Debug for TokenValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -48,6 +63,7 @@ impl std::fmt::Debug for TokenValue {
         }
     }
 }
+*/
 
 impl std::fmt::Debug for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -72,8 +88,14 @@ fn is_keyword(s: &[u8]) -> Option<Bstr> {
         b"and" => Some(Bstr::from("∧")),
         b"or"  => Some(Bstr::from("∨")),
         b"not" => Some(Bstr::from("¬")),
+        b"false" => Some(Bstr::from("⊥")),
+        b"true" => Some(Bstr::from("⊤")),
         _ => None
     }
+}
+
+fn is_utf8_continuation_byte(byte: u8) -> bool {
+    (byte & 0b1100_0000) == 0b1000_0000
 }
 
 fn scan(s: &[u8]) -> Vec<Token> {
@@ -82,15 +104,22 @@ fn scan(s: &[u8]) -> Vec<Token> {
     let mut acc: Vec<Token> = Vec::new();
     let mut line = 0;
     while i < n {
-        if s[i].is_ascii_alphabetic() {
+        if s[i].is_ascii_alphabetic() || s[i] == b'_' {
             let j = i;
-            while i < n && s[i].is_ascii_alphabetic() {
+            while i < n && (s[i].is_ascii_alphabetic() || matches!(s[i], b'_' | b'\'')) {
                 i += 1;
             }
             let value = match is_keyword(&s[j..i]) {
                 Some(symbol) => TokenValue::Symbol(symbol),
                 None => TokenValue::Identifier(Bstr::from(&s[j..i]))
             };
+            acc.push(Token {line, value});
+        } else if s[i].is_ascii_digit() {
+            let j = i;
+            while i < n && s[i].is_ascii_digit() {
+                i += 1;
+            }
+            let value = TokenValue::Number(Bstr::from(&s[j..i]));
             acc.push(Token {line, value});
         } else if s[i].is_ascii_whitespace() {
             if s[i] == b'\n' {line += 1;}
@@ -101,6 +130,11 @@ fn scan(s: &[u8]) -> Vec<Token> {
             i += 2;
         } else if s[i] == b'#' {
             while i < n && s[i] != b'\n' {i += 1;}
+        } else if s[i] > 127 {
+            let j = i; i += 1;
+            while i < n && is_utf8_continuation_byte(s[i]) {i += 1;}
+            let value = TokenValue::Symbol(Bstr::from(&s[j..i]));
+            acc.push(Token {line, value});
         } else {
             let value = TokenValue::Symbol(Bstr::from(&s[i..i+1]));
             acc.push(Token {line, value});
@@ -116,7 +150,7 @@ fn scan(s: &[u8]) -> Vec<Token> {
 enum Type {None, Some, Prop, Ind}
 use Type::{Prop, Ind};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum TermValue {
     Var(Bstr),
     Const(Bstr),
@@ -125,6 +159,7 @@ enum TermValue {
     App(Rc<[Term]>)
 }
 
+#[derive(Clone)]
 struct Term {
     value: TermValue,
     ty: Type
@@ -191,7 +226,7 @@ fn init_infix_table() -> HashMap<&'static [u8], (u32, Assoc, Infix)> {
         ("∧".as_bytes(), (50, L, infix("conj", Prop, Prop))),
         ("∨".as_bytes(), (40, L, infix("disj", Prop, Prop))),
         ("→".as_bytes(), (30, R, infix("subj", Prop, Prop))),
-        ("↔".as_bytes(), (20, L, infix("bij",  Prop, Prop))),
+        ("↔".as_bytes(), (20, L, infix("bijn", Prop, Prop))),
         ("⊢".as_bytes(), (10, R, infix("seq",  Prop, Prop)))
     ])
 }
@@ -199,19 +234,30 @@ fn init_infix_table() -> HashMap<&'static [u8], (u32, Assoc, Infix)> {
 struct Prefix {
     ident: &'static str,
     arg_type: Type,
-    value_type: Type
+    value_type: Type,
+    special: u32
 }
 
 impl Prefix {
     fn call(&self, line: usize, mut x: Term) -> Result<Term, Error> {
         ensure_type(&mut x, line, &self.arg_type)?;
         let f = Term {value: TermValue::Const(Bstr::from(self.ident)), ty: Type::None};
-        Ok(Term {value: TermValue::App(Rc::from([f, x])), ty: self.value_type.clone()})
+        let value = if self.special != 0 {
+            let verum = Term {value: TermValue::Const(Bstr::from("true")), ty: Prop};
+            TermValue::App(Rc::from([f, verum, x]))
+        } else {
+            TermValue::App(Rc::from([f, x]))
+        };
+        Ok(Term {value, ty: self.value_type.clone()})
     }
 }
 
 fn prefix(ident: &'static str, arg_type: Type, value_type: Type) -> Prefix {
-    Prefix {ident, arg_type, value_type}
+    Prefix {ident, arg_type, value_type, special: 0}
+}
+
+fn prefix_seq() -> Prefix {
+    Prefix {ident: "seq", arg_type: Prop, value_type: Prop, special: 1}
 }
 
 fn init_prefix_table() -> HashMap<&'static [u8], (u32, Prefix)> {
@@ -221,8 +267,8 @@ fn init_prefix_table() -> HashMap<&'static [u8], (u32, Prefix)> {
         ("~".as_bytes(), ( 60, prefix("neg", Prop, Prop))),
         ("¬".as_bytes(), ( 60, prefix("neg", Prop, Prop))),
         ("□".as_bytes(), ( 60, prefix("nec", Prop, Prop))),
-        ("◇".as_bytes(), ( 60, prefix("pos", Prop, Prop)))
-        // "⊢": ( 10, prefix_seq), "|-": (10, prefix_seq)
+        ("◇".as_bytes(), ( 60, prefix("pos", Prop, Prop))),
+        ("⊢".as_bytes(), ( 10, prefix_seq()))
     ])
 }
 
@@ -230,7 +276,8 @@ struct Env {
     tokens: Vec<Token>,
     index: Cell<usize>,
     infix_table:  HashMap<&'static [u8], (u32, Assoc, Infix)>,
-    prefix_table: HashMap<&'static [u8], (u32, Prefix)>
+    prefix_table: HashMap<&'static [u8], (u32, Prefix)>,
+    book: HashMap<Bstr, Term>
 }
 
 impl Env {
@@ -247,6 +294,28 @@ fn nud(env: &Env) -> Result<Term, Error> {
     if let TokenValue::Identifier(id) = &token.value {
         env.advance();
         Ok(Term {value: TermValue::Var(id.clone()), ty: Type::Some})
+    } else if token.is_symbol("⊥") {
+        env.advance();
+        Ok(Term {value: TermValue::Const(Bstr::from("false")), ty: Prop})
+    } else if token.is_symbol("⊤") {
+        env.advance();
+        Ok(Term {value: TermValue::Const(Bstr::from("true")), ty: Prop})
+    } else if token.is_symbol("(") {
+        let line = token.line;
+        env.advance();
+        let mut x = formula(env, 0)?;
+        let token = env.lookup();
+        if token.is_symbol(",") {
+            env.advance();
+            let y = formula(env, 0)?;
+            x = infix("pair", Ind, Ind).call(line, x, y)?;
+        }
+        let token = env.lookup();
+        if !token.is_symbol(")") {
+            return Err(syntax_error(token.line, format!("expected ')', but got '{:?}'", token.value)));
+        }
+        env.advance();
+        Ok(x)
     } else {
         if let TokenValue::Symbol(symbol) = &token.value {
             if let Some((bp, op)) = env.prefix_table.get(symbol.as_slice()) {
@@ -275,15 +344,203 @@ fn formula(env: &Env, rbp: u32) -> Result<Term, Error> {
     Ok(x)
 }
 
+fn rule_app(env: &Env) -> Result<Vec<Bstr>, Error> {
+    let mut acc: Vec<Bstr> = Vec::new();
+    let token = env.lookup();
+    let x = match &token.value {
+        TokenValue::Identifier(x) | TokenValue::Number(x) => x,
+        _ => return Err(syntax_error(token.line,
+            String::from("expected identifier or label")))
+    };
+    acc.push(x.clone());
+    env.advance();
+    loop {
+        let token = env.lookup();
+        match &token.value {
+            TokenValue::Identifier(x) | TokenValue::Number(x) => {
+                acc.push(x.clone());
+                env.advance();
+            },
+            TokenValue::Symbol(s) if matches!(s.as_slice(), b"." | b",") =>
+                break,
+            _ => return Err(syntax_error(token.line,String::from("expected identifier or label")))
+        }
+    }
+    Ok(acc)
+}
+
+fn ref_context(env: &Env) -> Result<Vec<Bstr>, Error> {
+    let mut acc: Vec<Bstr> = Vec::new();
+    let token = env.lookup();
+    if token.is_symbol("⊢") {
+        return Ok(acc);
+    }
+    loop {
+        let token = env.lookup();
+        if let TokenValue::Number(x) = &token.value {
+            acc.push(x.clone());
+            env.advance();
+        }
+        let token = env.lookup();
+        if !token.is_symbol(",") {break;}
+        env.advance();
+    }
+    Ok(acc)
+}
+
+#[derive(Debug)]
+struct RefSeq(Vec<Bstr>, Term);
+
+fn ref_sequent(env: &Env) -> Result<RefSeq, Error> {
+    let ctx = ref_context(env)?;
+    let token = env.lookup();
+    if token.is_symbol("⊢") {
+        let x = formula(env, 0)?; // todo: formula_type_checked
+        Ok(RefSeq(ctx, x))
+    } else {
+        Err(syntax_error(token.line, String::from("expected context")))
+    }
+}
+
+#[derive(Debug)]
+enum Sum<X, Y> {Left(X), Right(Y)}
+
+#[derive(Debug)]
+struct Statement {
+    line: usize,
+    label: Bstr,
+    term: Sum<Term, RefSeq>,
+    rule: Vec<Bstr>,
+    hint: Option<Term>
+}
+
+fn parse_statement(env: &Env) -> Result<Statement, Error> {
+    let token = env.lookup();
+    let (label, line) = match &token.value {
+        TokenValue::Identifier(x) | TokenValue::Number(x) =>
+            (x.clone(), token.line),
+        _ => return Err(syntax_error(token.line, String::from("expected label")))
+    };
+    env.advance();
+    let token = env.lookup();
+    if !token.is_symbol(".") {
+        return Err(syntax_error(token.line, String::from("expected '.'")));
+    }
+    env.advance();
+    let token = env.lookup();
+    let term = if token.is_symbol("(") || matches!(token.value, TokenValue::Identifier(_)) {
+        Sum::Left(formula(env, 0)?) // todo: formula_type_checked
+    } else {
+        Sum::Right(ref_sequent(env)?)
+    };
+    let token = env.lookup();
+    if !token.is_symbol(",") {
+        return Err(syntax_error(token.line, String::from("expected ','")));
+    }
+    env.advance();
+    let rule = rule_app(env)?;
+    let token = env.lookup();
+    let hint = if token.is_symbol(",") {
+        Some(formula(env, 0)?) // todo: formula_type_checked
+    } else {
+        None
+    };
+    let token = env.lookup();
+    if !token.is_symbol(".") {
+        return Err(syntax_error(token.line, String::from("expected '.'")));
+    }
+    env.advance();
+    Ok (Statement {line, label, term, rule, hint})
+}
+
+fn parse(env: &mut Env, cb: fn(&mut Env, Statement) -> Result<(), Error>) -> Result<(), Error> {
+    loop {
+        let token = env.lookup();
+        if matches!(token.value, TokenValue::None) {break;}
+        let stmt = parse_statement(env)?;
+        cb(env, stmt)?;
+    }
+    Ok(())
+}
+
+fn app<const N: usize>(args: [Term; N], ty: Type) -> Term {
+    Term {value: TermValue::App(Rc::new(args)), ty}
+}
+
+fn constant(ident: &str, ty: Type) -> Term {
+    Term {value: TermValue::Const(Bstr::from(ident)), ty}
+}
+
+fn verum() -> Term {
+    constant("true", Prop)
+}
+
+fn conjunction(a: Term, b: Term) -> Term {
+    app([constant("conj", Type::None), a, b], Prop)
+}
+
+fn dummy_sequent (a: Term) -> Term {
+    app([constant("seq", Type::None), verum(), a], Prop)
+}
+
+fn lookup(book: &HashMap<Bstr, Term>, key: Bstr, line: usize) -> Result<&Term, Error> {
+    match book.get(&key) {
+        Some(value) => Ok(value),
+        None => Err(logic_error(line, format!("label '{}' not found", key)))
+    }
+}
+
+fn get_arg(t: &Term, k: usize) -> &Term {
+    match &t.value {
+        TermValue::App(a) => &a[k],
+        _ => panic!()
+    }
+}
+
+fn verify(env: &mut Env, stmt: Statement) -> Result<(), Error> {
+    println!("{stmt:#?}");
+    let Statement {line, label, term, rule, hint: _} = stmt;
+    let form = match term {
+        Sum::Right(seq) => {
+            let ctx = seq.0;
+            let a = seq.1;
+            env.book.insert(label.clone(), dummy_sequent(a.clone()));
+            let mut h = verum();
+            for k in ctx {
+                let seq_k = lookup(&env.book, k, line)?;
+                let form_k = get_arg(seq_k, 2).clone();
+                h = conjunction(h, form_k);
+            }
+            app([constant("seq", Type::None), h, a], Prop)
+        },
+        Sum::Left(form) => form
+    };
+    if label.as_slice() != b"0" {
+        env.book.insert(label.clone(), form);
+    }
+    if rule.iter().any(|x| *x == label) {
+        return Err(logic_error(line, "cyclic deduction".to_string()));
+    }
+    if rule[0].as_slice() == b"def" {
+        Ok(()) // todo: definition(line, book, form, rule[1:], label)
+    } else if rule[0].as_slice() == b"axiom" {
+        Ok(())
+    } else {
+        Ok(()) // todo: modus_ponens(line, book, form, rule, hint)
+    }
+}
+
 fn main() {
     let argv: Vec<String> = args().collect();
+    let infix_table = init_infix_table();
+    let prefix_table = init_prefix_table();
+    let book = HashMap::new();
+    let mut env = Env{tokens: Vec::new(), index: 0.into(), infix_table, prefix_table, book};
     for file in &argv[1..] {
         let s = fs::read(file).unwrap();
         let tokens = scan(&s);
-        let infix_table = init_infix_table();
-        let prefix_table = init_prefix_table();
-        let env = Env{tokens, index: 0.into(), infix_table, prefix_table};
-        let t = formula(&env, 0).unwrap();
-        println!("{t:#?}");
+        env.tokens = tokens;
+        env.index.set(0);
+        parse(&mut env, verify).unwrap();
     }
 }

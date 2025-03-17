@@ -1,7 +1,7 @@
 
 use std::rc::Rc;
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub enum Bstr {
     Small([u8; 15]), Ref(Rc<Box<[u8]>>)
 }
