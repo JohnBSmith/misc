@@ -165,14 +165,54 @@ struct Term {
     ty: Type
 }
 
+use TermValue::{Var, Const, PatVar, BoundVar, App};
+
+fn term(value: TermValue, ty: Type) -> Term {
+    Term {value, ty}
+}
+
+fn app<const N: usize>(args: [Term; N], ty: Type) -> Term {
+    term(App(Rc::new(args)), ty)
+}
+
+fn constant(ident: &str, ty: Type) -> Term {
+    term(Const(Bstr::from(ident)), ty)
+}
+
+fn verum() -> Term {
+    constant("true", Prop)
+}
+
+fn conjunction(a: Term, b: Term) -> Term {
+    app([constant("conj", Type::None), a, b], Prop)
+}
+
 impl std::fmt::Debug for Term {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if f.alternate() {
-            if let TermValue::App(_) = self.value {
+            if let App(_) = self.value {
                 return write!(f, "{:#?}:{:?}", self.value, self.ty);
             }
         }
         write!(f, "{:?}:{:?}", self.value, self.ty)
+    }
+}
+
+impl std::fmt::Display for Term {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self.value {
+            Var(x) | Const(x) | PatVar(x) => write!(f, "{}", x),
+            BoundVar(x) => write!(f, "${}", x),
+            App(a) => {
+                write!(f, "(")?;
+                let mut first = true;
+                for x in a.as_ref() {
+                    if first {first = false} else {write!(f, " ")?;}
+                    write!(f, "{}", x)?;
+                }
+                write!(f, ")")
+            }
+        }
     }
 }
 
@@ -195,8 +235,8 @@ impl Infix {
     fn call(&self, line: usize, mut x: Term, mut y: Term) -> Result<Term, Error> {
         ensure_type(&mut x, line, &self.args_type)?;
         ensure_type(&mut y, line, &self.args_type)?;
-        let f = Term {value: TermValue::Const(Bstr::from(self.ident)), ty: Type::None};
-        Ok(Term {value: TermValue::App(Rc::from([f, x, y])), ty: self.value_type.clone()})
+        let f = constant(self.ident, Type::None);
+        Ok(app([f, x, y], self.value_type.clone()))
     }
 }
 
@@ -241,14 +281,13 @@ struct Prefix {
 impl Prefix {
     fn call(&self, line: usize, mut x: Term) -> Result<Term, Error> {
         ensure_type(&mut x, line, &self.arg_type)?;
-        let f = Term {value: TermValue::Const(Bstr::from(self.ident)), ty: Type::None};
+        let f = constant(self.ident, Type::None);
         let value = if self.special != 0 {
-            let verum = Term {value: TermValue::Const(Bstr::from("true")), ty: Prop};
-            TermValue::App(Rc::from([f, verum, x]))
+            App(Rc::from([f, verum(), x]))
         } else {
-            TermValue::App(Rc::from([f, x]))
+            App(Rc::from([f, x]))
         };
-        Ok(Term {value, ty: self.value_type.clone()})
+        Ok(term(value, self.value_type.clone()))
     }
 }
 
@@ -293,13 +332,13 @@ fn nud(env: &Env) -> Result<Term, Error> {
     let token = env.lookup();
     if let TokenValue::Identifier(id) = &token.value {
         env.advance();
-        Ok(Term {value: TermValue::Var(id.clone()), ty: Type::Some})
+        Ok(term(TermValue::Var(id.clone()),Type::Some))
     } else if token.is_symbol("⊥") {
         env.advance();
-        Ok(Term {value: TermValue::Const(Bstr::from("false")), ty: Prop})
+        Ok(constant("false", Prop))
     } else if token.is_symbol("⊤") {
         env.advance();
-        Ok(Term {value: TermValue::Const(Bstr::from("true")), ty: Prop})
+        Ok(constant("true", Prop))
     } else if token.is_symbol("(") {
         let line = token.line;
         env.advance();
@@ -395,6 +434,7 @@ fn ref_sequent(env: &Env) -> Result<RefSeq, Error> {
     let ctx = ref_context(env)?;
     let token = env.lookup();
     if token.is_symbol("⊢") {
+        env.advance();
         let x = formula(env, 0)?; // todo: formula_type_checked
         Ok(RefSeq(ctx, x))
     } else {
@@ -463,28 +503,14 @@ fn parse(env: &mut Env, cb: fn(&mut Env, Statement) -> Result<(), Error>) -> Res
     Ok(())
 }
 
-fn app<const N: usize>(args: [Term; N], ty: Type) -> Term {
-    Term {value: TermValue::App(Rc::new(args)), ty}
-}
-
-fn constant(ident: &str, ty: Type) -> Term {
-    Term {value: TermValue::Const(Bstr::from(ident)), ty}
-}
-
-fn verum() -> Term {
-    constant("true", Prop)
-}
-
-fn conjunction(a: Term, b: Term) -> Term {
-    app([constant("conj", Type::None), a, b], Prop)
-}
-
 fn dummy_sequent (a: Term) -> Term {
     app([constant("seq", Type::None), verum(), a], Prop)
 }
 
-fn lookup(book: &HashMap<Bstr, Term>, key: Bstr, line: usize) -> Result<&Term, Error> {
-    match book.get(&key) {
+fn lookup<'a, 'b>(book: &'a HashMap<Bstr, Term>, key: &'b Bstr, line: usize)
+-> Result<&'a Term, Error>
+{
+    match book.get(key) {
         Some(value) => Ok(value),
         None => Err(logic_error(line, format!("label '{}' not found", key)))
     }
@@ -497,9 +523,107 @@ fn get_arg(t: &Term, k: usize) -> &Term {
     }
 }
 
+fn pattern_from(t: &Term) -> Term {
+    match &t.value {
+        Var(x) => term(PatVar(x.clone()), t.ty.clone()),
+        App(a) => term(
+            App(Rc::from(a.iter().map(pattern_from).collect::<Vec<_>>())),
+            t.ty.clone()
+        ),
+        _ => t.clone()
+    }
+}
+
+fn term_eq(env: &Env, a: &Term, b: &Term) -> bool {
+    if a.ty != b.ty {return false;}
+    match (&a.value, &b.value) {
+        (Var(a), Var(b)) => a == b,
+        (Const(a), Const(b)) => a == b,
+        (BoundVar(a), BoundVar(b)) => a == b,
+        (App(a), App(b)) => a.as_ref().iter().zip(b.as_ref()).all(
+            |(x, y)| term_eq(env, x, y)),
+        _ => false
+    }
+}
+
+fn unify(env: &Env, line: usize, t: &Term, pattern: &Term, subs: &mut HashMap<Bstr, Term>)
+-> Result<bool, Error>
+{
+    if pattern.ty != t.ty {
+        return Err(logic_error(line, format!("type error {pattern:?}, {t:?}")));
+    }
+    // println!("    {:?}\nmit {:?}\n", t, pattern);
+    Ok(match &pattern.value {
+        PatVar(a) => {
+            if let Some(b) = subs.get(a) {
+                term_eq(env, b, t)
+            } else {
+                subs.insert(a.clone(), t.clone());
+                true
+            }
+        },
+        App(a) => {
+            match &t.value {
+                App(b) => {
+                    if a.len() != b.len() {return Ok(false);}
+                    for (pat, x) in a.as_ref().iter().zip(b.as_ref()) {
+                        let result = unify(env, line, x, pat, subs)?;
+                        if !result {return Ok(false);}
+                    }
+                    true
+                },
+                _ => false
+            }
+        },
+        _ => term_eq(env, pattern, t)
+    })
+}
+
+fn is_connective(t: &Term, ident: &str) -> bool {
+    match &t.value {
+        App(a) => matches!(&a[0].value, Const(x) if x.as_slice() == ident.as_bytes()),
+        _ => false
+    }
+}
+
+fn conclusion(env: &Env, line: usize, b: &Term, c: &Term, subs: &mut HashMap<Bstr, Term>, args: &[Bstr])
+-> Result<(), Error>
+{
+    let result = unify(env, line, b, c, subs)?;
+    if !result {
+        return Err(logic_error(line,
+            format!("unification failed for {}, in conclusion", args[0])));
+    }
+    Ok(())
+}
+
+fn modus_ponens(env: &Env, line: usize, b: Term, args: &[Bstr], _hint: Option<Term>)
+-> Result<(), Error>
+{
+    let c0 = pattern_from(lookup(&env.book, &args[0], line)?);
+    let mut c = &c0;
+    // println!("{c:#?}");
+
+    let mut subs = HashMap::new();
+    for i in 1..args.len() {
+        let a = lookup(&env.book, &args[i], line)?;
+        if !is_connective(c, "subj") {
+            return Err(logic_error(line, "expected a rule/subjunction".to_string()));
+        }
+        let result = unify(env, line, a, get_arg(c, 1), &mut subs)?;
+        if !result {
+            // println!("    {}\nmit {}\n", a, get_arg(c, 1));
+            return Err(logic_error(line,
+                format!("unification failed for {}, argument {}", args[0], i)));
+        }
+        c = get_arg(c, 2);
+    }
+    conclusion(env, line, &b, c, &mut subs, args)
+}
+
 fn verify(env: &mut Env, stmt: Statement) -> Result<(), Error> {
-    println!("{stmt:#?}");
-    let Statement {line, label, term, rule, hint: _} = stmt;
+    // println!("{stmt:#?}");
+    let Statement {line, label, term, rule, hint} = stmt;
     let form = match term {
         Sum::Right(seq) => {
             let ctx = seq.0;
@@ -507,7 +631,7 @@ fn verify(env: &mut Env, stmt: Statement) -> Result<(), Error> {
             env.book.insert(label.clone(), dummy_sequent(a.clone()));
             let mut h = verum();
             for k in ctx {
-                let seq_k = lookup(&env.book, k, line)?;
+                let seq_k = lookup(&env.book, &k, line)?;
                 let form_k = get_arg(seq_k, 2).clone();
                 h = conjunction(h, form_k);
             }
@@ -516,7 +640,7 @@ fn verify(env: &mut Env, stmt: Statement) -> Result<(), Error> {
         Sum::Left(form) => form
     };
     if label.as_slice() != b"0" {
-        env.book.insert(label.clone(), form);
+        env.book.insert(label.clone(), form.clone());
     }
     if rule.iter().any(|x| *x == label) {
         return Err(logic_error(line, "cyclic deduction".to_string()));
@@ -526,7 +650,7 @@ fn verify(env: &mut Env, stmt: Statement) -> Result<(), Error> {
     } else if rule[0].as_slice() == b"axiom" {
         Ok(())
     } else {
-        Ok(()) // todo: modus_ponens(line, book, form, rule, hint)
+        modus_ponens(env, line, form, &rule, hint)
     }
 }
 
