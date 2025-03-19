@@ -1,6 +1,0 @@
-
-hypo. (true /\ A |- A), axiom.
-conj_elim. (H |- A /\ B) -> (H |- A), axiom.
-
-1. 1 |- A /\ B, hypo.
-2. 1 |- A, conj_elim 1.
