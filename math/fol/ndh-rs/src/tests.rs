@@ -1,5 +1,5 @@
 
-use crate::{Env, verify, ErrorKind, load_prelude};
+use crate::{Env, verify, ErrorKind, load_prelude, KEYWORDS};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Expected {Ok, ErrLogic, ErrSyntax}
@@ -7,6 +7,19 @@ enum Expected {Ok, ErrLogic, ErrSyntax}
 const OK: Expected = Expected::Ok;
 const ELOGIC: Expected = Expected::ErrLogic;
 const ESYNTAX: Expected = Expected::ErrSyntax;
+
+#[test]
+fn keywords_sorted() {
+    fn is_sorted(a: &[(&[u8], &str)]) -> bool {
+        let mut i = 1;
+        while i < a.len() {
+            if a[i-1].0 >= a[i].0 {return false;}
+            i += 1;
+        }
+        true
+    }
+    assert!(is_sorted(KEYWORDS));
+}
 
 #[test]
 fn run_test_list() {
@@ -229,5 +242,9 @@ static TESTS: &[(&str, Expected, &str)] = &[
 ("02.03", ELOGIC, "
 1. 1 ⊢ A ∧ B, hypo.
 2. ⊢ A ∧ A → A ∧ A, subj_intro 1.
+"),
+
+("03.01", ELOGIC, "
+1. |- A x ∧ x, axiom
 ")
 ];

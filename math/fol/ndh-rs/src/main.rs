@@ -71,16 +71,31 @@ fn in_sym2(s: &[u8], i: usize, n: usize) -> Option<Bstr> {
     }
 }
 
-fn is_keyword(s: &[u8]) -> Option<Bstr> {
-    match s {
-        b"and" => Some(Bstr::from("∧")),
-        b"or"  => Some(Bstr::from("∨")),
-        b"not" => Some(Bstr::from("¬")),
-        b"false" => Some(Bstr::from("⊥")),
-        b"true" => Some(Bstr::from("⊤")),
+fn in_sym3(s: &[u8], i: usize, n: usize) -> Option<Bstr> {
+    if i + 2 >= n {return None;}
+    match &s[i..i + 3] {
+        b"<->" => Some(Bstr::from("↔")),
         _ => None
     }
 }
+
+static KEYWORDS: &[(&[u8], &str)] = &[
+    (b"Cap", "⋂"),
+    (b"Cup", "⋃"),
+    (b"and", "∧"),
+    (b"cap", "∩"),
+    (b"cup", "∪"),
+    (b"exists", "∃"),
+    (b"false", "⊥"),
+    (b"forall", "∀"),
+    (b"in", "∈"),
+    (b"not", "¬"),
+    (b"or", "∨"),
+    (b"prod", "∏"),
+    (b"sub", "⊆"),
+    (b"times", "×"),
+    (b"true", "⊤")
+];
 
 fn is_utf8_continuation_byte(byte: u8) -> bool {
     (byte & 0b1100_0000) == 0b1000_0000
@@ -100,9 +115,9 @@ fn scan(s: &[u8]) -> Vec<Token> {
             {
                 i += 1;
             }
-            let value = match is_keyword(&s[j..i]) {
-                Some(symbol) => TokenValue::Symbol(symbol),
-                None => TokenValue::Identifier(Bstr::from(&s[j..i]))
+            let value = match KEYWORDS.binary_search_by_key(&&s[j..i], |t| &t.0) {
+                Ok(index) => TokenValue::Symbol(Bstr::from(KEYWORDS[index].1)),
+                _ => TokenValue::Identifier(Bstr::from(&s[j..i]))
             };
             acc.push(Token {line, value});
         } else if s[i].is_ascii_digit() {
@@ -115,6 +130,10 @@ fn scan(s: &[u8]) -> Vec<Token> {
         } else if s[i].is_ascii_whitespace() {
             if s[i] == b'\n' {line += 1;}
             i += 1;
+        } else if let Some(x) = in_sym3(s, i, n) {
+            let value = TokenValue::Symbol(x);
+            acc.push(Token {line, value});
+            i += 3;
         } else if let Some(x) = in_sym2(s, i, n) {
             let value = TokenValue::Symbol(x);
             acc.push(Token {line, value});
@@ -138,16 +157,51 @@ fn scan(s: &[u8]) -> Vec<Token> {
 
 // The variant Some is for type inference
 #[derive(Debug, Clone, PartialEq)]
-enum Type {None, Some, Prop, Ind, Fn}
+enum Type {None, Some, Prop, Ind, FnSome, Fn(Rc<FnType>)}
 use Type::{Prop, Ind};
+
+#[derive(Debug, PartialEq)]
+struct FnType {
+    argv: Vec<Type>,
+    value: Type
+}
+
+impl std::fmt::Display for Type {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Type::None => write!(f, "None"),
+            Type::Some => write!(f, "Some"),
+            Type::Prop => write!(f, "Prop"),
+            Type::Ind => write!(f, "Ind"),
+            Type::FnSome => write!(f, "FnSome"),
+            Type::Fn(t) => {
+                if t.argv.len() == 1 {
+                    write!(f, "({}", t.argv[0])?;
+                } else {
+                    for i in 0..t.argv.len() {
+                        if i == 0 {
+                            write!(f, "({}", t.argv[i])?;
+                        } else {
+                            write!(f, ", {}", t.argv[i])?;
+                        }
+                        write!(f, ")")?;
+                    }
+                }
+                write!(f, " → {})", t.value)
+            }
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 enum TermValue {
     Var(Bstr),
     Const(Bstr),
     PatVar(Bstr),
-    #[allow(dead_code)] BoundVar(usize),
-    App(Rc<[Term]>)
+    BoundVar(usize),
+    App(Rc<[Term]>),
+    Forall(Rc<(Term, Term)>),
+    Exists(Rc<(Term, Term)>)
 }
 
 #[derive(Clone)]
@@ -177,7 +231,7 @@ impl Term {
     }
 }
 
-use TermValue::{Var, Const, PatVar, BoundVar, App};
+use TermValue::{Var, Const, PatVar, BoundVar, App, Forall, Exists};
 
 fn term(value: TermValue, ty: Type) -> Term {
     Term {value, ty}
@@ -223,7 +277,9 @@ impl std::fmt::Display for Term {
                     write!(f, "{}", x)?;
                 }
                 write!(f, ")")
-            }
+            },
+            Forall(t) => write!(f, "(forall {} {})", t.0, t.1),
+            Exists(t) => write!(f, "(exists {} {})", t.0, t.1)
         }
     }
 }
@@ -331,17 +387,19 @@ struct Env {
     index: Cell<usize>,
     infix_table:  HashMap<&'static [u8], (u32, Assoc, Infix)>,
     prefix_table: HashMap<&'static [u8], (u32, Prefix)>,
-    book: HashMap<Bstr, Term>
+    book: HashMap<Bstr, Term>,
+    var_counter: Cell<usize>
 }
 
 impl Env {
     fn new() -> Self {
         Self {
             tokens: Vec::new(),
-            index: 0.into(),
+            index: Cell::new(0),
             infix_table: init_infix_table(),
             prefix_table: init_prefix_table(),
-            book: HashMap::new()
+            book: HashMap::new(),
+            var_counter: Cell::new(0)
         }
     }
     fn lookup(&self) -> &Token {
@@ -350,6 +408,40 @@ impl Env {
     fn advance(&self) {
         self.index.set(self.index.get() + 1);
     }
+    fn unique_variable(&self, ty: Type) -> Term {
+        self.var_counter.set(self.var_counter.get() + 1);
+        term(BoundVar(self.var_counter.get()), ty)
+    }
+}
+
+fn substitute_term(t: &Term, x: &Term, u: &Term) -> Term {
+    match (&t.value, &x.value) {
+        (Var(tv), Var(xv)) if tv == xv => u.clone(),
+        (App(a), _) => term(App(Rc::from(a.iter().map(|s|
+            substitute_term(s, x, u)).collect::<Vec<_>>())), t.ty.clone()),
+        _ => t.clone()
+    }
+}
+
+fn quantifier(env: &Env, op: fn(Rc<(Term, Term)>) -> TermValue) -> Result<Term, Error> {
+    env.advance();
+    let token = env.lookup();
+    let TokenValue::Identifier(var) = &token.value else {
+        return Err(syntax_error(token.line, "expected a variable".to_string()));
+    };
+    let var = term(Var(var.clone()), Ind);
+    env.advance();
+    let token = env.lookup();
+    if !token.is_symbol(".") && !token.is_symbol(":") {
+        return Err(syntax_error(token.line, "expected '.'".to_string()));
+    }
+    env.advance();
+    let line = token.line;
+    let mut x = formula(env, 0)?;
+    ensure_type(&mut x, line, &Prop)?;
+    let u = env.unique_variable(Ind);
+    let x = substitute_term(&x, &var, &u);
+    Ok(term(op(Rc::new((u, x))), Prop))
 }
 
 fn nud(env: &Env) -> Result<Term, Error> {
@@ -380,6 +472,10 @@ fn nud(env: &Env) -> Result<Term, Error> {
         }
         env.advance();
         Ok(x)
+    } else if token.is_symbol("∀") {
+        quantifier(env, Forall)
+    } else if token.is_symbol("∃") {
+        quantifier(env, Exists)
     } else {
         if let TokenValue::Symbol(symbol) = &token.value {
             if let Some((bp, op)) = env.prefix_table.get(symbol.as_slice()) {
@@ -388,7 +484,7 @@ fn nud(env: &Env) -> Result<Term, Error> {
                 return op.call(token.line, x);
             }
         } 
-        Err(syntax_error(token.line, "unimplemented".to_string()))
+        Err(syntax_error(token.line, format!("unimplemented: {:?}", token.value)))
     }
 }
 
@@ -396,7 +492,7 @@ fn application(env: &Env) -> Result<Term, Error> {
     let token = env.lookup();
     let line0 = token.line;
     let x = nud(env)?;
-    let token = env.lookup();
+    let mut token = env.lookup();
     if matches!(&token.value, TokenValue::Identifier(_)) ||
        matches!(&token.value, TokenValue::Symbol(s)
            if {let s = s.as_slice(); s == b"(" || s == b"{"})
@@ -408,12 +504,13 @@ fn application(env: &Env) -> Result<Term, Error> {
         {
             let x = nud(env)?;
             args.push(x);
+            token = env.lookup();
         }
         if !matches!(&args[0].value, Const(_) | Var(_)) {
             return Err(syntax_error(line0,
                 "predicate or function must be an identifier".to_string()));
         }
-        args[0].ty = Type::Fn;
+        args[0].ty = Type::FnSome;
         Ok(term(App(Rc::from(args)), Type::Some))
     } else {
         Ok(x)
@@ -436,10 +533,74 @@ fn formula(env: &Env, rbp: u32) -> Result<Term, Error> {
     Ok(x)
 }
 
+fn type_check(line: usize, t: &mut Term, record: &mut HashMap<Bstr, Type>)
+-> Result<(), Error>
+{
+    if let Var(x) = &mut t.value {
+        if let Some(ty) = record.get(x) {
+            if *ty != t.ty {
+                if t.ty == Type::Some {
+                    t.ty = ty.clone();
+                } else {
+                    return Err(logic_error(line, format!("Type error for {t:?}")));
+                }
+            }
+        } else {
+            if t.ty == Type::Some {
+                t.ty = Ind;
+            }
+            record.insert(x.clone(), t.ty.clone());
+        }
+    } else if let App(a) = &mut t.value {
+        let Some(a) = Rc::get_mut(a) else {unreachable!()};
+        for x in a {
+            type_check(line, x, record)?;
+        }
+        if t.ty == Type::Some {
+            t.ty = Ind;
+        }
+    }
+    Ok(())
+}
+
+fn type_check_apps(line: usize, t: &mut Term, record: &mut HashMap<Bstr, Type>)
+-> Result<(), Error>
+{
+    if let App(a) = &mut t.value {
+        let Some(a) = Rc::get_mut(a) else {unreachable!()};
+        if a[0].ty == Type::FnSome {
+            let (first, a) = a.split_at_mut(1);
+            let f = &mut first[0];
+            let fid = match &f.value {
+                Const(s) | Var(s) => s,
+                _ => panic!()
+            };
+            f.ty = Type::Fn(Rc::new(FnType {
+                argv: a.iter().map(|x| x.ty.clone()).collect(),
+                value: t.ty.clone()
+            }));
+            if let Some(ty) = record.get(fid) {
+                if *ty != f.ty {
+                    return Err(logic_error(line, format!(
+                        "Type error for {:?}: {} != {}", f.value, f.ty, ty)));
+                }
+            } else {
+                record.insert(fid.clone(), f.ty.clone());
+            }
+        }
+        for x in a {
+            type_check_apps(line, x, record)?;
+        }
+    }
+    Ok(())
+}
+
 fn formula_type_checked(env: &Env) -> Result<Term, Error> {
     let token = env.lookup();
     let mut x = formula(env, 0)?;
     ensure_type(&mut x, token.line, &Prop)?;
+    type_check(token.line, &mut x, &mut HashMap::new())?;
+    type_check_apps(token.line, &mut x, &mut HashMap::new())?;
     Ok(x)
 }
 
@@ -596,6 +757,12 @@ fn term_eq(env: &Env, a: &Term, b: &Term) -> bool {
         (BoundVar(a), BoundVar(b)) => a == b,
         (App(a), App(b)) => a.as_ref().iter().zip(b.as_ref()).all(
             |(x, y)| term_eq(env, x, y)),
+        (Forall(a), Forall(b)) | (Exists(a), Exists(b)) => {
+            let u = env.unique_variable(Ind);
+            let ta = substitute_term(&a.1, &a.0, &u);
+            let tb = substitute_term(&b.1, &b.0, &u);
+            term_eq(env, &ta, &tb)
+        },
         _ => false
     }
 }
@@ -785,6 +952,7 @@ fn modus_ponens(env: &Env, line: usize, b: Term, args: &[Bstr], _hint: Option<Te
 
 fn verify_cb(env: &mut Env, stmt: Statement) -> Result<(), Error> {
     let Statement {line, label, term, rule, hint} = stmt;
+    // println!("{:#?}", term);
     let form = match term {
         Sum::Right(seq) => {
             let ctx = seq.0;
@@ -842,6 +1010,7 @@ wk. (H ⊢ B) → (H ∧ A ⊢ B), axiom.
 exch. (H ⊢ A) → (H ⊢ A), axiom.
 ";
 
+#[allow(dead_code)]
 fn load_prelude(env: &mut Env) {
     if let Err(_) = verify(env, RULES.as_bytes()) {
         unreachable!();
