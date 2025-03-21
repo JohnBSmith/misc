@@ -533,7 +533,7 @@ def unify(line, A, pattern, subst):
                 B = subst[pattern.node]
                 return unify(line, A, B, subst)
             else:
-                if pattern.type != A.type:
+                if pattern.type != A.type: #todo: entfällt anscheinend
                     return UErr(A, pattern)
                 subst[pattern.node] = A
                 return None

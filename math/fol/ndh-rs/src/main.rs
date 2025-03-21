@@ -1,8 +1,6 @@
 
-use std::env::args;
-use std::fs;
-use std::rc::Rc;
-use std::cell::Cell;
+use std::{env::args, fs};
+use std::{rc::Rc, cell::Cell};
 use std::collections::HashMap;
 
 mod bstr;
@@ -193,6 +191,18 @@ impl std::fmt::Display for Type {
     }
 }
 
+#[derive(Debug)]
+struct Substitution {
+    term: Term,
+    args: Vec<Term>
+}
+
+impl Substitution {
+    fn call(&self, argv: &[Term]) -> Term {
+        substitute_terms(&self.term, &self.args, argv)
+    }
+}
+
 #[derive(Debug, Clone)]
 enum TermValue {
     Var(Bstr),
@@ -201,7 +211,8 @@ enum TermValue {
     BoundVar(usize),
     App(Rc<[Term]>),
     Forall(Rc<(Term, Term)>),
-    Exists(Rc<(Term, Term)>)
+    Exists(Rc<(Term, Term)>),
+    Subst(Rc<Substitution>)
 }
 
 #[derive(Clone)]
@@ -231,7 +242,7 @@ impl Term {
     }
 }
 
-use TermValue::{Var, Const, PatVar, BoundVar, App, Forall, Exists};
+use TermValue::{Var, Const, PatVar, BoundVar, App, Forall, Exists, Subst};
 
 fn term(value: TermValue, ty: Type) -> Term {
     Term {value, ty}
@@ -257,10 +268,10 @@ impl std::fmt::Debug for Term {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if f.alternate() {
             if let App(_) = self.value {
-                return write!(f, "{:#?}:{:?}", self.value, self.ty);
+                return write!(f, "{:#?}:{}", self.value, self.ty);
             }
         }
-        write!(f, "{:?}:{:?}", self.value, self.ty)
+        write!(f, "{:?}:{}", self.value, self.ty)
     }
 }
 
@@ -279,7 +290,8 @@ impl std::fmt::Display for Term {
                 write!(f, ")")
             },
             Forall(t) => write!(f, "(forall {} {})", t.0, t.1),
-            Exists(t) => write!(f, "(exists {} {})", t.0, t.1)
+            Exists(t) => write!(f, "(exists {} {})", t.0, t.1),
+            Subst(_t) => todo!()
         }
     }
 }
@@ -388,7 +400,10 @@ struct Env {
     infix_table:  HashMap<&'static [u8], (u32, Assoc, Infix)>,
     prefix_table: HashMap<&'static [u8], (u32, Prefix)>,
     book: HashMap<Bstr, Term>,
-    var_counter: Cell<usize>
+    var_counter: Cell<usize>,
+
+    #[cfg(debug_assertions)]
+    mismatch_trace: std::cell::RefCell<Vec<(Term, Term)>>
 }
 
 impl Env {
@@ -399,7 +414,10 @@ impl Env {
             infix_table: init_infix_table(),
             prefix_table: init_prefix_table(),
             book: HashMap::new(),
-            var_counter: Cell::new(0)
+            var_counter: Cell::new(0),
+
+            #[cfg(debug_assertions)]
+            mismatch_trace: std::cell::RefCell::new(Vec::new())
         }
     }
     fn lookup(&self) -> &Token {
@@ -412,13 +430,52 @@ impl Env {
         self.var_counter.set(self.var_counter.get() + 1);
         term(BoundVar(self.var_counter.get()), ty)
     }
+    #[cfg(debug_assertions)]
+    fn set_mismatch(&self, x: Term, y: Term) {
+        self.mismatch_trace.borrow_mut().push((x, y));
+    }
+    #[cfg(debug_assertions)]
+    fn print_mismatch(&self) {
+        let a = self.mismatch_trace.borrow();
+        println!("Traceback:\n");
+        for (x, y) in a.iter() {
+            println!("     {:?}\nwith {:?}\n", x, y);
+        }
+    }
 }
 
 fn substitute_term(t: &Term, x: &Term, u: &Term) -> Term {
     match (&t.value, &x.value) {
         (Var(tv), Var(xv)) if tv == xv => u.clone(),
+        (BoundVar(tv), BoundVar(xv)) if tv == xv => u.clone(),
         (App(a), _) => term(App(Rc::from(a.iter().map(|s|
             substitute_term(s, x, u)).collect::<Vec<_>>())), t.ty.clone()),
+        _ => t.clone()
+    }
+}
+
+fn substitute_terms(t: &Term, x: &[Term], u: &[Term]) -> Term {
+    match &t.value {
+        Var(tv) => {
+            for i in 0..x.len() {
+                match &x[i].value {
+                    Var(xiv) if tv == xiv => {return u[i].clone();}
+                    _ => {}
+                }
+            }
+            t.clone()
+        },
+        BoundVar(tv) => {
+            for i in 0..x.len() {
+                match &x[i].value {
+                    BoundVar(xiv) if tv == xiv => {return u[i].clone();}
+                    _ => {}
+                }
+            }
+            t.clone()
+        },
+        App(a) => term(App(Rc::from(a.iter().map(|s|
+            substitute_terms(s, x, u)).collect::<Vec<_>>())), t.ty.clone()),
         _ => t.clone()
     }
 }
@@ -559,6 +616,9 @@ fn type_check(line: usize, t: &mut Term, record: &mut HashMap<Bstr, Type>)
         if t.ty == Type::Some {
             t.ty = Ind;
         }
+    } else if let Forall(a) | Exists(a) = &mut t.value {
+        let Some(a) = Rc::get_mut(a) else {unreachable!()};
+        type_check(line, &mut a.1, record)?;
     }
     Ok(())
 }
@@ -591,6 +651,9 @@ fn type_check_apps(line: usize, t: &mut Term, record: &mut HashMap<Bstr, Type>)
         for x in a {
             type_check_apps(line, x, record)?;
         }
+    } else if let Forall(a) | Exists(a) = &mut t.value {
+        let Some(a) = Rc::get_mut(a) else {unreachable!()};
+        type_check_apps(line, &mut a.1, record)?;
     }
     Ok(())
 }
@@ -745,6 +808,14 @@ fn pattern_from(t: &Term) -> Term {
             App(Rc::from(a.iter().map(pattern_from).collect::<Vec<_>>())),
             t.ty.clone()
         ),
+        Forall(a) => term(
+            Forall(Rc::from((a.0.clone(), pattern_from(&a.1)))),
+            t.ty.clone()
+        ),
+        Exists(a) => term(
+            Exists(Rc::from((a.0.clone(), pattern_from(&a.1)))),
+            t.ty.clone()
+        ),
         _ => t.clone()
     }
 }
@@ -816,6 +887,39 @@ mod substi {
 }
 use substi::Subs;
 
+fn side_condition<'a>(c: &'a Term, conds: &mut Vec<(Term, Term)>) -> &'a Term {
+    if c.is_connective("subj") && c.arg(1).is_connective("nf") {
+        let x = c.arg(1).arg(1);
+        let a = c.arg(1).arg(2);
+        conds.push((x.clone(), a.clone()));
+        side_condition(c.arg(2), conds)
+    } else {c}
+}
+
+fn free_in(env: &Env, x: &Term, t: &Term, subs: &Subs) -> bool {
+    match &t.value {
+        PatVar(id) => {
+            if let Some(t_subs) = subs.get(id) {
+                if !term_eq(env, t, t_subs) {
+                    return free_in(env, x, t_subs, subs);
+                }
+            }
+            t.ty == Prop && term_eq(env, x, t)
+        },
+        Var(_) | Const(_) => {
+            t.ty == Prop && term_eq(env, x, t)
+        },
+        App(a) => {
+            for s in a.iter() {
+                if free_in(env, x, s, subs) {return true;}
+            }
+            false
+        },
+        Forall(a) | Exists(a) => free_in(env, x, &a.1, subs),
+        _ => false
+    }
+}
+
 fn subs_rec(t: &Term, subs: &Subs) -> Term {
     match &t.value {
         PatVar(x) => {
@@ -856,11 +960,21 @@ fn set_eq(env: &Env, a: &[Term], b: &[Term]) -> bool {
     subset(env, a, b) && subset(env, b, a)
 }
 
-fn unify_seq(env: &Env, line: usize, pattern: &[Term], a: &[Term], subs: &mut Subs)
+#[cfg(debug_assertions)]
+macro_rules! trace {
+    ($env:expr, $x:expr, $y:expr) => {$env.set_mismatch($x.clone(), $y.clone())}
+}
+
+#[cfg(not(debug_assertions))]
+macro_rules! trace {
+    ($env:expr, $x:expr, $y:expr) => {}
+}
+
+fn unify_seq(env: &Env, line: usize, a: &[Term], pattern: &[Term], subs: &mut Subs)
 -> Result<bool, Error>
 {
     let result = unify(env, line, &a[2], &pattern[2], subs)?;
-    if !result {return Ok(false);}
+    if !result {trace!(env, a[2], pattern[2]); return Ok(false);}
     let mut l1 = Vec::new();
     let mut l2 = Vec::new();
     conj_list(&pattern[1], Some(subs), &mut l2);
@@ -871,9 +985,14 @@ fn unify_seq(env: &Env, line: usize, pattern: &[Term], a: &[Term], subs: &mut Su
 fn unify_args(env: &Env, line: usize, a: &[Term], b: &[Term], subs: &mut Subs)
 -> Result<bool, Error>
 {
-    if a.len() != b.len() {return Ok(false);}
+    if a.len() != b.len() {
+        trace!(env,
+            term(App(Rc::from(a)), Type::None),
+            term(App(Rc::from(b)), Type::None));
+        return Ok(false);
+    }
     let mut subs_copy = subs.clone();
-    for (pat, x) in a.as_ref().iter().zip(b.as_ref()) {
+    for (x, pat) in a.as_ref().iter().zip(b.as_ref()) {
         let result = unify(env, line, x, pat, subs)?;
         if !result {
             if a[0].is_const("seq") && b[0].is_const("seq") {
@@ -883,10 +1002,52 @@ fn unify_args(env: &Env, line: usize, a: &[Term], b: &[Term], subs: &mut Subs)
                 }
                 return Ok(result);
             }
+            trace!(env,
+                term(App(Rc::from(a)), Type::None),
+                term(App(Rc::from(b)), Type::None));
             return Ok(false);
         }
     }
     Ok(true)
+}
+
+fn unify_pred(env: &Env, line: usize, t: &Term, pattern: &[Term], subs: &mut Subs)
+-> Result<bool, Error>
+{
+    let PatVar(f) = &pattern[0].value else {unreachable!()};
+    let args = &pattern[1..];
+    if let Some(f) = subs.get(f) {
+        let Subst(f) = &f.value else {
+            trace!(env, t, term(App(Rc::from(pattern)), t.ty.clone()));
+            return Ok(false)
+        };
+        let b = f.call(args);
+        unify(env, line, t, &b, subs)
+    } else {
+        let mut acc = Vec::with_capacity(args.len());
+        for x in args {
+            if let PatVar(id) = &x.value {
+                if let Some(x) = subs.get(id) {
+                    acc.push(x.clone());
+                } else {
+                    acc.push(x.clone());
+                }
+            } else {
+                acc.push(x.clone());
+            }
+        }
+        subs.set(f.clone(), term(Subst(Rc::new(Substitution {term: t.clone(), args: acc})), Type::None));
+        Ok(true)
+    }
+}
+
+fn unify_quant(env: &Env, line: usize, t: &(Term, Term), pattern: &(Term, Term), subs: &mut Subs)
+-> Result<bool, Error>
+{
+    let u = env.unique_variable(Ind);
+    let ta = substitute_term(&t.1, &t.0, &u);
+    let tb = substitute_term(&pattern.1, &pattern.0, &u);
+    unify(env, line, &ta, &tb, subs)
 }
 
 fn unify(env: &Env, line: usize, t: &Term, pattern: &Term, subs: &mut Subs)
@@ -897,19 +1058,30 @@ fn unify(env: &Env, line: usize, t: &Term, pattern: &Term, subs: &mut Subs)
     }
     // println!("    {:?}\nmit {:?}\n", t, pattern);
     match &pattern.value {
-        PatVar(a) => {
-            Ok(if let Some(b) = subs.get(a) {
-                term_eq(env, b, t)
+        PatVar(id) => {
+            Ok(if let Some(b) = subs.get(id) {
+                term_eq(env, t, b)
             } else {
-                subs.set(a.clone(), t.clone());
+                subs.set(id.clone(), t.clone());
                 true
             })
         },
-        App(a) => {
-            match &t.value {
-                App(b) => unify_args(env, line, a, b, subs),
-                _ => Ok(false)
+        App(b) => {
+            if let PatVar(_) = &b[0].value {
+                return unify_pred(env, line, t, b, subs);
             }
+            match &t.value {
+                App(a) => unify_args(env, line, a, b, subs),
+                _ => {trace!(env, t, pattern); Ok(false)}
+            }
+        },
+        Forall(b) => match &t.value {
+            Forall(a) => unify_quant(env, line, a, b, subs),
+            _ => {trace!(env, t, pattern); Ok(false)}
+        },
+        Exists(b) => match &t.value {
+            Exists(a) => unify_quant(env, line, a, b, subs),
+            _ => {trace!(env, t, pattern); Ok(false)}
         },
         _ => Ok(term_eq(env, pattern, t))
     }
@@ -920,6 +1092,9 @@ fn conclusion(env: &Env, line: usize, b: &Term, c: &Term, subs: &mut Subs, args:
 {
     let result = unify(env, line, b, c, subs)?;
     if !result {
+        #[cfg(debug_assertions)] {
+            env.print_mismatch();
+        }
         return Err(logic_error(line,
             format!("unification failed for {}, in conclusion", args[0])));
     }
@@ -930,7 +1105,8 @@ fn modus_ponens(env: &Env, line: usize, b: Term, args: &[Bstr], _hint: Option<Te
 -> Result<(), Error>
 {
     let c0 = pattern_from(lookup(&env.book, &args[0], line)?);
-    let mut c = &c0;
+    let mut conds: Vec<(Term, Term)> = Vec::new();
+    let mut c = side_condition(&c0, &mut conds);
     // println!("{c:#?}");
 
     let mut subs = Subs::new();
@@ -941,13 +1117,28 @@ fn modus_ponens(env: &Env, line: usize, b: Term, args: &[Bstr], _hint: Option<Te
         }
         let result = unify(env, line, a, c.arg(1), &mut subs)?;
         if !result {
-            // println!("    {}\nmit {}\n", a, get_arg(c, 1));
+            #[cfg(debug_assertions)] {
+                env.print_mismatch();
+            }
             return Err(logic_error(line,
                 format!("unification failed for {}, argument {}", args[0], i)));
         }
         c = c.arg(2);
     }
-    conclusion(env, line, &b, c, &mut subs, args)
+    conclusion(env, line, &b, c, &mut subs, args)?;
+    for (x, a) in &conds {
+        let mut x = x;
+        if let PatVar(id) = &x.value {
+            if let Some(x_subs) = subs.get(id) {
+                x = x_subs;
+            }
+        }
+        if free_in(env, x, a, &subs) {
+            return Err(logic_error(line, format!(
+                "in {}: {} occurs free in {}", args[0], x, a)));
+        }
+    }
+    Ok(())
 }
 
 fn verify_cb(env: &mut Env, stmt: Statement) -> Result<(), Error> {
