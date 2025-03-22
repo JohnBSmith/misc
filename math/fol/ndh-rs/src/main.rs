@@ -1,4 +1,11 @@
 
+// todo: Definierte Funktion wird auf zu wenige oder viele Argumente angewendet.
+// todo: Symboltabelle enthält nur Konstanten. Es wäre zu verhindern,
+//   dass bereits definierte Konstanten überschrieben werden.
+//   Man beachte auch den Unterschied in der Logik, dass Symbole der
+//   Symboltabelle niemals als Muster zur Verfügung stehen. Eigentlich
+//   ein gewolltes Verhalten.
+
 use std::{env::args, fs};
 use std::{rc::Rc, cell::Cell};
 use std::collections::HashMap;
@@ -291,7 +298,7 @@ impl std::fmt::Display for Term {
             },
             Forall(t) => write!(f, "(forall {} {})", t.0, t.1),
             Exists(t) => write!(f, "(exists {} {})", t.0, t.1),
-            Subst(_t) => todo!()
+            Subst(_t) => write!(f, "todo")
         }
     }
 }
@@ -394,6 +401,26 @@ fn init_prefix_table() -> HashMap<&'static [u8], (u32, Prefix)> {
     ])
 }
 
+fn fn_type(argv: Vec<Type>, value: Type) -> Type {
+    Type::Fn(Rc::new(FnType {argv, value}))
+}
+
+fn init_definitions() -> HashMap<Bstr, Type> {
+    HashMap::from([
+        (Bstr::from("conj"), Type::None),
+        (Bstr::from("disj"), Type::None),
+        (Bstr::from("subj"), Type::None),
+        (Bstr::from("bijn"), Type::None),
+        (Bstr::from("neg"), Type::None),
+        (Bstr::from("nec"), Type::None),
+        (Bstr::from("pos"), Type::None),
+        (Bstr::from("seq"), Type::None),
+        (Bstr::from("nf"), Type::None),
+        (Bstr::from("eq"), fn_type(vec![Ind, Ind], Prop)),
+        (Bstr::from("element"), fn_type(vec![Ind, Ind], Prop)),
+    ])
+}
+
 struct Env {
     tokens: Vec<Token>,
     index: Cell<usize>,
@@ -401,6 +428,7 @@ struct Env {
     prefix_table: HashMap<&'static [u8], (u32, Prefix)>,
     book: HashMap<Bstr, Term>,
     var_counter: Cell<usize>,
+    definitions: HashMap<Bstr, Type>,
 
     #[cfg(debug_assertions)]
     mismatch_trace: std::cell::RefCell<Vec<(Term, Term)>>
@@ -415,6 +443,7 @@ impl Env {
             prefix_table: init_prefix_table(),
             book: HashMap::new(),
             var_counter: Cell::new(0),
+            definitions: init_definitions(),
 
             #[cfg(debug_assertions)]
             mismatch_trace: std::cell::RefCell::new(Vec::new())
@@ -430,6 +459,13 @@ impl Env {
         self.var_counter.set(self.var_counter.get() + 1);
         term(BoundVar(self.var_counter.get()), ty)
     }
+
+    #[allow(dead_code)]
+    fn reset(&mut self) {
+        self.book.clear();
+        self.definitions = init_definitions();
+    }
+
     #[cfg(debug_assertions)]
     fn set_mismatch(&self, x: Term, y: Term) {
         self.mismatch_trace.borrow_mut().push((x, y));
@@ -439,7 +475,7 @@ impl Env {
         let a = self.mismatch_trace.borrow();
         println!("Traceback:\n");
         for (x, y) in a.iter() {
-            println!("     {:?}\nwith {:?}\n", x, y);
+            println!("     {}\nwith {}\n", x, y);
         }
     }
 }
@@ -505,7 +541,11 @@ fn nud(env: &Env) -> Result<Term, Error> {
     let token = env.lookup();
     if let TokenValue::Identifier(id) = &token.value {
         env.advance();
-        Ok(term(TermValue::Var(id.clone()),Type::Some))
+        if let Some(ty) = env.definitions.get(id) {
+            Ok(term(TermValue::Const(id.clone()), ty.clone()))
+        } else {
+            Ok(term(TermValue::Var(id.clone()), Type::Some))
+        }
     } else if token.is_symbol("⊥") {
         env.advance();
         Ok(constant("false", Prop))
@@ -766,6 +806,7 @@ fn parse_statement(env: &Env) -> Result<Statement, Error> {
     let rule = rule_app(env)?;
     let token = env.lookup();
     let hint = if token.is_symbol(",") {
+        env.advance();
         Some(formula_type_checked(env)?)
     } else {
         None
@@ -840,7 +881,7 @@ fn term_eq(env: &Env, a: &Term, b: &Term) -> bool {
 
 mod substi {
     use crate::{Term, Bstr};
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     pub struct Subs(Vec<(Bstr, Term)>);
     // There are so few variables in ordinary inference rules
     // that Vec turns out to be more efficient than HashMap.
@@ -904,10 +945,10 @@ fn free_in(env: &Env, x: &Term, t: &Term, subs: &Subs) -> bool {
                     return free_in(env, x, t_subs, subs);
                 }
             }
-            t.ty == Prop && term_eq(env, x, t)
+            t.ty == Ind && term_eq(env, x, t)
         },
         Var(_) | Const(_) => {
-            t.ty == Prop && term_eq(env, x, t)
+            t.ty == Ind && term_eq(env, x, t)
         },
         App(a) => {
             for s in a.iter() {
@@ -1053,10 +1094,10 @@ fn unify_quant(env: &Env, line: usize, t: &(Term, Term), pattern: &(Term, Term),
 fn unify(env: &Env, line: usize, t: &Term, pattern: &Term, subs: &mut Subs)
 -> Result<bool, Error>
 {
+    // println!("    {}\nmit {}\n", t, pattern);
     if pattern.ty != t.ty {
         return Err(logic_error(line, format!("type error {pattern:?}, {t:?}")));
     }
-    // println!("    {:?}\nmit {:?}\n", t, pattern);
     match &pattern.value {
         PatVar(id) => {
             Ok(if let Some(b) = subs.get(id) {
@@ -1087,9 +1128,36 @@ fn unify(env: &Env, line: usize, t: &Term, pattern: &Term, subs: &mut Subs)
     }
 }
 
+fn unification_hint(line: usize, hint: &Term, subs: &mut Subs)
+-> Result<(), Error>
+{
+    if hint.is_connective("bijn") || hint.is_connective("eq") {
+        let lhs = hint.arg(1); let rhs = hint.arg(2);
+        if let App(a) = &lhs.value {
+            let f = &a[0]; let args = &a[1..];
+            if let Var(id) = &f.value {
+                let subst = Rc::new(Substitution {term: rhs.clone(), args: args.to_vec()});
+                subs.set(id.clone(), term(Subst(subst), Type::None));
+            }
+            return Ok(());
+        }
+    }
+    Err(logic_error(line, format!("invalid unification hint: {}", hint)))
+}
+
+fn is_quantifier_rule(c: &Term) -> bool {
+    if c.is_connective("subj") && c.arg(2).is_connective("seq") {
+        let a = c.arg(2).arg(2);
+        matches!(&a.value, Forall(_) | Exists(_))
+    } else {false}
+}
+
 fn conclusion(env: &Env, line: usize, b: &Term, c: &Term, subs: &mut Subs, args: &[Bstr])
 -> Result<(), Error>
 {
+    #[cfg(debug_assertions)]
+    env.mismatch_trace.borrow_mut().clear();
+
     let result = unify(env, line, b, c, subs)?;
     if !result {
         #[cfg(debug_assertions)] {
@@ -1101,20 +1169,40 @@ fn conclusion(env: &Env, line: usize, b: &Term, c: &Term, subs: &mut Subs, args:
     Ok(())
 }
 
-fn modus_ponens(env: &Env, line: usize, b: Term, args: &[Bstr], _hint: Option<Term>)
+fn modus_ponens(env: &Env, line: usize, b: Term, args: &[Bstr], hint: Option<Term>)
 -> Result<(), Error>
 {
-    let c0 = pattern_from(lookup(&env.book, &args[0], line)?);
+    let c = lookup(&env.book, &args[0], line)?;
+    if args.len() > 1 && c.is_connective("seq") {
+        if !c.arg(1).is_const("true") {
+            return Err(logic_error(line,
+                format!("'{}' does not correspond to a rule", args[0])));
+        }
+        // c = auto_rule(line, c.arg(2), 1, args.len() - 1);
+    }
+    let c0 = pattern_from(c);
     let mut conds: Vec<(Term, Term)> = Vec::new();
     let mut c = side_condition(&c0, &mut conds);
     // println!("{c:#?}");
 
     let mut subs = Subs::new();
+    let mut reverse = false;
+    if let Some(hint) = hint {
+        unification_hint(line, &hint, &mut subs)?;
+    }
+    if is_quantifier_rule(c) {
+        conclusion(env, line, &b, c.arg(2), &mut subs, args)?;
+        reverse = true;
+    }
     for i in 1..args.len() {
         let a = lookup(&env.book, &args[i], line)?;
         if !c.is_connective("subj") {
             return Err(logic_error(line, "expected a rule/subjunction".to_string()));
         }
+
+        #[cfg(debug_assertions)]
+        env.mismatch_trace.borrow_mut().clear();
+
         let result = unify(env, line, a, c.arg(1), &mut subs)?;
         if !result {
             #[cfg(debug_assertions)] {
@@ -1125,7 +1213,9 @@ fn modus_ponens(env: &Env, line: usize, b: Term, args: &[Bstr], _hint: Option<Te
         }
         c = c.arg(2);
     }
-    conclusion(env, line, &b, c, &mut subs, args)?;
+    if !reverse {
+        conclusion(env, line, &b, c, &mut subs, args)?;
+    }
     for (x, a) in &conds {
         let mut x = x;
         if let PatVar(id) = &x.value {
@@ -1133,10 +1223,98 @@ fn modus_ponens(env: &Env, line: usize, b: Term, args: &[Bstr], _hint: Option<Te
                 x = x_subs;
             }
         }
+        // println!("COND: {} in {:?}", x, a);
+        // println!("SUBS: {:#?}", subs);
         if free_in(env, x, a, &subs) {
             return Err(logic_error(line, format!(
                 "in {}: {} occurs free in {}", args[0], x, a)));
         }
+    }
+    Ok(())
+}
+
+fn expect_len(line: usize, args: &[Bstr], n: usize, rule_name: &str)
+-> Result<(), Error>
+{
+    let s = if n == 1 {""} else {"s"};
+    Err(logic_error(line, format!(
+        "rule {} expects {} argument{}, but got {}",
+        rule_name, n, s, args.len())))
+}
+
+fn free_vars(env: &Env, a: &Term, s: &mut HashMap<Bstr, ()>) {
+    match &a.value {
+        Var(id) | Const(id) => {
+            if let None = env.definitions.get(id) {
+                s.insert(id.clone(), ());
+            }
+        },
+        App(a) => {
+            for b in a.iter() {
+                free_vars(env, b, s);
+            }
+        },
+        Forall(a) | Exists(a) => {
+            free_vars(env, &a.1, s);
+        },
+        _ => {}
+    }
+}
+
+fn free_vars_check(env: &Env, line: usize, a: &Term, argv: &[Term], label: &Bstr) -> Result<(), Error> {
+    let mut s = HashMap::new();
+    free_vars(env, a, &mut s);
+    for x in s.keys() {
+        if label.as_slice() != "0".as_bytes() &&
+            !argv.iter().any(|arg|
+                matches!(&arg.value, Const(id) | Var(id) if id == x))
+        {
+            return Err(logic_error(line, format!(
+                "{} is free in right hand side of definition", x)));
+        }
+    }
+    Ok(())
+}
+
+fn definition(env: &mut Env, line: usize, seq: &Term, args: &[Bstr], label: &Bstr)
+-> Result<(), Error>
+{
+    if args.len() != 1 {
+        return expect_len(line, args, 0, "def");
+    }
+    if !seq.is_connective("seq") {
+        return Err(logic_error(line, "definition expects a sequent".to_string()));
+    }
+    if !seq.arg(1).is_const("true") {
+        return Err(logic_error(line, "definition expects empty context".to_string()));
+    }
+    let c = seq.arg(2);
+    if c.is_connective("bijn") || c.is_connective("eq") {
+        let a = c.arg(1); let b = c.arg(2);
+        match &a.value {
+            Var(id) | Const(id) =>  {
+                if let Some(_) = env.definitions.get(id) {
+                    return Err(logic_error(line, "already defined".to_string()));
+                }
+                free_vars_check(env, line, b, &[], label)?;
+                env.definitions.insert(id.clone(), a.ty.clone());
+            },
+            App(args) => {
+                let (Var(id) | Const(id)) = &args[0].value else {
+                    return Err(logic_error(line, "expected identifier".to_string()));
+                };
+                if let Some(_) = env.definitions.get(id) {
+                    return Err(logic_error(line, "already defined".to_string()));
+                }
+                free_vars_check(env, line, b, &args[1..], label)?;
+                env.definitions.insert(id.clone(), args[0].ty.clone());
+            },
+            _ => {
+                return Err(logic_error(line, "malformed definition".to_string()));
+            }
+        }
+    } else {
+        return Err(logic_error(line, "malformed definition".to_string()));
     }
     Ok(())
 }
@@ -1166,7 +1344,7 @@ fn verify_cb(env: &mut Env, stmt: Statement) -> Result<(), Error> {
         return Err(logic_error(line, "cyclic deduction".to_string()));
     }
     if rule[0].as_slice() == b"def" {
-        Ok(()) // todo: definition(line, book, form, rule[1:], label)
+        definition(env, line, &form, &rule, &label)
     } else if rule[0].as_slice() == b"axiom" {
         Ok(())
     } else {
@@ -1199,6 +1377,13 @@ bij_eliml. (H ⊢ A ↔ B) → (H ⊢ A → B), axiom.
 bij_elimr. (H ⊢ A ↔ B) → (H ⊢ B → A), axiom.
 wk. (H ⊢ B) → (H ∧ A ⊢ B), axiom.
 exch. (H ⊢ A) → (H ⊢ A), axiom.
+uq_intro. (nf u (H ∧ ∀x. A x)) → (H ⊢ A u) → (H ⊢ ∀x. A x), axiom.
+uq_elim. (H ⊢ ∀x. A x) → (H ⊢ A t), axiom.
+ex_intro. (H ⊢ A t) → (H ⊢ ∃x. A x), axiom.
+ex_elim. (nf u (H1 ∧ H2 ∧ B ∧ ∃x. A x)) →
+  (H1 ⊢ ∃x. A x) → (H2 ∧ A u ⊢ B) → (H1 ∧ H2 ⊢ B), axiom.
+lift_impl. (⊢ A → B) → (H ⊢ A) → (H ⊢ B), axiom.
+lift_impl_ii. (⊢ A → B → C) → (H1 ⊢ A) → (H2 ⊢ B) → (H1 ∧ H2 ⊢ C), axiom.
 ";
 
 #[allow(dead_code)]
