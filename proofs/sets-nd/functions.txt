@@ -70,7 +70,7 @@ fn_img_lemma. ⊢ function f → x ∈ dom f →
 10. 2 ⊢ y ∈ {y | (x, y) ∈ f}, comp_intro 9 2.
 11. 2, 5 ⊢ y ∈ {b}, eq_subst_rev 7 10, P u ↔ y ∈ u.
 12. 2, 5 ⊢ y = b, sg_elim 6 11.
-13. 5 ⊢ ⋂{b} = ⋂{y | (x, y) ∈ f}, f_equal 7.
+13. 5 ⊢ ⋂{b} = ⋂{y | (x, y) ∈ f}, f_equal 7, f u = Cap u.
 14. 5 ⊢ ⋂{b} = b, Intersection_sg 6.
 15. 5 ⊢ b = ⋂{b}, eq_symm 14.
 16. 5 ⊢ b = ⋂{y | (x, y) ∈ f}, eq_trans 15 13.

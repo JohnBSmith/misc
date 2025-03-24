@@ -534,7 +534,7 @@ Intersection_sg. ⊢ set a → ⋂{a} = a, subj_intro 20.
 01. 1 ⊢ set x, hypo.
 02. 2 ⊢ set y, hypo.
 03. 3 ⊢ {x} = {y}, hypo.
-04. 3 ⊢ ⋂{x} = ⋂{y}, f_equal 3.
+04. 3 ⊢ ⋂{x} = ⋂{y}, f_equal 3, f u = Cap u.
 05. 1 ⊢ ⋂{x} = x, Intersection_sg 1.
 06. 2 ⊢ ⋂{y} = y, Intersection_sg 2.
 07. 1, 3 ⊢ x = ⋂{y}, eq_subst 5 4, P u ↔ u = ⋂{y}.
@@ -735,7 +735,7 @@ set_sg. ⊢ set x → set {x}, subj_intro 4.
 05. 1, 2 ⊢ set {x, y}, pairing 1 2.
 06. 1, 2 ⊢ set {{x, y}}, set_sg 5.
 07. 1, 2 ⊢ set {{x}, {x, y}}, set_union 4 6.
-08. 1, 2 ⊢ set (x, y), eq_subst_rev pair_eq 7.
+08. 1, 2 ⊢ set (x, y), eq_subst_rev pair_eq 7, P u <-> set u.
 09. 1 ⊢ set y → set (x, y), subj_intro 8.
 set_pair. ⊢ set x → set y → set (x, y), subj_intro 9.
 
@@ -781,7 +781,7 @@ setr_from_pair. ⊢ set (x, y) → set y, subj_intro 10.
 12. ⊢ {x} ⊆ {x, y}, union_incl_left.
 13. ⊢ {x} ∩ {x, y} = {x}, intersection_from_incl 12.
 14. 1 ⊢ ⋂(x, y) = {x}, eq_trans 11 13.
-15. 1 ⊢ ⋂⋂(x, y) = ⋂{x}, f_equal 14.
+15. 1 ⊢ ⋂⋂(x, y) = ⋂{x}, f_equal 14, f u = Cap u.
 16. 1 ⊢ ⋂{x} = x, Intersection_sg 2.
 17. 1 ⊢ ⋂⋂(x, y) = x, eq_trans 15 16.
 18. ⊢ fst (x, y) = ⋂⋂(x, y), fst_eq.
@@ -794,12 +794,12 @@ pair_fst_conj. ⊢ set x ∧ set y → fst (x, y) = x, subj_intro 19.
 23. 1 ⊢ ⋃(x, y) = {x} ∪ {x, y}, eq_trans 21 22.
 24. ⊢ {x} ∪ {x, y} = {x, y}, union_from_incl 12.
 25. 1 ⊢ ⋃(x, y) = {x, y}, eq_trans 23 24.
-26. 1 ⊢ ⋃⋃(x, y) = ⋃{x, y}, f_equal 25.
+26. 1 ⊢ ⋃⋃(x, y) = ⋃{x, y}, f_equal 25, f u = Cup u.
 27. 1 ⊢ ⋃{x, y} = x ∪ y, Union_pair_set 1.
 28. 1 ⊢ ⋃⋃(x, y) = x ∪ y, eq_trans 26 27.
 
 29. 1 ⊢ ⋂{x, y} = x ∩ y, Intersection_pair_set 1.
-30. 1 ⊢ ⋂⋃(x, y) = ⋂{x, y}, f_equal 25.
+30. 1 ⊢ ⋂⋃(x, y) = ⋂{x, y}, f_equal 25, f u = Cap u.
 31. 1 ⊢ ⋂⋃(x, y) = x ∩ y, eq_trans 30 29.
 
 32. ⊢ scd (x, y) = ⋂⋃(x, y) ∪ (⋃⋃(x, y) \ ⋂⋂(x, y)), scd_eq.
@@ -850,17 +850,17 @@ pair_scd. ⊢ set x → set y → scd (x, y) = y, subj_intro 7.
 03. 1 ⊢ set x, conj_eliml 1.
 04. 1 ⊢ set y, conj_elimr 1.
 05. 1 ⊢ set (x, y), set_pair 3 4.
-06. 1, 2 ⊢ set (x', y'), eq_subst 2 5.
+06. 1, 2 ⊢ set (x', y'), eq_subst 2 5, P u <-> set u.
 07. 1, 2 ⊢ set x', setl_from_pair 6.
 08. 1, 2 ⊢ set y', setr_from_pair 6.
 09. 1, 2 ⊢ set x' ∧ set y', conj_intro 7 8.
-10. 2 ⊢ fst (x, y) = fst (x', y'), f_equal 2.
+10. 2 ⊢ fst (x, y) = fst (x', y'), f_equal 2, f u = fst u.
 11. 1 ⊢ fst (x, y) = x, pair_fst_conj 1.
 12. 1 ⊢ x = fst (x, y), eq_symm 11.
 13. 1, 2 ⊢ fst (x', y') = x', pair_fst_conj 9.
 14. 1, 2 ⊢ x = fst (x', y'), eq_trans 12 10.
 15. 1, 2 ⊢ x = x', eq_trans 14 13.
-16. 2 ⊢ scd (x, y) = scd (x', y'), f_equal 2.
+16. 2 ⊢ scd (x, y) = scd (x', y'), f_equal 2, f u = scd u.
 17. 1 ⊢ scd (x, y) = y, pair_scd_conj 1.
 18. 1 ⊢ y = scd (x, y), eq_symm 17.
 19. 1, 2 ⊢ scd (x', y') = y', pair_scd_conj 9.

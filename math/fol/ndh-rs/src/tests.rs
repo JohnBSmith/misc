@@ -544,7 +544,4 @@ r_equi. ⊢ r ↔ ∀x. f x = g x, def.
 2. ⊢ P x → P x, subj_intro 1.
 3. ⊢ ∀P. P x → P x, uq_intro 2.
 "),*/
-("09.02", ELOGIC, "
-1. |- A x ∧ x, axiom
-")
 ];

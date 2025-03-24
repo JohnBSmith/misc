@@ -29,3 +29,4 @@ else:
     files = [m + ".txt" for (m, _) in modules]
 
 run(["nd.py"] + files)
+run(["nd"] + files)

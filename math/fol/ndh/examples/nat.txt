@@ -46,7 +46,7 @@ induction. (H1 ⊢ P O) → (H2 ⊢ ∀n. P n → P (S n)) →
 
 # Induction step
 7. 7 ⊢ a + b + n = a + (b + n), hypo.
-8. 7 ⊢ S (a + b + n) = S (a + (b + n)), f_equal 7.
+8. 7 ⊢ S (a + b + n) = S (a + (b + n)), f_equal 7, f x = S x.
 9. ⊢ a + b + S n = S (a + b + n), add_succ.
 10. 7 ⊢ a + b + S n = S (a + (b + n)), eq_trans_rule 9 8.
 11. ⊢ b + S n = S (b + n), add_succ.
