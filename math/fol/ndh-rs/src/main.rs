@@ -108,6 +108,39 @@ fn is_utf8_continuation_byte(byte: u8) -> bool {
     (byte & 0b1100_0000) == 0b1000_0000
 }
 
+fn decode_utf8_unchecked(s: &[u8]) -> u32 {
+    let s0 = s[0];
+    if s0 < 0b11100000 {
+        // 110xxxxx 10xxxxxx
+        (((s0 & 0b11111) as u32) << 6) | ((s[1] & 0b111111) as u32)
+    } else {
+        // 1110xxxx 10xxxxxx 10xxxxxx
+        (((s0 & 0b1111) as u32) << 12)
+        | (((s[1] & 0b111111) as u32) << 6)
+        |  ((s[2] & 0b111111) as u32)
+    }
+}
+
+fn mb_is_alpha(s: &[u8]) -> bool {
+    let x = decode_utf8_unchecked(s);
+    !(x == 172 || x == 215 || (8590..10240).contains(&x))
+}
+
+fn unicode_identifier(s: &[u8], mut i: usize, n: usize) -> usize {
+    loop {
+        if i >= n {return i;}
+        if s[i] > 127 {
+            let j = i; i += 1;
+            while i < n && is_utf8_continuation_byte(s[i]) {i += 1;}
+            if !mb_is_alpha(&s[j..i]) {return j;}
+        } else if s[i].is_ascii_alphabetic() || s[i].is_ascii_digit() ||
+            s[i] == b'_' || s[i] == b'\''
+        {
+            i += 1;
+        } else {return i;}
+    }
+}
+
 fn scan(s: &[u8]) -> Vec<Token> {
     let mut i = 0;
     let n = s.len();
@@ -121,6 +154,9 @@ fn scan(s: &[u8]) -> Vec<Token> {
                 matches!(s[i], b'_' | b'\''))
             {
                 i += 1;
+            }
+            if i < n && s[i] > 127 {
+                i = unicode_identifier(s, i, n);
             }
             let value = match KEYWORDS.binary_search_by_key(&&s[j..i], |t| t.0) {
                 Ok(index) => TokenValue::Symbol(Bstr::from(KEYWORDS[index].1)),
@@ -158,6 +194,9 @@ fn scan(s: &[u8]) -> Vec<Token> {
             let symbol = &s[j..i];
             let value = if symbol == "∅".as_bytes() {
                 TokenValue::Identifier(Bstr::from("empty_set"))
+            } else if mb_is_alpha(symbol) {
+                i = unicode_identifier(s, i, n);
+                TokenValue::Identifier(Bstr::from(&s[j..i]))
             } else {
                 TokenValue::Symbol(Bstr::from(symbol))
             };
@@ -1598,8 +1637,6 @@ fn load_prelude(env: &mut Env) {
 
 fn main() {
     let argv: Vec<String> = args().collect();
-    let mut env = Env::new();
-    load_prelude(&mut env);
     if argv.len() >= 3 && argv[1] == "-f" {
         let s = fs::read(&argv[2]).unwrap();
         let fs = fmt::format_source_code(&s);
@@ -1610,6 +1647,8 @@ fn main() {
             fout.write_all(b"\n").unwrap();
         }
     } else {
+        let mut env = Env::new();
+        load_prelude(&mut env);
         for file in &argv[1..] {
             let s = fs::read(file).unwrap();
             if let Err(e) = verify(&mut env, &s) {
