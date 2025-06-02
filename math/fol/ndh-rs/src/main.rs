@@ -9,6 +9,7 @@
 use std::{env::args, fs, io::Write};
 use std::{rc::Rc, cell::Cell};
 use std::collections::HashMap;
+use std::process::ExitCode;
 
 mod bstr;
 use bstr::Bstr;
@@ -1635,7 +1636,7 @@ fn load_prelude(env: &mut Env) {
     }
 }
 
-fn main() {
+fn main() -> ExitCode {
     let argv: Vec<String> = args().collect();
     if argv.len() >= 3 && argv[1] == "-f" {
         let s = fs::read(&argv[2]).unwrap();
@@ -1650,7 +1651,14 @@ fn main() {
         let mut env = Env::new();
         load_prelude(&mut env);
         for file in &argv[1..] {
-            let s = fs::read(file).unwrap();
+            let s = match fs::read(file) {
+                Ok(value) => value,
+                Err(e) => {
+                    println!("Could not read file {}, error kind: {}.",
+                        file, e.kind());
+                    return ExitCode::FAILURE;
+                }
+            };
             if let Err(e) = verify(&mut env, &s) {
                 let kind = match e.kind {
                     ErrorKind::Syntax => "Syntax",
@@ -1658,8 +1666,9 @@ fn main() {
                 };
                 println!("{} error in {}, line {}:\n{}",
                     kind, file, e.line + 1, e.info);
-                break;
+                return ExitCode::FAILURE;
             }
         }
     }
+    ExitCode::SUCCESS
 }
