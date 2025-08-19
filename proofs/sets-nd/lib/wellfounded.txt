@@ -1,6 +1,0 @@
-wf_equi. ⊢ wf M R ↔ ∀A. A ⊆ M → ¬A = ∅ →
-  ∃y. y ∈ A ∧ ¬∃x. x ∈ A ∧ (x, y) ∈ R, def.
-wf_unfold. ⊢ wf M R → ∀A. A ⊆ M → ¬A = ∅ →
-  ∃y. y ∈ A ∧ ¬∃x. x ∈ A ∧ (x, y) ∈ R, axiom.
-wf_induction. ⊢ wf M R → A ⊆ M →
-  (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → y ∈ A) → x ∈ A) → A = M, axiom.
