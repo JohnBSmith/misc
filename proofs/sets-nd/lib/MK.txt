@@ -1,0 +1,50 @@
+incl_equi. ⊢ A ⊆ B ↔ ∀x. x ∈ A → x ∈ B, def.
+set_equi. ⊢ set x ↔ ∃C. x ∈ C, def.
+empty_set_eq. ⊢ ∅ = {x | ⊥}, def.
+union_eq. ⊢ A ∪ B = {x | x ∈ A ∨ x ∈ B}, def.
+sg_eq. ⊢ {a} = {x | set a → x = a}, def.
+pair_eq. ⊢ (x, y) = {{x}, {x, y}}, def.
+power_eq. ⊢ power M = {A | A ⊆ M}, def.
+intersection_eq. ⊢ A ∩ B = {x | x ∈ A ∧ x ∈ B}, def.
+diff_eq. ⊢ A \ B = {x | x ∈ A ∧ ¬x ∈ B}, def.
+compl_eq. ⊢ compl A = {x | ¬x ∈ A}, def.
+Union_eq. ⊢ ⋃M = {x | ∃A. A ∈ M ∧ x ∈ A}, def.
+Intersection_eq. ⊢ ⋂M = {x | ∀A. A ∈ M → x ∈ A}, def.
+prod_eq. ⊢ A × B =
+  {t | ∃x. ∃y. x ∈ A ∧ y ∈ B ∧ t = (x, y)}, def.
+fst_eq. ⊢ fst t = ⋂⋂t, def.
+scd_eq. ⊢ scd t = ⋂⋃t ∪ (⋃⋃t \ ⋂⋂t), def.
+UnivCl_eq. ⊢ UnivCl = {x | x = x}, def.
+DiagCl_eq. ⊢ DiagCl = {x | ¬x ∈ x}, def.
+dom_eq. ⊢ dom R = {x | ∃y. (x, y) ∈ R}, def.
+rng_eq. ⊢ rng R = {y | ∃x. (x, y) ∈ R}, def.
+img_eq. ⊢ img R A = {y | ∃x. x ∈ A ∧ (x, y) ∈ R}, def.
+inv_img_eq. ⊢ inv_img R B = {x | ∃y. y ∈ B ∧ (x, y) ∈ R}, def.
+app_eq. ⊢ app f x = ⋂{y | (x, y) ∈ f}, def.
+relation_equi. ⊢ relation R ↔ ∀t. t ∈ R → ∃x. ∃y. t = (x, y), def.
+function_equi. ⊢ function f ↔ relation f ∧
+  ∀x. ∀y1. ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2, def.
+map_equi. ⊢ map f X Y ↔ function f ∧ dom f = X ∧ rng f ⊆ Y, def.
+inj_equi. ⊢ inj f X Y ↔ map f X Y ∧ ∀a. ∀b.
+  a ∈ X → b ∈ X → app f a = app f b → a = b, def.
+sur_equi. ⊢ sur f X Y ↔ map f X Y ∧ rng f = Y, def.
+bij_equi. ⊢ bij f X Y ↔ inj f X Y ∧ sur f X Y, def.
+inv_eq. ⊢ inv f = {t | ∃x. ∃y. t = (y, x) ∧ (x, y) ∈ f}, def.
+restr_eq. ⊢ restr f A = f ∩ (A × UnivCl), def.
+choice_function_equi. ⊢ choice_function f ↔
+  function f ∧ ∀x. x ∈ dom f → app f x ∈ x, def.
+composition_eq. ⊢ composition g f = {t | ∃x. ∃y. ∃z.
+  t = (x, z) ∧ (x, y) ∈ f ∧ (y, z) ∈ g}, def.
+dne. ⊢ ¬¬A → A, axiom.
+eq_refl. ⊢ x = x, axiom.
+eq_subst. ⊢ x = y → P x → P y, axiom.
+ext. ⊢ (∀x. x ∈ A ↔ x ∈ B) → A = B, axiom.
+comp. ⊢ u ∈ {x | P x} ↔ set u ∧ P u, axiom.
+pairing. ⊢ set x → set y → set {x, y}, axiom.
+subset. ⊢ A ⊆ B → set B → set A, axiom.
+power. ⊢ set M → set (power M), axiom.
+union. ⊢ set M → set (⋃M), axiom.
+regularity. ⊢ ¬A = ∅ → ∃x. x ∈ A ∧ x ∩ A = ∅, axiom.
+infinity. ⊢ ∃A. ∅ ∈ A ∧ ∀x. x ∈ A → x ∪ {x} ∈ A, axiom.
+substitution. ⊢ function f → set (dom f) → set (rng f), axiom.
+choice. ⊢ ∃f. choice_function f ∧ dom f = UnivCl \ {∅}, axiom.

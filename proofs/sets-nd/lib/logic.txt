@@ -1,0 +1,19 @@
+efq. ⊢ ⊥ → A, axiom.
+lem. ⊢ A ∨ ¬A, axiom.
+diag_contra. ⊢ ¬(A ↔ ¬A), axiom.
+dn_intro. ⊢ A → ¬¬A, axiom.
+contraposition. ⊢ (A → B) → ¬B → ¬A, axiom.
+contraposition_rev. ⊢ (¬A → ¬B) → (B → A), axiom.
+subj_from_disj. ⊢ (¬A ∨ B) → (A → B), axiom.
+eq_symm. ⊢ x = y → y = x, axiom.
+eq_subst_rev. ⊢ y = x → P x → P y, axiom.
+f_equal. ⊢ x = y → f x = f y, axiom.
+eq_trans. ⊢ x = y → y = z → x = z, axiom.
+neg_subj. ⊢ ¬(A → B) → A ∧ ¬B, axiom.
+neg_conj. ⊢ ¬(A ∧ B) → ¬A ∨ ¬B, axiom.
+neg_ex. ⊢ (¬∃x. P x) → (∀x. ¬P x), axiom.
+neg_uq. ⊢ (¬∀x. P x) → (∃x. ¬P x), axiom.
+uq_neg. ⊢ (∀x. ¬P x) → (¬∃x. P x), axiom.
+ex_neg. ⊢ (∃x. ¬P x) → (¬∀x. P x), axiom.
+neg_uq_bounded. ⊢ (¬∀x. P x → Q x) → (∃x. P x ∧ ¬Q x), axiom.
+neg_ex_bounded. ⊢ (¬∃x. P x ∧ Q x) → (∀x. P x → ¬Q x), axiom.

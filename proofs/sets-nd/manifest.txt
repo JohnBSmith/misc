@@ -3,3 +3,4 @@
 (basic: MK logic)
 (relations: MK logic basic)
 (functions: MK logic basic relations)
+(wellfounded: MK logic basic)

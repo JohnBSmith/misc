@@ -1,0 +1,15 @@
+relation_intro. ⊢ (∀t. t ∈ R → ∃x. ∃y. t = (x, y)) → relation R, axiom.
+relation_from_incl. ⊢ R ⊆ X × Y → relation R, axiom.
+img_intro. ⊢ x ∈ A → (x, y) ∈ R → y ∈ img R A, axiom.
+img_elim. ⊢ y ∈ img R A → ∃x. x ∈ A ∧ (x, y) ∈ R, axiom.
+inv_img_intro. ⊢ y ∈ B → (x, y) ∈ R → x ∈ inv_img R B, axiom.
+inv_img_elim. ⊢ x ∈ inv_img R B → ∃y. y ∈ B ∧ (x, y) ∈ R, axiom.
+dom_intro. ⊢ (x, y) ∈ R → x ∈ dom R, axiom.
+dom_elim. ⊢ x ∈ dom R → ∃y. (x, y) ∈ R, axiom.
+dom_incl. ⊢ R ⊆ X × Y → dom R ⊆ X, axiom.
+img_dist_union. ⊢ img R (A ∪ B) = img R A ∪ img R B, axiom.
+img_dist_inter. ⊢ img R (A ∩ B) ⊆ img R A ∩ img R B, axiom.
+img_incl. ⊢ A ⊆ B → img R A ⊆ img R B, axiom.
+inv_img_dist_inter. ⊢ inv_img R (A ∩ B) ⊆ inv_img R A ∩ inv_img R B, axiom.
+inv_img_dist_union. ⊢ inv_img R (A ∪ B) = inv_img R A ∪ inv_img R B, axiom.
+inv_img_incl. ⊢ A ⊆ B → inv_img R A ⊆ inv_img R B, axiom.
