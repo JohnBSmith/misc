@@ -189,6 +189,15 @@ fn scan(s: &[u8]) -> Vec<Token> {
             i += 2;
         } else if s[i] == b'#' {
             while i < n && s[i] != b'\n' {i += 1;}
+        } else if s[i] == b'(' && i + 1 < n && s[i + 1] == b'*' {
+            while i < n {
+                if s[i] == b'*' && i + 1 < n && s[i + 1] == b')' {
+                    i += 2;
+                    break;
+                }
+                if s[i] == b'\n' {line += 1;}
+                i += 1;
+            }
         } else if s[i] > 127 {
             let j = i; i += 1;
             while i < n && is_utf8_continuation_byte(s[i]) {i += 1;}

@@ -1,7 +1,7 @@
 
-# Morse-Kelly set theory.
+(*|chapter| Morse-Kelley set theory *)
 
-# DEFINITIONS
+(*|section| Definitions *)
 
 incl_equi. ⊢ A ⊆ B ↔ ∀x. x ∈ A → x ∈ B, def.
 set_equi. ⊢ set x ↔ ∃C. x ∈ C, def.
@@ -45,7 +45,7 @@ choice_function_equi. ⊢ choice_function f ↔
 composition_eq. ⊢ composition g f = {t | ∃x. ∃y. ∃z.
   t = (x, z) ∧ (x, y) ∈ f ∧ (y, z) ∈ g}, def.
 
-# AXIOMS
+(*|section| Axioms *)
 
 dne. ⊢ ¬¬A → A, axiom.
 eq_refl. ⊢ x = x, axiom.

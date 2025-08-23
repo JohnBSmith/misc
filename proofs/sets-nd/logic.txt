@@ -1,5 +1,7 @@
 
-# Propositional logic
+(*|chapter| Logic *)
+
+(*|section| Propositional logic *)
 
 01. 1 ⊢ ⊥, hypo.
 02. 2 ⊢ ¬A, hypo.
@@ -63,7 +65,8 @@ contraposition_rev. ⊢ (¬A → ¬B) → (B → A), subj_intro 7.
 08. 1 ⊢ A → B, subj_intro 7.
 subj_from_disj. ⊢ (¬A ∨ B) → (A → B), subj_intro 8.
 
-# Logic with equality
+
+(*|section| Logic with equality *)
 
 01. 1 ⊢ x = y, hypo.
 02. 1 ⊢ y = x, eq_subst 1 eq_refl, P u ↔ u = x.
@@ -86,7 +89,8 @@ f_equal. ⊢ x = y → f x = f y, subj_intro 3.
 05. 1 ⊢ y = z → x = z, subj_intro 4.
 eq_trans. ⊢ x = y → y = z → x = z, subj_intro 5.
 
-# Distributing negations
+
+(*|section| Distributing negations *)
 
 01. 1 ⊢ B, hypo.
 02. 2 ⊢ A, hypo.
@@ -173,3 +177,75 @@ neg_uq_bounded. ⊢ (¬∀x. P x → Q x) → (∃x. P x ∧ ¬Q x), subj_intro 
 05. 1 ⊢ P x → ¬Q x, subj_from_disj 4.
 06. 1 ⊢ ∀x. P x → ¬Q x, uq_intro 5.
 neg_ex_bounded. ⊢ (¬∃x. P x ∧ Q x) → (∀x. P x → ¬Q x), subj_intro 6.
+
+
+(*|section| Unique existence *)
+
+01. 1 ⊢ ∃x. P x, hypo.
+02. 2 ⊢ ∀x. ∀y. P x → P y → x = y, hypo.
+03. 3 ⊢ P x, hypo.
+04. 2 ⊢ ∀y. P x → P y → x = y, uq_elim 2.
+05. 2 ⊢ P x → P y → x = y, uq_elim 4.
+06. 2, 3 ⊢ P y → x = y, subj_elim 5 3.
+07. 7 ⊢ x = y, hypo.
+08. 3, 7 ⊢ P y, eq_subst 7 3.
+09. 3 ⊢ x = y → P y, subj_intro 8.
+10. 2, 3 ⊢ x = y ↔ P y, bij_intro 9 6.
+11. 2, 3 ⊢ ∀y. x = y ↔ P y, uq_intro 10.
+12. 2, 3 ⊢ ∃x. ∀y. x = y ↔ P y, ex_intro 11.
+13. 1, 2 ⊢ ∃x. ∀y. x = y ↔ P y, ex_elim 1 12.
+14. 1 ⊢ (∀x. ∀y. P x → P y → x = y) →
+  (∃x. ∀y. x = y ↔ P y), subj_intro 13.
+ex_uniq_intro. ⊢ (∃x. P x) → (∀x. ∀y. P x → P y → x = y) →
+  (∃x. ∀y. x = y ↔ P y), subj_intro 14.
+
+01. 1 ⊢ ∃x. ∀y. x = y ↔ P y, hypo.
+02. 2 ⊢ ∀y. x = y ↔ P y, hypo.
+03. 2 ⊢ x = x ↔ P x, uq_elim 2.
+04. 2 ⊢ x = x → P x, bij_eliml 3.
+05. ⊢ x = x, eq_refl.
+06. 2 ⊢ P x, subj_elim 4 5.
+07. 2 ⊢ ∃x. P x, ex_intro 6.
+08. 1 ⊢ ∃x. P x, ex_elim 1 7.
+ex_uniq_eliml. ⊢ (∃x. ∀y. x = y ↔ P y) → (∃x. P x), subj_intro 8.
+
+01. 1 ⊢ ∃x. ∀y. x = y ↔ P y, hypo.
+02. 2 ⊢ ∀y. u = y ↔ P y, hypo.
+03. 3 ⊢ P x, hypo.
+04. 4 ⊢ P y, hypo.
+05. 2 ⊢ u = x ↔ P x, uq_elim 2.
+06. 2 ⊢ u = y ↔ P y, uq_elim 2.
+07. 2 ⊢ P x → u = x, bij_elimr 5.
+08. 2 ⊢ P y → u = y, bij_elimr 6.
+09. 3, 2 ⊢ u = x, subj_elim 7 3.
+10. 4, 2 ⊢ u = y, subj_elim 8 4.
+11. 3, 2 ⊢ x = u, eq_symm 9.
+12. 3, 4, 2 ⊢ x = y, eq_trans 11 10.
+13. 1, 3, 4 ⊢ x = y, ex_elim 1 12.
+14. 1, 3 ⊢ P y → x = y, subj_intro 13.
+15. 1 ⊢ P x → P y → x = y, subj_intro 14.
+ex_uniq_elimr. ⊢ (∃x. ∀y. x = y ↔ P y) → P x → P y → x = y,
+  subj_intro 15.
+
+01. 1 ⊢ ∃x. S x ∧ P x, hypo.
+02. 2 ⊢ ∀x. ∀y. P x → P y → x = y, hypo.
+03. 3 ⊢ S x ∧ P x, hypo.
+04. 3 ⊢ S x, conj_eliml 3.
+05. 3 ⊢ P x, conj_elimr 3.
+06. 6 ⊢ x = y, hypo.
+07. 3, 6 ⊢ P y, eq_subst 6 5.
+08. 3 ⊢ x = y → P y, subj_intro 7.
+09. 2 ⊢ ∀y. P x → P y → x = y, uq_elim 2.
+10. 2 ⊢ P x → P y → x = y, uq_elim 9.
+11. 2, 3 ⊢ P y → x = y, subj_elim 10 5.
+12. 2, 3 ⊢ x = y ↔ P y, bij_intro 8 11.
+13. 2, 3 ⊢ ∀y. x = y ↔ P y, uq_intro 12.
+14. 2, 3 ⊢ S x ∧ ∀y. x = y ↔ P y, conj_intro 4 13.
+15. 2, 3 ⊢ ∃x. S x ∧ ∀y. x = y ↔ P y, ex_intro 14.
+16. 1, 2 ⊢ ∃x. S x ∧ ∀y. x = y ↔ P y, ex_elim 1 15.
+17. 1 ⊢ (∀x. ∀y. P x → P y → x = y) →
+  (∃x. S x ∧ ∀y. x = y ↔ P y), subj_intro 16.
+ex_uniq_set_intro. ⊢ (∃x. S x ∧ P x) → (∀x. ∀y. P x → P y → x = y) →
+  (∃x. S x ∧ ∀y. x = y ↔ P y), subj_intro 17.
+
+

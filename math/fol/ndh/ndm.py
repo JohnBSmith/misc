@@ -60,6 +60,10 @@ def main():
                 run(["ndexport.py", m + ".txt", "/dev/stdout"])
                 print()
             exit(0)
+        elif argv[1] == "-doc":
+            files = [m + ".txt" for (m, _) in modules]
+            run(["nddoc.py"] + files)
+            exit(0)
         elif argv[1] == "-c":
             run(["ndexport.py", "--clear"])
             exit(0)
@@ -76,7 +80,7 @@ def main():
             files.append(mod + ".txt")
     else:
         files = [m + ".txt" for (m, _) in modules]
-    run(["nd.py"] + files)
-    # run(["nd"] + files)
+    # run(["nd.py"] + files)
+    run(["nd"] + files)
 
 main()

@@ -1,4 +1,6 @@
 
+(*|chapter| Well-founded relations *)
+
 wf_equi. ⊢ wf M R ↔ ∀A. A ⊆ M → ¬A = ∅ →
   ∃y. y ∈ A ∧ ¬∃x. x ∈ A ∧ (x, y) ∈ R, def.
   
@@ -108,8 +110,248 @@ wf_induction_set. ⊢ wf M R → A ⊆ M →
 45. 1, 3 ⊢ ∀x. x ∈ M → P x, subj_elim 43 44.
 46. 1 ⊢ (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → P y) → P x) →
   (∀x. x ∈ M → P x), subj_intro 45.
-
 wf_induction. ⊢ wf M R →
   (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → P y) → P x) →
   (∀x. x ∈ M → P x), subj_intro 46.
+
+01. 1 ⊢ wf X R, hypo.
+02. 2 ⊢ ∀u. u ∈ X → (u, x) ∈ R → app f u = app g u, hypo.
+03. 2 ⊢ u ∈ X → (u, x) ∈ R → app f u = app g u, uq_elim 2.
+04. 4 ⊢ u ∈ inv_img R {x}, hypo.
+05. 4 ⊢ ∃y. y ∈ {x} ∧ (u, y) ∈ R, inv_img_elim 4.
+06. 6 ⊢ y ∈ {x} ∧ (u, y) ∈ R, hypo.
+07. 6 ⊢ y ∈ {x}, conj_eliml 6.
+08. 8 ⊢ x ∈ X, hypo.
+09. 8 ⊢ set x, set_intro 8.
+10. 8, 6 ⊢ y = x, sg_elim 9 7.
+11. 6 ⊢ (u, y) ∈ R, conj_elimr 6.
+12. 8, 6 ⊢ (u, x) ∈ R, eq_subst 10 11, P x ↔ (u, x) ∈ R.
+13. 8, 4 ⊢ (u, x) ∈ R, ex_elim 5 12.
+14. 14 ⊢ dom R = X, hypo.
+15. 8, 4 ⊢ u ∈ dom R, dom_intro 13.
+16. 14, 8, 4 ⊢ u ∈ X, eq_subst 14 15, P x ↔ u ∈ x.
+17. 14, 2, 8, 4 ⊢ (u, x) ∈ R → app f u = app g u, subj_elim 3 16.
+18. 14, 2, 8, 4 ⊢ app f u = app g u, subj_elim 17 13.
+19. 19 ⊢ map f X Y, hypo.
+20. 20 ⊢ map g X Y, hypo.
+21. ⊢ inv_img R {x} ⊆ dom R, inv_img_incl_in_dom.
+22. 14 ⊢ inv_img R {x} ⊆ X, eq_subst 14 21, P u ↔ inv_img R {x} ⊆ u.
+23. 19, 14, 4 ⊢ app f u = app (restr f (inv_img R {x})) u, app_restr 19 22 4.
+24. 20, 14, 4 ⊢ app g u = app (restr g (inv_img R {x})) u, app_restr 20 22 4.
+25. 19, 14, 2, 8, 4 ⊢ app (restr f (inv_img R {x})) u = app g u,
+  eq_subst 23 18, P t ↔ t = app g u.
+26. 19, 20, 14, 2, 8, 4 ⊢ app (restr f (inv_img R {x})) u = app (restr g (inv_img R {x})) u,
+  eq_subst 24 25, P t ↔ app (restr f (inv_img R {x})) u = t.
+27. 19, 20, 14, 2, 8 ⊢ u ∈ inv_img R {x} →
+  app (restr f (inv_img R {x})) u = app (restr g (inv_img R {x})) u,
+  subj_intro 26.
+28. 19, 20, 14, 2, 8 ⊢ ∀u. u ∈ inv_img R {x} →
+  app (restr f (inv_img R {x})) u = app (restr g (inv_img R {x})) u,
+  uq_intro 27.
+29. 19, 14 ⊢ map (restr f (inv_img R {x})) (inv_img R {x}) Y, map_restr 19 22.
+30. 20, 14 ⊢ map (restr g (inv_img R {x})) (inv_img R {x}) Y, map_restr 20 22.
+31. 19, 20, 14, 2, 8 ⊢ restr f (inv_img R {x}) = restr g (inv_img R {x}),
+  map_extensionality 29 30 28.
+
+32. 32 ⊢ ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), hypo.
+33. 33 ⊢ ∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x})), hypo.
+34. 32 ⊢ x ∈ X → app f x = φ x (restr f (inv_img R {x})), uq_elim 32.
+35. 33 ⊢ x ∈ X → app g x = φ x (restr g (inv_img R {x})), uq_elim 33.
+36. 32, 8 ⊢ app f x = φ x (restr f (inv_img R {x})), subj_elim 34 8.
+37. 33, 8 ⊢ app g x = φ x (restr g (inv_img R {x})), subj_elim 35 8.
+38. 19, 20, 14, 32, 2, 8 ⊢ app f x = φ x (restr g (inv_img R {x})),
+  eq_subst 31 36, P t ↔ app f x = φ x t.
+39. 19, 20, 14, 32, 33, 8, 2 ⊢ app f x = app g x,
+  eq_subst_rev 37 38, P t ↔ app f x = t.
+40. 19, 20, 14, 32, 33, 8 ⊢ (∀u. u ∈ X → (u, x) ∈ R → app f u = app g u) →
+  app f x = app g x, subj_intro 39.
+41. 19, 20, 14, 32, 33 ⊢ x ∈ X → (∀u. u ∈ X → (u, x) ∈ R → app f u = app g u) →
+  app f x = app g x, subj_intro 40.
+42. 19, 20, 14, 32, 33 ⊢ ∀x. x ∈ X → (∀u. u ∈ X → (u, x) ∈ R → app f u = app g u) →
+  app f x = app g x, uq_intro 41.
+43. 1, 19, 20, 14, 32, 33 ⊢ ∀x. x ∈ X → app f x = app g x, wf_induction 1 42.
+44. 1, 14, 19, 20, 32, 33 ⊢ f = g, map_extensionality 19 20 43.
+45. 1, 14, 19, 20, 32 ⊢
+  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
+  f = g, subj_intro 44.
+46. 1, 14, 19, 20 ⊢
+  (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
+  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
+  f = g, subj_intro 45.
+47. 1, 14, 19 ⊢ map g X Y →
+  (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
+  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
+  f = g, subj_intro 46.
+48. 1, 14 ⊢ map f X Y → map g X Y →
+  (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
+  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
+  f = g, subj_intro 47.
+49. 1 ⊢ dom R = X → map f X Y → map g X Y →
+  (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
+  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
+  f = g, subj_intro 48.
+wf_rec_unique. ⊢ wf X R → dom R = X → map f X Y → map g X Y →
+  (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
+  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
+  f = g, subj_intro 49.
+
+01. 1 ⊢ wf X R, hypo.
+02. 2 ⊢ dom R = X, hypo.
+03. 3 ⊢ ∀x. ∀f. φ x f ∈ Y, hypo.
+04. 4 ⊢ F = {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ A}, hypo.
+05. 5 ⊢ f = ⋂F, hypo.
+
+06. 6 ⊢ x ∈ X, hypo.
+07. 6 ⊢ set x, set_intro 6.
+09. 3 ⊢ ∀f. φ x f ∈ Y, uq_elim 3.
+10. 3 ⊢ φ x f ∈ Y, uq_elim 9.
+11. 3 ⊢ set (φ x f), set_intro 10.
+12. 3, 6 ⊢ set (x, φ x f), set_pair 7 11.
+13. 3, 6 ⊢ set (x, φ x (restr g (inv_img R {x}))), 12.
+
+14. 14 ⊢ A ∈ F, hypo.
+15. 4, 14 ⊢ A ∈ {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ A}, eq_subst 4 14, P u ↔ A ∈ u.
+16. 4, 14 ⊢ A ⊆ X × Y ∧ ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ A, comp_elim 15.
+17. 4, 14 ⊢ ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ A, conj_elimr 16.
+18. 4, 14 ⊢ x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ A, uq_elim 17.
+19. 4, 6, 14 ⊢ ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ A, subj_elim 18 6.
+20. 4, 6, 14 ⊢ (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ A, uq_elim 19.
+22. 5, 14 ⊢ f ⊆ A, Intersection_is_lower_bound 5 14.
+23. 23 ⊢ ∀u. u ∈ inv_img R {x} → (u, app g u) ∈ f, hypo.
+24. 23 ⊢ u ∈ inv_img R {x} → (u, app g u) ∈ f, uq_elim 23.
+25. 25 ⊢ u ∈ inv_img R {x}, hypo.
+26. 23, 25 ⊢ (u, app g u) ∈ f, subj_elim 24 25.
+27. 5, 23, 14, 25 ⊢ (u, app g u) ∈ A, incl_elim 22 26.
+28. 5, 23, 14 ⊢ u ∈ inv_img R {x} → (u, app g u) ∈ A, subj_intro 27.
+29. 5, 23, 14 ⊢ ∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A, uq_intro 28.
+30. 4, 5, 6, 23, 14 ⊢ (x, φ x (restr g (inv_img R {x}))) ∈ A, subj_elim 20 29.
+31. 4, 5, 6, 23 ⊢ A ∈ F → (x, φ x (restr g (inv_img R {x}))) ∈ A, subj_intro 30.
+32. 4, 5, 6, 23 ⊢ ∀A. A ∈ F → (x, φ x (restr g (inv_img R {x}))) ∈ A, uq_intro 31.
+33. 3, 4, 5, 6, 23 ⊢ (x, φ x (restr g (inv_img R {x}))) ∈ ⋂F, Intersection_intro 13 32.
+34. 3, 4, 5, 6, 23 ⊢ (x, φ x (restr g (inv_img R {x}))) ∈ f,
+  eq_subst_rev 5 33, P u ↔ (x, φ x (restr g (inv_img R {x}))) ∈ u.
+35. 3, 4, 5, 6 ⊢ (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ f) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ f, subj_intro 34.
+37. 3, 4, 5, 6 ⊢ ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ f) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ f, uq_intro 35.
+38. 3, 4, 5 ⊢ x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ f) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ f, subj_intro 37.
+39. 3, 4, 5 ⊢ ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ f) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ f, uq_intro 38.
+
+40. 3, 6 ⊢ (x, φ x f) ∈ X × Y, prod_intro 6 10.
+41. 41 ⊢ (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ X × Y), hypo.
+43. 3, 6, 41 ⊢ (x, φ x f) ∈ X × Y, wk 40.
+44. 3, 6 ⊢ (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ X × Y) →
+  (x, φ x f) ∈ X × Y, subj_intro 43.
+46. 3, 6 ⊢ ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ X × Y) →
+  (x, φ x f) ∈ X × Y, uq_intro 44.
+47. 3 ⊢ x ∈ X → ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ X × Y) →
+  (x, φ x f) ∈ X × Y, subj_intro 46.
+48. 3 ⊢ ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ X × Y) →
+  (x, φ x f) ∈ X × Y, uq_intro 47.
+49. ⊢ X × Y ⊆ X × Y, incl_refl.
+50. 3 ⊢ X × Y ⊆ X × Y ∧
+  ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ X × Y) →
+  (x, φ x f) ∈ X × Y, conj_intro 49 48.
+51. 51 ⊢ set X, hypo.
+52. 52 ⊢ set Y, hypo.
+53. 51, 52 ⊢ set (X × Y), set_prod 51 52.
+54. 51, 52, 3 ⊢ X × Y ∈ {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+  (x, φ x f) ∈ A}, comp_intro 53 50, P A ↔
+    A ⊆ X × Y ∧ ∀x. x ∈ X →
+    ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+    (x, φ x f) ∈ A.
+55. 51, 52, 3 ⊢ X × Y ∈ {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ A}, 54.
+56. 51, 52, 3, 4 ⊢ X × Y ∈ F, eq_subst_rev 4 55, P u ↔ X × Y ∈ u.
+57. 51, 52, 3, 4, 5 ⊢ f ⊆ X × Y, Intersection_is_lower_bound 5 56.
+
+58. 51, 52, 3, 4, 5 ⊢ f ⊆ X × Y ∧ ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ f) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ f, conj_intro 57 39.
+59. 51, 52, 3, 4, 5 ⊢ set f, subset 57 53.
+60. 51, 52, 3, 4, 5 ⊢ f ∈ {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
+  ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
+  (x, φ x (restr g (inv_img R {x}))) ∈ A}, comp_intro 59 58.
+61. 51, 52, 3, 4, 5 ⊢ f ∈ F, eq_subst_rev 4 60, P u ↔ f ∈ u.
+
+# 62. 62 ⊢ ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), hypo.
+63. 63 ⊢ x ∈ X, hypo.
+64. 64 ⊢ ∀u. u ∈ X → (u, x) ∈ R →
+  ∃y0. ∀y. y0 = y ↔ y ∈ Y ∧ (u, y) ∈ f, hypo.
+65. 65 ⊢ u ∈ inv_img R {x}, hypo.
+66. 64 ⊢ u ∈ X → (u, x) ∈ R →
+  ∃y0. ∀y. y0 = y ↔ y ∈ Y ∧ (u, y) ∈ f, uq_elim 64.
+67. 65 ⊢ ∃a. a ∈ {x} ∧ (u, a) ∈ R, inv_img_elim 65.
+68. 68 ⊢ a ∈ {x} ∧ (u, a) ∈ R, hypo.
+69. 68 ⊢ a ∈ {x}, conj_eliml 68.
+70. 68 ⊢ (u, a) ∈ R, conj_elimr 68.
+71. 63 ⊢ set x, set_intro 63.
+72. 63, 68 ⊢ a = x, sg_elim 71 69.
+73. 63, 68 ⊢ (u, x) ∈ R, eq_subst 72 70, P x ↔ (u, x) ∈ R.
+74. 63, 65 ⊢ (u, x) ∈ R, ex_elim 67 73.
+75. 68 ⊢ u ∈ dom R, dom_intro 70.
+76. 65 ⊢ u ∈ dom R, ex_elim 67 75.
+77. 2, 65 ⊢ u ∈ X, eq_subst 2 76, P X ↔ u ∈ X.
+78. 2, 64, 65 ⊢ (u, x) ∈ R → ∃y0. ∀y. y0 = y ↔ y ∈ Y ∧ (u, y) ∈ f,
+  subj_elim 66 77.
+79. 2, 63, 64, 65 ⊢ ∃y0. ∀y. y0 = y ↔ y ∈ Y ∧ (u, y) ∈ f,
+  subj_elim 78 74.
+80. 2, 63, 64 ⊢ u ∈ inv_img R {x} →
+  ∃y0. ∀y. y0 = y ↔ y ∈ Y ∧ (u, y) ∈ f, subj_intro 79.
+81. 2, 63, 64 ⊢ ∀u. u ∈ inv_img R {x} →
+  ∃y0. ∀y. y0 = y ↔ y ∈ Y ∧ (u, y) ∈ f, uq_intro 80.
+
+# 01. |- ∀x. x ∈ X → ∃z. ∀y. z = y ↔ y ∈ Y ∧ (u, y) ∈ f, hypo.
+
+# relation_fold. ⊢ (∀t. t ∈ R → ∃x. ∃y. t = (x, y)) → relation R,
+# app_elim. ⊢ function f → x ∈ dom f → y = app f x → (x, y) ∈ f,
+
+#81. ⊢ app f u = app f u, eq_refl.
+#82. 2, 65 ⊢ (u, app f u) ∈ f, map_app_elim 80 77 81.
+#83. 2 ⊢ u ∈ inv_img R {x} → (u, app f u) ∈ f, subj_intro 82.
+#84. 2 ⊢ ∀u. u ∈ inv_img R {x} → (u, app f u) ∈ f, uq_intro 83.
+#85. 3, 4, 5, 63 ⊢ ∀g. (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ f) →
+#  (x, φ x (restr g (inv_img R {x}))) ∈ f, subj_elim 38 63.
+#86. 3, 4, 5, 63 ⊢ (∀u. u ∈ inv_img R {x} → (u, app f u) ∈ f) →
+#  (x, φ x (restr f (inv_img R {x}))) ∈ f, uq_elim 85.
+#88. 2, 3, 4, 5, 63 ⊢ (x, φ x (restr f (inv_img R {x}))) ∈ f,
+#  subj_elim 86 84.
+#89. 2, 3, 4, 5, 63 ⊢ ∃y. (x, y) ∈ f, ex_intro 88.
+
+#38. 3, 4, 5 ⊢ x ∈ X → ∀g. map g X Y →
+#  (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ f) →
+#  (x, φ x (restr g (inv_img R {x}))) ∈ f, uq_intro 38.
+
+#80. 80 |- ∀y. y0 = y ↔ y ∈ Y ∧ (u, y) ∈ f, hypo.
+#81. 80 |- y0 = app f u ↔ app f u ∈ Y ∧ (u, app f u) ∈ f, uq_elim 80.
+#82. 82 |- y0 = app f u
+
+# (u, app f u) ∈ f 
+
+
+# wf_induction. ⊢ wf X R →
+#   (∀x. x ∈ X → (∀u. u ∈ X → (u, x) ∈ R → P u) → P x) →
+#   (∀x. x ∈ X → P x)
+
+# P x ↔ ∃y0. ∀y. y0 = y ↔ y ∈ Y ∧ (x, y) ∈ f
 

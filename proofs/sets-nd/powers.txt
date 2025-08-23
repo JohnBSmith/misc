@@ -1,0 +1,55 @@
+
+(*|chapter| Power sets *)
+
+01. 1 ⊢ set x, hypo.
+02. 2 ⊢ x ⊆ y, hypo.
+03. 1, 2 ⊢ x ∈ {x | x ⊆ y}, comp_intro 1 2.
+04. ⊢ power y = {x | x ⊆ y}, power_eq.
+05. 1, 2 ⊢ x ∈ power y, eq_subst_rev 4 3, P u ↔ x ∈ u.
+06. 1 ⊢ x ⊆ y → x ∈ power y, subj_intro 5.
+power_intro. ⊢ set x → x ⊆ y → x ∈ power y, subj_intro 6.
+
+01. 1 ⊢ t ∈ A × B, hypo.
+02. 1 ⊢ ∃x. ∃y. x ∈ A ∧ y ∈ B ∧ t = (x, y), prod_elim 1.
+03. 3 ⊢ ∃y. x ∈ A ∧ y ∈ B ∧ t = (x, y), hypo.
+04. 4 ⊢ x ∈ A ∧ y ∈ B ∧ t = (x, y), hypo.
+05. 4 ⊢ t = (x, y), conj_elimr 4.
+06. 4 ⊢ t = {{x}, {x, y}}, eq_subst pair_eq 5, P u ↔ t = u.
+07. 4 ⊢ x ∈ A ∧ y ∈ B, conj_eliml 4.
+08. 4 ⊢ x ∈ A, conj_eliml 7.
+09. 4 ⊢ y ∈ B, conj_elimr 7.
+10. 4 ⊢ {x} ⊆ A, sg_incl_in 8.
+11. 4 ⊢ {y} ⊆ B, sg_incl_in 9.
+12. 4 ⊢ {x, y} ⊆ A ∪ B, union_incl_in_union 10 11.
+13. ⊢ A ⊆ A ∪ B, union_incl_left.
+14. 4 ⊢ {x} ⊆ A ∪ B, incl_trans 10 13.
+15. 4 ⊢ set x, set_intro 8.
+16. 4 ⊢ set y, set_intro 9.
+17. 4 ⊢ set {x}, set_sg 15.
+18. 4 ⊢ set {y}, set_sg 16.
+19. 4 ⊢ set {x, y}, set_union 17 18.
+20. 4 ⊢ {x} ∈ power (A ∪ B), power_intro 17 14.
+21. 4 ⊢ {x, y} ∈ power (A ∪ B), power_intro 19 12.
+22. 4 ⊢ {{x}} ⊆ power (A ∪ B), sg_incl_in 20.
+23. 4 ⊢ {{x, y}} ⊆ power (A ∪ B), sg_incl_in 21.
+24. 4 ⊢ {{x}, {x, y}} ⊆ power (A ∪ B), union_incl_in 22 23.
+25. 4 ⊢ set {{x}}, set_sg 17.
+26. 4 ⊢ set {{x, y}}, set_sg 19.
+27. 4 ⊢ set {{x}, {x, y}}, set_union 25 26.
+28. 4 ⊢ {{x}, {x, y}} ∈ power (power (A ∪ B)), power_intro 27 24.
+29. 4 ⊢ t ∈ power (power (A ∪ B)), eq_subst_rev 6 28,
+  P u ↔ u ∈ power (power (A ∪ B)).
+30. 3 ⊢ t ∈ power (power (A ∪ B)), ex_elim 3 29.
+31. 1 ⊢ t ∈ power (power (A ∪ B)), ex_elim 2 30.
+32. ⊢ t ∈ A × B → t ∈ power (power (A ∪ B)), subj_intro 31.
+33. ⊢ ∀t. t ∈ A × B → t ∈ power (power (A ∪ B)), uq_intro 32.
+prod_incl_in_power. ⊢ A × B ⊆ power (power (A ∪ B)), incl_intro 33.
+
+01. 1 ⊢ set A, hypo.
+02. 2 ⊢ set B, hypo.
+03. 1, 2 ⊢ set (A ∪ B), set_union 1 2.
+04. 1, 2 ⊢ set (power (A ∪ B)), power 3.
+05. 1, 2 ⊢ set (power (power (A ∪ B))), power 4.
+06. 1, 2 ⊢ set (A × B), subset prod_incl_in_power 5.
+07. 1 ⊢ set B → set (A × B), subj_intro 6.
+set_prod. ⊢ set A → set B → set (A × B), subj_intro 7.
