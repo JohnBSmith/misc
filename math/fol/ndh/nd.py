@@ -836,8 +836,9 @@ uq_elim. (H ⊢ ∀x. A x) → (H ⊢ A t), axiom.
 ex_intro. (H ⊢ A t) → (H ⊢ ∃x. A x), axiom.
 ex_elim. (nf u (H1 ∧ H2 ∧ B ∧ ∃x. A x)) →
   (H1 ⊢ ∃x. A x) → (H2 ∧ A u ⊢ B) → (H1 ∧ H2 ⊢ B), axiom.
-lift_impl. (⊢ A → B) → (H ⊢ A) → (H ⊢ B), axiom.
-lift_impl_ii. (⊢ A → B → C) → (H1 ⊢ A) → (H2 ⊢ B) → (H1 ∧ H2 ⊢ C), axiom.
+subj_intro_ii. (H ∧ A ∧ B ⊢ C) → (H ⊢ A → B → C), axiom.
+subj_intro_iii. (H ∧ A ∧ B ∧ C ⊢ D) → (H ⊢ A → B → C → D), axiom.
+subj_intro_iv. (H ∧ A ∧ B ∧ C ∧ D ⊢ E) → (H ⊢ A → B → C → D → E), axiom.
 """
 
 def main():

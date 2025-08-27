@@ -1,7 +1,9 @@
 
-(*|chapter| Morse-Kelley set theory *)
+(*/title Formal theorems and proofs *)
 
-(*|section| Definitions *)
+(*/chapter Morse-Kelley set theory *)
+
+(*/section Definitions *)
 
 incl_equi. ⊢ A ⊆ B ↔ ∀x. x ∈ A → x ∈ B, def.
 set_equi. ⊢ set x ↔ ∃C. x ∈ C, def.
@@ -45,9 +47,11 @@ choice_function_equi. ⊢ choice_function f ↔
 composition_eq. ⊢ composition g f = {t | ∃x. ∃y. ∃z.
   t = (x, z) ∧ (x, y) ∈ f ∧ (y, z) ∈ g}, def.
 
-(*|section| Axioms *)
+(*/section Axioms *)
 
-dne. ⊢ ¬¬A → A, axiom.
+efq. ⊢ ⊥ → A, axiom.
+lem. ⊢ A ∨ ¬A, axiom.
+
 eq_refl. ⊢ x = x, axiom.
 eq_subst. ⊢ x = y → P x → P y, axiom.
 

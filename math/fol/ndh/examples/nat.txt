@@ -1,24 +1,22 @@
 
-eq_refl. ⊢ x = x, axiom.
-eq_symm. ⊢ x = y → y = x, axiom.
-eq_trans. ⊢ x = y → y = z → x = z, axiom.
-eq_subst. ⊢ x = y → P x → P y, axiom.
-eq_subst_rule. (H1 ⊢ x = y) → (H2 ⊢ P x) → (H1 ∧ H2 ⊢ P y),
-  lift_impl_ii eq_subst.
-eq_symm_rule. (H ⊢ x = y) → (H ⊢ y = x), lift_impl eq_symm.
-eq_trans_rule. (H1 ⊢ x = y) → (H2 ⊢ y = z) → (H1 ∧ H2 ⊢ x = z),
-  lift_impl_ii eq_trans.
-  
-1. 1 ⊢ x = y, hypo.
-2. ⊢ f x = f x, eq_refl.
-3. 1 ⊢ f x = f y, eq_subst_rule 1 2, P u ↔ f x = f u.
-4. ⊢ x = y → f x = f y, subj_intro 3.
-f_equal. (H ⊢ x = y) → (H ⊢ f x = f y), lift_impl 4.
+# Peano arithmetic
 
+# DEFINITIONS
+
+# Declares opaque constant and function symbols
+# so that they no longer act as free variables.
 0. ⊢ O = _, def.
 0. ⊢ S a = _, def.
 0. ⊢ a + b = _, def.
 0. ⊢ a⋅b = _, def.
+
+# Defines a relation
+le_equi. ⊢ a ≤ b ↔ ∃n. a + n = b, def.
+
+# AXIOMS
+
+eq_refl. ⊢ x = x, axiom.
+eq_subst. ⊢ x = y → P x → P y, axiom.
 
 add_zero. ⊢ a + O = a, axiom.
 add_succ. ⊢ a + S b = S (a + b), axiom.
@@ -26,36 +24,50 @@ add_succ. ⊢ a + S b = S (a + b), axiom.
 mul_zero. ⊢ a⋅O = O, axiom.
 mul_succ. ⊢ a⋅(S b) = a⋅b + a, axiom.
 
-le_equi. ⊢ a ≤ b ↔ ∃n. a + n = b, def.
+induction. ⊢ P O → (∀n. P n → P (S n)) → (∀n. P n), axiom.
 
-ind. ⊢ P O → (∀n. P n → P (S n)) → (∀n. P n), axiom.
-induction. (H1 ⊢ P O) → (H2 ⊢ ∀n. P n → P (S n)) →
-  (H1 ∧ H2 ⊢ ∀n. P n), lift_impl_ii ind.
+# SOME PROOFS
+
+01. 1 ⊢ x = y, hypo.
+02. 1 ⊢ y = x, eq_subst 1 eq_refl, P u ↔ u = x.
+eq_symm. ⊢ x = y → y = x, subj_intro 2.
+
+01. 1 ⊢ x = y, hypo.
+02. 2 ⊢ y = z, hypo.
+03. 1 ⊢ y = x, eq_symm 1.
+04. 1, 2 ⊢ x = z, eq_subst 3 2, P u ↔ u = z.
+eq_trans. ⊢ x = y → y = z → x = z, subj_intro_ii 4.
+
+1. 1 ⊢ x = y, hypo.
+2. ⊢ f x = f x, eq_refl.
+3. 1 ⊢ f x = f y, eq_subst 1 2, P u ↔ f x = f u.
+f_equal. ⊢ x = y → f x = f y, subj_intro 3.
 
 1. ⊢ S O + S O = S (S O + O), add_succ.
 2. ⊢ S O + O = S O, add_zero.
-3. ⊢ S O + S O = S (S O), eq_subst_rule 2 1, P x ↔ S O + S O = S x.
+one_plus_one. ⊢ S O + S O = S (S O), eq_subst 2 1,
+  P x ↔ S O + S O = S x.
 
 # Induction base
 1. ⊢ a + b + O = a + b, add_zero.
-2. ⊢ a = a + O, eq_symm_rule add_zero.
+2. ⊢ a = a + O, eq_symm add_zero.
 3. ⊢ b = b + O, 2.
 4. ⊢ a + b = a + b, eq_refl.
-5. ⊢ a + b = a + (b + O), eq_subst_rule 3 4, P x ↔ a + b = a + x.
-6. ⊢ a + b + O = a + (b + O), eq_trans_rule 1 5.
+5. ⊢ a + b = a + (b + O), eq_subst 3 4, P x ↔ a + b = a + x.
+6. ⊢ a + b + O = a + (b + O), eq_trans 1 5.
 
 # Induction step
 7. 7 ⊢ a + b + n = a + (b + n), hypo.
 8. 7 ⊢ S (a + b + n) = S (a + (b + n)), f_equal 7, f x = S x.
 9. ⊢ a + b + S n = S (a + b + n), add_succ.
-10. 7 ⊢ a + b + S n = S (a + (b + n)), eq_trans_rule 9 8.
+10. 7 ⊢ a + b + S n = S (a + (b + n)), eq_trans 9 8.
 11. ⊢ b + S n = S (b + n), add_succ.
-12. ⊢ S (b + n) = b + S n, eq_symm_rule 11.
+12. ⊢ S (b + n) = b + S n, eq_symm 11.
 13. ⊢ a + S (b + n) = a + (b + S n), f_equal 12, f x = a + x.
 14. ⊢ a + S (b + n) = S (a + (b + n)), add_succ.
-15. ⊢ S (a + (b + n)) = a + S (b + n), eq_symm_rule 14.
-16. ⊢ S (a + (b + n)) = a + (b + S n), eq_trans_rule 15 13.
-17. 7 ⊢ a + b + S n = a + (b + S n), eq_trans_rule 10 16.
+15. ⊢ S (a + (b + n)) = a + S (b + n), eq_symm 14.
+16. ⊢ S (a + (b + n)) = a + (b + S n), eq_trans 15 13.
+17. 7 ⊢ a + b + S n = a + (b + S n), eq_trans 10 16.
 18. ⊢ a + b + n = a + (b + n) → a + b + S n = a + (b + S n),
   subj_intro 17.
 19. ⊢ ∀n. a + b + n = a + (b + n) → a + b + S n = a + (b + S n),

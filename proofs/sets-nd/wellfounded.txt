@@ -1,5 +1,5 @@
 
-(*|chapter| Well-founded relations *)
+(*/chapter Well-founded relations *)
 
 wf_equi. ⊢ wf M R ↔ ∀A. A ⊆ M → ¬A = ∅ →
   ∃y. y ∈ A ∧ ¬∃x. x ∈ A ∧ (x, y) ∈ R, def.
@@ -54,14 +54,9 @@ wf_unfold. ⊢ wf M R → ∀A. A ⊆ M → ¬A = ∅ →
 38. 9, 1, 21, 7 ⊢ ⊥, ex_elim 14 37.
 39. 9, 1, 21 ⊢ ¬¬A = M, neg_intro 38.
 40. 9, 1, 21 ⊢ A = M, dne 39.
-41. 9, 1 ⊢ (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → y ∈ A) → x ∈ A) → A = M,
-  subj_intro 40.
-42. 9 ⊢ A ⊆ M → (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → y ∈ A) → x ∈ A) → A = M,
-  subj_intro 41.
-
 wf_induction_set. ⊢ wf M R → A ⊆ M →
   (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → y ∈ A) → x ∈ A) → A = M,
-  subj_intro 42.
+  subj_intro_iii 40.
 
 01. 1 ⊢ wf M R, hypo.
 02. 2 ⊢ A = {x | x ∈ M ∧ P x}, hypo.
@@ -108,11 +103,9 @@ wf_induction_set. ⊢ wf M R → A ⊆ M →
 43. 1, 3 ⊢ {x | x ∈ M ∧ P x} = {x | x ∈ M ∧ P x} → ∀x. x ∈ M → P x, 42.
 44. ⊢ {x | x ∈ M ∧ P x} = {x | x ∈ M ∧ P x}, eq_refl.
 45. 1, 3 ⊢ ∀x. x ∈ M → P x, subj_elim 43 44.
-46. 1 ⊢ (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → P y) → P x) →
-  (∀x. x ∈ M → P x), subj_intro 45.
 wf_induction. ⊢ wf M R →
   (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → P y) → P x) →
-  (∀x. x ∈ M → P x), subj_intro 46.
+  (∀x. x ∈ M → P x), subj_intro_ii 45.
 
 01. 1 ⊢ wf X R, hypo.
 02. 2 ⊢ ∀u. u ∈ X → (u, x) ∈ R → app f u = app g u, hypo.
@@ -171,30 +164,16 @@ wf_induction. ⊢ wf M R →
   app f x = app g x, uq_intro 41.
 43. 1, 19, 20, 14, 32, 33 ⊢ ∀x. x ∈ X → app f x = app g x, wf_induction 1 42.
 44. 1, 14, 19, 20, 32, 33 ⊢ f = g, map_extensionality 19 20 43.
-45. 1, 14, 19, 20, 32 ⊢
-  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
-  f = g, subj_intro 44.
-46. 1, 14, 19, 20 ⊢
+45. 1, 14, 19, 20 ⊢
   (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
   (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
-  f = g, subj_intro 45.
-47. 1, 14, 19 ⊢ map g X Y →
-  (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
-  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
-  f = g, subj_intro 46.
-48. 1, 14 ⊢ map f X Y → map g X Y →
-  (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
-  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
-  f = g, subj_intro 47.
-49. 1 ⊢ dom R = X → map f X Y → map g X Y →
-  (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
-  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
-  f = g, subj_intro 48.
+  f = g, subj_intro_ii 44.
 wf_rec_unique. ⊢ wf X R → dom R = X → map f X Y → map g X Y →
   (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
   (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
-  f = g, subj_intro 49.
+  f = g, subj_intro_iv 45.
 
+(*
 01. 1 ⊢ wf X R, hypo.
 02. 2 ⊢ dom R = X, hypo.
 03. 3 ⊢ ∀x. ∀f. φ x f ∈ Y, hypo.
@@ -354,4 +333,4 @@ wf_rec_unique. ⊢ wf X R → dom R = X → map f X Y → map g X Y →
 #   (∀x. x ∈ X → P x)
 
 # P x ↔ ∃y0. ∀y. y0 = y ↔ y ∈ Y ∧ (x, y) ∈ f
-
+*)

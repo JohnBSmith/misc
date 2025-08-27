@@ -1,13 +1,12 @@
 
-(*|chapter| Power sets *)
+(*/chapter Power sets *)
 
 01. 1 ⊢ set x, hypo.
 02. 2 ⊢ x ⊆ y, hypo.
 03. 1, 2 ⊢ x ∈ {x | x ⊆ y}, comp_intro 1 2.
 04. ⊢ power y = {x | x ⊆ y}, power_eq.
 05. 1, 2 ⊢ x ∈ power y, eq_subst_rev 4 3, P u ↔ x ∈ u.
-06. 1 ⊢ x ⊆ y → x ∈ power y, subj_intro 5.
-power_intro. ⊢ set x → x ⊆ y → x ∈ power y, subj_intro 6.
+power_intro. ⊢ set x → x ⊆ y → x ∈ power y, subj_intro_ii 5.
 
 01. 1 ⊢ t ∈ A × B, hypo.
 02. 1 ⊢ ∃x. ∃y. x ∈ A ∧ y ∈ B ∧ t = (x, y), prod_elim 1.
@@ -51,5 +50,10 @@ prod_incl_in_power. ⊢ A × B ⊆ power (power (A ∪ B)), incl_intro 33.
 04. 1, 2 ⊢ set (power (A ∪ B)), power 3.
 05. 1, 2 ⊢ set (power (power (A ∪ B))), power 4.
 06. 1, 2 ⊢ set (A × B), subset prod_incl_in_power 5.
-07. 1 ⊢ set B → set (A × B), subj_intro 6.
-set_prod. ⊢ set A → set B → set (A × B), subj_intro 7.
+set_prod. ⊢ set A → set B → set (A × B), subj_intro_ii 6.
+
+01. 1 ⊢ set X, hypo.
+02. ⊢ {x | x ∈ X ∧ P x} ⊆ X, sep_is_subclass.
+03. 1 ⊢ set {x | x ∈ X ∧ P x}, subset 2 1.
+04. 1 ⊢ {x | x ∈ X ∧ P x} ∈ power X, power_intro 3 2.
+sep_in_power. ⊢ set X → {x | x ∈ X ∧ P x} ∈ power X, subj_intro 4.

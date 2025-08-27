@@ -1,14 +1,23 @@
 
-(*|chapter| Logic *)
+(*/chapter Logic *)
 
-(*|section| Propositional logic *)
+(*/section Propositional logic *)
+
+01. 1 ⊢ ¬¬A, hypo.
+02. ⊢ A ∨ ¬A, lem.
+03. 3 ⊢ A, hypo.
+04. 4 ⊢ ¬A, hypo.
+05. 1, 4 ⊢ ⊥, neg_elim 1 4.
+06. 1, 4 ⊢ A, efq 5.
+07. 1 ⊢ A, disj_elim 2 3 6.
+dne. ⊢ ¬¬A → A, subj_intro 7.
 
 01. 1 ⊢ ⊥, hypo.
 02. 2 ⊢ ¬A, hypo.
 03. 1, 2 ⊢ ⊥, wk 1.
 04. 1 ⊢ ¬¬A, neg_intro 3.
 05. 1 ⊢ A, dne 4.
-efq. ⊢ ⊥ → A, subj_intro 5.
+efq_from_dne. ⊢ ⊥ → A, subj_intro 5.
 
 01. 1 ⊢ ¬(A ∨ ¬A), hypo.
 02. 2 ⊢ A, hypo.
@@ -18,7 +27,7 @@ efq. ⊢ ⊥ → A, subj_intro 5.
 06. 1 ⊢ A ∨ ¬A, disj_intror 5.
 07. 1 ⊢ ⊥, neg_elim 1 6.
 08. ⊢ ¬¬(A ∨ ¬A), neg_intro 7.
-lem. ⊢ A ∨ ¬A, dne 8.
+lem_from_dne. ⊢ A ∨ ¬A, dne 8.
 
 01. 1 ⊢ A ↔ ¬A, hypo.
 02. 1 ⊢ A → ¬A, bij_eliml 1.
@@ -65,8 +74,75 @@ contraposition_rev. ⊢ (¬A → ¬B) → (B → A), subj_intro 7.
 08. 1 ⊢ A → B, subj_intro 7.
 subj_from_disj. ⊢ (¬A ∨ B) → (A → B), subj_intro 8.
 
+(*/section Projections *)
 
-(*|section| Logic with equality *)
+01. 1 ⊢ A ∧ B ∧ C, hypo.
+02. 1 ⊢ A ∧ B, conj_eliml 1.
+03. 1 ⊢ A, conj_eliml 2.
+conj_elimll. ⊢ A ∧ B ∧ C → A, subj_intro 3.
+
+01. 1 ⊢ A ∧ B ∧ C, hypo.
+02. 1 ⊢ A ∧ B, conj_eliml 1.
+03. 1 ⊢ B, conj_elimr 2.
+conj_elimlr. ⊢ A ∧ B ∧ C → B, subj_intro 3.
+
+01. 1 ⊢ A ∧ B ∧ C ∧ D, hypo.
+02. 1 ⊢ A ∧ B ∧ C, conj_eliml 1.
+03. 1 ⊢ A ∧ B, conj_eliml 2.
+04. 1 ⊢ A, conj_eliml 3.
+conj_elimlll. ⊢ A ∧ B ∧ C ∧ D → A, subj_intro 4.
+
+01. 1 ⊢ A ∧ B ∧ C ∧ D, hypo.
+02. 1 ⊢ A ∧ B ∧ C, conj_eliml 1.
+03. 1 ⊢ A ∧ B, conj_eliml 2.
+04. 1 ⊢ B, conj_elimr 3.
+conj_elimllr. ⊢ A ∧ B ∧ C ∧ D → B, subj_intro 4.
+
+01. 1 ⊢ A ↔ B, hypo.
+02. 1 ⊢ A → B, bij_eliml 1.
+lsubj_elim. ⊢ (A ↔ B) → A → B, subj_intro 2.
+
+01. 1 ⊢ A ↔ B, hypo.
+02. 1 ⊢ B → A, bij_elimr 1.
+rsubj_elim. ⊢ (A ↔ B) → B → A, subj_intro 2.
+
+01. 1 ⊢ E ↔ A ∧ B, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B, lsubj_elim 1 2.
+04. 1, 2 ⊢ A, conj_eliml 3.
+lsubj_conj_eliml. ⊢ (E ↔ A ∧ B) → E → A, subj_intro_ii 4.
+
+01. 1 ⊢ E ↔ A ∧ B, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B, lsubj_elim 1 2.
+04. 1, 2 ⊢ B, conj_elimr 3.
+lsubj_conj_elimr. ⊢ (E ↔ A ∧ B) → E → B, subj_intro_ii 4.
+
+01. 1 ⊢ E ↔ A ∧ B ∧ C, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B ∧ C, lsubj_elim 1 2.
+04. 1, 2 ⊢ A, conj_elimll 3.
+lsubj_conj_elimll. ⊢ (E ↔ A ∧ B ∧ C) → E → A, subj_intro_ii 4.
+
+01. 1 ⊢ E ↔ A ∧ B ∧ C, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B ∧ C, lsubj_elim 1 2.
+04. 1, 2 ⊢ B, conj_elimlr 3.
+lsubj_conj_elimlr. ⊢ (E ↔ A ∧ B ∧ C) → E → B, subj_intro_ii 4.
+
+01. 1 ⊢ E ↔ A ∧ B ∧ C ∧ D, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B ∧ C ∧ D, lsubj_elim 1 2.
+04. 1, 2 ⊢ A, conj_elimlll 3.
+lsubj_conj_elimlll. ⊢ (E ↔ A ∧ B ∧ C ∧ D) → E → A, subj_intro_ii 4.
+
+01. 1 ⊢ E ↔ A ∧ B ∧ C ∧ D, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B ∧ C ∧ D, lsubj_elim 1 2.
+04. 1, 2 ⊢ B, conj_elimllr 3.
+lsubj_conj_elimllr. ⊢ (E ↔ A ∧ B ∧ C ∧ D) → E → B, subj_intro_ii 4.
+
+(*/section Logic with equality *)
 
 01. 1 ⊢ x = y, hypo.
 02. 1 ⊢ y = x, eq_subst 1 eq_refl, P u ↔ u = x.
@@ -86,11 +162,10 @@ f_equal. ⊢ x = y → f x = f y, subj_intro 3.
 02. 2 ⊢ y = z, hypo.
 03. 1 ⊢ y = x, eq_symm 1.
 04. 1, 2 ⊢ x = z, eq_subst 3 2, P u ↔ u = z.
-05. 1 ⊢ y = z → x = z, subj_intro 4.
-eq_trans. ⊢ x = y → y = z → x = z, subj_intro 5.
+eq_trans. ⊢ x = y → y = z → x = z, subj_intro_ii 4.
 
 
-(*|section| Distributing negations *)
+(*/section Distributing negations *)
 
 01. 1 ⊢ B, hypo.
 02. 2 ⊢ A, hypo.
@@ -179,7 +254,7 @@ neg_uq_bounded. ⊢ (¬∀x. P x → Q x) → (∃x. P x ∧ ¬Q x), subj_intro 
 neg_ex_bounded. ⊢ (¬∃x. P x ∧ Q x) → (∀x. P x → ¬Q x), subj_intro 6.
 
 
-(*|section| Unique existence *)
+(*/section Unique existence *)
 
 01. 1 ⊢ ∃x. P x, hypo.
 02. 2 ⊢ ∀x. ∀y. P x → P y → x = y, hypo.
@@ -194,10 +269,8 @@ neg_ex_bounded. ⊢ (¬∃x. P x ∧ Q x) → (∀x. P x → ¬Q x), subj_intro 
 11. 2, 3 ⊢ ∀y. x = y ↔ P y, uq_intro 10.
 12. 2, 3 ⊢ ∃x. ∀y. x = y ↔ P y, ex_intro 11.
 13. 1, 2 ⊢ ∃x. ∀y. x = y ↔ P y, ex_elim 1 12.
-14. 1 ⊢ (∀x. ∀y. P x → P y → x = y) →
-  (∃x. ∀y. x = y ↔ P y), subj_intro 13.
 ex_uniq_intro. ⊢ (∃x. P x) → (∀x. ∀y. P x → P y → x = y) →
-  (∃x. ∀y. x = y ↔ P y), subj_intro 14.
+  (∃x. ∀y. x = y ↔ P y), subj_intro_ii 13.
 
 01. 1 ⊢ ∃x. ∀y. x = y ↔ P y, hypo.
 02. 2 ⊢ ∀y. x = y ↔ P y, hypo.
@@ -222,10 +295,8 @@ ex_uniq_eliml. ⊢ (∃x. ∀y. x = y ↔ P y) → (∃x. P x), subj_intro 8.
 11. 3, 2 ⊢ x = u, eq_symm 9.
 12. 3, 4, 2 ⊢ x = y, eq_trans 11 10.
 13. 1, 3, 4 ⊢ x = y, ex_elim 1 12.
-14. 1, 3 ⊢ P y → x = y, subj_intro 13.
-15. 1 ⊢ P x → P y → x = y, subj_intro 14.
 ex_uniq_elimr. ⊢ (∃x. ∀y. x = y ↔ P y) → P x → P y → x = y,
-  subj_intro 15.
+  subj_intro_iii 13.
 
 01. 1 ⊢ ∃x. S x ∧ P x, hypo.
 02. 2 ⊢ ∀x. ∀y. P x → P y → x = y, hypo.
@@ -243,9 +314,7 @@ ex_uniq_elimr. ⊢ (∃x. ∀y. x = y ↔ P y) → P x → P y → x = y,
 14. 2, 3 ⊢ S x ∧ ∀y. x = y ↔ P y, conj_intro 4 13.
 15. 2, 3 ⊢ ∃x. S x ∧ ∀y. x = y ↔ P y, ex_intro 14.
 16. 1, 2 ⊢ ∃x. S x ∧ ∀y. x = y ↔ P y, ex_elim 1 15.
-17. 1 ⊢ (∀x. ∀y. P x → P y → x = y) →
-  (∃x. S x ∧ ∀y. x = y ↔ P y), subj_intro 16.
 ex_uniq_set_intro. ⊢ (∃x. S x ∧ P x) → (∀x. ∀y. P x → P y → x = y) →
-  (∃x. S x ∧ ∀y. x = y ↔ P y), subj_intro 17.
+  (∃x. S x ∧ ∀y. x = y ↔ P y), subj_intro_ii 16.
 
 
