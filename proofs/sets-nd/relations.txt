@@ -464,3 +464,99 @@ dom_sg. ⊢ set a → set b → dom {(a, b)} = {a}, subj_intro_ii 24.
 23. 1, 2 ⊢ ∀y. y ∈ rng {(a, b)} ↔ y ∈ {b}, uq_intro 22.
 24. 1, 2 ⊢ rng {(a, b)} = {b}, ext 23.
 rng_sg. ⊢ set a → set b → rng {(a, b)} = {b}, subj_intro_ii 24.
+
+01. 1 ⊢ y ∈ img (R ∪ Q) A, hypo.
+02. 1 ⊢ ∃x. x in A and (x, y) ∈ R ∪ Q, img_elim 1.
+03. 3 ⊢ x in A and (x, y) ∈ R ∪ Q, hypo.
+04. 3 |- x in A, conj_eliml 3.
+05. 3 |- (x, y) in R cup Q, conj_elimr 3.
+06. 3 ⊢ (x, y) ∈ R ∨ (x, y) ∈ Q, union_elim 5.
+07. 7 ⊢ (x, y) ∈ R, hypo.
+08. 3, 7 ⊢ y ∈ img R A, img_intro 4 7.
+09. 3, 7 ⊢ y ∈ img R A ∪ img Q A, union_introl 8.
+10. 10 ⊢ (x, y) ∈ Q, hypo.
+11. 3, 10 ⊢ y ∈ img Q A, img_intro 4 10.
+12. 3, 10 ⊢ y ∈ img R A ∪ img Q A, union_intror 11.
+13. 3 ⊢ y ∈ img R A ∪ img Q A, disj_elim 6 9 12.
+14. 1 ⊢ y ∈ img R A ∪ img Q A, ex_elim 2 13.
+15. ⊢ y ∈ img (R ∪ Q) A → y ∈ img R A ∪ img Q A, subj_intro 14.
+16. 16 ⊢ y ∈ img R A ∪ img Q A, hypo.
+17. 16 ⊢ y ∈ img R A ∨ y ∈ img Q A, union_elim 16.
+18. 18 ⊢ y ∈ img R A, hypo.
+19. 18 ⊢ ∃x. x in A and (x, y) ∈ R, img_elim 18.
+20. 20 ⊢ x in A and (x, y) ∈ R, hypo.
+21. 20 |- x in A, conj_eliml 20.
+22. 20 |- (x, y) in R, conj_elimr 20.
+23. 20 ⊢ (x, y) ∈ R ∪ Q, union_introl 22.
+24. 20 ⊢ y ∈ img (R ∪ Q) A, img_intro 21 23.
+25. 18 ⊢ y ∈ img (R ∪ Q) A, ex_elim 19 24.
+26. 26 ⊢ y ∈ img Q A, hypo.
+27. 26 ⊢ ∃x. x in A and (x, y) ∈ Q, img_elim 26.
+28. 28 ⊢ x in A and (x, y) ∈ Q, hypo.
+29. 28 |- x in A, conj_eliml 28.
+30. 28 |- (x, y) in Q, conj_elimr 28.
+31. 28 ⊢ (x, y) ∈ R ∪ Q, union_intror 30.
+32. 28 ⊢ y ∈ img (R ∪ Q) A, img_intro 29 31.
+33. 26 ⊢ y ∈ img (R ∪ Q) A, ex_elim 27 32.
+34. 16 ⊢ y ∈ img (R ∪ Q) A, disj_elim 17 25 33.
+35. ⊢ y ∈ img R A ∪ img Q A → y ∈ img (R ∪ Q) A, subj_intro 34.
+36. ⊢ y ∈ img (R ∪ Q) A ↔ y ∈ img R A ∪ img Q A, bij_intro 15 35.
+37. ⊢ ∀y. y ∈ img (R ∪ Q) A ↔ y ∈ img R A ∪ img Q A, uq_intro 36.
+img_union. ⊢ img (R ∪ Q) A = img R A ∪ img Q A, ext 37.
+
+01. 1 ⊢ set a, hypo.
+02. 2 ⊢ set b, hypo.
+03. 3 ⊢ y ∈ img {(a, b)} {a}, hypo.
+04. 3 ⊢ ∃x. x ∈ {a} ∧ (x, y) ∈ {(a, b)}, img_elim 3.
+05. 5 ⊢ x ∈ {a} ∧ (x, y) ∈ {(a, b)}, hypo.
+06. 5 ⊢ (x, y) ∈ {(a, b)}, conj_elimr 5.
+07. 1, 2 ⊢ set (a, b), set_pair 1 2.
+08. 1, 2, 5 ⊢ (x, y) = (a, b), sg_elim 7 6.
+09. 1, 2, 5 ⊢ (a, b) = (x, y), eq_symm 8.
+10. 1, 2, 5 ⊢ a = x ∧ b = y, pair_property 1 2 9.
+11. 1, 2, 5 ⊢ b = y, conj_elimr 10.
+12. 1, 2, 5 ⊢ y = b, eq_symm 11.
+13. 1, 2, 5 ⊢ y ∈ {b}, sg_intro 2 12.
+14. 1, 2, 3 ⊢ y ∈ {b}, ex_elim 4 13.
+15. 1, 2 ⊢ y ∈ img {(a, b)} {a} → y ∈ {b}, subj_intro 14.
+16. 16 ⊢ y ∈ {b}, hypo.
+17. 2, 16 ⊢ y = b, sg_elim 2 16.
+18. ⊢ (a, b) = (a, b), eq_refl.
+19. 2, 16 ⊢ (a, y) = (a, b), eq_subst_rev 17 18,
+  P u ↔ (a, u) = (a, b).
+20. 1, 2, 16 ⊢ (a, y) ∈ {(a, b)}, sg_intro 7 19.
+21. ⊢ a = a, eq_refl.
+22. 1 ⊢ a ∈ {a}, sg_intro 1 21.
+23. 1, 2, 16 ⊢ y ∈ img {(a, b)} {a}, img_intro 22 20.
+24. 1, 2 ⊢ y ∈ {b} → y ∈ img {(a, b)} {a}, subj_intro 23.
+25. 1, 2 ⊢ y ∈ img {(a, b)} {a} ↔ y ∈ {b}, bij_intro 15 24.
+26. 1, 2 ⊢ ∀y. y ∈ img {(a, b)} {a} ↔ y ∈ {b}, uq_intro 25.
+27. 1, 2 ⊢ img {(a, b)} {a} = {b}, ext 26.
+img_sg_sg. ⊢ set a → set b → img {(a, b)} {a} = {b}, subj_intro_ii 27.
+
+01. 1 ⊢ set a, hypo.
+02. 2 ⊢ set b, hypo.
+03. 3 ⊢ set x, hypo.
+04. 4 ⊢ ¬a = x, hypo.
+05. 5 ⊢ y ∈ img {(a, b)} {x}, hypo.
+06. 5 ⊢ ∃u. u ∈ {x} ∧ (u, y) ∈ {(a, b)}, img_elim 5.
+07. 7 ⊢ u ∈ {x} ∧ (u, y) ∈ {(a, b)}, hypo.
+08. 7 ⊢ u ∈ {x}, conj_eliml 7.
+09. 3, 7 ⊢ u = x, sg_elim 3 8.
+10. 1, 2 ⊢ set (a, b), set_pair 1 2.
+11. 7 ⊢ (u, y) ∈ {(a, b)}, conj_elimr 7.
+12. 1, 2, 7 ⊢ (u, y) = (a, b), sg_elim 10 11.
+13. 1, 2, 7 ⊢ (a, b) = (u, y), eq_symm 12.
+14. 1, 2, 7 ⊢ a = u ∧ b = y, pair_property 1 2 13.
+15. 1, 2, 7 ⊢ a = u, conj_eliml 14.
+16. 1, 2, 3, 7 ⊢ a = x, eq_trans 15 9.
+17. 1, 2, 3, 5 ⊢ a = x, ex_elim 6 16.
+18. 1, 2, 3, 4, 5 ⊢ ⊥, neg_elim 4 17.
+19. 1, 2, 3, 4, 5 ⊢ y ∈ ∅, efq 18.
+20. 1, 2, 3, 4 ⊢ y ∈ img {(a, b)} {x} → y ∈ ∅, subj_intro 19.
+21. 1, 2, 3, 4 ⊢ ∀y. y ∈ img {(a, b)} {x} → y ∈ ∅, uq_intro 20.
+22. 1, 2, 3, 4 ⊢ img {(a, b)} {x} ⊆ ∅, incl_intro 21.
+23. ⊢ ∅ ⊆ img {(a, b)} {x}, empty_set_is_least.
+24. 1, 2, 3, 4 ⊢ img {(a, b)} {x} = ∅, incl_antisym 22 23.
+img_sg_sg_neq. ⊢ set a → set b → set x → ¬a = x →
+  img {(a, b)} {x} = ∅, subj_intro_iv 24.

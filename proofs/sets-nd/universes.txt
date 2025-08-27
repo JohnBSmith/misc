@@ -1,22 +1,19 @@
 
 (*/chapter Grothendieck universes *)
 
-univ_equi. ⊢ univ U ↔
+univ_equi. ⊢ univ U ↔ ∅ ∈ U ∧
   (∀x. x ∈ U → x ⊆ U) ∧
-  (∀x. ∀y. x ∈ U → y ∈ U → {x, y} ∈ U) ∧
   (∀x. x ∈ U → power x ∈ U) ∧
   (∀I. ∀x. I ∈ U → map x I U → ⋃(img x I) ∈ U), def.
 
 01. 1 ⊢ univ U, hypo.
-02. 1 ⊢ (∀x. x ∈ U → x ⊆ U), lsubj_conj_elimlll univ_equi 1.
-03. 1 ⊢ x ∈ U → x ⊆ U, uq_elim 2.
-univ_trans. ⊢ univ U → x ∈ U → x ⊆ U, subj_intro 3.
+02. 1 ⊢ ∅ ∈ U, lsubj_conj_elimlll univ_equi 1.
+univ_contains_empty_set. ⊢ univ U → ∅ ∈ U, subj_intro 2.
 
 01. 1 ⊢ univ U, hypo.
-02. 1 ⊢ (∀x. ∀y. x ∈ U → y ∈ U → {x, y} ∈ U), lsubj_conj_elimllr univ_equi 1.
-03. 1 ⊢ ∀y. x ∈ U → y ∈ U → {x, y} ∈ U, uq_elim 2.
-04. 1 ⊢ x ∈ U → y ∈ U → {x, y} ∈ U, uq_elim 3.
-univ_closed_pair_set. ⊢ univ U → x ∈ U → y ∈ U → {x, y} ∈ U, subj_intro 4.
+02. 1 ⊢ (∀x. x ∈ U → x ⊆ U), lsubj_conj_elimllr univ_equi 1.
+03. 1 ⊢ x ∈ U → x ⊆ U, uq_elim 2.
+univ_trans. ⊢ univ U → x ∈ U → x ⊆ U, subj_intro 3.
 
 01. 1 ⊢ univ U, hypo.
 02. 1 ⊢ (∀x. x ∈ U → power x ∈ U), lsubj_conj_elimlr univ_equi 1.
@@ -24,28 +21,12 @@ univ_closed_pair_set. ⊢ univ U → x ∈ U → y ∈ U → {x, y} ∈ U, subj_
 univ_closed_power. ⊢ univ U → x ∈ U → power x ∈ U, subj_intro 3.
 
 01. 1 ⊢ univ U, hypo.
-02. 1 ⊢ ∀I. ∀x. I ∈ U → map x I U → ⋃(img x I) ∈ U, lsubj_conj_elimr univ_equi 1.
+02. 1 ⊢ ∀I. ∀x. I ∈ U → map x I U → ⋃(img x I) ∈ U,
+  lsubj_conj_elimr univ_equi 1.
 03. 1 ⊢ ∀x. I ∈ U → map x I U → ⋃(img x I) ∈ U, uq_elim 2.
 04. 1 ⊢ I ∈ U → map x I U → ⋃(img x I) ∈ U, uq_elim 3.
-univ_closed_union. ⊢ univ U → I ∈ U → map x I U → ⋃(img x I) ∈ U,
+univ_closed_Union. ⊢ univ U → I ∈ U → map x I U → ⋃(img x I) ∈ U,
   subj_intro 4.
-
-01. 1 ⊢ univ U, hypo.
-02. 2 ⊢ x ∈ U, hypo.
-03. 1, 2 ⊢ {x, x} ∈ U, univ_closed_pair_set 1 2 2.
-04. ⊢ {x, x} = {x}, union_idem.
-05. 1, 2 ⊢ {x} ∈ U, eq_subst 4 3, P u ↔ u ∈ U.
-univ_closed_sg. ⊢ univ U → x ∈ U → {x} ∈ U, subj_intro_ii 5.
-
-01. 1 ⊢ univ U, hypo.
-02. 2 ⊢ x ∈ U, hypo.
-03. 3 ⊢ y ∈ U, hypo.
-04. 1, 2 ⊢ {x} ∈ U, univ_closed_sg 1 2.
-05. 1, 2, 3 ⊢ {x, y} ∈ U, univ_closed_pair_set 1 2 3.
-06. 1, 2, 3 ⊢ {{x}, {x, y}} ∈ U, univ_closed_pair_set 1 4 5.
-07. 1, 2, 3 ⊢ (x, y) ∈ U, eq_subst_rev pair_eq 6, P u ↔ u ∈ U.
-univ_closed_pair. ⊢ univ U → x ∈ U → y ∈ U → (x, y) ∈ U,
-  subj_intro_iii 7.
 
 01. 1 ⊢ univ U, hypo.
 02. 2 ⊢ y ⊆ x, hypo.
@@ -66,9 +47,62 @@ univ_closed_subset. ⊢ univ U → y ⊆ x → x ∈ U → y ∈ U,
 univ_closed_intersection. ⊢ univ U → x ∈ U → x ∩ y ∈ U,
   subj_intro_ii 4.
 
-(*
 01. 1 ⊢ univ U, hypo.
-02. 2 ⊢ ∅ ∈ U, hypo.
-03. 1, 2 ⊢ {∅} ∈ U, univ_closed_sg 1 2.
-04. 1, 2 ⊢ {∅, {∅}} ∈ U, univ_closed_pair_set 1 2 3.
-*)
+02. 1 ⊢ ∅ ∈ U, univ_contains_empty_set 1.
+03. 1 ⊢ power ∅ ∈ U, univ_closed_power 1 2.
+04. 1 ⊢ {∅} ∈ U, eq_subst power_empty_set 3, P u ↔ u ∈ U.
+05. 1 ⊢ power {∅} ∈ U, univ_closed_power 1 4.
+06. ⊢ power {∅} = {∅, {∅}}, power_sg empty_set_is_set.
+07. 1 ⊢ {∅, {∅}} ∈ U, eq_subst 6 5, P u ↔ u ∈ U.
+08. 8 ⊢ x ∈ U, hypo.
+09. 9 ⊢ y ∈ U, hypo.
+10. ⊢ set ∅, empty_set_is_set.
+11. ⊢ set {∅}, set_sg 10.
+12. 8 ⊢ map {(∅, x)} {∅} U, sg_map 10 8.
+13. 9 ⊢ map {({∅}, y)} {{∅}} U, sg_map 11 9.
+14. ⊢ {∅} ∩ {{∅}} = ∅,
+  disjoint_sg_from_neq 10 11 empty_set_neq_sg_empty_set.
+15. 8, 9 ⊢ map {(∅, x), ({∅}, y)} {∅, {∅}} U,
+  map_union_eq_rngs 12 13 14.
+16. 1, 8, 9 ⊢ ⋃(img {(∅, x), ({∅}, y)} {∅, {∅}}) ∈ U,
+  univ_closed_Union 1 7 15.
+17. 8 ⊢ set x, set_intro 8.
+18. 9 ⊢ set y, set_intro 9.
+19. 8, 9 ⊢ img {(∅, x), ({∅}, y)} {∅, {∅}} = {x, y}, img_graph2 17 18.
+20. 1, 8, 9 ⊢ ⋃{x, y} ∈ U, eq_subst 19 16, P t ↔ ⋃t ∈ U.
+21. 8, 9 ⊢ set x ∧ set y, conj_intro 17 18.
+22. 8, 9 ⊢ ⋃{x, y} = x ∪ y, Union_pair_set 21.
+23. 1, 8, 9 ⊢ x ∪ y ∈ U, eq_subst 22 20, P t ↔ t ∈ U.
+univ_closed_union. ⊢ univ U → x ∈ U → y ∈ U → x ∪ y ∈ U,
+  subj_intro_iii 23.
+
+01. 1 ⊢ univ U, hypo.
+02. 2 ⊢ x ∈ U, hypo.
+03. 2 ⊢ set x, set_intro 2.
+04. 2 ⊢ {x} ⊆ power x, sg_incl_in_power 3.
+05. 2 ⊢ set {x}, set_sg 3.
+06. 2 ⊢ {x} ∈ power (power x), power_intro 5 4.
+07. 1, 2 ⊢ power x ∈ U, univ_closed_power 1 2.
+08. 1, 2 ⊢ power (power x) ∈ U, univ_closed_power 1 7.
+09. 1, 2 ⊢ power (power x) ⊆ U, univ_trans 1 8.
+10. 1, 2 ⊢ {x} ∈ U, incl_elim 9 6.
+univ_closed_sg. ⊢ univ U → x ∈ U → {x} ∈ U, subj_intro_ii 10.
+
+01. 1 ⊢ univ U, hypo.
+02. 2 ⊢ x ∈ U, hypo.
+03. 3 ⊢ y ∈ U, hypo.
+04. 1, 2 ⊢ {x} ∈ U, univ_closed_sg 1 2.
+05. 1, 3 ⊢ {y} ∈ U, univ_closed_sg 1 3.
+06. 1, 2, 3 ⊢ {x, y} ∈ U, univ_closed_union 1 4 5.
+univ_closed_pair_set. ⊢ univ U → x ∈ U → y ∈ U → {x, y} ∈ U,
+  subj_intro_iii 6.
+
+01. 1 ⊢ univ U, hypo.
+02. 2 ⊢ x ∈ U, hypo.
+03. 3 ⊢ y ∈ U, hypo.
+04. 1, 2 ⊢ {x} ∈ U, univ_closed_sg 1 2.
+05. 1, 2, 3 ⊢ {x, y} ∈ U, univ_closed_pair_set 1 2 3.
+06. 1, 2, 3 ⊢ {{x}, {x, y}} ∈ U, univ_closed_pair_set 1 4 5.
+07. 1, 2, 3 ⊢ (x, y) ∈ U, eq_subst_rev pair_eq 6, P u ↔ u ∈ U.
+univ_closed_pair. ⊢ univ U → x ∈ U → y ∈ U → (x, y) ∈ U,
+  subj_intro_iii 7.

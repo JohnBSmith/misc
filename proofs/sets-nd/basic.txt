@@ -1099,6 +1099,20 @@ prod_eliml. ⊢ t ∈ X × Y → fst t ∈ X, subj_intro 3.
 03. 1 ⊢ scd t ∈ Y, conj_elimr 2.
 prod_elimr. ⊢ t ∈ X × Y → scd t ∈ Y, subj_intro 3.
 
+01. ⊢ ∃A. ∅ ∈ A ∧ ∀x. x ∈ A → x ∪ {x} ∈ A, infinity.
+02. 2 ⊢ ∅ ∈ A ∧ ∀x. x ∈ A → x ∪ {x} ∈ A, hypo.
+03. 2 ⊢ ∅ ∈ A, conj_eliml 2.
+04. 2 ⊢ set ∅, set_intro 3.
+empty_set_is_set. ⊢ set ∅, ex_elim 1 4.
+
+01. 1 ⊢ ∅ = {∅}, hypo.
+02. 1 ⊢ {∅} ⊆ ∅, incl_from_eq_rev 1.
+03. ⊢ ∅ = ∅, eq_refl.
+04. ⊢ ∅ ∈ {∅}, sg_intro empty_set_is_set 3.
+05. 1 ⊢ ∅ ∈ ∅, incl_elim 2 4.
+06. 1 ⊢ ⊥, empty_efq 5.
+empty_set_neq_sg_empty_set. ⊢ ¬∅ = {∅}, neg_intro 6.
+
 01. 1 ⊢ set a, hypo.
 02. 2 ⊢ set b, hypo.
 03. 3 ⊢ ¬a = b, hypo.
@@ -1135,6 +1149,34 @@ disjoint_sg_from_neq. ⊢ set a → set b → ¬a = b → {a} ∩ {b} = ∅,
 14. 1, 2 ⊢ X ∩ {a} = ∅, incl_antisym 12 13.
 disjoint_sg_from_new. ⊢ set a → ¬a ∈ X → X ∩ {a} = ∅,
   subj_intro_ii 14.
+
+01. 1 ⊢ set a, hypo.
+02. 2 ⊢ x ⊆ {a}, hypo.
+03. ⊢ a ∈ x ∨ ¬a ∈ x, lem.
+04. 4 ⊢ a ∈ x, hypo.
+05. 5 ⊢ u ∈ {a}, hypo.
+06. 1, 5 ⊢ u = a, sg_elim 1 5.
+07. 1, 4, 5 ⊢ u ∈ x, eq_subst_rev 6 4, P u ↔ u ∈ x.
+08. 1, 4 ⊢ u ∈ {a} → u ∈ x, subj_intro 7.
+09. 1, 4 ⊢ ∀u. u ∈ {a} → u ∈ x, uq_intro 8.
+10. 1, 4 ⊢ {a} ⊆ x, incl_intro 9.
+11. 1, 2, 4 ⊢ x = {a}, incl_antisym 2 10.
+12. 1, 2, 4 ⊢ x = ∅ ∨ x = {a}, disj_intror 11.
+13. 13 ⊢ ¬a ∈ x, hypo.
+14. 14 ⊢ u ∈ x, hypo.
+15. 2, 14 ⊢ u ∈ {a}, incl_elim 2 14.
+16. 1, 2, 14 ⊢ u = a, sg_elim 1 15.
+17. 1, 2, 14 ⊢ a ∈ x, eq_subst 16 14, P u ↔ u ∈ x.
+18. 1, 2, 13, 14 ⊢ ⊥, neg_elim 13 17.
+19. 1, 2, 13, 14 ⊢ u ∈ ∅, efq 18.
+20. 1, 2, 13 ⊢ u ∈ x → u ∈ ∅, subj_intro 19.
+21. 1, 2, 13 ⊢ ∀u. u ∈ x → u ∈ ∅, uq_intro 20.
+22. 1, 2, 13 ⊢ x ⊆ ∅, incl_intro 21.
+23. ⊢ ∅ ⊆ x, empty_set_is_least.
+24. 1, 2, 13 ⊢ x = ∅, incl_antisym 22 23.
+25. 1, 2, 13 ⊢ x = ∅ ∨ x = {a}, disj_introl 24.
+26. 1, 2 ⊢ x = ∅ ∨ x = {a}, disj_elim 3 12 25.
+subsets_of_sg. ⊢ set a → x ⊆ {a} → x = ∅ ∨ x = {a}, subj_intro_ii 26.
 
 (*/section Operations on families of sets *)
 

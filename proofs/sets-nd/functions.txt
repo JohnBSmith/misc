@@ -566,3 +566,41 @@ sg_function. ⊢ set a → set b → function {(a, b)}, subj_intro_ii 21.
 09. 1, 2 ⊢ rng {(a, b)} ⊆ Y, incl_trans 7 8.
 10. 1, 2 ⊢ map {(a, b)} {a} Y, map_intro 4 5 9.
 sg_map. ⊢ set a → b ∈ Y → map {(a, b)} {a} Y, subj_intro_ii 10.
+
+01. 1 ⊢ set x, hypo.
+02. 2 ⊢ set y, hypo.
+03. ⊢ set ∅, empty_set_is_set.
+04. ⊢ set {∅}, set_sg 3.
+05. ⊢ img {(∅, x), ({∅}, y)} {∅, {∅}}
+  = img {(∅, x)} {∅, {∅}} ∪ img {({∅}, y)} {∅, {∅}}, img_union.
+06. ⊢ img {(∅, x)} {∅, {∅}}
+  = img {(∅, x)} {∅} ∪ img {(∅, x)} {{∅}}, img_dist_union.
+07. ⊢ img {({∅}, y)} {∅, {∅}}
+  = img {({∅}, y)} {∅} ∪ img {({∅}, y)} {{∅}}, img_dist_union.
+08. 1 ⊢ img {(∅, x)} {∅} = {x}, img_sg_sg 3 1.
+09. 2 ⊢ img {({∅}, y)} {{∅}} = {y}, img_sg_sg 4 2.
+10. ⊢ ¬∅ = {∅}, empty_set_neq_sg_empty_set.
+11. ⊢ ¬{∅} = ∅, neq_symm 10.
+12. 1 ⊢ img {(∅, x)} {{∅}} = ∅, img_sg_sg_neq 3 1 4 10.
+13. 2 ⊢ img {({∅}, y)} {∅} = ∅, img_sg_sg_neq 4 2 3 11.
+14. 1 ⊢ img {(∅, x)} {∅, {∅}} = {x} ∪ img {(∅, x)} {{∅}},
+  eq_subst 8 6, P t ↔ img {(∅, x)} {∅, {∅}} = t ∪ img {(∅, x)} {{∅}}.
+15. 1 ⊢ img {(∅, x)} {∅, {∅}} = {x} ∪ ∅, eq_subst 12 14,
+  P t ↔ img {(∅, x)} {∅, {∅}} = {x} ∪ t.
+16. ⊢ {x} ∪ ∅ = {x}, union_neutr.
+17. 1 ⊢ img {(∅, x)} {∅, {∅}} = {x}, eq_subst 16 15,
+  P t ↔ img {(∅, x)} {∅, {∅}} = t.
+18. 2 ⊢ img {({∅}, y)} {∅, {∅}} = ∅ ∪ img {({∅}, y)} {{∅}},
+  eq_subst 13 7, P t ↔ img {({∅}, y)} {∅, {∅}} = t ∪ img {({∅}, y)} {{∅}}.
+19. 2 ⊢ img {({∅}, y)} {∅, {∅}} = ∅ ∪ {y}, eq_subst 9 18,
+  P t ↔ img {({∅}, y)} {∅, {∅}} = ∅ ∪ t.
+21. ⊢ ∅ ∪ {y} = {y}, union_neutl.
+22. 2 ⊢ img {({∅}, y)} {∅, {∅}} = {y}, eq_subst 21 19,
+  P t ↔ img {({∅}, y)} {∅, {∅}} = t.
+23. 1 ⊢ img {(∅, x), ({∅}, y)} {∅, {∅}} = {x} ∪ img {({∅}, y)} {∅, {∅}},
+  eq_subst 17 5, P t ↔ img {(∅, x), ({∅}, y)} {∅, {∅}}
+    = t ∪ img {({∅}, y)} {∅, {∅}}.
+24. 1, 2 ⊢ img {(∅, x), ({∅}, y)} {∅, {∅}} = {x} ∪ {y},
+  eq_subst 22 23, P t ↔ img {(∅, x), ({∅}, y)} {∅, {∅}} = {x} ∪ t.
+img_graph2. ⊢ set x → set y → img {(∅, x), ({∅}, y)} {∅, {∅}} = {x, y},
+  subj_intro_ii 24.
