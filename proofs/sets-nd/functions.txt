@@ -1,6 +1,8 @@
 
 (*/chapter Functions *)
 
+(*/section Basic results *)
+
 function_unfold. ⊢ function f → relation f ∧
   (∀x. ∀y1. ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2),
   bij_eliml function_equi.
@@ -126,6 +128,22 @@ fn_img_lemma. ⊢ function f → x ∈ dom f →
 17. 1, 2 ⊢ y = app f x, ex_elim 1 16.
 app_intro_lemma. ⊢ (∃y. set y ∧ {y} = {y | (x, y) ∈ f}) →
   (x, y) ∈ f → y = app f x, subj_intro_ii 17.
+
+01. 1 ⊢ ∃y. set y ∧ {y} = {y | (x, y) ∈ f}, hypo.
+02. 2 ⊢ y = app f x, hypo.
+03. 2 ⊢ y = ⋂{y | (x, y) ∈ f}, eq_subst app_eq 2, P u ↔ y = u.
+04. 4 ⊢ set b ∧ {b} = {y | (x, y) ∈ f}, hypo.
+05. 4 ⊢ set b, conj_eliml 4.
+06. 4 ⊢ {b} = {y | (x, y) ∈ f}, conj_elimr 4.
+07. 2, 4 ⊢ y = ⋂{b}, eq_subst_rev 6 3, P u ↔ y = ⋂u.
+08. 4 ⊢ ⋂{b} = b, Intersection_sg 5.
+09. 2, 4 ⊢ y = b, eq_trans 7 8.
+10. 2, 4 ⊢ y ∈ {b}, sg_intro 5 9.
+11. 2, 4 ⊢ y ∈ {y | (x, y) ∈ f}, eq_subst 6 10, P u ↔ y ∈ u.
+12. 2, 4 ⊢ (x, y) ∈ f, comp_elim 11.
+13. 1, 2 ⊢ (x, y) ∈ f, ex_elim 1 12.
+app_elim_lemma. ⊢ (∃y. set y ∧ {y} = {y | (x, y) ∈ f}) →
+  y = app f x → (x, y) ∈ f, subj_intro_ii 13.
 
 01. 1 ⊢ function f, hypo.
 02. 2 ⊢ (x, y) ∈ f, hypo.
@@ -604,3 +622,172 @@ sg_map. ⊢ set a → b ∈ Y → map {(a, b)} {a} Y, subj_intro_ii 10.
   eq_subst 22 23, P t ↔ img {(∅, x), ({∅}, y)} {∅, {∅}} = {x} ∪ t.
 img_graph2. ⊢ set x → set y → img {(∅, x), ({∅}, y)} {∅, {∅}} = {x, y},
   subj_intro_ii 24.
+
+01. 1 ⊢ ∀x. x ∈ X → ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f, hypo.
+02. 2 ⊢ x ∈ X, hypo.
+03. 1, 2 ⊢ ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f, uq_bounded_elim 1 2.
+04. 4 ⊢ z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f, hypo.
+05. 4 ⊢ z ∈ Y, conj_eliml 4.
+06. 4 ⊢ ∀y. z = y ↔ (x, y) ∈ f, conj_elimr 4.
+07. 4 ⊢ z = z ↔ (x, z) ∈ f, uq_elim 6.
+08. ⊢ z = z, eq_refl.
+09. 4 ⊢ (x, z) ∈ f, lsubj_elim 7 8.
+10. 4 ⊢ x ∈ dom f, dom_intro 9.
+11. 1, 2 ⊢ x ∈ dom f, ex_elim 3 10.
+12. 1 ⊢ x ∈ X → x ∈ dom f, subj_intro 11.
+13. 1 ⊢ ∀x. x ∈ X → x ∈ dom f, uq_intro 12.
+14. 1 ⊢ X ⊆ dom f, incl_intro 13.
+subclass_dom_from_ex_uniq. ⊢
+  (∀x. x ∈ X → ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f) →
+  X ⊆ dom f, subj_intro 14.
+
+(*/ Partly functional relations *)
+
+fn_on_eq. ⊢ fn_on f A ↔ relation f ∧ ∀x. x ∈ A →
+  ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, def.
+
+01. 1 ⊢ relation f, hypo.
+02. 2 ⊢ ∀x. x ∈ A → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, hypo.
+03. 1, 2 ⊢ relation f ∧
+  (∀x. x ∈ A → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f), conj_intro 1 2.
+04. 1, 2 ⊢ fn_on f A, rsubj_elim fn_on_eq 3.
+fn_on_intro. ⊢ relation f →
+  (∀x. x ∈ A → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f) →
+  fn_on f A, subj_intro_ii 4.
+
+01. 1 ⊢ relation f, hypo.
+02. 2 ⊢ ∀x. x ∈ A → ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f, hypo.
+03. 3 ⊢ x ∈ A, hypo.
+04. 2, 3 ⊢ ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f, uq_bounded_elim 2 3.
+05. ⊢ z ∈ Y → set z, set_intro.
+06. ⊢ ∀z. z ∈ Y → set z, uq_intro 5.
+07. 2, 3 ⊢ ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, ex_weaken_conj 6 4.
+08. 2 ⊢ x ∈ A → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, subj_intro 7.
+09. 2 ⊢ ∀x. x ∈ A → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, uq_intro 8.
+10. 1, 2 ⊢ fn_on f A, fn_on_intro 1 9.
+fn_on_intro_cod. ⊢ relation f →
+  (∀x. x ∈ A → ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f) →
+  fn_on f A, subj_intro_ii 10.
+
+01. 1 ⊢ fn_on f A, hypo.
+02. 1 ⊢ relation f, lsubj_conj_eliml fn_on_eq 1.
+relation_from_fn_on. ⊢ fn_on f A → relation f, subj_intro 2.
+
+01. 1 ⊢ fn_on f A, hypo.
+02. 1 ⊢ ∀x. x ∈ A → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f,
+  lsubj_conj_elimr fn_on_eq 1.
+ex_uniq_from_fn_on. ⊢ fn_on f A → ∀x. x ∈ A →
+  ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, subj_intro 2.
+
+01. 1 ⊢ function f, hypo.
+02. 2 ⊢ A ⊆ dom f, hypo.
+03. 1 ⊢ relation f, fn_is_rel 1.
+04. 4 ⊢ x ∈ A, hypo.
+05. 2, 4 ⊢ x ∈ dom f, incl_elim 2 4.
+06. 2, 4 ⊢ ∃y. (x, y) ∈ f, dom_elim 5.
+07. 7 ⊢ (x, y) ∈ f, hypo.
+08. 7 ⊢ set (x, y), set_intro 7.
+09. 7 ⊢ set y, setr_from_pair 8.
+10. 7 ⊢ set y ∧ (x, y) ∈ f, conj_intro 9 7.
+11. 7 ⊢ ∃y. set y ∧ (x, y) ∈ f, ex_intro 10.
+12. 2, 4 ⊢ ∃y. set y ∧ (x, y) ∈ f, ex_elim 6 11.
+13. 1 ⊢ (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2, fn_unique_value 1.
+14. 1 ⊢ ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2, uq_intro 13.
+15. 1 ⊢ ∀y1. ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2, uq_intro 14.
+16. 1, 2, 4 ⊢ ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, ex_uniq_set_intro 12 15.
+17. 1, 2 ⊢ x ∈ A → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, subj_intro 16.
+18. 1, 2 ⊢ ∀x. x ∈ A → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, uq_intro 17.
+19. 1, 2 ⊢ fn_on f A, fn_on_intro 3 18.
+fn_on_from_function. ⊢ function f → A ⊆ dom f → fn_on f A,
+  subj_intro_ii 19.
+
+01. 1 ⊢ map f X Y, hypo.
+02. 2 ⊢ A ⊆ X, hypo.
+03. 1 ⊢ function f ∧ dom f = X ∧ rng f ⊆ Y, map_unfold 1.
+04. 1 ⊢ function f, conj_elimll 3.
+05. 1 ⊢ dom f = X, conj_elimlr 3.
+06. 1, 2 ⊢ A ⊆ dom f, eq_subst_rev 5 2.
+07. 1, 2 ⊢ fn_on f A, fn_on_from_function 4 6.
+fn_on_from_map. ⊢ map f X Y → A ⊆ X → fn_on f A, subj_intro_ii 7.
+
+01. 1 ⊢ fn_on f X, hypo.
+02. 2 ⊢ dom f ⊆ X, hypo.
+03. 1 ⊢ ∀x. x ∈ X → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f,
+  ex_uniq_from_fn_on 1.
+04. 4 ⊢ (x, y1) ∈ f, hypo.
+05. 4 ⊢ x ∈ dom f, dom_intro 4.
+06. 2, 4 ⊢ x ∈ X, incl_elim 2 5.
+07. 1, 2, 4 ⊢ ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, uq_bounded_elim 3 6.
+08. 1, 2, 4 ⊢ (x, y2) ∈ f → y1 = y2, ex_uniq_set_elimr 7 4.
+09. 1, 2 ⊢ (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2, subj_intro 8.
+10. 1, 2 ⊢ ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2, uq_intro 9.
+11. 1, 2 ⊢ ∀y1. ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2, uq_intro 10.
+12. 1, 2 ⊢ ∀x. ∀y1. ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2, uq_intro 11.
+13. 1 ⊢ relation f, relation_from_fn_on 1.
+14. 1, 2 ⊢ function f, function_intro 13 12.
+function_from_fn_on. ⊢ fn_on f X → dom f ⊆ X → function f,
+  subj_intro_ii 14.
+
+01. 1 ⊢ fn_on f A, hypo.
+02. 2 ⊢ x ∈ A, hypo.
+03. 3 ⊢ (x, y) ∈ f, hypo.
+04. 1 ⊢ ∀x. x ∈ A → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, ex_uniq_from_fn_on 1.
+05. 1, 2 ⊢ ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, uq_bounded_elim 4 2.
+06. 1, 2 ⊢ ∃z. set z ∧ {z} = {y | (x, y) ∈ f}, sg_eq_from_ex_uniq 5.
+07. 1, 2, 3 ⊢ y = app f x, app_intro_lemma 6 3.
+fn_on_app_intro. ⊢ fn_on f A → x ∈ A → (x, y) ∈ f →
+  y = app f x, subj_intro_iii 7.
+
+01. 1 ⊢ fn_on f A, hypo.
+02. 2 ⊢ x ∈ A, hypo.
+03. 3 ⊢ y = app f x, hypo.
+04. 1 ⊢ ∀x. x ∈ A → ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, ex_uniq_from_fn_on 1.
+05. 1, 2 ⊢ ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, uq_bounded_elim 4 2.
+06. 1, 2 ⊢ ∃z. set z ∧ {z} = {y | (x, y) ∈ f}, sg_eq_from_ex_uniq 5.
+07. 1, 2, 3 ⊢ (x, y) ∈ f, app_elim_lemma 6 3.
+fn_on_app_elim. ⊢ fn_on f A → x ∈ A → y = app f x →
+  (x, y) ∈ f, subj_intro_iii 7.
+
+01. 1 ⊢ fn_on f A, hypo.
+02. 2 ⊢ fn_on g A, hypo.
+03. 3 ⊢ ∀x. x ∈ A → app f x = app g x, hypo.
+04. 4 ⊢ t ∈ restr f A, hypo.
+05. 4 ⊢ t ∈ f ∩ (A × UnivCl), eq_subst restr_eq 4, P u ↔ t ∈ u.
+06. 4 ⊢ t ∈ f, intersection_eliml 5.
+07. 4 ⊢ t ∈ A × UnivCl, intersection_elimr 5.
+08. 1 ⊢ relation f, relation_from_fn_on 1.
+09. 1 ⊢ ∀t. t ∈ f → ∃x. ∃y. t = (x, y), relation_unfold 8.
+10. 1, 4 ⊢ ∃x. ∃y. t = (x, y), uq_bounded_elim 9 6.
+11. 11 ⊢ ∃y. t = (x, y), hypo.
+12. 12 ⊢ t = (x, y), hypo.
+13. 4, 12 ⊢ (x, y) ∈ A × UnivCl, eq_subst 12 7.
+14. 4, 12 ⊢ x ∈ A ∧ y ∈ UnivCl, prod_elim_pair 13.
+15. 4, 12 ⊢ x ∈ A, conj_eliml 14.
+16. 4, 12 ⊢ y ∈ UnivCl, conj_elimr 14.
+17. 4, 12 ⊢ (x, y) ∈ f, eq_subst 12 6.
+18. 1, 4, 12 ⊢ y = app f x, fn_on_app_intro 1 15 17.
+19. 3, 4, 12 ⊢ app f x = app g x, uq_bounded_elim 3 15.
+20. 1, 3, 4, 12 ⊢ y = app g x, eq_subst 19 18, P u ↔ y = u.
+21. 1, 2, 3, 4, 12 ⊢ (x, y) ∈ g, fn_on_app_elim 2 15 20.
+22. 1, 2, 3, 4, 12 ⊢ (x, y) ∈ g ∩ (A × UnivCl), intersection_intro 21 13.
+23. ⊢ restr g A = g ∩ (A × UnivCl), restr_eq.
+24. 1, 2, 3, 4, 12 ⊢ (x, y) ∈ restr g A, eq_subst_rev 23 22, P u ↔ (x, y) ∈ u.
+25. 1, 2, 3, 4, 12 ⊢ t ∈ restr g A, eq_subst_rev 12 24, P u ↔ u ∈ restr g A.
+26. 1, 2, 3, 4, 11 ⊢ t ∈ restr g A, ex_elim 11 25.
+27. 1, 2, 3, 4 ⊢ t ∈ restr g A, ex_elim 10 26.
+28. 1, 2, 3 ⊢ t ∈ restr f A → t ∈ restr g A, subj_intro 27.
+29. 1, 2, 3 ⊢ ∀t. t ∈ restr f A → t ∈ restr g A, uq_intro 28.
+30. 1, 2, 3 ⊢ restr f A ⊆ restr g A, incl_intro 29.
+31. ⊢ fn_on f A → fn_on g A →
+  (∀x. x ∈ A → app f x = app g x) →
+  restr f A ⊆ restr g A, subj_intro_iii 30.
+32. 32 ⊢ x ∈ A, hypo.
+33. 3, 32 ⊢ app f x = app g x, uq_bounded_elim 3 32.
+34. 3, 32 ⊢ app g x = app f x, eq_symm 33.
+35. 3 ⊢ x ∈ A → app g x = app f x, subj_intro 34.
+36. 3 ⊢ ∀x. x ∈ A → app g x = app f x, uq_intro 35.
+37. 1, 2, 3 ⊢ restr g A ⊆ restr f A, 31 2 1 36.
+38. 1, 2, 3 ⊢ restr f A = restr g A, incl_antisym 30 37.
+fn_on_extensionality. ⊢ fn_on f A → fn_on g A →
+  (∀x. x ∈ A → app f x = app g x) →
+  restr f A = restr g A, subj_intro_iii 38.

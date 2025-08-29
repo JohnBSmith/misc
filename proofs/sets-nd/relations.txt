@@ -96,6 +96,32 @@ rng_intro. ⊢ (x, y) ∈ R → y ∈ rng R, subj_intro 6.
 03. 1 ⊢ ∃x. (x, y) ∈ R, comp_elim 2.
 rng_elim. ⊢ y ∈ rng R → ∃x. (x, y) ∈ R, subj_intro 3.
 
+01. 1 ⊢ R ⊆ X × Y, hypo.
+02. 2 ⊢ x ∈ dom R, hypo.
+03. 2 ⊢ ∃y. (x, y) ∈ R, dom_elim 2.
+04. 4 ⊢ (x, y) ∈ R, hypo.
+05. 1, 4 ⊢ (x, y) ∈ X × Y, incl_elim 1 4.
+06. 1, 4 ⊢ x ∈ X ∧ y ∈ Y, prod_elim_pair 5.
+07. 1, 4 ⊢ x ∈ X, conj_eliml 6.
+08. 1, 2 ⊢ x ∈ X, ex_elim 3 7.
+09. 1 ⊢ x ∈ dom R → x ∈ X, subj_intro 8.
+10. 1 ⊢ ∀x. x ∈ dom R → x ∈ X, uq_intro 9.
+11. 1 ⊢ dom R ⊆ X, incl_intro 10.
+dom_of_subclass_prod. ⊢ R ⊆ X × Y → dom R ⊆ X, subj_intro 11.
+
+01. 1 ⊢ R ⊆ X × Y, hypo.
+02. 2 ⊢ y ∈ rng R, hypo.
+03. 2 ⊢ ∃x. (x, y) ∈ R, rng_elim 2.
+04. 4 ⊢ (x, y) ∈ R, hypo.
+05. 1, 4 ⊢ (x, y) ∈ X × Y, incl_elim 1 4.
+06. 1, 4 ⊢ x ∈ X ∧ y ∈ Y, prod_elim_pair 5.
+07. 1, 4 ⊢ y ∈ Y, conj_elimr 6.
+08. 1, 2 ⊢ y ∈ Y, ex_elim 3 7.
+09. 1 ⊢ y ∈ rng R → y ∈ Y, subj_intro 8.
+10. 1 ⊢ ∀y. y ∈ rng R → y ∈ Y, uq_intro 9.
+11. 1 ⊢ rng R ⊆ Y, incl_intro 10.
+rng_of_subclass_prod. ⊢ R ⊆ X × Y → rng R ⊆ Y, subj_intro 11.
+
 1. 1 ⊢ relation R, hypo.
 2. 2 ⊢ dom R ⊆ X, hypo.
 3. 3 ⊢ rng R ⊆ Y, hypo.

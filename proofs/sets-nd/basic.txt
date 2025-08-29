@@ -700,6 +700,14 @@ sg_intro. ⊢ set a → x = a → x ∈ {a}, subj_intro 14.
 15. 1 ⊢ x ∈ {a} ↔ x = a, bij_intro 6 14.
 sg_equi. ⊢ set a → (x ∈ {a} ↔ x = a), subj_intro 15.
 
+01. 1 ⊢ set y, hypo.
+02. 2 ⊢ ¬x = y, hypo.
+03. 3 ⊢ x ∈ {y}, hypo.
+04. 1, 3 ⊢ x = y, sg_elim 1 3.
+05. 1, 2, 3 ⊢ ⊥, neg_elim 2 4.
+06. 1, 2 ⊢ ¬x ∈ {y}, neg_intro 5.
+sg_neg_intro. ⊢ set y → ¬x = y → ¬x ∈ {y}, subj_intro_ii 6.
+
 01. 1 ⊢ x ∈ A, hypo.
 02. 1 ⊢ set x, set_intro 1.
 03. 3 ⊢ u ∈ {x}, hypo.
