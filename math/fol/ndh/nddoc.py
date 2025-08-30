@@ -203,6 +203,7 @@ def header(acc):
 <head>
   <meta charset="UTF-8">
   <title>Library</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
 body{{
   font-family: {CSS_FONTS};
@@ -212,6 +213,9 @@ body{{
   line-height: 1.5;
   margin-top: 2em;
   margin-bottom: 6em;
+}}
+@media(max-width: 56em){{
+  body{{margin-left: 3%; margin-right: 3%;}}
 }}
 {CSS_COMMON}
   </style>
@@ -228,6 +232,12 @@ body{{
   line-height: 1.5;
   margin-top: 4em;
   margin-bottom: 6em;
+}}
+@media(max-width: 62em){{
+  body{{margin-left: 6%; margin-right: 6%;}}
+}}
+@media(max-width: 52em){{
+  body{{margin-left: 3%; margin-right: 3%;}}
 }}
 {CSS_COMMON}
 """
@@ -295,6 +305,7 @@ def proof_file(env, kwargs):
 <head>
   <meta charset="UTF-8">
   <title>{ident}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="main.css" rel="stylesheet">
 </head>
 <body>

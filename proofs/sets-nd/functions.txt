@@ -641,7 +641,7 @@ subclass_dom_from_ex_uniq. ⊢
   (∀x. x ∈ X → ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f) →
   X ⊆ dom f, subj_intro 14.
 
-(*/ Partly functional relations *)
+(*/section Partly functional relations *)
 
 fn_on_eq. ⊢ fn_on f A ↔ relation f ∧ ∀x. x ∈ A →
   ∃z. set z ∧ ∀y. z = y ↔ (x, y) ∈ f, def.
