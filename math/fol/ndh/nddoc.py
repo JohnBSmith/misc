@@ -11,8 +11,9 @@ DIR_NAME = "proofs-doc"
 class Env:
     def __init__(self):
         self.toc = []
-        self.section_count = 0
         self.chapter_count = 0
+        self.section_count = 0
+        self.subsection_count = 0
         self.def_count = 0
         self.axiom_count = 0
         self.thm_count = 0
@@ -61,10 +62,16 @@ def process_command(s, acc, env):
         acc.append(f"<h2 id='{id}'>{content}</h2>\n")
         env.toc.append((content, id, []))
     elif cmd == "section":
+        env.subsection_count = 0
         env.section_count += 1
         id = f"{env.chapter_count}.{env.section_count}"
         acc.append(f"<h3 id='{id}'>{content}</h3>\n")
         env.toc[-1][2].append((content, id, []))
+    elif cmd == "subsection":
+        env.subsection_count += 1
+        id = f"{env.chapter_count}.{env.section_count}.{env.subsection_count}"
+        acc.append(f"<h4 id='{id}'>{content}</h4>\n")
+        env.toc[-1][2][-1][2].append((content, id, []))
     elif cmd == "title":
         env.title = content
     elif cmd == "rules":

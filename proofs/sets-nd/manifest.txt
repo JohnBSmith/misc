@@ -1,4 +1,3 @@
-(rules:)
 (MK:)
 (logic: MK)
 (basic: MK logic)

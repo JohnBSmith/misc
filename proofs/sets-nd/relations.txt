@@ -1,6 +1,8 @@
 
 (*/chapter Relations *)
 
+(*/section Relationhood *)
+
 relation_unfold. ⊢ relation R → ∀t. t ∈ R → ∃x. ∃y. t = (x, y),
   bij_eliml relation_equi.
 
@@ -25,37 +27,38 @@ relation_fold. ⊢ (∀t. t ∈ R → ∃x. ∃y. t = (x, y)) → relation R,
 15. 1 ⊢ relation R, subj_elim 14 13.
 relation_from_incl. ⊢ R ⊆ X × Y → relation R, subj_intro 15.
 
-01. 1 ⊢ x ∈ A, hypo.
-02. 2 ⊢ (x, y) ∈ R, hypo.
-03. 2 ⊢ set (x, y), set_intro 2.
-04. 2 ⊢ set y, setr_from_pair 3.
-05. 1, 2 ⊢ x ∈ A ∧ (x, y) ∈ R, conj_intro 1 2.
-06. 1, 2 ⊢ ∃x. x ∈ A ∧ (x, y) ∈ R, ex_intro 5.
-07. 1, 2 ⊢ y ∈ {y | ∃x. x ∈ A ∧ (x, y) ∈ R}, comp_intro 4 6.
-08. 1, 2 ⊢ y ∈ img R A, eq_subst_rev img_eq 7, P u ↔ y ∈ u.
-img_intro. ⊢ x ∈ A → (x, y) ∈ R → y ∈ img R A, subj_intro_ii 8.
+01. 1 ⊢ R ⊆ Q, hypo.
+02. 2 ⊢ relation Q, hypo.
+03. 3 ⊢ t ∈ R, hypo.
+04. 1, 3 ⊢ t ∈ Q, incl_elim 1 3.
+05. 2 ⊢ ∀t. t ∈ Q → ∃x. ∃y. t = (x, y), relation_unfold 2.
+06. 2 ⊢ t ∈ Q → ∃x. ∃y. t = (x, y), uq_elim 5.
+07. 1, 2, 3 ⊢ ∃x. ∃y. t = (x, y), subj_elim 6 4.
+08. 1, 2 ⊢ t ∈ R → ∃x. ∃y. t = (x, y), subj_intro 7.
+09. 1, 2 ⊢ ∀t. t ∈ R → ∃x. ∃y. t = (x, y), uq_intro 8.
+10. 1, 2 ⊢ relation R, relation_fold 9.
+relation_subclass. ⊢ R ⊆ Q → relation Q → relation R, subj_intro_ii 10.
 
-01. 1 ⊢ y ∈ img R A, hypo.
-02. 1 ⊢ y ∈ {y | ∃x. x ∈ A ∧ (x, y) ∈ R},
-  eq_subst img_eq 1, P u ↔ y ∈ u.
-03. 1 ⊢ ∃x. x ∈ A ∧ (x, y) ∈ R, comp_elim 2.
-img_elim. ⊢ y ∈ img R A → ∃x. x ∈ A ∧ (x, y) ∈ R, subj_intro 3.
+01. 1 ⊢ relation R, hypo.
+02. 2 ⊢ relation Q, hypo.
+03. 1 ⊢ ∀t. t ∈ R → ∃x. ∃y. t = (x, y), relation_unfold 1.
+04. 2 ⊢ ∀t. t ∈ Q → ∃x. ∃y. t = (x, y), relation_unfold 2.
+05. 1 ⊢ t ∈ R → ∃x. ∃y. t = (x, y), uq_elim 3.
+06. 2 ⊢ t ∈ Q → ∃x. ∃y. t = (x, y), uq_elim 4.
+07. 7 ⊢ t ∈ R ∪ Q, hypo.
+08. 7 ⊢ t ∈ R ∨ t ∈ Q, union_elim 7.
+09. 9 ⊢ t ∈ R, hypo.
+10. 1, 9 ⊢ ∃x. ∃y. t = (x, y), subj_elim 5 9.
+11. 11 ⊢ t ∈ Q, hypo.
+12. 2, 11 ⊢ ∃x. ∃y. t = (x, y), subj_elim 6 11.
+13. 1, 2, 7 ⊢ ∃x. ∃y. t = (x, y), disj_elim 8 10 12.
+14. 1, 2 ⊢ t ∈ R ∪ Q → ∃x. ∃y. t = (x, y), subj_intro 13.
+15. 1, 2 ⊢ ∀t. t ∈ R ∪ Q → ∃x. ∃y. t = (x, y), uq_intro 14.
+16. 1, 2 ⊢ relation (R ∪ Q), relation_fold 15.
+relation_union. ⊢ relation R → relation Q → relation (R ∪ Q),
+  subj_intro_ii 16.
 
-01. 1 ⊢ y ∈ B, hypo.
-02. 2 ⊢ (x, y) ∈ R, hypo.
-03. 2 ⊢ set (x, y), set_intro 2.
-04. 2 ⊢ set x, setl_from_pair 3.
-05. 1, 2 ⊢ y ∈ B ∧ (x, y) ∈ R, conj_intro 1 2.
-06. 1, 2 ⊢ ∃y. y ∈ B ∧ (x, y) ∈ R, ex_intro 5.
-07. 1, 2 ⊢ x ∈ {x | ∃y. y ∈ B ∧ (x, y) ∈ R}, comp_intro 4 6.
-08. 1, 2 ⊢ x ∈ inv_img R B, eq_subst_rev inv_img_eq 7, P u ↔ x ∈ u.
-inv_img_intro. ⊢ y ∈ B → (x, y) ∈ R → x ∈ inv_img R B, subj_intro_ii 8.
-
-01. 1 ⊢ x ∈ inv_img R B, hypo.
-02. 1 ⊢ x ∈ {x | ∃y. y ∈ B ∧ (x, y) ∈ R},
-  eq_subst inv_img_eq 1, P u ↔ x ∈ u.
-03. 1 ⊢ ∃y. y ∈ B ∧ (x, y) ∈ R, comp_elim 2.
-inv_img_elim. ⊢ x ∈ inv_img R B → ∃y. y ∈ B ∧ (x, y) ∈ R, subj_intro 3.
+(*/section Domains and ranges *)
 
 01. 1 ⊢ (x, y) ∈ R, hypo.
 02. 1 ⊢ set (x, y), set_intro 1.
@@ -95,6 +98,18 @@ rng_intro. ⊢ (x, y) ∈ R → y ∈ rng R, subj_intro 6.
 02. 1 ⊢ y ∈ {y | ∃x. (x, y) ∈ R}, eq_subst rng_eq 1, P u ↔ y ∈ u.
 03. 1 ⊢ ∃x. (x, y) ∈ R, comp_elim 2.
 rng_elim. ⊢ y ∈ rng R → ∃x. (x, y) ∈ R, subj_intro 3.
+
+01. 1 ⊢ R ⊆ Q, hypo.
+02. 2 ⊢ y ∈ rng R, hypo.
+03. 2 ⊢ ∃x. (x, y) ∈ R, rng_elim 2.
+04. 4 ⊢ (x, y) ∈ R, hypo.
+05. 1, 4 ⊢ (x, y) ∈ Q, incl_elim 1 4.
+06. 1, 4 ⊢ y ∈ rng Q, rng_intro 5.
+07. 1, 2 ⊢ y ∈ rng Q, ex_elim 3 6.
+08. 1 ⊢ y ∈ rng R → y ∈ rng Q, subj_intro 7.
+09. 1 ⊢ ∀y. y ∈ rng R → y ∈ rng Q, uq_intro 8.
+10. 1 ⊢ rng R ⊆ rng Q, incl_intro 9.
+rng_subclass. ⊢ R ⊆ Q → rng R ⊆ rng Q, subj_intro 10.
 
 01. 1 ⊢ R ⊆ X × Y, hypo.
 02. 2 ⊢ x ∈ dom R, hypo.
@@ -145,6 +160,107 @@ rng_of_subclass_prod. ⊢ R ⊆ X × Y → rng R ⊆ Y, subj_intro 11.
 21. 1, 2, 3 ⊢ R ⊆ X × Y, incl_intro 20.
 relation_incl_prod. ⊢ relation R →
   dom R ⊆ X → rng R ⊆ Y → R ⊆ X × Y, subj_intro_iii 21.
+
+01. 1 ⊢ x ∈ dom (R ∪ Q), hypo.
+02. 1 ⊢ ∃y. (x, y) ∈ R ∪ Q, dom_elim 1.
+03. 3 ⊢ (x, y) ∈ R ∪ Q, hypo.
+04. 3 ⊢ (x, y) ∈ R ∨ (x, y) ∈ Q, union_elim 3.
+05. 5 ⊢ (x, y) ∈ R, hypo.
+06. 5 ⊢ x ∈ dom R, dom_intro 5.
+07. 5 ⊢ x ∈ dom R ∪ dom Q, union_introl 6.
+08. 8 ⊢ (x, y) ∈ Q, hypo.
+09. 8 ⊢ x ∈ dom Q, dom_intro 8.
+10. 8 ⊢ x ∈ dom R ∪ dom Q, union_intror 9.
+11. 3 ⊢ x ∈ dom R ∪ dom Q, disj_elim 4 7 10.
+12. 1 ⊢ x ∈ dom R ∪ dom Q, ex_elim 2 11.
+13. ⊢ x ∈ dom (R ∪ Q) → x ∈ dom R ∪ dom Q, subj_intro 12.
+14. 14 ⊢ x ∈ dom R ∪ dom Q, hypo.
+15. 14 ⊢ x ∈ dom R ∨ x ∈ dom Q, union_elim 14.
+16. 16 ⊢ x ∈ dom R, hypo.
+17. 16 ⊢ ∃y. (x, y) ∈ R, dom_elim 16.
+18. 18 ⊢ (x, y) ∈ R, hypo.
+19. 18 ⊢ (x, y) ∈ R ∪ Q, union_introl 18.
+20. 18 ⊢ x ∈ dom (R ∪ Q), dom_intro 19.
+21. 16 ⊢ x ∈ dom (R ∪ Q), ex_elim 17 20.
+22. 22 ⊢ x ∈ dom Q, hypo.
+23. 22 ⊢ ∃y. (x, y) ∈ Q, dom_elim 22.
+24. 24 ⊢ (x, y) ∈ Q, hypo.
+25. 24 ⊢ (x, y) ∈ R ∪ Q, union_intror 24.
+26. 24 ⊢ x ∈ dom (R ∪ Q), dom_intro 25.
+27. 22 ⊢ x ∈ dom (R ∪ Q), ex_elim 23 26.
+28. 14 ⊢ x ∈ dom (R ∪ Q), disj_elim 15 21 27.
+29. ⊢ x ∈ dom R ∪ dom Q → x ∈ dom (R ∪ Q), subj_intro 28.
+30. ⊢ x ∈ dom (R ∪ Q) ↔ x ∈ dom R ∪ dom Q, bij_intro 13 29.
+31. ⊢ ∀x. x ∈ dom (R ∪ Q) ↔ x ∈ dom R ∪ dom Q, uq_intro 30.
+dom_union. ⊢ dom (R ∪ Q) = dom R ∪ dom Q, ext 31.
+
+01. 1 ⊢ y ∈ rng (R ∪ Q), hypo.
+02. 1 ⊢ ∃x. (x, y) ∈ R ∪ Q, rng_elim 1.
+03. 3 ⊢ (x, y) ∈ R ∪ Q, hypo.
+04. 3 ⊢ (x, y) ∈ R ∨ (x, y) ∈ Q, union_elim 3.
+05. 5 ⊢ (x, y) ∈ R, hypo.
+06. 5 ⊢ y ∈ rng R, rng_intro 5.
+07. 5 ⊢ y ∈ rng R ∪ rng Q, union_introl 6.
+08. 8 ⊢ (x, y) ∈ Q, hypo.
+09. 8 ⊢ y ∈ rng Q, rng_intro 8.
+10. 8 ⊢ y ∈ rng R ∪ rng Q, union_intror 9.
+11. 3 ⊢ y ∈ rng R ∪ rng Q, disj_elim 4 7 10.
+12. 1 ⊢ y ∈ rng R ∪ rng Q, ex_elim 2 11.
+13. ⊢ y ∈ rng (R ∪ Q) → y ∈ rng R ∪ rng Q, subj_intro 12.
+14. 14 ⊢ y ∈ rng R ∪ rng Q, hypo.
+15. 14 ⊢ y ∈ rng R ∨ y ∈ rng Q, union_elim 14.
+16. 16 ⊢ y ∈ rng R, hypo.
+17. 16 ⊢ ∃x. (x, y) ∈ R, rng_elim 16.
+18. 18 ⊢ (x, y) ∈ R, hypo.
+19. 18 ⊢ (x, y) ∈ R ∪ Q, union_introl 18.
+20. 18 ⊢ y ∈ rng (R ∪ Q), rng_intro 19.
+21. 16 ⊢ y ∈ rng (R ∪ Q), ex_elim 17 20.
+22. 22 ⊢ y ∈ rng Q, hypo.
+23. 22 ⊢ ∃x. (x, y) ∈ Q, rng_elim 22.
+24. 24 ⊢ (x, y) ∈ Q, hypo.
+25. 24 ⊢ (x, y) ∈ R ∪ Q, union_intror 24.
+26. 24 ⊢ y ∈ rng (R ∪ Q), rng_intro 25.
+27. 22 ⊢ y ∈ rng (R ∪ Q), ex_elim 23 26.
+28. 14 ⊢ y ∈ rng (R ∪ Q), disj_elim 15 21 27.
+29. ⊢ y ∈ rng R ∪ rng Q → y ∈ rng (R ∪ Q), subj_intro 28.
+30. ⊢ y ∈ rng (R ∪ Q) ↔ y ∈ rng R ∪ rng Q, bij_intro 13 29.
+31. ⊢ ∀y. y ∈ rng (R ∪ Q) ↔ y ∈ rng R ∪ rng Q, uq_intro 30.
+rng_union. ⊢ rng (R ∪ Q) = rng R ∪ rng Q, ext 31.
+
+
+(*/section Images and inverse images *)
+
+01. 1 ⊢ x ∈ A, hypo.
+02. 2 ⊢ (x, y) ∈ R, hypo.
+03. 2 ⊢ set (x, y), set_intro 2.
+04. 2 ⊢ set y, setr_from_pair 3.
+05. 1, 2 ⊢ x ∈ A ∧ (x, y) ∈ R, conj_intro 1 2.
+06. 1, 2 ⊢ ∃x. x ∈ A ∧ (x, y) ∈ R, ex_intro 5.
+07. 1, 2 ⊢ y ∈ {y | ∃x. x ∈ A ∧ (x, y) ∈ R}, comp_intro 4 6.
+08. 1, 2 ⊢ y ∈ img R A, eq_subst_rev img_eq 7, P u ↔ y ∈ u.
+img_intro. ⊢ x ∈ A → (x, y) ∈ R → y ∈ img R A, subj_intro_ii 8.
+
+01. 1 ⊢ y ∈ img R A, hypo.
+02. 1 ⊢ y ∈ {y | ∃x. x ∈ A ∧ (x, y) ∈ R},
+  eq_subst img_eq 1, P u ↔ y ∈ u.
+03. 1 ⊢ ∃x. x ∈ A ∧ (x, y) ∈ R, comp_elim 2.
+img_elim. ⊢ y ∈ img R A → ∃x. x ∈ A ∧ (x, y) ∈ R, subj_intro 3.
+
+01. 1 ⊢ y ∈ B, hypo.
+02. 2 ⊢ (x, y) ∈ R, hypo.
+03. 2 ⊢ set (x, y), set_intro 2.
+04. 2 ⊢ set x, setl_from_pair 3.
+05. 1, 2 ⊢ y ∈ B ∧ (x, y) ∈ R, conj_intro 1 2.
+06. 1, 2 ⊢ ∃y. y ∈ B ∧ (x, y) ∈ R, ex_intro 5.
+07. 1, 2 ⊢ x ∈ {x | ∃y. y ∈ B ∧ (x, y) ∈ R}, comp_intro 4 6.
+08. 1, 2 ⊢ x ∈ inv_img R B, eq_subst_rev inv_img_eq 7, P u ↔ x ∈ u.
+inv_img_intro. ⊢ y ∈ B → (x, y) ∈ R → x ∈ inv_img R B, subj_intro_ii 8.
+
+01. 1 ⊢ x ∈ inv_img R B, hypo.
+02. 1 ⊢ x ∈ {x | ∃y. y ∈ B ∧ (x, y) ∈ R},
+  eq_subst inv_img_eq 1, P u ↔ x ∈ u.
+03. 1 ⊢ ∃y. y ∈ B ∧ (x, y) ∈ R, comp_elim 2.
+inv_img_elim. ⊢ x ∈ inv_img R B → ∃y. y ∈ B ∧ (x, y) ∈ R, subj_intro 3.
 
 01. 1 ⊢ y ∈ img R (A ∪ B), hypo.
 02. 1 ⊢ ∃x. x ∈ A ∪ B ∧ (x, y) ∈ R, img_elim 1.
@@ -283,33 +399,6 @@ inv_img_dist_union. ⊢ inv_img R (A ∪ B) = inv_img R A ∪ inv_img R B,
 06. 1 ⊢ inv_img R A ⊆ inv_img R B, incl_from_union 5.
 inv_img_incl. ⊢ A ⊆ B → inv_img R A ⊆ inv_img R B, subj_intro 6.
 
-01. ⊢ ∅ ⊆ X × Y, empty_set_is_least.
-empty_relation. ⊢ relation ∅, relation_from_incl 1.
-
-01. 1 ⊢ R ⊆ Q, hypo.
-02. 2 ⊢ relation Q, hypo.
-03. 3 ⊢ t ∈ R, hypo.
-04. 1, 3 ⊢ t ∈ Q, incl_elim 1 3.
-05. 2 ⊢ ∀t. t ∈ Q → ∃x. ∃y. t = (x, y), relation_unfold 2.
-06. 2 ⊢ t ∈ Q → ∃x. ∃y. t = (x, y), uq_elim 5.
-07. 1, 2, 3 ⊢ ∃x. ∃y. t = (x, y), subj_elim 6 4.
-08. 1, 2 ⊢ t ∈ R → ∃x. ∃y. t = (x, y), subj_intro 7.
-09. 1, 2 ⊢ ∀t. t ∈ R → ∃x. ∃y. t = (x, y), uq_intro 8.
-10. 1, 2 ⊢ relation R, relation_fold 9.
-relation_subclass. ⊢ R ⊆ Q → relation Q → relation R, subj_intro_ii 10.
-
-01. 1 ⊢ R ⊆ Q, hypo.
-02. 2 ⊢ y ∈ rng R, hypo.
-03. 2 ⊢ ∃x. (x, y) ∈ R, rng_elim 2.
-04. 4 ⊢ (x, y) ∈ R, hypo.
-05. 1, 4 ⊢ (x, y) ∈ Q, incl_elim 1 4.
-06. 1, 4 ⊢ y ∈ rng Q, rng_intro 5.
-07. 1, 2 ⊢ y ∈ rng Q, ex_elim 3 6.
-08. 1 ⊢ y ∈ rng R → y ∈ rng Q, subj_intro 7.
-09. 1 ⊢ ∀y. y ∈ rng R → y ∈ rng Q, uq_intro 8.
-10. 1 ⊢ rng R ⊆ rng Q, incl_intro 9.
-rng_subclass. ⊢ R ⊆ Q → rng R ⊆ rng Q, subj_intro 10.
-
 01. 1 ⊢ x ∈ inv_img R B, hypo.
 02. 1 ⊢ ∃y. y ∈ B ∧ (x, y) ∈ R, inv_img_elim 1.
 03. 3 ⊢ y ∈ B ∧ (x, y) ∈ R, hypo.
@@ -319,6 +408,51 @@ rng_subclass. ⊢ R ⊆ Q → rng R ⊆ rng Q, subj_intro 10.
 07. ⊢ x ∈ inv_img R B → x ∈ dom R, subj_intro 6.
 08. ⊢ ∀x. x ∈ inv_img R B → x ∈ dom R, uq_intro 7.
 inv_img_incl_in_dom. ⊢ inv_img R B ⊆ dom R, incl_intro 8.
+
+01. 1 ⊢ y ∈ img (R ∪ Q) A, hypo.
+02. 1 ⊢ ∃x. x in A and (x, y) ∈ R ∪ Q, img_elim 1.
+03. 3 ⊢ x in A and (x, y) ∈ R ∪ Q, hypo.
+04. 3 |- x in A, conj_eliml 3.
+05. 3 |- (x, y) in R cup Q, conj_elimr 3.
+06. 3 ⊢ (x, y) ∈ R ∨ (x, y) ∈ Q, union_elim 5.
+07. 7 ⊢ (x, y) ∈ R, hypo.
+08. 3, 7 ⊢ y ∈ img R A, img_intro 4 7.
+09. 3, 7 ⊢ y ∈ img R A ∪ img Q A, union_introl 8.
+10. 10 ⊢ (x, y) ∈ Q, hypo.
+11. 3, 10 ⊢ y ∈ img Q A, img_intro 4 10.
+12. 3, 10 ⊢ y ∈ img R A ∪ img Q A, union_intror 11.
+13. 3 ⊢ y ∈ img R A ∪ img Q A, disj_elim 6 9 12.
+14. 1 ⊢ y ∈ img R A ∪ img Q A, ex_elim 2 13.
+15. ⊢ y ∈ img (R ∪ Q) A → y ∈ img R A ∪ img Q A, subj_intro 14.
+16. 16 ⊢ y ∈ img R A ∪ img Q A, hypo.
+17. 16 ⊢ y ∈ img R A ∨ y ∈ img Q A, union_elim 16.
+18. 18 ⊢ y ∈ img R A, hypo.
+19. 18 ⊢ ∃x. x in A and (x, y) ∈ R, img_elim 18.
+20. 20 ⊢ x in A and (x, y) ∈ R, hypo.
+21. 20 |- x in A, conj_eliml 20.
+22. 20 |- (x, y) in R, conj_elimr 20.
+23. 20 ⊢ (x, y) ∈ R ∪ Q, union_introl 22.
+24. 20 ⊢ y ∈ img (R ∪ Q) A, img_intro 21 23.
+25. 18 ⊢ y ∈ img (R ∪ Q) A, ex_elim 19 24.
+26. 26 ⊢ y ∈ img Q A, hypo.
+27. 26 ⊢ ∃x. x in A and (x, y) ∈ Q, img_elim 26.
+28. 28 ⊢ x in A and (x, y) ∈ Q, hypo.
+29. 28 |- x in A, conj_eliml 28.
+30. 28 |- (x, y) in Q, conj_elimr 28.
+31. 28 ⊢ (x, y) ∈ R ∪ Q, union_intror 30.
+32. 28 ⊢ y ∈ img (R ∪ Q) A, img_intro 29 31.
+33. 26 ⊢ y ∈ img (R ∪ Q) A, ex_elim 27 32.
+34. 16 ⊢ y ∈ img (R ∪ Q) A, disj_elim 17 25 33.
+35. ⊢ y ∈ img R A ∪ img Q A → y ∈ img (R ∪ Q) A, subj_intro 34.
+36. ⊢ y ∈ img (R ∪ Q) A ↔ y ∈ img R A ∪ img Q A, bij_intro 15 35.
+37. ⊢ ∀y. y ∈ img (R ∪ Q) A ↔ y ∈ img R A ∪ img Q A, uq_intro 36.
+img_union. ⊢ img (R ∪ Q) A = img R A ∪ img Q A, ext 37.
+
+
+(*/section Special relations *)
+
+01. ⊢ ∅ ⊆ X × Y, empty_set_is_least.
+empty_relation. ⊢ relation ∅, relation_from_incl 1.
 
 01. 1 ⊢ x ∈ dom ∅, hypo.
 02. 1 ⊢ ∃y. (x, y) ∈ ∅, dom_elim 1.
@@ -341,91 +475,6 @@ dom_empty_set. ⊢ dom ∅ = ∅, incl_antisym 8 9.
 08. ⊢ rng ∅ ⊆ ∅, incl_intro 7.
 09. ⊢ ∅ ⊆ rng ∅, empty_set_is_least.
 rng_empty_set. ⊢ rng ∅ = ∅, incl_antisym 8 9.
-
-01. 1 ⊢ x ∈ dom (R ∪ Q), hypo.
-02. 1 ⊢ ∃y. (x, y) ∈ R ∪ Q, dom_elim 1.
-03. 3 ⊢ (x, y) ∈ R ∪ Q, hypo.
-04. 3 ⊢ (x, y) ∈ R ∨ (x, y) ∈ Q, union_elim 3.
-05. 5 ⊢ (x, y) ∈ R, hypo.
-06. 5 ⊢ x ∈ dom R, dom_intro 5.
-07. 5 ⊢ x ∈ dom R ∪ dom Q, union_introl 6.
-08. 8 ⊢ (x, y) ∈ Q, hypo.
-09. 8 ⊢ x ∈ dom Q, dom_intro 8.
-10. 8 ⊢ x ∈ dom R ∪ dom Q, union_intror 9.
-11. 3 ⊢ x ∈ dom R ∪ dom Q, disj_elim 4 7 10.
-12. 1 ⊢ x ∈ dom R ∪ dom Q, ex_elim 2 11.
-13. ⊢ x ∈ dom (R ∪ Q) → x ∈ dom R ∪ dom Q, subj_intro 12.
-14. 14 ⊢ x ∈ dom R ∪ dom Q, hypo.
-15. 14 ⊢ x ∈ dom R ∨ x ∈ dom Q, union_elim 14.
-16. 16 ⊢ x ∈ dom R, hypo.
-17. 16 ⊢ ∃y. (x, y) ∈ R, dom_elim 16.
-18. 18 ⊢ (x, y) ∈ R, hypo.
-19. 18 ⊢ (x, y) ∈ R ∪ Q, union_introl 18.
-20. 18 ⊢ x ∈ dom (R ∪ Q), dom_intro 19.
-21. 16 ⊢ x ∈ dom (R ∪ Q), ex_elim 17 20.
-22. 22 ⊢ x ∈ dom Q, hypo.
-23. 22 ⊢ ∃y. (x, y) ∈ Q, dom_elim 22.
-24. 24 ⊢ (x, y) ∈ Q, hypo.
-25. 24 ⊢ (x, y) ∈ R ∪ Q, union_intror 24.
-26. 24 ⊢ x ∈ dom (R ∪ Q), dom_intro 25.
-27. 22 ⊢ x ∈ dom (R ∪ Q), ex_elim 23 26.
-28. 14 ⊢ x ∈ dom (R ∪ Q), disj_elim 15 21 27.
-29. ⊢ x ∈ dom R ∪ dom Q → x ∈ dom (R ∪ Q), subj_intro 28.
-30. ⊢ x ∈ dom (R ∪ Q) ↔ x ∈ dom R ∪ dom Q, bij_intro 13 29.
-31. ⊢ ∀x. x ∈ dom (R ∪ Q) ↔ x ∈ dom R ∪ dom Q, uq_intro 30.
-dom_union. ⊢ dom (R ∪ Q) = dom R ∪ dom Q, ext 31.
-
-01. 1 ⊢ y ∈ rng (R ∪ Q), hypo.
-02. 1 ⊢ ∃x. (x, y) ∈ R ∪ Q, rng_elim 1.
-03. 3 ⊢ (x, y) ∈ R ∪ Q, hypo.
-04. 3 ⊢ (x, y) ∈ R ∨ (x, y) ∈ Q, union_elim 3.
-05. 5 ⊢ (x, y) ∈ R, hypo.
-06. 5 ⊢ y ∈ rng R, rng_intro 5.
-07. 5 ⊢ y ∈ rng R ∪ rng Q, union_introl 6.
-08. 8 ⊢ (x, y) ∈ Q, hypo.
-09. 8 ⊢ y ∈ rng Q, rng_intro 8.
-10. 8 ⊢ y ∈ rng R ∪ rng Q, union_intror 9.
-11. 3 ⊢ y ∈ rng R ∪ rng Q, disj_elim 4 7 10.
-12. 1 ⊢ y ∈ rng R ∪ rng Q, ex_elim 2 11.
-13. ⊢ y ∈ rng (R ∪ Q) → y ∈ rng R ∪ rng Q, subj_intro 12.
-14. 14 ⊢ y ∈ rng R ∪ rng Q, hypo.
-15. 14 ⊢ y ∈ rng R ∨ y ∈ rng Q, union_elim 14.
-16. 16 ⊢ y ∈ rng R, hypo.
-17. 16 ⊢ ∃x. (x, y) ∈ R, rng_elim 16.
-18. 18 ⊢ (x, y) ∈ R, hypo.
-19. 18 ⊢ (x, y) ∈ R ∪ Q, union_introl 18.
-20. 18 ⊢ y ∈ rng (R ∪ Q), rng_intro 19.
-21. 16 ⊢ y ∈ rng (R ∪ Q), ex_elim 17 20.
-22. 22 ⊢ y ∈ rng Q, hypo.
-23. 22 ⊢ ∃x. (x, y) ∈ Q, rng_elim 22.
-24. 24 ⊢ (x, y) ∈ Q, hypo.
-25. 24 ⊢ (x, y) ∈ R ∪ Q, union_intror 24.
-26. 24 ⊢ y ∈ rng (R ∪ Q), rng_intro 25.
-27. 22 ⊢ y ∈ rng (R ∪ Q), ex_elim 23 26.
-28. 14 ⊢ y ∈ rng (R ∪ Q), disj_elim 15 21 27.
-29. ⊢ y ∈ rng R ∪ rng Q → y ∈ rng (R ∪ Q), subj_intro 28.
-30. ⊢ y ∈ rng (R ∪ Q) ↔ y ∈ rng R ∪ rng Q, bij_intro 13 29.
-31. ⊢ ∀y. y ∈ rng (R ∪ Q) ↔ y ∈ rng R ∪ rng Q, uq_intro 30.
-rng_union. ⊢ rng (R ∪ Q) = rng R ∪ rng Q, ext 31.
-
-01. 1 ⊢ relation R, hypo.
-02. 2 ⊢ relation Q, hypo.
-03. 1 ⊢ ∀t. t ∈ R → ∃x. ∃y. t = (x, y), relation_unfold 1.
-04. 2 ⊢ ∀t. t ∈ Q → ∃x. ∃y. t = (x, y), relation_unfold 2.
-05. 1 ⊢ t ∈ R → ∃x. ∃y. t = (x, y), uq_elim 3.
-06. 2 ⊢ t ∈ Q → ∃x. ∃y. t = (x, y), uq_elim 4.
-07. 7 ⊢ t ∈ R ∪ Q, hypo.
-08. 7 ⊢ t ∈ R ∨ t ∈ Q, union_elim 7.
-09. 9 ⊢ t ∈ R, hypo.
-10. 1, 9 ⊢ ∃x. ∃y. t = (x, y), subj_elim 5 9.
-11. 11 ⊢ t ∈ Q, hypo.
-12. 2, 11 ⊢ ∃x. ∃y. t = (x, y), subj_elim 6 11.
-13. 1, 2, 7 ⊢ ∃x. ∃y. t = (x, y), disj_elim 8 10 12.
-14. 1, 2 ⊢ t ∈ R ∪ Q → ∃x. ∃y. t = (x, y), subj_intro 13.
-15. 1, 2 ⊢ ∀t. t ∈ R ∪ Q → ∃x. ∃y. t = (x, y), uq_intro 14.
-16. 1, 2 ⊢ relation (R ∪ Q), relation_fold 15.
-relation_union. ⊢ relation R → relation Q → relation (R ∪ Q),
-  subj_intro_ii 16.
 
 01. 1 ⊢ set a, hypo.
 02. 2 ⊢ set b, hypo.
@@ -491,45 +540,6 @@ dom_sg. ⊢ set a → set b → dom {(a, b)} = {a}, subj_intro_ii 24.
 24. 1, 2 ⊢ rng {(a, b)} = {b}, ext 23.
 rng_sg. ⊢ set a → set b → rng {(a, b)} = {b}, subj_intro_ii 24.
 
-01. 1 ⊢ y ∈ img (R ∪ Q) A, hypo.
-02. 1 ⊢ ∃x. x in A and (x, y) ∈ R ∪ Q, img_elim 1.
-03. 3 ⊢ x in A and (x, y) ∈ R ∪ Q, hypo.
-04. 3 |- x in A, conj_eliml 3.
-05. 3 |- (x, y) in R cup Q, conj_elimr 3.
-06. 3 ⊢ (x, y) ∈ R ∨ (x, y) ∈ Q, union_elim 5.
-07. 7 ⊢ (x, y) ∈ R, hypo.
-08. 3, 7 ⊢ y ∈ img R A, img_intro 4 7.
-09. 3, 7 ⊢ y ∈ img R A ∪ img Q A, union_introl 8.
-10. 10 ⊢ (x, y) ∈ Q, hypo.
-11. 3, 10 ⊢ y ∈ img Q A, img_intro 4 10.
-12. 3, 10 ⊢ y ∈ img R A ∪ img Q A, union_intror 11.
-13. 3 ⊢ y ∈ img R A ∪ img Q A, disj_elim 6 9 12.
-14. 1 ⊢ y ∈ img R A ∪ img Q A, ex_elim 2 13.
-15. ⊢ y ∈ img (R ∪ Q) A → y ∈ img R A ∪ img Q A, subj_intro 14.
-16. 16 ⊢ y ∈ img R A ∪ img Q A, hypo.
-17. 16 ⊢ y ∈ img R A ∨ y ∈ img Q A, union_elim 16.
-18. 18 ⊢ y ∈ img R A, hypo.
-19. 18 ⊢ ∃x. x in A and (x, y) ∈ R, img_elim 18.
-20. 20 ⊢ x in A and (x, y) ∈ R, hypo.
-21. 20 |- x in A, conj_eliml 20.
-22. 20 |- (x, y) in R, conj_elimr 20.
-23. 20 ⊢ (x, y) ∈ R ∪ Q, union_introl 22.
-24. 20 ⊢ y ∈ img (R ∪ Q) A, img_intro 21 23.
-25. 18 ⊢ y ∈ img (R ∪ Q) A, ex_elim 19 24.
-26. 26 ⊢ y ∈ img Q A, hypo.
-27. 26 ⊢ ∃x. x in A and (x, y) ∈ Q, img_elim 26.
-28. 28 ⊢ x in A and (x, y) ∈ Q, hypo.
-29. 28 |- x in A, conj_eliml 28.
-30. 28 |- (x, y) in Q, conj_elimr 28.
-31. 28 ⊢ (x, y) ∈ R ∪ Q, union_intror 30.
-32. 28 ⊢ y ∈ img (R ∪ Q) A, img_intro 29 31.
-33. 26 ⊢ y ∈ img (R ∪ Q) A, ex_elim 27 32.
-34. 16 ⊢ y ∈ img (R ∪ Q) A, disj_elim 17 25 33.
-35. ⊢ y ∈ img R A ∪ img Q A → y ∈ img (R ∪ Q) A, subj_intro 34.
-36. ⊢ y ∈ img (R ∪ Q) A ↔ y ∈ img R A ∪ img Q A, bij_intro 15 35.
-37. ⊢ ∀y. y ∈ img (R ∪ Q) A ↔ y ∈ img R A ∪ img Q A, uq_intro 36.
-img_union. ⊢ img (R ∪ Q) A = img R A ∪ img Q A, ext 37.
-
 01. 1 ⊢ set a, hypo.
 02. 2 ⊢ set b, hypo.
 03. 3 ⊢ y ∈ img {(a, b)} {a}, hypo.
@@ -586,3 +596,4 @@ img_sg_sg. ⊢ set a → set b → img {(a, b)} {a} = {b}, subj_intro_ii 27.
 24. 1, 2, 3, 4 ⊢ img {(a, b)} {x} = ∅, incl_antisym 22 23.
 img_sg_sg_neq. ⊢ set a → set b → set x → ¬a = x →
   img {(a, b)} {x} = ∅, subj_intro_iv 24.
+

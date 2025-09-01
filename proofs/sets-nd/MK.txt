@@ -51,6 +51,7 @@ composition_eq. ⊢ composition g f = {t | ∃x. ∃y. ∃z.
 
 efq. ⊢ ⊥ → A, axiom.
 lem. ⊢ A ∨ ¬A, axiom.
+equi_subst. ⊢ (A ↔ B) → P A → P B, axiom.
 
 eq_refl. ⊢ x = x, axiom.
 eq_subst. ⊢ x = y → P x → P y, axiom.

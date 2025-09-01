@@ -545,43 +545,30 @@ wf_rec_unique. ⊢ wf X R → dom R = X → map f X Y → map g X Y →
   ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), ex_intro 198.
 200. 50, 51, 1, 2, 3, 4 ⊢ f = ⋂F → ∃f. set f ∧ map f X Y ∧
   ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_intro 199.
-201. 50, 51, 1, 2, 3, 4 ⊢ ⋂F = ⋂F → ∃f. set f ∧ map f X Y ∧
-  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), 200.
-202. ⊢ ⋂F = ⋂F, eq_refl.
-203. 50, 51, 1, 2, 3, 4 ⊢ ∃f. set f ∧ map f X Y ∧
-  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_elim 201 202.
-204. 50, 51, 1, 2, 3 ⊢
+201. 50, 51, 1, 2, 3, 4 ⊢ ∀f. f = ⋂F → ∃f. set f ∧ map f X Y ∧
+  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), uq_intro 200.
+202. 50, 51, 1, 2, 3, 4 ⊢ ∃f. set f ∧ map f X Y ∧
+  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), disused_eq 201.
+203. 50, 51, 1, 2, 3 ⊢
   F = {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
   ∀g. fn_on g (inv_img R {x}) →
   (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
   (x, φ x (restr g (inv_img R {x}))) ∈ A} →
   ∃f. set f ∧ map f X Y ∧
-  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_intro 203.
-205. 50, 51, 1, 2, 3 ⊢
-  {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
-  ∀g. fn_on g (inv_img R {x}) →
-  (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
-  (x, φ x (restr g (inv_img R {x}))) ∈ A}
-  = {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
+  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_intro 202.
+204. 50, 51, 1, 2, 3 ⊢
+  ∀F. F = {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
   ∀g. fn_on g (inv_img R {x}) →
   (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
   (x, φ x (restr g (inv_img R {x}))) ∈ A} →
   ∃f. set f ∧ map f X Y ∧
-  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), 204.
-206. ⊢ {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
-  ∀g. fn_on g (inv_img R {x}) →
-  (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
-  (x, φ x (restr g (inv_img R {x}))) ∈ A}
-  = {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
-  ∀g. fn_on g (inv_img R {x}) →
-  (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
-  (x, φ x (restr g (inv_img R {x}))) ∈ A}, eq_refl.
-207. 50, 51, 1, 2, 3 ⊢ ∃f. set f ∧ map f X Y ∧
-  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_elim 205 206.
-208. 50, 51 ⊢ wf X R → dom R = X → (∀x. ∀g. φ x g ∈ Y) →
+  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), uq_intro 203.
+205. 50, 51, 1, 2, 3 ⊢ ∃f. set f ∧ map f X Y ∧
+  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), disused_eq 204.
+206. 50, 51 ⊢ wf X R → dom R = X → (∀x. ∀g. φ x g ∈ Y) →
   ∃f. set f ∧ map f X Y ∧
-  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_intro_iii 207.
+  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_intro_iii 205.
 wf_rec_existence. ⊢ set X → set Y → wf X R →
   dom R = X → (∀x. ∀g. φ x g ∈ Y) → ∃f. set f ∧ map f X Y ∧
-  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_intro_ii 208.
+  ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_intro_ii 206.
 
