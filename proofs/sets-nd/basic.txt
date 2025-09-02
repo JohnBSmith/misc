@@ -1181,9 +1181,9 @@ prod_eliml. ⊢ t ∈ X × Y → fst t ∈ X, subj_intro 3.
 03. 1 ⊢ scd t ∈ Y, conj_elimr 2.
 prod_elimr. ⊢ t ∈ X × Y → scd t ∈ Y, subj_intro 3.
 
-01. ⊢ ∃A. ∅ ∈ A ∧ ∀x. x ∈ A → x ∪ {x} ∈ A, infinity.
-02. 2 ⊢ ∅ ∈ A ∧ ∀x. x ∈ A → x ∪ {x} ∈ A, hypo.
-03. 2 ⊢ ∅ ∈ A, conj_eliml 2.
+01. ⊢ ∃A. set A ∧ (∅ ∈ A ∧ ∀x. x ∈ A → x ∪ {x} ∈ A), infinity.
+02. 2 ⊢ set A ∧ (∅ ∈ A ∧ ∀x. x ∈ A → x ∪ {x} ∈ A), hypo.
+03. 2 ⊢ ∅ ∈ A, conj_elimrl 2.
 04. 2 ⊢ set ∅, set_intro 3.
 empty_set_is_set. ⊢ set ∅, ex_elim 1 4.
 

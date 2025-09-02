@@ -421,7 +421,7 @@ map_app_exists. ⊢ map f X Y → x ∈ X → ∃y. y ∈ Y ∧ y = app f x,
 07. 4 ⊢ set y, set_intro 5.
 08. 4 ⊢ set (app f x), eq_subst 6 7, P u ↔ set u.
 09. 1, 2 ⊢ set (app f x), ex_elim 3 8.
-fn_app_is_set. ⊢ function f → x ∈ dom f → set (app f x), subj_intro_ii 9.
+app_is_set. ⊢ function f → x ∈ dom f → set (app f x), subj_intro_ii 9.
 
 01. 1 ⊢ map f X Y, hypo.
 02. 2 ⊢ x ∈ X, hypo.
@@ -429,10 +429,15 @@ fn_app_is_set. ⊢ function f → x ∈ dom f → set (app f x), subj_intro_ii 9
 04. 4 ⊢ y ∈ Y ∧ y = app f x, hypo.
 05. 4 ⊢ y ∈ Y, conj_eliml 4.
 06. 4 ⊢ y = app f x, conj_elimr 4.
-07. 4 ⊢ set y, set_intro 5.
-08. 4 ⊢ set (app f x), eq_subst 6 7, P u ↔ set u.
-09. 1, 2 ⊢ set (app f x), ex_elim 3 8.
-app_is_set. ⊢ map f X Y → x ∈ X → set (app f x), subj_intro_ii 9.
+08. 4 ⊢ app f x ∈ Y, eq_subst 6 5, P u ↔ u ∈ Y.
+09. 1, 2 ⊢ app f x ∈ Y, ex_elim 3 8.
+map_app_in_cod. ⊢ map f X Y → x ∈ X → app f x ∈ Y, subj_intro_ii 9.
+
+01. 1 ⊢ map f X Y, hypo.
+02. 2 ⊢ x ∈ X, hypo.
+03. 1, 2 ⊢ app f x ∈ Y, map_app_in_cod 1 2.
+04. 1, 2 ⊢ set (app f x), set_intro 3.
+map_app_is_set. ⊢ map f X Y → x ∈ X → set (app f x), subj_intro_ii 4.
 
 
 (*/section Function composition *)
@@ -483,7 +488,105 @@ app_is_set. ⊢ map f X Y → x ∈ X → set (app f x), subj_intro_ii 9.
 41. 1 ⊢ ∀y1. ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2, uq_intro 40.
 42. 1 ⊢ ∀x. ∀y1. ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2, uq_intro 41.
 43. 1 ⊢ function f, function_intro 11 42.
-fn_from_term. ⊢ f = {t | ∃x. t = (x, y x)} → function f, subj_intro 43.
+fn_from_term_plain. ⊢ f = {t | ∃x. t = (x, y x)} → function f,
+  subj_intro 43.
+
+01. 1 ⊢ f = {t | ∃x. P x ∧ t = (x, y x)}, hypo.
+02. 2 ⊢ t ∈ f, hypo.
+03. 1, 2 ⊢ t ∈ {t | ∃x. P x ∧ t = (x, y x)},
+  eq_subst 1 2, P u ↔ t ∈ u.
+04. 1, 2 ⊢ ∃x. P x ∧ t = (x, y x), comp_elim 3.
+05. 5 ⊢ P x ∧ t = (x, y x), hypo.
+06. 5 ⊢ t = (x, y x), conj_elimr 5.
+07. 5 ⊢ ∃x. t = (x, y x), ex_intro 6.
+08. 1, 2 ⊢ ∃x. t = (x, y x), ex_elim 4 7.
+09. 1, 2 ⊢ t ∈ {t | ∃x. t = (x, y x)}, comp_intro_from 2 8.
+10. 1 ⊢ t ∈ f → t ∈ {t | ∃x. t = (x, y x)}, subj_intro 9.
+11. 1 ⊢ ∀t. t ∈ f → t ∈ {t | ∃x. t = (x, y x)}, uq_intro 10.
+12. 1 ⊢ f ⊆ {t | ∃x. t = (x, y x)}, incl_intro 11.
+13. ⊢ {t | ∃x. t = (x, y x)} = {t | ∃x. t = (x, y x)}, eq_refl.
+14. ⊢ function {t | ∃x. t = (x, y x)}, fn_from_term_plain 13.
+15. 1 ⊢ function f, function_subclass 12 14.
+fn_from_term. ⊢ f = {t | ∃x. P x ∧ t = (x, y x)} → function f,
+  subj_intro 15.
+
+01. 1 ⊢ f = {t | ∃x. x ∈ X ∧ t = (x, y x)}, hypo.
+02. 2 ⊢ a ∈ dom f, hypo.
+03. 2 ⊢ ∃b. (a, b) ∈ f, dom_elim 2.
+04. 4 ⊢ (a, b) ∈ f, hypo.
+05. 1, 4 ⊢ (a, b) ∈ {t | ∃x. x ∈ X ∧ t = (x, y x)},
+  eq_subst 1 4, P u ↔ (a, b) ∈ u.
+06. 1, 4 ⊢ ∃x. x ∈ X ∧ (a, b) = (x, y x), comp_elim 5.
+07. 7 ⊢ x ∈ X ∧ (a, b) = (x, y x), hypo.
+08. 7 ⊢ x ∈ X, conj_eliml 7.
+09. 7 ⊢ (a, b) = (x, y x), conj_elimr 7.
+10. 4 ⊢ set (a, b), set_intro 4.
+11. 4 ⊢ set a, setl_from_pair 10.
+12. 4 ⊢ set b, setr_from_pair 10.
+13. 4, 7 ⊢ a = x ∧ b = y x, pair_property 11 12 9.
+14. 4, 7 ⊢ a = x, conj_eliml 13.
+15. 4, 7 ⊢ a ∈ X, eq_subst_rev 14 8, P u ↔ u ∈ X.
+16. 1, 4 ⊢ a ∈ X, ex_elim 6 15.
+17. 1, 2 ⊢ a ∈ X, ex_elim 3 16.
+18. 1 ⊢ a ∈ dom f → a ∈ X, subj_intro 17.
+19. 19 ⊢ a ∈ X, hypo.
+20. ⊢ (a, y a) = (a, y a), eq_refl.
+21. 19 ⊢ a ∈ X ∧ (a, y a) = (a, y a), conj_intro 19 20.
+22. 19 ⊢ ∃x. x ∈ X ∧ (a, y a) = (x, y x), ex_intro 21.
+23. 19 ⊢ set a, set_intro 19.
+24. 24 ⊢ ∀x. x ∈ X → set (y x), hypo.
+25. 24, 19 ⊢ set (y a), uq_bounded_elim 24 19.
+26. 24, 19 ⊢ set (a, y a), set_pair 23 25.
+27. 24, 19 ⊢ (a, y a) ∈ {t | ∃x. x ∈ X ∧ t = (x, y x)},
+  comp_intro 26 22, P u ↔ (∃x. x ∈ X ∧ u = (x, y x)).
+28. 1, 24, 19 ⊢ (a, y a) ∈ f, eq_subst_rev 1 27, P u ↔ (a, y a) ∈ u.
+29. 1, 24, 19 ⊢ a ∈ dom f, dom_intro 28.
+30. 1, 24 ⊢ a ∈ X → a ∈ dom f, subj_intro 29.
+31. 1, 24 ⊢ a ∈ dom f ↔ a ∈ X, bij_intro 18 30.
+32. 1, 24 ⊢ ∀x. x ∈ dom f ↔ x ∈ X, uq_intro 31.
+33. 1, 24 ⊢ dom f = X, ext 32.
+dom_from_term. ⊢ f = {t | ∃x. x ∈ X ∧ t = (x, y x)} →
+  (∀x. x ∈ X → set (y x)) → dom f = X, subj_intro_ii 33.
+
+01. 1 ⊢ f = {t | ∃x. x ∈ X ∧ t = (x, y x)}, hypo.
+02. 2 ⊢ ∀x. x ∈ X → y x ∈ Y, hypo.
+03. 3 ⊢ b ∈ rng f, hypo.
+04. 3 ⊢ ∃a. (a, b) ∈ f, rng_elim 3.
+05. 5 ⊢ (a, b) ∈ f, hypo.
+06. 1, 5 ⊢ (a, b) ∈ {t | ∃x. x ∈ X ∧ t = (x, y x)},
+  eq_subst 1 5, P u ↔ (a, b) ∈ u.
+07. 1, 5 ⊢ ∃x. x ∈ X ∧ (a, b) = (x, y x), comp_elim 6.
+08. 8 ⊢ x ∈ X ∧ (a, b) = (x, y x), hypo.
+09. 8 ⊢ x ∈ X, conj_eliml 8.
+10. 8 ⊢ (a, b) = (x, y x), conj_elimr 8.
+11. 5 ⊢ set (a, b), set_intro 5.
+12. 5 ⊢ set a, setl_from_pair 11.
+13. 5 ⊢ set b, setr_from_pair 11.
+14. 5, 8 ⊢ a = x ∧ b = y x, pair_property 12 13 10.
+15. 5, 8 ⊢ b = y x, conj_elimr 14.
+16. 2, 8 ⊢ y x ∈ Y, uq_bounded_elim 2 9.
+17. 2, 5, 8 ⊢ b ∈ Y, eq_subst_rev 15 16, P u ↔ u ∈ Y.
+18. 1, 2, 5 ⊢ b ∈ Y, ex_elim 7 17.
+19. 1, 2, 3 ⊢ b ∈ Y, ex_elim 4 18.
+20. 1, 2 ⊢ b ∈ rng f → b ∈ Y, subj_intro 19.
+21. 1, 2 ⊢ ∀y. y ∈ rng f → y ∈ Y, uq_intro 20.
+22. 1, 2 ⊢ rng f ⊆ Y, incl_intro 21.
+rng_from_term. ⊢ f = {t | ∃x. x ∈ X ∧ t = (x, y x)} →
+  (∀x. x ∈ X → y x ∈ Y) → rng f ⊆ Y, subj_intro_ii 22.
+
+01. 1 ⊢ f = {t | ∃x. x ∈ X ∧ t = (x, y x)}, hypo.
+02. 2 ⊢ ∀x. x ∈ X → y x ∈ Y, hypo.
+03. 3 ⊢ x ∈ X, hypo.
+04. 2, 3 ⊢ y x ∈ Y, uq_bounded_elim 2 3.
+05. 2, 3 ⊢ set (y x), set_intro 4.
+06. 2 ⊢ x ∈ X → set (y x), subj_intro 5.
+07. 2 ⊢ ∀x. x ∈ X → set (y x), uq_intro 6.
+08. 1 ⊢ function f, fn_from_term 1.
+09. 1, 2 ⊢ dom f = X, dom_from_term 1 7.
+10. 1, 2 ⊢ rng f ⊆ Y, rng_from_term 1 2.
+11. 1, 2 ⊢ map f X Y, map_intro 8 9 10.
+map_from_term. ⊢ f = {t | ∃x. x ∈ X ∧ t = (x, y x)} →
+  (∀x. x ∈ X → y x ∈ Y) → map f X Y, subj_intro_ii 11.
 
 
 (*/section Restricted functions *)
@@ -573,7 +676,7 @@ map_restr. ⊢ map f X Y → A ⊆ X → map (restr f A) A Y, subj_intro_ii 13.
 02. 2 ⊢ A ⊆ X, hypo.
 03. 3 ⊢ x ∈ A, hypo.
 04. 2, 3 ⊢ x ∈ X, incl_elim 2 3.
-05. 1, 2, 3 ⊢ set (app f x), app_is_set 1 4.
+05. 1, 2, 3 ⊢ set (app f x), map_app_is_set 1 4.
 06. 1, 2, 3 ⊢ app f x ∈ UnivCl, UnivCl_intro 5.
 07. 1, 2, 3 ⊢ (x, app f x) ∈ A × UnivCl, prod_intro 3 6.
 08. ⊢ app f x = app f x, eq_refl.
@@ -589,7 +692,7 @@ app_restr. ⊢ map f X Y → A ⊆ X → x ∈ A → app f x = app (restr f A) x
 01. 1 ⊢ function f, hypo.
 02. 2 ⊢ x ∈ dom f, hypo.
 03. 3 ⊢ x ∈ A, hypo.
-05. 1, 2 ⊢ set (app f x), fn_app_is_set 1 2.
+05. 1, 2 ⊢ set (app f x), app_is_set 1 2.
 06. 1, 2 ⊢ app f x ∈ UnivCl, UnivCl_intro 5.
 07. 1, 2, 3 ⊢ (x, app f x) ∈ A × UnivCl, prod_intro 3 6.
 08. ⊢ app f x = app f x, eq_refl.

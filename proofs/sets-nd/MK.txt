@@ -63,7 +63,7 @@ subset. ⊢ A ⊆ B → set B → set A, axiom.
 power. ⊢ set M → set (power M), axiom.
 union. ⊢ set M → set (⋃M), axiom.
 regularity. ⊢ ¬A = ∅ → ∃x. x ∈ A ∧ x ∩ A = ∅, axiom.
-infinity. ⊢ ∃A. ∅ ∈ A ∧ ∀x. x ∈ A → x ∪ {x} ∈ A, axiom.
+infinity. ⊢ ∃A. set A ∧ (∅ ∈ A ∧ ∀x. x ∈ A → x ∪ {x} ∈ A), axiom.
 substitution. ⊢ function f → set (dom f) → set (rng f), axiom.
 choice. ⊢ ∃f. choice_function f ∧ dom f = UnivCl \ {∅}, axiom.
 

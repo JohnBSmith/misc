@@ -1,0 +1,49 @@
+
+(*/chapter Closure operators *)
+
+clop_equi. ⊢ closure_operator H U ↔
+  set U ∧ map H (power U) (power U) ∧
+  (∀X. X ⊆ U → X ⊆ app H X) ∧
+  (∀X. ∀Y. X ⊆ Y → Y ⊆ U → app H X ⊆ app H Y) ∧
+  (∀X. X ⊆ U → app H (app H X) ⊆ app H X), def.
+
+01. 1 ⊢ closure_operator H U, hypo.
+02. 2 ⊢ X ⊆ U, hypo.
+03. 1 ⊢ set U ∧ map H (power U) (power U),
+  lsubj_conj_elimlll clop_equi 1.
+04. 1 ⊢ set U, conj_eliml 3.
+05. 1 ⊢ map H (power U) (power U), conj_elimr 3.
+06. 1, 2 ⊢ set X, subset 2 4.
+07. 1, 2 ⊢ X ∈ power U, power_intro 6 2.
+08. 1, 2 ⊢ app H X ∈ power U, map_app_in_cod 5 7.
+09. 1, 2 ⊢ app H X ⊆ U, power_elim 8.
+clop_app_in_cod. ⊢ closure_operator H U → X ⊆ U →
+  app H X ⊆ U, subj_intro_ii 9.
+
+01. 1 ⊢ closure_operator H U, hypo.
+02. 2 ⊢ X ⊆ U, hypo.
+03. 1 ⊢ ∀X. X ⊆ U → X ⊆ app H X,
+  lsubj_conj_elimllr clop_equi 1.
+04. 1, 2 ⊢ X ⊆ app H X, uq_bounded_elim 3 2.
+clop_extensivity. ⊢ closure_operator H U →
+  X ⊆ U → X ⊆ app H X, subj_intro_ii 4.
+
+01. 1 ⊢ closure_operator H U, hypo.
+02. 1 ⊢ ∀X. ∀Y. X ⊆ Y → Y ⊆ U → app H X ⊆ app H Y,
+  lsubj_conj_elimlr clop_equi 1.
+03. 1 ⊢ ∀Y. X ⊆ Y → Y ⊆ U → app H X ⊆ app H Y, uq_elim 2.
+04. 1 ⊢ X ⊆ Y → Y ⊆ U → app H X ⊆ app H Y, uq_elim 3.
+clop_monotony. ⊢ closure_operator H U →
+  X ⊆ Y → Y ⊆ U → app H X ⊆ app H Y, subj_intro 4.
+
+01. 1 ⊢ closure_operator H U, hypo.
+02. 2 ⊢ X ⊆ U, hypo.
+03. 1 ⊢ ∀X. X ⊆ U → app H (app H X) ⊆ app H X,
+  lsubj_conj_elimr clop_equi 1.
+04. 1, 2 ⊢ app H (app H X) ⊆ app H X, uq_bounded_elim 3 2.
+05. 1, 2 ⊢ app H X ⊆ U, clop_app_in_cod 1 2.
+06. 1, 2 ⊢ app H X ⊆ app H (app H X), clop_extensivity 1 5.
+07. 1, 2 ⊢ app H (app H X) = app H X, incl_antisym 4 6.
+clop_idem. ⊢ closure_operator H U →
+  X ⊆ U → app H (app H X) = app H X, subj_intro_ii 7.
+

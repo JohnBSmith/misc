@@ -177,6 +177,16 @@ conj_elimll. ⊢ A ∧ B ∧ C → A, subj_intro 3.
 03. 1 ⊢ B, conj_elimr 2.
 conj_elimlr. ⊢ A ∧ B ∧ C → B, subj_intro 3.
 
+01. 1 ⊢ A ∧ (B ∧ C), hypo.
+02. 1 ⊢ B ∧ C, conj_elimr 1.
+03. 1 ⊢ B, conj_eliml 2.
+conj_elimrl. ⊢ A ∧ (B ∧ C) → B, subj_intro 3.
+
+01. 1 ⊢ A ∧ (B ∧ C), hypo.
+02. 1 ⊢ B ∧ C, conj_elimr 1.
+03. 1 ⊢ C, conj_elimr 2.
+conj_elimrr. ⊢ A ∧ (B ∧ C) → C, subj_intro 3.
+
 01. 1 ⊢ A ∧ B ∧ C ∧ D, hypo.
 02. 1 ⊢ A ∧ B ∧ C, conj_eliml 1.
 03. 1 ⊢ A ∧ B, conj_eliml 2.
