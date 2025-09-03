@@ -25,11 +25,11 @@ bij_eliml. (H ⊢ A ↔ B) → (H ⊢ A → B), axiom.
 bij_elimr. (H ⊢ A ↔ B) → (H ⊢ B → A), axiom.
 wk. (H ⊢ B) → (H ∧ A ⊢ B), axiom.
 exch. (H ⊢ A) → (H ⊢ A), axiom.
-uq_intro. (nf u (H ∧ ∀x. A x)) → (H ⊢ A u) → (H ⊢ ∀x. A x), axiom.
-uq_elim. (H ⊢ ∀x. A x) → (H ⊢ A t), axiom.
-ex_intro. (H ⊢ A t) → (H ⊢ ∃x. A x), axiom.
-ex_elim. (nf u (H1 ∧ H2 ∧ B ∧ ∃x. A x)) →
-  (H1 ⊢ ∃x. A x) → (H2 ∧ A u ⊢ B) → (H1 ∧ H2 ⊢ B), axiom.
+uq_intro. (nf u (H ∧ ∀x. P x)) → (H ⊢ P u) → (H ⊢ ∀x. P x), axiom.
+uq_elim. (H ⊢ ∀x. P x) → (H ⊢ P t), axiom.
+ex_intro. (H ⊢ P t) → (H ⊢ ∃x. P x), axiom.
+ex_elim. (nf u (H1 ∧ H2 ∧ B ∧ ∃x. P x)) →
+  (H1 ⊢ ∃x. P x) → (H2 ∧ P u ⊢ B) → (H1 ∧ H2 ⊢ B), axiom.
 subj_intro_ii. (H ∧ A ∧ B ⊢ C) → (H ⊢ A → B → C), axiom.
 subj_intro_iii. (H ∧ A ∧ B ∧ C ⊢ D) → (H ⊢ A → B → C → D), axiom.
 subj_intro_iv. (H ∧ A ∧ B ∧ C ∧ D ⊢ E) → (H ⊢ A → B → C → D → E), axiom.
@@ -456,3 +456,38 @@ ex_uniq_from_mixed_form. ⊢ (∃x. S x ∧ P x ∧ ∀y. P y → x = y) →
 ex_weaken_conj. ⊢ (∀x. P x → Q x) → (∃x. P x ∧ R x) →
   (∃x. Q x ∧ R x), subj_intro_ii 10.
 
+
+(*/note hypo The hypothesis rule, also known as the assumption rule.
+It states that the initial sequent A\_⊢\_A may be introduced, i.e.
+derived from zero premises. The seemingly useless conjunction with
+the verum\_⊤ is an artifact of the way the proof verifier works; it
+does not occur in proof notation and can be ignored. The derivation
+system stated by the rules is sequent natural deduction. In this regard,
+the assumption made by the hypothesis rule appears as a dependency that
+can later be uncharged by [[subj_intro]] or [[neg_intro]]. *)
+
+(*/note subj_intro Subjunction introduction. It reflects the deduction
+theorem, but is an inference rule, not a metatheorem. *)
+
+(*/note subj_elim Subjunction elimination, a modus ponens that operates
+with sequents rather than plain propositions. *)
+
+(*/note neg_intro Negation introduction. The negation ¬A is derived by
+leading the assumption A to a contradiction. It must be distinguished
+from the classical reductio ad absurdum, (H\_∧\_¬A\_⊢\_⊥)\_→ (H\_⊢\_A),
+which adds the subsequent application of [[dne]] to neg_intro and is
+therefore not part of intuitionistic logic. *)
+
+(*/note subj_intro_ii The rule [[subj_intro]] applied twice consecutively.
+This admissible rule was added for ergonomic reasons, because it cannot
+be expressed and derived as a theorem. *)
+
+(*/note uq_intro Universal quantification introduction. A universal
+quantification ∀x.\_P\_x is shown from hypotheses H by deriving P\_u
+from H for a parameter u that does not occur free in H and ∀x.\_P\_x.
+That is to say, we show that something holds for all x by parametrizing
+the proof over u. *)
+
+(*/note dne Double negation elimination. It is not valid in
+intuitionistic logic, which is why it requires [[lem]] as a
+dependency. *)

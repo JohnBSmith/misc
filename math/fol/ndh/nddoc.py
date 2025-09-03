@@ -24,6 +24,7 @@ class Env:
         self.propose_clear = False
         self.title = None
         self.rules = set()
+        self.notes = {}
 
 def consume_ident(s, n, i):
     j = i
@@ -77,6 +78,13 @@ def process_command(s, acc, env):
     elif cmd == "rules":
         for rule in content.split():
             env.rules.add(rule)
+    elif cmd == "note":
+        i = 0
+        while i < len(content) and not content[i].isspace():
+            i += 1
+        label = content[0:i]
+        content = content[i:].strip()
+        env.notes[label] = content
 
 def consume_ident_list(s, n, i):
     idents = []
@@ -180,6 +188,7 @@ CSS_COMMON = """\
 pre{font-size: 12pt;}
 a{color: #00304a; text-decoration: none;}
 a:hover{color: #d00090; text-decoration: underline;}
+p a{text-decoration: underline;}
 div.box{
   border-top: 2px solid #cacac2;
   border-bottom: 2px solid #cacac2;
@@ -287,6 +296,32 @@ def number_as_word(n):
         "nine" if n == 9 else
         str(n))
 
+def format_text(s):
+    acc = ["<p>"]
+    i = 0; n = len(s)
+    while i < n:
+        if s[i] == '[' and i + 1 < n and s[i + 1] == '[':
+            i += 2; j = i
+            ref = None
+            while i < n and s[i] != ']':
+                if s[i] == '|':
+                    ref = s[j:i]; j = i + 1
+                i += 1
+            if ref is None:
+                ref = s[j:i]
+                acc.append(f"<a href='{ref}.htm'>{ref}</a>")
+            else:
+                acc.append(f"<a href='{ref}.htm'>{s[j:i]}</a>")
+            i += 2
+        elif s[i] == '\\' and i + 1 < n and s[i + 1] == '_':
+            acc.append("&nbsp;")
+            i += 2
+        else:
+            acc.append(s[i])
+            i += 1
+    acc.append("</p>")
+    return "".join(acc)
+
 def proof_file(env, kwargs):
     ident = kwargs["ident"]
     kind = kwargs["kind"]
@@ -306,6 +341,10 @@ def proof_file(env, kwargs):
             f"The given proof depends on {axiom_count}:<br>{axiom_deps}.</p>")
     else:
         axiom_deps = ""
+    if ident in env.notes:
+        notes_text = format_text(env.notes[ident])
+    else:
+        notes_text = ""
     return f"""\
 <!DOCTYPE html>
 <html>
@@ -317,7 +356,7 @@ def proof_file(env, kwargs):
 </head>
 <body>
 <h3>{kind} {ident}</h3>
-{item}{text}{axiom_deps}
+{item}{notes_text}{text}{axiom_deps}
 </body>
 </html>\
 """

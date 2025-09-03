@@ -67,3 +67,54 @@ infinity. ⊢ ∃A. set A ∧ (∅ ∈ A ∧ ∀x. x ∈ A → x ∪ {x} ∈ A),
 substitution. ⊢ function f → set (dom f) → set (rng f), axiom.
 choice. ⊢ ∃f. choice_function f ∧ dom f = UnivCl \ {∅}, axiom.
 
+(*/note set_equi A class is called <i>set</i> if there exists another class
+that contains it. Otherwise it is called <i>proper</i> class, i.e.
+a class\_A with ¬set\_A is proper. Theorems [[UnivCl_intro]] and
+[[UnivCl_elim]] show that a class is a set, if and only if it is an
+element of [[UnivCl_eq|UnivCl]]. *)
+
+(*/note incl_equi The inclusion relation. Like equality, it is formed
+by a binary relation symbol, thus defined on the entire class
+universe. If A ⊆ B, then we say that A is <i>included</i> in B, or
+that A is a <i>subclass</i> of B. Inclusion is a partial order on the
+class universe, as [[incl_refl]], [[incl_trans]] and
+[[incl_antisym]] show. *)
+
+(*/note empty_set_eq The empty set. It is the least element of the
+class universe, as [[empty_set_is_least]] shows. Having x ∈ ∅ means
+a contradiction, as [[empty_contra]] shows. According to
+[[empty_set_is_set]], the empty set is a [[set_equi|set]]. *)
+
+(*/note UnivCl_eq The universal class. It contains all the
+[[set_equi|sets]], as [[UnivCl_intro]] and [[UnivCl_elim]] show.
+But it must be distinguished from the class universe, which is the
+entire universe of discourse of the logical system. As
+[[empty_set_is_least]] and [[UnivCl_is_greatest]] show, the
+[[empty_set_eq|empty set]] and the universal class are the least and
+greatest element of the class universe. Thus, all classes are
+[[incl_equi|subclasses]] of UnivCl. *)
+
+(*/note Intersection_eq The intersection of a class of sets. Note that
+M is allowed to be [[empty_set_eq|empty]], then ⋂M is [[UnivCl_eq|UnivCl]],
+as [[Intersection_empty_set]] shows. *)
+
+(*/note efq Ex falso quodlibet. From a contradiction,
+any proposition follows. *)
+
+(*/note lem The law of excluded middle. Valid in classical logic,
+but not in intuitionistic logic. *)
+
+(*/note ext The axiom of extensionality. It states that two sets with
+the same elements are equal. Thus, a set contains an element neither
+multiple times nor in a specific order, or so to say, it would be
+indistinguishable from one presented in different order. *)
+
+(*/note eq_refl States, that equality is a reflexive relation. Note that
+equality is defined on the entire class universe. This differs from the
+diagonal relation E = {t | ∃x. t = (x,\_x)}. Firstly, E is only
+defined on the universal class, i.e. only for sets, but
+not for proper classes. Secondly, one has to write (x,\_x) ∈ E instead of
+E\_x\_x, since E is a class, not a binary relation symbol. The syntax
+x = x, on the other hand, is a shorthand for eq\_x\_x. *)
+
+(*/note eq_subst The substitution schema for equality. *)

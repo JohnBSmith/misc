@@ -655,6 +655,7 @@ Intersection_intro_non_empty. ⊢ ¬M = ∅ →
 08. 1, 2 ⊢ A ⊆ B, incl_intro 7.
 Intersection_is_lower_bound. ⊢ A = ⋂M → B ∈ M → A ⊆ B, subj_intro_ii 8.
 
+
 (*/section The universal class and Russell's paradox *)
 
 01. 1 ⊢ set x, hypo.
@@ -750,6 +751,20 @@ intersection_compl. ⊢ A ∩ compl A = ∅, incl_antisym 9 10.
 12. ⊢ UnivCl ⊆ A ∪ compl A, incl_intro 11.
 13. ⊢ A ∪ compl A ⊆ UnivCl, UnivCl_is_greatest.
 union_compl. ⊢ A ∪ compl A = UnivCl, incl_antisym 13 12.
+
+01. 1 ⊢ x ∈ UnivCl, hypo.
+02. 2 ⊢ A ∈ ∅, hypo.
+03. 2 ⊢ x ∈ A, empty_efq 2.
+04. ⊢ A ∈ ∅ → x ∈ A, subj_intro 3.
+05. ⊢ ∀A. A ∈ ∅ → x ∈ A, uq_intro 4.
+06. 1 ⊢ set x, set_intro 1.
+08. 1 ⊢ x ∈ ⋂∅, Intersection_intro 6 5.
+09. ⊢ x ∈ UnivCl → x ∈ ⋂∅, subj_intro 8.
+10. ⊢ ∀x. x ∈ UnivCl → x ∈ ⋂∅, uq_intro 9.
+11. ⊢ UnivCl ⊆ ⋂∅, incl_intro 10.
+12. ⊢ ⋂∅ ⊆ UnivCl, UnivCl_is_greatest.
+Intersection_empty_set. ⊢ ⋂∅ = UnivCl, incl_antisym 12 11.
+
 
 (*/section Singletons, pair sets and pairs *)
 
