@@ -5,6 +5,6 @@
 (functions: MK logic basic relations)
 (powers: MK logic basic)
 (wellfounded: MK logic basic powers functions)
-(universes: MK logic basic relations functions powers)
 (onat: MK logic basic relations functions)
 (clops: MK logic basic relations functions powers)
+(universes: MK logic basic relations functions powers onat)

@@ -52,21 +52,59 @@ zero_in_onat. ⊢ ∅ ∈ onat, eq_subst_rev onat_eq 7, P x ↔ ∅ ∈ x.
 succ_in_onat. ⊢ n ∈ onat → succ n ∈ onat, subj_intro 15.
 
 01. 1 ⊢ A ⊆ onat, hypo.
-02. 2 ⊢ ∅ ∈ A ∧ ∀n. n ∈ A → succ n ∈ A, hypo.
-03. 2 ⊢ ∅ ∈ A, conj_eliml 2.
-04. 2 ⊢ ∀n. n ∈ A → succ n ∈ A, conj_elimr 2.
-05. 5 ⊢ n ∈ A, hypo.
-06. 2, 5 ⊢ succ n ∈ A, uq_bounded_elim 4 5.
-07. 2, 5 ⊢ n ∪ {n} ∈ A, eq_subst succ_eq 6, P x ↔ x ∈ A.
-08. 2 ⊢ n ∈ A → n ∪ {n} ∈ A, subj_intro 7.
-09. 2 ⊢ ∀n. n ∈ A → n ∪ {n} ∈ A, uq_intro 8.
-10. 2 ⊢ ∅ ∈ A ∧ ∀n. n ∈ A → n ∪ {n} ∈ A, conj_intro 3 9.
-11. 1 ⊢ set A, subset 1 onat_is_set.
-12. 1, 2 ⊢ A ∈ {A | ∅ ∈ A ∧ ∀n. n ∈ A → n ∪ {n} ∈ A}, comp_intro 11 10.
-13. 1, 2 ⊢ A ∈ onat_inductive_sets,
-  eq_subst_rev onat_inductive_sets_eq 12, P x ↔ A ∈ x.
-14. 1, 2 ⊢ onat ⊆ A, Intersection_is_lower_bound onat_eq 13.
-15. 1, 2 ⊢ A = onat, incl_antisym 1 14.
-onat_induction_sets. ⊢ A ⊆ onat →
-  (∅ ∈ A ∧ ∀n. n ∈ A → succ n ∈ A) → A = onat, subj_intro_ii 15.
+02. 2 ⊢ ∅ ∈ A, hypo.
+03. 3 ⊢ ∀n. n ∈ A → succ n ∈ A, hypo.
+04. 4 ⊢ n ∈ A, hypo.
+05. 3, 4 ⊢ succ n ∈ A, uq_bounded_elim 3 4.
+06. 3, 4 ⊢ n ∪ {n} ∈ A, eq_subst succ_eq 5, P x ↔ x ∈ A.
+07. 3 ⊢ n ∈ A → n ∪ {n} ∈ A, subj_intro 6.
+08. 3 ⊢ ∀n. n ∈ A → n ∪ {n} ∈ A, uq_intro 7.
+09. 2, 3 ⊢ ∅ ∈ A ∧ ∀n. n ∈ A → n ∪ {n} ∈ A, conj_intro 2 8.
+10. 1 ⊢ set A, subset 1 onat_is_set.
+11. 1, 2, 3 ⊢ A ∈ {A | ∅ ∈ A ∧ ∀n. n ∈ A → n ∪ {n} ∈ A},
+  comp_intro 10 09.
+12. 1, 2, 3 ⊢ A ∈ onat_inductive_sets,
+  eq_subst_rev onat_inductive_sets_eq 11, P x ↔ A ∈ x.
+13. 1, 2, 3 ⊢ onat ⊆ A, Intersection_is_lower_bound onat_eq 12.
+14. 1, 2, 3 ⊢ A = onat, incl_antisym 1 13.
+onat_induction_sets. ⊢ A ⊆ onat → ∅ ∈ A →
+  (∀n. n ∈ A → succ n ∈ A) → A = onat, subj_intro_iii 14.
 
+01. 1 ⊢ P ∅, hypo.
+02. 2 ⊢ ∀n. n ∈ onat → P n → P (succ n), hypo.
+03. ⊢ {n | n ∈ onat ∧ P n} ⊆ onat, sep_is_subclass.
+04. 1 ⊢ ∅ ∈ onat ∧ P ∅, conj_intro zero_in_onat 1.
+05. 1 ⊢ ∅ ∈ {n | n ∈ onat ∧ P n}, comp_intro empty_set_is_set 4.
+06. 6 ⊢ n ∈ {n | n ∈ onat ∧ P n}, hypo.
+07. 6 ⊢ n ∈ onat ∧ P n, comp_elim 6.
+08. 6 ⊢ n ∈ onat, conj_eliml 7.
+09. 6 ⊢ P n, conj_elimr 7.
+10. 2, 6 ⊢ P n → P (succ n), uq_bounded_elim 2 8.
+11. 2, 6 ⊢ P (succ n), subj_elim 10 09.
+12. 6 ⊢ succ n ∈ onat, succ_in_onat 8.
+13. 6 ⊢ set (succ n), set_intro 12.
+14. 2, 6 ⊢ succ n ∈ onat ∧ P (succ n), conj_intro 12 11.
+15. 2, 6 ⊢ succ n ∈ {n | n ∈ onat ∧ P n},
+  comp_intro 13 14, P n ↔ n ∈ onat ∧ P n.
+16. 2 ⊢ n ∈ {n | n ∈ onat ∧ P n} →
+  succ n ∈ {n | n ∈ onat ∧ P n}, subj_intro 15.
+17. 2 ⊢ ∀n. n ∈ {n | n ∈ onat ∧ P n} →
+  succ n ∈ {n | n ∈ onat ∧ P n}, uq_intro 16.
+18. 1, 2 ⊢ {n | n ∈ onat ∧ P n} = onat, onat_induction_sets 3 5 17.
+19. 19 ⊢ n ∈ onat, hypo.
+20. 1, 2, 19 ⊢ n ∈ {n | n ∈ onat ∧ P n}, eq_subst_rev 18 19.
+21. 1, 2, 19 ⊢ n ∈ onat ∧ P n, comp_elim 20.
+22. 1, 2, 19 ⊢ P n, conj_elimr 21.
+23. 1, 2 ⊢ n ∈ onat → P n, subj_intro 22.
+24. 1, 2 ⊢ ∀n. n ∈ onat → P n, uq_intro 23.
+onat_induction. ⊢ P ∅ → (∀n. n ∈ onat → P n → P (succ n)) →
+  (∀n. n ∈ onat → P n), subj_intro_ii 24.
+
+(*/note onat_eq The natural numbers, represented as the first
+ordinal numbers. The number zero is the [[empty_set_eq|empty set]], the
+successor operation is [[succ_eq|succ]]. The inherent induction
+principle is shown by [[onat_induction_sets]] and
+[[onat_induction]].*)
+
+(*/note succ_eq The successor operation for ordinal numbers, in
+particular for [[onat_eq|onat]]. *)

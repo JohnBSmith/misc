@@ -6,6 +6,10 @@ univ_equi. ⊢ univ U ↔ ∅ ∈ U ∧
   (∀x. x ∈ U → power x ∈ U) ∧
   (∀I. ∀x. I ∈ U → map x I U → ⋃(img x I) ∈ U), def.
 
+least_univ_eq. ⊢ least_univ A = ⋂{U | univ U ∧ A ∈ U}, def.
+Univ_eq. ⊢ Univ = least_univ onat, def.
+universes. ⊢ set x → ∃U. set U ∧ univ U ∧ x ∈ U, axiom.
+
 01. 1 ⊢ univ U, hypo.
 02. 1 ⊢ ∅ ∈ U, lsubj_conj_elimlll univ_equi 1.
 univ_contains_empty_set. ⊢ univ U → ∅ ∈ U, subj_intro 2.
@@ -25,8 +29,8 @@ univ_closed_power. ⊢ univ U → x ∈ U → power x ∈ U, subj_intro 3.
   lsubj_conj_elimr univ_equi 1.
 03. 1 ⊢ ∀x. I ∈ U → map x I U → ⋃(img x I) ∈ U, uq_elim 2.
 04. 1 ⊢ I ∈ U → map x I U → ⋃(img x I) ∈ U, uq_elim 3.
-univ_closed_Union. ⊢ univ U → I ∈ U → map x I U → ⋃(img x I) ∈ U,
-  subj_intro 4.
+univ_closed_family_union. ⊢ univ U → I ∈ U → map x I U →
+  ⋃(img x I) ∈ U, subj_intro 4.
 
 01. 1 ⊢ univ U, hypo.
 02. 2 ⊢ y ⊆ x, hypo.
@@ -65,7 +69,7 @@ univ_closed_intersection. ⊢ univ U → x ∈ U → x ∩ y ∈ U,
 15. 8, 9 ⊢ map {(∅, x), ({∅}, y)} {∅, {∅}} U,
   map_union_eq_rngs 12 13 14.
 16. 1, 8, 9 ⊢ ⋃(img {(∅, x), ({∅}, y)} {∅, {∅}}) ∈ U,
-  univ_closed_Union 1 7 15.
+  univ_closed_family_union 1 7 15.
 17. 8 ⊢ set x, set_intro 8.
 18. 9 ⊢ set y, set_intro 9.
 19. 8, 9 ⊢ img {(∅, x), ({∅}, y)} {∅, {∅}} = {x, y}, img_graph2 17 18.
@@ -106,3 +110,176 @@ univ_closed_pair_set. ⊢ univ U → x ∈ U → y ∈ U → {x, y} ∈ U,
 07. 1, 2, 3 ⊢ (x, y) ∈ U, eq_subst_rev pair_eq 6, P u ↔ u ∈ U.
 univ_closed_pair. ⊢ univ U → x ∈ U → y ∈ U → (x, y) ∈ U,
   subj_intro_iii 7.
+
+01. 1 ⊢ univ U, hypo.
+02. 2 ⊢ A ∈ U, hypo.
+03. ⊢ {x | x ∈ A ∧ P x} ⊆ A, sep_is_subclass.
+04. 1, 2 ⊢ {x | x ∈ A ∧ P x} ∈ U, univ_closed_subset 1 3 2.
+univ_closed_sep. ⊢ univ U → A ∈ U → {x | x ∈ A ∧ P x} ∈ U,
+  subj_intro_ii 4.
+
+01. 1 ⊢ univ U, hypo.
+02. 2 ⊢ A ∈ U, hypo.
+03. 3 ⊢ B ∈ U, hypo.
+04. 1, 2, 3 ⊢ A ∪ B ∈ U, univ_closed_union 1 2 3.
+05. 1, 2, 3 ⊢ power (A ∪ B) ∈ U, univ_closed_power 1 4.
+06. 1, 2, 3 ⊢ power (power (A ∪ B)) ∈ U, univ_closed_power 1 5.
+07. ⊢ A × B ⊆ power (power (A ∪ B)), prod_incl_in_power.
+08. 1, 2, 3 ⊢ A × B ∈ U, univ_closed_subset 1 7 6.
+univ_closed_prod. ⊢ univ U → A ∈ U → B ∈ U → A × B ∈ U,
+  subj_intro_iii 8.
+
+01. 1 ⊢ univ U, hypo.
+02. 2 ⊢ M ∈ U, hypo.
+03. 3 ⊢ ¬M = ∅, hypo.
+04. 3 ⊢ ∃y. y ∈ M, non_empty 3.
+05. 5 ⊢ y ∈ M, hypo.
+06. ⊢ ⋂M = ⋂M, eq_refl.
+07. 5 ⊢ ⋂M ⊆ y, Intersection_is_lower_bound 6 5.
+08. 1, 2 ⊢ M ⊆ U, univ_trans 1 2.
+09. 1, 2, 5 ⊢ y ∈ U, incl_elim 8 5.
+10. 1, 2, 5 ⊢ ⋂M ∈ U, univ_closed_subset 1 7 9.
+11. 1, 2, 3 ⊢ ⋂M ∈ U, ex_elim 4 10.
+univ_closed_Intersection. ⊢ univ U → M ∈ U → ¬M = ∅ → ⋂M ∈ U,
+  subj_intro_iii 11.
+
+01. 1 ⊢ univ U, hypo.
+02. 2 ⊢ M ∈ U, hypo.
+03. ⊢ map (id M) M M, id_is_map.
+04. 1, 2 ⊢ M ⊆ U, univ_trans 1 2.
+05. 1, 2 ⊢ map (id M) M U, map_rng_weaken 3 4.
+06. 1, 2 ⊢ ⋃(img (id M) M) ∈ U, univ_closed_family_union 1 2 5.
+07. ⊢ M ⊆ M, incl_refl.
+08. ⊢ img (id M) M = M, id_img 7.
+09. 1, 2 ⊢ ⋃M ∈ U, eq_subst 8 6, P x ↔ ⋃x ∈ U.
+univ_closed_Union. ⊢ univ U → M ∈ U → ⋃M ∈ U, subj_intro_ii 9.
+
+01. 1 ⊢ set A, hypo.
+02. 1 ⊢ ∃U. set U ∧ univ U ∧ A ∈ U, universes 1.
+03. 3 ⊢ set U ∧ univ U ∧ A ∈ U, hypo.
+04. 3 ⊢ set U, conj_elimll 3.
+05. 3 ⊢ univ U, conj_elimlr 3.
+06. 3 ⊢ A ∈ U, conj_elimr 3.
+07. 3 ⊢ univ U ∧ A ∈ U, conj_intro 5 6.
+08. 3 ⊢ U ∈ {U | univ U ∧ A ∈ U}, comp_intro 4 7.
+09. 3 ⊢ least_univ A ⊆ U, Intersection_is_lower_bound least_univ_eq 8.
+10. 3 ⊢ set (least_univ A), subset 9 4.
+11. 1 ⊢ set (least_univ A), ex_elim 2 10.
+
+12. 12 ⊢ x ∈ least_univ A, hypo.
+13. 12 ⊢ x ∈ ⋂{U | univ U ∧ A ∈ U},
+  eq_subst least_univ_eq 12, P t ↔ x ∈ t.
+14. 14 ⊢ y ∈ x, hypo.
+15. 15 ⊢ U ∈ {U | univ U ∧ A ∈ U}, hypo.
+16. 15 ⊢ univ U ∧ A ∈ U, comp_elim 15.
+17. 15 ⊢ univ U, conj_eliml 16.
+18. 15 ⊢ A ∈ U, conj_elimr 16.
+19. 12, 15 ⊢ x ∈ U, Intersection_elim 13 15.
+20. 12, 15 ⊢ x ⊆ U, univ_trans 17 19.
+21. 12, 14, 15 ⊢ y ∈ U, incl_elim 20 14.
+22. 12, 14 ⊢ U ∈ {U | univ U ∧ A ∈ U} → y ∈ U, subj_intro 21.
+23. 12, 14 ⊢ ∀U. U ∈ {U | univ U ∧ A ∈ U} → y ∈ U, uq_intro 22.
+24. 14 ⊢ set y, set_intro 14.
+25. 12, 14 ⊢ y ∈ ⋂{U | univ U ∧ A ∈ U}, Intersection_intro 24 23.
+26. 12, 14 ⊢ y ∈ least_univ A,
+  eq_subst_rev least_univ_eq 25, P t ↔ y ∈ t.
+27. 12 ⊢ y ∈ x → y ∈ least_univ A, subj_intro 26.
+28. 12 ⊢ ∀y. y ∈ x → y ∈ least_univ A, uq_intro 27.
+29. 12 ⊢ x ⊆ least_univ A, incl_intro 28.
+30. ⊢ x ∈ least_univ A → x ⊆ least_univ A, subj_intro 29.
+31. ⊢ ∀x. x ∈ least_univ A → x ⊆ least_univ A, uq_intro 30.
+
+32. 12, 15 ⊢ power x ∈ U, univ_closed_power 17 19.
+33. 12 ⊢ U ∈ {U | univ U ∧ A ∈ U} → power x ∈ U, subj_intro 32.
+34. 12 ⊢ ∀U. U ∈ {U | univ U ∧ A ∈ U} → power x ∈ U, uq_intro 33.
+35. 12 ⊢ set x, set_intro 12.
+36. 12 ⊢ set (power x), power 35.
+37. 12 ⊢ power x ∈ ⋂{U | univ U ∧ A ∈ U}, Intersection_intro 36 34.
+38. 12 ⊢ power x ∈ least_univ A,
+  eq_subst_rev least_univ_eq 37, P t ↔ power x ∈ t.
+39. ⊢ x ∈ least_univ A → power x ∈ least_univ A, subj_intro 38.
+40. ⊢ ∀x. x ∈ least_univ A → power x ∈ least_univ A, uq_intro 39.
+
+41. 41 ⊢ I ∈ least_univ A, hypo.
+42. 41 ⊢ I ∈ ⋂{U | univ U ∧ A ∈ U},
+  eq_subst least_univ_eq 41, P t ↔ I ∈ t.
+43. 43 ⊢ map f I (least_univ A), hypo.
+44. 41, 15 ⊢ I ∈ U, Intersection_elim 42 15.
+45. 15 ⊢ least_univ A ⊆ U, Intersection_is_lower_bound least_univ_eq 15.
+46. 43, 15 ⊢ map f I U, map_rng_weaken 43 45.
+47. 41, 43, 15 ⊢ ⋃(img f I) ∈ U, univ_closed_family_union 17 44 46.
+48. 41, 43 ⊢ U ∈ {U | univ U ∧ A ∈ U} → ⋃(img f I) ∈ U, subj_intro 47.
+49. 41, 43 ⊢ ∀U. U ∈ {U | univ U ∧ A ∈ U} → ⋃(img f I) ∈ U, uq_intro 48.
+50. 43 ⊢ function f ∧ dom f = I ∧ rng f ⊆ least_univ A, map_unfold 43.
+51. 43 ⊢ rng f ⊆ least_univ A, conj_elimr 50.
+52. ⊢ img f I ⊆ rng f, img_incl_in_rng.
+53. 43 ⊢ img f I ⊆ least_univ A, incl_trans 52 51.
+54. 1, 43 ⊢ set (img f I), subset 53 11.
+55. 1, 43 ⊢ set (⋃(img f I)), union 54.
+56. 1, 41, 43 ⊢ ⋃(img f I) ∈ ⋂{U | univ U ∧ A ∈ U},
+  Intersection_intro 55 49.
+57. 1, 41, 43 ⊢ ⋃(img f I) ∈ least_univ A,
+  eq_subst_rev least_univ_eq 56, P t ↔ ⋃(img f I) ∈ t.
+58. 1 ⊢ I ∈ least_univ A → map f I (least_univ A) →
+  ⋃(img f I) ∈ least_univ A, subj_intro_ii 57.
+59. 1 ⊢ ∀f. I ∈ least_univ A → map f I (least_univ A) →
+  ⋃(img f I) ∈ least_univ A, uq_intro 58.
+60. 1 ⊢ ∀I. ∀f. I ∈ least_univ A → map f I (least_univ A) →
+  ⋃(img f I) ∈ least_univ A, uq_intro 59.
+
+61. 15 ⊢ ∅ ∈ U, univ_contains_empty_set 17.
+62. ⊢ U ∈ {U | univ U ∧ A ∈ U} → ∅ ∈ U, subj_intro 61.
+63. ⊢ ∀U. U ∈ {U | univ U ∧ A ∈ U} → ∅ ∈ U, uq_intro 62.
+64. ⊢ ∅ ∈ ⋂{U | univ U ∧ A ∈ U},
+  Intersection_intro empty_set_is_set 63.
+65. ⊢ ∅ ∈ least_univ A, eq_subst_rev least_univ_eq 64, P t ↔ ∅ ∈ t.
+
+66. ⊢ ∅ ∈ least_univ A ∧
+  (∀x. x ∈ least_univ A → x ⊆ least_univ A), conj_intro 65 31.
+67. ⊢ ∅ ∈ least_univ A ∧
+  (∀x. x ∈ least_univ A → x ⊆ least_univ A) ∧
+  (∀x. x ∈ least_univ A → power x ∈ least_univ A), conj_intro 66 40.
+68. 1 ⊢ ∅ ∈ least_univ A ∧
+  (∀x. x ∈ least_univ A → x ⊆ least_univ A) ∧
+  (∀x. x ∈ least_univ A → power x ∈ least_univ A) ∧
+  (∀I. ∀f. I ∈ least_univ A → map f I (least_univ A) →
+    ⋃(img f I) ∈ least_univ A), conj_intro 67 60.
+69. ⊢ univ (least_univ A) ↔ ∅ ∈ least_univ A ∧
+  (∀x. x ∈ least_univ A → x ⊆ least_univ A) ∧
+  (∀x. x ∈ least_univ A → power x ∈ least_univ A) ∧
+  (∀I. ∀x. I ∈ least_univ A → map x I (least_univ A) →
+    ⋃(img x I) ∈ least_univ A), univ_equi.
+70. 1 ⊢ univ (least_univ A), rsubj_elim 69 68.
+71. 1 ⊢ set (least_univ A) ∧ univ (least_univ A), conj_intro 11 70.
+least_univ_is_univ. ⊢ set A →
+  set (least_univ A) ∧ univ (least_univ A), subj_intro 71.
+
+01. ⊢ set (least_univ onat) ∧ univ (least_univ onat),
+  least_univ_is_univ onat_is_set.
+02. ⊢ set (least_univ onat), conj_eliml 1.
+Univ_is_set. ⊢ set Univ, eq_subst_rev Univ_eq 2, P t ↔ set t.
+
+01. ⊢ set (least_univ onat) ∧ univ (least_univ onat),
+  least_univ_is_univ onat_is_set.
+02. ⊢ univ (least_univ onat), conj_elimr 1.
+Univ_is_univ. ⊢ univ Univ, eq_subst_rev Univ_eq 2, P t ↔ univ t.
+
+(*/note univ_equi Defines what is considered to be the Grothendieck
+universe. Their existence is assured by the
+[[universes|axiom of universes]]. *)
+
+(*/note least_univ_eq The least [[univ_equi|Grothendieck universe]]
+that contains A. *)
+
+(*/note Univ_eq The universal set, defined as the least
+[[univ_equi|Grothendieck universe]] that contains the
+[[onat_eq|natural numbers]], see the [[least_univ_eq|least_univ]]
+operation. Basically this means, it behaves almost exactly like
+[[UnivCl_eq|UnivCl]], but it is a [[set_equi|set]] rather than
+a proper class. Theorem [[Univ_is_univ]] shows that it is
+well-defined, the proof depends on the
+[[universes|axiom of universes]]. *)
+
+(*/note universes The axiom of universes. It states that each
+[[set_equi|set]] is a member of some
+[[univ_equi|Grothendieck universe]]. *)

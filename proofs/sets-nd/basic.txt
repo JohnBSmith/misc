@@ -49,6 +49,17 @@ incl_from_eq. ⊢ A = B → A ⊆ B, subj_intro 3.
 03. 1 ⊢ B ⊆ A, eq_subst 1 2, P X ↔ X ⊆ A.
 incl_from_eq_rev. ⊢ A = B → B ⊆ A, subj_intro 3.
 
+01. 1 ⊢ ∀X. X ⊆ A ↔ X ⊆ B, hypo.
+02. 1 ⊢ A ⊆ A ↔ A ⊆ B, uq_elim 1.
+03. 1 ⊢ B ⊆ A ↔ B ⊆ B, uq_elim 1.
+04. ⊢ A ⊆ A, incl_refl.
+05. ⊢ B ⊆ B, incl_refl.
+06. 1 ⊢ A ⊆ B, lsubj_elim 2 4.
+07. 1 ⊢ B ⊆ A, rsubj_elim 3 5.
+08. 1 ⊢ A = B, incl_antisym 6 7.
+incl_ext. ⊢ (∀X. X ⊆ A ↔ X ⊆ B) → A = B, subj_intro 8.
+
+
 (*/section Class comprehension *)
 
 01. ⊢ u ∈ {x | P x} ↔ set u ∧ P u, comp.

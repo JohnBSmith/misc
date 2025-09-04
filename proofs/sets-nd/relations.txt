@@ -326,6 +326,16 @@ img_dist_inter. ⊢ img R (A ∩ B) ⊆ img R A ∩ img R B, incl_intro 13.
 06. 1 ⊢ img R A ⊆ img R B, incl_from_union 5.
 img_incl. ⊢ A ⊆ B → img R A ⊆ img R B, subj_intro 6.
 
+01. 1 ⊢ y ∈ img R A, hypo.
+02. 1 ⊢ ∃x. x ∈ A ∧ (x, y) ∈ R, img_elim 1.
+03. 3 ⊢ x ∈ A ∧ (x, y) ∈ R, hypo.
+04. 3 ⊢ (x, y) ∈ R, conj_elimr 3.
+05. 3 ⊢ y ∈ rng R, rng_intro 4.
+06. 1 ⊢ y ∈ rng R, ex_elim 2 5.
+07. ⊢ y ∈ img R A → y ∈ rng R, subj_intro 6.
+08. ⊢ ∀y. y ∈ img R A → y ∈ rng R, uq_intro 7.
+img_incl_in_rng. ⊢ img R A ⊆ rng R, incl_intro 8.
+
 01. 1 ⊢ x ∈ inv_img R (A ∩ B), hypo.
 02. 1 ⊢ ∃y. y ∈ A ∩ B ∧ (x, y) ∈ R, inv_img_elim 1.
 03. 3 ⊢ y ∈ A ∩ B ∧ (x, y) ∈ R, hypo.
