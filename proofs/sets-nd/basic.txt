@@ -568,6 +568,15 @@ set_with_no_elements. ⊢ (∀x. ¬x ∈ A) → A = ∅, subj_intro 12.
 07. 1 ⊢ ∃x. x ∈ A, dne 6.
 non_empty. ⊢ ¬A = ∅ → ∃x. x ∈ A, subj_intro 7.
 
+01. 1 ⊢ x ∈ A, hypo.
+02. 2 ⊢ A = ∅, hypo.
+03. 1, 2 ⊢ x ∈ ∅, eq_subst 2 1.
+04. 1, 2 ⊢ ⊥, empty_contra 3.
+05. 1 ⊢ ¬A = ∅, neg_intro 4.
+non_empty_from_witness. ⊢ x ∈ A → ¬A = ∅,
+  subj_intro 5.
+
+
 (*/section Operations on systems of sets *)
 
 01. 1 ⊢ set x, hypo.

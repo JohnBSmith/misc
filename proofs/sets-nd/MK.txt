@@ -44,7 +44,7 @@ inv_eq. ⊢ inv f = {t | ∃x. ∃y. t = (y, x) ∧ (x, y) ∈ f}, def.
 restr_eq. ⊢ restr f A = f ∩ (A × UnivCl), def.
 choice_function_equi. ⊢ choice_function f ↔
   function f ∧ ∀x. x ∈ dom f → app f x ∈ x, def.
-composition_eq. ⊢ composition g f = {t | ∃x. ∃y. ∃z.
+composition_eq. ⊢ g ∘ f = {t | ∃x. ∃y. ∃z.
   t = (x, z) ∧ (x, y) ∈ f ∧ (y, z) ∈ g}, def.
 
 (*/section Axioms *)

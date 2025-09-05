@@ -618,6 +618,91 @@ map_from_term_app. ⊢ f = {t | ∃x. x ∈ X ∧ t = (x, y x)} →
   (∀x. x ∈ X → y x ∈ Y) → x ∈ X → app f x = y x,
   subj_intro_iii 16.
 
+01. 1 ⊢ map f X Y, hypo.
+02. 2 ⊢ map g Y Z, hypo.
+03. 1 ⊢ function f ∧ dom f = X ∧ rng f ⊆ Y, map_unfold 1.
+04. 2 ⊢ function g ∧ dom g = Y ∧ rng g ⊆ Z, map_unfold 2.
+05. 1 ⊢ function f, conj_elimll 3.
+06. 1 ⊢ dom f = X, conj_elimlr 3.
+07. 1 ⊢ rng f ⊆ Y, conj_elimr 3.
+08. 2 ⊢ function g, conj_elimll 4.
+09. 2 ⊢ dom g = Y, conj_elimlr 4.
+10. 2 ⊢ rng g ⊆ Z, conj_elimr 4.
+11. ⊢ relation (g ∘ f), composition_is_relation.
+12. ⊢ rng (g ∘ f) ⊆ rng g, rng_composition.
+13. 2 ⊢ rng (g ∘ f) ⊆ Z, incl_trans 12 10.
+14. ⊢ dom (g ∘ f) ⊆ dom f, dom_composition.
+15. 1 ⊢ dom f ⊆ X, incl_from_eq 6.
+16. 1 ⊢ dom (g ∘ f) ⊆ X, incl_trans 14 15.
+
+17. 17 ⊢ x ∈ X, hypo.
+18. 1, 17 ⊢ ∃y. y ∈ Y ∧ y = app f x, map_app_exists 1 17.
+19. 19 ⊢ y ∈ Y ∧ y = app f x, hypo.
+20. 19 ⊢ y ∈ Y, conj_eliml 19.
+21. 19 ⊢ y = app f x, conj_elimr 19.
+22. 1, 17, 19 ⊢ (x, y) ∈ f, map_app_elim 1 17 21.
+23. 2, 19 ⊢ ∃z. z ∈ Z ∧ z = app g y, map_app_exists 2 20.
+24. 24 ⊢ z ∈ Z ∧ z = app g y, hypo.
+25. 24 ⊢ z ∈ Z, conj_eliml 24.
+26. 24 ⊢ z = app g y, conj_elimr 24.
+27. 2, 19, 24 ⊢ (y, z) ∈ g, map_app_elim 2 20 26.
+28. 1, 2, 17, 19, 24 ⊢ (x, z) ∈ g ∘ f, composition_intro 22 27.
+29. 1, 2, 17, 19, 24 ⊢ x ∈ dom (g ∘ f), dom_intro 28.
+30. 1, 2, 17, 19 ⊢ x ∈ dom (g ∘ f), ex_elim 23 29.
+31. 1, 2, 17 ⊢ x ∈ dom (g ∘ f), ex_elim 18 30.
+32. 1, 2 ⊢ x ∈ X → x ∈ dom (g ∘ f), subj_intro 31.
+33. 1, 2 ⊢ ∀x. x ∈ X → x ∈ dom (g ∘ f), uq_intro 32.
+34. 1, 2 ⊢ X ⊆ dom (g ∘ f), incl_intro 33.
+35. 1, 2 ⊢ dom (g ∘ f) = X, incl_antisym 16 34.
+
+36. 36 ⊢ (x, z1) ∈ g ∘ f, hypo.
+37. 37 ⊢ (x, z2) ∈ g ∘ f, hypo.
+38. 36 ⊢ ∃y. (x, y) ∈ f ∧ (y, z1) ∈ g, composition_elim 36.
+39. 37 ⊢ ∃y. (x, y) ∈ f ∧ (y, z2) ∈ g, composition_elim 37.
+40. 40 ⊢ (x, y1) ∈ f ∧ (y1, z1) ∈ g, hypo.
+41. 41 ⊢ (x, y2) ∈ f ∧ (y2, z2) ∈ g, hypo.
+42. 40 ⊢ (x, y1) ∈ f, conj_eliml 40.
+43. 41 ⊢ (x, y2) ∈ f, conj_eliml 41.
+44. 40 ⊢ (y1, z1) ∈ g, conj_elimr 40.
+45. 41 ⊢ (y2, z2) ∈ g, conj_elimr 41.
+46. 1, 40, 41 ⊢ y1 = y2, fn_unique_value 5 42 43.
+47. 1, 40, 41 ⊢ (y1, z2) ∈ g, eq_subst_rev 46 45.
+48. 1, 2, 40, 41 ⊢ z1 = z2, fn_unique_value 8 44 47.
+49. 1, 2, 37, 40 ⊢ z1 = z2, ex_elim 39 48.
+50. 1, 2, 36, 37 ⊢ z1 = z2, ex_elim 38 49.
+51. 1, 2 ⊢ (x, z1) ∈ g ∘ f → (x, z2) ∈ g ∘ f → z1 = z2,
+  subj_intro_ii 50.
+52. 1, 2 ⊢ ∀z2. (x, z1) ∈ g ∘ f → (x, z2) ∈ g ∘ f → z1 = z2,
+  uq_intro 51.
+53. 1, 2 ⊢ ∀z1. ∀z2. (x, z1) ∈ g ∘ f → (x, z2) ∈ g ∘ f → z1 = z2,
+  uq_intro 52.
+54. 1, 2 ⊢ ∀x. ∀z1. ∀z2. (x, z1) ∈ g ∘ f → (x, z2) ∈ g ∘ f → z1 = z2,
+  uq_intro 53.
+55. 1, 2 ⊢ function (g ∘ f), function_intro 11 54.
+56. 1, 2 ⊢ map (g ∘ f) X Z, map_intro 55 35 13.
+composition_is_map. ⊢ map f X Y → map g Y Z → map (g ∘ f) X Z,
+  subj_intro_ii 56.
+
+01. 1 ⊢ map f X Y, hypo.
+02. 2 ⊢ map g Y Z, hypo.
+03. 3 ⊢ x ∈ X, hypo.
+04. 1, 2 ⊢ map (g ∘ f) X Z, composition_is_map 1 2.
+05. 1, 3 ⊢ ∃y. y ∈ Y ∧ y = app f x, map_app_exists 1 3.
+06. 6 ⊢ y ∈ Y ∧ y = app f x, hypo.
+07. 6 ⊢ y ∈ Y, conj_eliml 6.
+08. 6 ⊢ y = app f x, conj_elimr 6.
+09. ⊢ app g y = app g y, eq_refl.
+10. 6 ⊢ app g (app f x) = app g y,
+  eq_subst 8 9, P t ↔ app g t = app g y.
+11. 1, 3, 6 ⊢ (x, y) ∈ f, map_app_elim 1 3 8.
+12. 2, 6 ⊢ (y, app g (app f x)) ∈ g, map_app_elim 2 7 10.
+13. 1, 2, 3, 6 ⊢ (x, app g (app f x)) ∈ g ∘ f, composition_intro 11 12.
+14. 1, 2, 3, 6 ⊢ app g (app f x) = app (g ∘ f) x, map_app_intro 4 13.
+15. 1, 2, 3, 6 ⊢ app (g ∘ f) x = app g (app f x), eq_symm 14.
+16. 1, 2, 3 ⊢ app (g ∘ f) x = app g (app f x), ex_elim 5 15.
+map_app_composition. ⊢ map f X Y → map g Y Z → x ∈ X →
+  app (g ∘ f) x = app g (app f x), subj_intro_iii 16.
+
 
 (*/section Restricted functions *)
 

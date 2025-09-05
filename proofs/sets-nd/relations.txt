@@ -459,6 +459,115 @@ inv_img_incl_in_dom. ⊢ inv_img R B ⊆ dom R, incl_intro 8.
 img_union. ⊢ img (R ∪ Q) A = img R A ∪ img Q A, ext 37.
 
 
+(*/section Composition of relations *)
+
+01. 1 ⊢ t ∈ S ∘ R, hypo.
+02. ⊢ S ∘ R = {t | ∃x. ∃y. ∃z. t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S},
+  composition_eq.
+03. 1 ⊢ t ∈ {t | ∃x. ∃y. ∃z. t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S},
+  eq_subst 2 1, P u ↔ t ∈ u.
+04. 1 ⊢ ∃x. ∃y. ∃z. t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S,
+  comp_elim 3.
+05. 5 ⊢ ∃y. ∃z. t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S, hypo.
+06. 6 ⊢ ∃z. t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S, hypo.
+07. 7 ⊢ t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S, hypo.
+08. 7 ⊢ t = (x, z), conj_elimll 7.
+09. 7 ⊢ ∃z. t = (x, z), ex_intro 8.
+10. 7 ⊢ ∃x. ∃z. t = (x, z), ex_intro 9.
+11. 6 ⊢ ∃x. ∃z. t = (x, z), ex_elim 6 10.
+12. 5 ⊢ ∃x. ∃z. t = (x, z), ex_elim 5 11.
+13. 1 ⊢ ∃x. ∃z. t = (x, z), ex_elim 4 12.
+14. ⊢ t ∈ S ∘ R → ∃x. ∃z. t = (x, z), subj_intro 13.
+15. ⊢ ∀t. t ∈ S ∘ R → ∃x. ∃z. t = (x, z), uq_intro 14.
+composition_is_relation. ⊢ relation (S ∘ R), relation_fold 15.
+
+01. 1 ⊢ (a, c) ∈ S ∘ R, hypo.
+02. ⊢ S ∘ R = {t | ∃x. ∃y. ∃z. t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S},
+  composition_eq.
+03. 1 ⊢ (a, c) ∈ {t | ∃x. ∃y. ∃z. t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S},
+  eq_subst 2 1, P u ↔ (a, c) ∈ u.
+04. 1 ⊢ ∃x. ∃y. ∃z. (a, c) = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S,
+  comp_elim 3.
+05. 5 ⊢ ∃y. ∃z. (a, c) = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S, hypo.
+06. 6 ⊢ ∃z. (a, c) = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S, hypo.
+07. 7 ⊢ (a, c) = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S, hypo.
+08. 7 ⊢ (a, c) = (x, z), conj_elimll 7.
+09. 1 ⊢ set (a, c), set_intro 1.
+10. 1 ⊢ set a, setl_from_pair 9.
+11. 1 ⊢ set c, setr_from_pair 9.
+12. 1, 7 ⊢ a = x ∧ c = z, pair_property 10 11 8.
+13. 1, 7 ⊢ a = x, conj_eliml 12.
+14. 1, 7 ⊢ c = z, conj_elimr 12.
+15. 7 ⊢ (x, y) ∈ R, conj_elimlr 7.
+16. 1, 7 ⊢ (a, y) ∈ R, eq_subst_rev 13 15.
+17. 1, 7 ⊢ ∃y. (a, y) ∈ R, ex_intro 16.
+18. 1, 6 ⊢ ∃y. (a, y) ∈ R, ex_elim 6 17.
+19. 1, 5 ⊢ ∃y. (a, y) ∈ R, ex_elim 5 18.
+20. 1 ⊢ ∃y. (a, y) ∈ R, ex_elim 4 19.
+composition_elimr. ⊢ (a, c) ∈ S ∘ R → ∃y. (a, y) ∈ R, subj_intro 20.
+
+21. 7 ⊢ (y, z) ∈ S, conj_elimr 7.
+22. 1, 7 ⊢ (y, c) ∈ S, eq_subst_rev 14 21.
+23. 1, 7 ⊢ ∃y. (y, c) ∈ S, ex_intro 22.
+24. 1, 6 ⊢ ∃y. (y, c) ∈ S, ex_elim 6 23.
+25. 1, 5 ⊢ ∃y. (y, c) ∈ S, ex_elim 5 24.
+26. 1 ⊢ ∃y. (y, c) ∈ S, ex_elim 4 25.
+composition_eliml. ⊢ (a, c) ∈ S ∘ R → ∃y. (y, c) ∈ S, subj_intro 26.
+
+27. 1, 7 ⊢ (a, y) ∈ R ∧ (y, c) ∈ S, conj_intro 16 22.
+28. 1, 7 ⊢ ∃y. (a, y) ∈ R ∧ (y, c) ∈ S, ex_intro 27.
+29. 1, 6 ⊢ ∃y. (a, y) ∈ R ∧ (y, c) ∈ S, ex_elim 6 28.
+30. 1, 5 ⊢ ∃y. (a, y) ∈ R ∧ (y, c) ∈ S, ex_elim 5 29.
+31. 1 ⊢ ∃y. (a, y) ∈ R ∧ (y, c) ∈ S, ex_elim 4 30.
+composition_elim. ⊢ (a, c) ∈ S ∘ R → ∃y. (a, y) ∈ R ∧ (y, c) ∈ S,
+  subj_intro 31.
+
+01. 1 ⊢ (a, b) ∈ R, hypo.
+02. 2 ⊢ (b, c) ∈ S, hypo.
+03. ⊢ (a, c) = (a, c), eq_refl.
+04. 1 ⊢ (a, c) = (a, c) ∧ (a, b) ∈ R, conj_intro 3 1.
+05. 1, 2 ⊢ (a, c) = (a, c) ∧ (a, b) ∈ R ∧ (b, c) ∈ S, conj_intro 4 2.
+06. 1, 2 ⊢ ∃z. (a, c) = (a, z) ∧ (a, b) ∈ R ∧ (b, z) ∈ S, ex_intro 5.
+07. 1, 2 ⊢ ∃y. ∃z. (a, c) = (a, z) ∧ (a, y) ∈ R ∧ (y, z) ∈ S, ex_intro 6.
+08. 1, 2 ⊢ ∃x. ∃y. ∃z. (a, c) = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S, ex_intro 7.
+09. 1 ⊢ set (a, b), set_intro 1.
+10. 2 ⊢ set (b, c), set_intro 2.
+11. 1 ⊢ set a, setl_from_pair 9.
+12. 2 ⊢ set c, setr_from_pair 10.
+13. 1, 2 ⊢ set (a, c), set_pair 11 12.
+14. 1, 2 ⊢ (a, c) ∈ {t | ∃x. ∃y. ∃z. t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S},
+  comp_intro 13 8, P t ↔ (∃x. ∃y. ∃z. t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S).
+15. ⊢ S ∘ R = {t | ∃x. ∃y. ∃z. t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S},
+  composition_eq.
+16. 1, 2 ⊢ (a, c) ∈ S ∘ R, eq_subst_rev 15 14, P u ↔ (a, c) ∈ u.
+composition_intro. ⊢ (a, b) ∈ R → (b, c) ∈ S → (a, c) ∈ S ∘ R,
+  subj_intro_ii 16.
+
+01. 1 ⊢ x ∈ dom (S ∘ R), hypo.
+02. 1 ⊢ ∃z. (x, z) ∈ S ∘ R, dom_elim 1.
+03. 3 ⊢ (x, z) ∈ S ∘ R, hypo.
+04. 3 ⊢ ∃y. (x, y) ∈ R, composition_elimr 3.
+05. 5 ⊢ (x, y) ∈ R, hypo.
+06. 5 ⊢ x ∈ dom R, dom_intro 5.
+07. 3 ⊢ x ∈ dom R, ex_elim 4 6.
+08. 1 ⊢ x ∈ dom R, ex_elim 2 7.
+09. ⊢ x ∈ dom (S ∘ R) → x ∈ dom R, subj_intro 8.
+10. ⊢ ∀x. x ∈ dom (S ∘ R) → x ∈ dom R, uq_intro 9.
+dom_composition. ⊢ dom (S ∘ R) ⊆ dom R, incl_intro 10.
+
+01. 1 ⊢ z ∈ rng (S ∘ R), hypo.
+02. 1 ⊢ ∃x. (x, z) ∈ S ∘ R, rng_elim 1.
+03. 3 ⊢ (x, z) ∈ S ∘ R, hypo.
+04. 3 ⊢ ∃y. (y, z) ∈ S, composition_eliml 3.
+05. 5 ⊢ (y, z) ∈ S, hypo.
+06. 5 ⊢ z ∈ rng S, rng_intro 5.
+07. 3 ⊢ z ∈ rng S, ex_elim 4 6.
+08. 1 ⊢ z ∈ rng S, ex_elim 2 7.
+09. ⊢ z ∈ rng (S ∘ R) → z ∈ rng S, subj_intro 8.
+10. ⊢ ∀z. z ∈ rng (S ∘ R) → z ∈ rng S, uq_intro 9.
+rng_composition. ⊢ rng (S ∘ R) ⊆ rng S, incl_intro 10.
+
+
 (*/section Special relations *)
 
 01. ⊢ ∅ ⊆ X × Y, empty_set_is_least.

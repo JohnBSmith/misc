@@ -92,6 +92,7 @@ static KEYWORDS: &[(&[u8], &str)] = &[
     (b"Cup", "⋃"),
     (b"and", "∧"),
     (b"cap", "∩"),
+    (b"circ", "∘"),
     (b"cup", "∪"),
     (b"exists", "∃"),
     (b"false", "⊥"),
