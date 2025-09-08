@@ -567,6 +567,70 @@ dom_composition. ⊢ dom (S ∘ R) ⊆ dom R, incl_intro 10.
 10. ⊢ ∀z. z ∈ rng (S ∘ R) → z ∈ rng S, uq_intro 9.
 rng_composition. ⊢ rng (S ∘ R) ⊆ rng S, incl_intro 10.
 
+01. 1 ⊢ z ∈ img (S ∘ R) A, hypo.
+02. 1 ⊢ ∃x. x ∈ A ∧ (x, z) ∈ S ∘ R, img_elim 1.
+03. 3 ⊢ x ∈ A ∧ (x, z) ∈ S ∘ R, hypo.
+04. 3 ⊢ x ∈ A, conj_eliml 3.
+05. 3 ⊢ (x, z) ∈ S ∘ R, conj_elimr 3.
+06. 3 ⊢ ∃y. (x, y) ∈ R ∧ (y, z) ∈ S, composition_elim 5.
+07. 7 ⊢ (x, y) ∈ R ∧ (y, z) ∈ S, hypo.
+08. 7 ⊢ (x, y) ∈ R, conj_eliml 7.
+09. 3, 7 ⊢ y ∈ img R A, img_intro 4 8.
+10. 7 ⊢ (y, z) ∈ S, conj_elimr 7.
+11. 3, 7 ⊢ z ∈ img S (img R A), img_intro 9 10.
+12. 3 ⊢ z ∈ img S (img R A), ex_elim 6 11.
+13. 1 ⊢ z ∈ img S (img R A), ex_elim 2 12.
+14. ⊢ z ∈ img (S ∘ R) A → z ∈ img S (img R A), subj_intro 13.
+15. 15 ⊢ z ∈ img S (img R A), hypo.
+16. 15 ⊢ ∃y. y ∈ img R A ∧ (y, z) ∈ S, img_elim 15.
+17. 17 ⊢ y ∈ img R A ∧ (y, z) ∈ S, hypo.
+18. 17 ⊢ y ∈ img R A, conj_eliml 17.
+19. 17 ⊢ ∃x. x ∈ A ∧ (x, y) ∈ R, img_elim 18.
+20. 20 ⊢ x ∈ A ∧ (x, y) ∈ R, hypo.
+21. 20 ⊢ x ∈ A, conj_eliml 20.
+22. 20 ⊢ (x, y) ∈ R, conj_elimr 20.
+23. 17 ⊢ (y, z) ∈ S, conj_elimr 17.
+24. 17, 20 ⊢ (x, z) ∈ S ∘ R, composition_intro 22 23.
+25. 17, 20 ⊢ z ∈ img (S ∘ R) A, img_intro 21 24.
+26. 17 ⊢ z ∈ img (S ∘ R) A, ex_elim 19 25.
+27. 15 ⊢ z ∈ img (S ∘ R) A, ex_elim 16 26.
+28. ⊢ z ∈ img S (img R A) → z ∈ img (S ∘ R) A, subj_intro 27.
+29. ⊢ z ∈ img (S ∘ R) A ↔ z ∈ img S (img R A), bij_intro 14 28.
+30. ⊢ ∀z. z ∈ img (S ∘ R) A ↔ z ∈ img S (img R A), uq_intro 29.
+img_composition. ⊢ img (S ∘ R) A = img S (img R A), ext 30.
+
+01. 1 ⊢ x ∈ inv_img (S ∘ R) B, hypo.
+02. 1 ⊢ ∃z. z ∈ B ∧ (x, z) ∈ S ∘ R, inv_img_elim 1.
+03. 3 ⊢ z ∈ B ∧ (x, z) ∈ S ∘ R, hypo.
+04. 3 ⊢ z ∈ B, conj_eliml 3.
+05. 3 ⊢ (x, z) ∈ S ∘ R, conj_elimr 3.
+06. 3 ⊢ ∃y. (x, y) ∈ R ∧ (y, z) ∈ S, composition_elim 5.
+07. 7 ⊢ (x, y) ∈ R ∧ (y, z) ∈ S, hypo.
+08. 7 ⊢ (y, z) ∈ S, conj_elimr 7.
+09. 3, 7 ⊢ y ∈ inv_img S B, inv_img_intro 4 8.
+10. 7 ⊢ (x, y) ∈ R, conj_eliml 7.
+11. 3, 7 ⊢ x ∈ inv_img R (inv_img S B), inv_img_intro 9 10.
+12. 3 ⊢ x ∈ inv_img R (inv_img S B), ex_elim 6 11.
+13. 1 ⊢ x ∈ inv_img R (inv_img S B), ex_elim 2 12.
+14. ⊢ x ∈ inv_img (S ∘ R) B → x ∈ inv_img R (inv_img S B), subj_intro 13.
+15. 15 ⊢ x ∈ inv_img R (inv_img S B), hypo.
+16. 15 ⊢ ∃y. y ∈ inv_img S B ∧ (x, y) ∈ R, inv_img_elim 15.
+17. 17 ⊢ y ∈ inv_img S B ∧ (x, y) ∈ R, hypo.
+18. 17 ⊢ y ∈ inv_img S B, conj_eliml 17.
+19. 17 ⊢ ∃z. z ∈ B ∧ (y, z) ∈ S, inv_img_elim 18.
+20. 20 ⊢ z ∈ B ∧ (y, z) ∈ S, hypo.
+21. 20 ⊢ z ∈ B, conj_eliml 20.
+22. 20 ⊢ (y, z) ∈ S, conj_elimr 20.
+23. 17 ⊢ (x, y) ∈ R, conj_elimr 17.
+24. 17, 20 ⊢ (x, z) ∈ S ∘ R, composition_intro 23 22.
+25. 17, 20 ⊢ x ∈ inv_img (S ∘ R) B, inv_img_intro 21 24.
+26. 17 ⊢ x ∈ inv_img (S ∘ R) B, ex_elim 19 25.
+27. 15 ⊢ x ∈ inv_img (S ∘ R) B, ex_elim 16 26.
+28. ⊢ x ∈ inv_img R (inv_img S B) → x ∈ inv_img (S ∘ R) B, subj_intro 27.
+29. ⊢ x ∈ inv_img (S ∘ R) B ↔ x ∈ inv_img R (inv_img S B), bij_intro 14 28.
+30. ⊢ ∀x. x ∈ inv_img (S ∘ R) B ↔ x ∈ inv_img R (inv_img S B), uq_intro 29.
+inv_img_composition. ⊢ inv_img (S ∘ R) B = inv_img R (inv_img S B), ext 30.
+
 
 (*/section Special relations *)
 
