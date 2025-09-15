@@ -1,0 +1,258 @@
+
+(*/chapter Cardinal numbers *)
+
+(*/section Equinumerousities *)
+
+equinum_equi. ⊢ equinum X Y ↔ ∃f. bij f X Y, def.
+
+Map_eq. ⊢ Map X Y = {f | map f X Y}, def.
+
+indicator_eq. ⊢ χ A X =
+  {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)} ∪
+  {t | ∃x. x ∈ A ∧ t = (x, {∅})}, def.
+
+equinum_intro. ⊢ (∃f. bij f X Y) → equinum X Y,
+  bij_elimr equinum_equi.
+
+01. 1 ⊢ map f X Y, hypo.
+02. 2 ⊢ set X, hypo.
+03. 1, 2 ⊢ set f, map_is_set 1 2.
+04. 1, 2 ⊢ f ∈ {f | map f X Y}, comp_intro 3 1.
+05. 1, 2 ⊢ f ∈ Map X Y, eq_subst_rev Map_eq 4, P t ↔ f ∈ t.
+Map_intro. ⊢ map f X Y → set X → f ∈ Map X Y, subj_intro_ii 5.
+
+01. 1 ⊢ f ∈ Map X Y, hypo.
+02. 1 ⊢ f ∈ {f | map f X Y}, eq_subst Map_eq 1, P t ↔ f ∈ t.
+03. 1 ⊢ map f X Y, comp_elim 2.
+Map_elim. ⊢ f ∈ Map X Y → map f X Y, subj_intro 3.
+
+01. ⊢ set ∅, empty_set_is_set.
+02. ⊢ set {∅}, set_sg 1.
+03. ⊢ ∅ ∈ {∅, {∅}}, in21 1.
+04. ⊢ {∅} ∈ {∅, {∅}}, in22 2.
+05. 5 ⊢ x ∈ X \ A, hypo.
+06. 6 ⊢ x ∈ A, hypo.
+07. 5 ⊢ ∅ ∈ {∅, {∅}}, wk 3.
+08. 6 ⊢ {∅} ∈ {∅, {∅}}, wk 4.
+09. ⊢ x ∈ X \ A → ∅ ∈ {∅, {∅}}, subj_intro 7.
+10. ⊢ x ∈ A → {∅} ∈ {∅, {∅}}, subj_intro 8.
+11. ⊢ ∀x. x ∈ X \ A → ∅ ∈ {∅, {∅}}, uq_intro 9.
+12. ⊢ ∀x. x ∈ A → {∅} ∈ {∅, {∅}}, uq_intro 10.
+13. ⊢ {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)}
+  = {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)}, eq_refl.
+14. ⊢ {t | ∃x. x ∈ A ∧ t = (x, {∅})}
+  = {t | ∃x. x ∈ A ∧ t = (x, {∅})}, eq_refl.
+15. ⊢ map {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)} (X \ A) {∅, {∅}},
+  map_from_term 13 11.
+16. ⊢ map {t | ∃x. x ∈ A ∧ t = (x, {∅})} A {∅, {∅}},
+  map_from_term 14 12.
+17. ⊢ A ∩ (X \ A) = ∅, intersection_rel_compl.
+18. ⊢ (X \ A) ∩ A = A ∩ (X \ A), intersection_comm.
+19. ⊢ (X \ A) ∩ A = ∅, eq_trans 18 17.
+20. ⊢ map ({t | ∃x. x ∈ X \ A ∧ t = (x, ∅)} ∪
+  {t | ∃x. x ∈ A ∧ t = (x, {∅})}) ((X \ A) ∪ A) {∅, {∅}},
+  map_union_eq_rngs 15 16 19.
+21. ⊢ map (χ A X) ((X \ A) ∪ A) {∅, {∅}},
+  eq_subst_rev indicator_eq 20, P t ↔ map t ((X \ A) ∪ A) {∅, {∅}}.
+22. 22 ⊢ A ⊆ X, hypo.
+23. 22 ⊢ (X \ A) ∪ A = X, diff_union_subclass 22.
+24. 22 ⊢ map (χ A X) X {∅, {∅}},
+  eq_subst 23 21, P t ↔ map (χ A X) t {∅, {∅}}.
+indicator_is_map. ⊢ A ⊆ X → map (χ A X) X {∅, {∅}}, subj_intro 24.
+
+01. 1 ⊢ A ⊆ X, hypo.
+02. 2 ⊢ x ∈ X \ A, hypo.
+03. ⊢ (x, ∅) = (x, ∅), eq_refl.
+04. 2 ⊢ x ∈ X \ A ∧ (x, ∅) = (x, ∅), conj_intro 2 3.
+05. 2 ⊢ ∃u. u ∈ X \ A ∧ (x, ∅) = (u, ∅), ex_intro 4.
+06. 2 ⊢ set x, set_intro 2.
+07. ⊢ set ∅, empty_set_is_set.
+08. 2 ⊢ set (x, ∅), set_pair 6 7.
+09. 2 ⊢ (x, ∅) ∈ {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)},
+  comp_intro 8 5, P t ↔ (∃x. x ∈ X \ A ∧ t = (x, ∅)).
+10. 2 ⊢ (x, ∅) ∈ {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)} ∪
+  {t | ∃x. x ∈ A ∧ t = (x, {∅})}, union_introl 9.
+11. 2 ⊢ (x, ∅) ∈ χ A X, eq_subst_rev indicator_eq 10,
+  P u ↔ (x, ∅) ∈ u.
+12. 1 ⊢ map (χ A X) X {∅, {∅}}, indicator_is_map 1.
+13. 1, 2 ⊢ ∅ = app (χ A X) x, map_app_intro 12 11.
+14. 1, 2 ⊢ app (χ A X) x = ∅, eq_symm 13.
+indicator_app_is_zero. ⊢ A ⊆ X → x ∈ X \ A → app (χ A X) x = ∅,
+  subj_intro_ii 14.
+
+01. 1 ⊢ A ⊆ X, hypo.
+02. 2 ⊢ x ∈ A, hypo.
+03. ⊢ (x, {∅}) = (x, {∅}), eq_refl.
+04. 2 ⊢ x ∈ A ∧ (x, {∅}) = (x, {∅}), conj_intro 2 3.
+05. 2 ⊢ ∃u. u ∈ A ∧ (x, {∅}) = (u, {∅}), ex_intro 4.
+06. 2 ⊢ set x, set_intro 2.
+07. ⊢ set {∅}, set_sg empty_set_is_set.
+08. 2 ⊢ set (x, {∅}), set_pair 6 7.
+09. 2 ⊢ (x, {∅}) ∈ {t | ∃x. x ∈ A ∧ t = (x, {∅})},
+  comp_intro 8 5, P t ↔ (∃x. x ∈ A ∧ t = (x, {∅})).
+10. 2 ⊢ (x, {∅}) ∈ {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)} ∪
+  {t | ∃x. x ∈ A ∧ t = (x, {∅})}, union_intror 9.
+11. 2 ⊢ (x, {∅}) ∈ χ A X, eq_subst_rev indicator_eq 10,
+  P u ↔ (x, {∅}) ∈ u.
+12. 1 ⊢ map (χ A X) X {∅, {∅}}, indicator_is_map 1.
+13. 1, 2 ⊢ {∅} = app (χ A X) x, map_app_intro 12 11.
+14. 1, 2 ⊢ app (χ A X) x = {∅}, eq_symm 13.
+indicator_app_is_one. ⊢ A ⊆ X → x ∈ A → app (χ A X) x = {∅},
+  subj_intro_ii 14.
+
+01. 1 ⊢ A ⊆ X, hypo.
+02. 2 ⊢ x ∈ X, hypo.
+03. 3 ⊢ app (χ A X) x = {∅}, hypo.
+04. 3 ⊢ {∅} = app (χ A X) x, eq_symm 3.
+05. 1 ⊢ map (χ A X) X {∅, {∅}}, indicator_is_map 1.
+06. 1, 2, 3 ⊢ (x, {∅}) ∈ χ A X, map_app_elim 5 2 4.
+07. 1, 2, 3 ⊢ (x, {∅}) ∈ {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)} ∪
+  {t | ∃x. x ∈ A ∧ t = (x, {∅})},
+  eq_subst indicator_eq 6, P u ↔ (x, {∅}) ∈ u.
+08. 1, 2, 3 ⊢
+  (x, {∅}) ∈ {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)} ∨
+  (x, {∅}) ∈ {t | ∃x. x ∈ A ∧ t = (x, {∅})}, union_elim 7.
+09. 9 ⊢ (x, {∅}) ∈ {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)}, hypo.
+10. 9 ⊢ ∃u. u ∈ X \ A ∧ (x, {∅}) = (u, ∅), comp_elim 9.
+11. 11 ⊢ u ∈ X \ A ∧ (x, {∅}) = (u, ∅), hypo.
+12. 11 ⊢ (x, {∅}) = (u, ∅), conj_elimr 11.
+13. 2 ⊢ set x, set_intro 2.
+14. ⊢ set {∅}, set_sg empty_set_is_set.
+15. 2, 11 ⊢ x = u ∧ {∅} = ∅, pair_property 13 14 12.
+16. 2, 11 ⊢ {∅} = ∅, conj_elimr 15.
+17. 2, 11 ⊢ ∅ = {∅}, eq_symm 16.
+18. 2, 11 ⊢ ⊥, neg_elim zero_neq_one 17.
+19. 2, 11 ⊢ x ∈ A, efq 18.
+20. 2, 9 ⊢ x ∈ A, ex_elim 10 19.
+21. 21 ⊢ (x, {∅}) ∈ {t | ∃x. x ∈ A ∧ t = (x, {∅})}, hypo.
+22. 21 ⊢ ∃u. u ∈ A ∧ (x, {∅}) = (u, {∅}), comp_elim 21.
+23. 23 ⊢ u ∈ A ∧ (x, {∅}) = (u, {∅}), hypo.
+24. 23 ⊢ u ∈ A, conj_eliml 23.
+25. 23 ⊢ (x, {∅}) = (u, {∅}), conj_elimr 23.
+26. 2, 23 ⊢ x = u ∧ {∅} = {∅}, pair_property 13 14 25.
+27. 2, 23 ⊢ x = u, conj_eliml 26.
+28. 2, 23 ⊢ x ∈ A, eq_subst_rev 27 24.
+29. 2, 21 ⊢ x ∈ A, ex_elim 22 28.
+30. 1, 2, 3 ⊢ x ∈ A, disj_elim 8 20 29.
+from_indicator_app_is_one. ⊢ A ⊆ X → x ∈ X →
+  app (χ A X) x = {∅} → x ∈ A, subj_intro_iii 30.
+
+001. 1 ⊢ set X, hypo.
+002. 2 ⊢ φ = {t | ∃A. A ∈ power X ∧ t = (A, χ A X)}, hypo.
+003. 3 ⊢ A ∈ power X, hypo.
+004. 3 ⊢ A ⊆ X, power_elim 3.
+005. 3 ⊢ map (χ A X) X {∅, {∅}}, indicator_is_map 4.
+006. 1, 3 ⊢ χ A X ∈ Map X {∅, {∅}}, Map_intro 5 1.
+007. 1 ⊢ A ∈ power X → χ A X ∈ Map X {∅, {∅}}, subj_intro 6.
+008. 1 ⊢ ∀A. A ∈ power X → χ A X ∈ Map X {∅, {∅}}, uq_intro 7.
+009. 1, 2 ⊢ map φ (power X) (Map X {∅, {∅}}), map_from_term 2 8.
+
+010. 10 ⊢ A ∈ power X, hypo.
+011. 11 ⊢ B ∈ power X, hypo.
+012. 12 ⊢ app φ A = app φ B, hypo.
+013. 1, 2, 10 ⊢ app φ A = χ A X, map_from_term_app 2 8 10.
+014. 1, 2, 11 ⊢ app φ B = χ B X, map_from_term_app 2 8 11.
+015. 1, 2, 10, 12 ⊢ χ A X = app φ B, eq_symm_trans 13 12.
+016. 1, 2, 10, 11, 12 ⊢ χ A X = χ B X, eq_trans 15 14.
+017. 10 ⊢ A ⊆ X, power_elim 10.
+018. 11 ⊢ B ⊆ X, power_elim 11.
+019. 19 ⊢ x ∈ A, hypo.
+020. 10, 19 ⊢ app (χ A X) x = {∅}, indicator_app_is_one 17 19.
+021. 1, 2, 10, 11, 12, 19 ⊢ app (χ B X) x = {∅},
+  eq_subst 16 20, P t ↔ app t x = {∅}.
+022. 10, 19 ⊢ x ∈ X, incl_elim 17 19.
+023. 1, 2, 10, 11, 12, 19 ⊢ x ∈ B, from_indicator_app_is_one 18 22 21.
+024. 1, 2, 10, 11, 12 ⊢ x ∈ A → x ∈ B, subj_intro 23.
+025. 25 ⊢ x ∈ B, hypo.
+026. 11, 25 ⊢ app (χ B X) x = {∅}, indicator_app_is_one 18 25.
+027. 1, 2, 10, 11, 12, 25 ⊢ app (χ A X) x = {∅},
+  eq_subst_rev 16 26, P t ↔ app t x = {∅}.
+028. 11, 25 ⊢ x ∈ X, incl_elim 18 25.
+029. 1, 2, 10, 11, 12, 25 ⊢ x ∈ A, from_indicator_app_is_one 17 28 27.
+030. 1, 2, 10, 11, 12 ⊢ x ∈ B → x ∈ A, subj_intro 29.
+031. 1, 2, 10, 11, 12 ⊢ x ∈ A ↔ x ∈ B, bij_intro 24 30.
+032. 1, 2, 10, 11, 12 ⊢ ∀x. x ∈ A ↔ x ∈ B, uq_intro 31.
+033. 1, 2, 10, 11, 12 ⊢ A = B, ext 32.
+034. 1, 2 ⊢ A ∈ power X → B ∈ power X → app φ A = app φ B → A = B,
+  subj_intro_iii 33.
+035. 1, 2 ⊢ ∀B. A ∈ power X → B ∈ power X →
+  app φ A = app φ B → A = B, uq_intro 34.
+036. 1, 2 ⊢ ∀A. ∀B. A ∈ power X → B ∈ power X →
+  app φ A = app φ B → A = B, uq_intro 35.
+037. 1, 2 ⊢ inj φ (power X) (Map X {∅, {∅}}), inj_intro 9 36.
+
+038. 38 ⊢ f ∈ Map X {∅, {∅}}, hypo.
+039. 38 ⊢ map f X {∅, {∅}}, Map_elim 38.
+040. 38 ⊢ function f ∧ dom f = X ∧ rng f ⊆ {∅, {∅}}, map_unfold 39.
+041. 38 ⊢ dom f = X, conj_elimlr 40.
+042. 42 ⊢ A = inv_img f {{∅}}, hypo.
+043. 43 ⊢ x ∈ X, hypo.
+044. 38, 43 ⊢ app f x ∈ {∅, {∅}}, map_app_in_cod 39 43.
+045. 38, 43 ⊢ app f x ∈ {∅} ∨ app f x ∈ {{∅}}, union_elim 44.
+046. 46 ⊢ app f x ∈ {∅}, hypo.
+047. 46 ⊢ app f x = ∅, sg_elim empty_set_is_set 46.
+048. 46 ⊢ ∅ = app f x, eq_symm 47.
+049. 38, 43, 46 ⊢ (x, ∅) ∈ f, map_app_elim 39 43 48.
+050. ⊢ inv_img f {{∅}} ⊆ dom f, inv_img_incl_in_dom.
+051. 42 ⊢ A ⊆ dom f, eq_subst_rev 42 50, P t ↔ t ⊆ dom f.
+052. 38, 42 ⊢ A ⊆ X, eq_subst 41 51, P t ↔ A ⊆ t.
+053. 53 ⊢ x ∈ A, hypo.
+054. 42, 53 ⊢ x ∈ inv_img f {{∅}}, eq_subst 42 53.
+055. 42, 53 ⊢ ∃y. y ∈ {{∅}} ∧ (x, y) ∈ f, inv_img_elim 54.
+056. 56 ⊢ y ∈ {{∅}} ∧ (x, y) ∈ f, hypo.
+057. 56 ⊢ y ∈ {{∅}}, conj_eliml 56.
+058. 56 ⊢ (x, y) ∈ f, conj_elimr 56.
+059. 38 ⊢ function f, conj_elimll 40.
+060. 38, 43, 46, 56 ⊢ y = ∅, fn_unique_value 59 58 49.
+061. ⊢ set {∅}, set_sg empty_set_is_set.
+062. 56 ⊢ y = {∅}, sg_elim 61 57.
+063. 38, 43, 46, 56 ⊢ ∅ = {∅}, eq_symm_trans 60 62.
+064. 38, 43, 46, 56 ⊢ ⊥, neg_elim zero_neq_one 63.
+065. 38, 42, 43, 46, 53 ⊢ ⊥, ex_elim 55 64.
+066. 38, 42, 43, 46 ⊢ ¬x ∈ A, neg_intro 65.
+067. 38, 42, 43, 46 ⊢ x ∈ X \ A, diff_intro 43 66.
+068. 38, 42, 43, 46 ⊢ app (χ A X) x = ∅, indicator_app_is_zero 52 67.
+069. 38, 42, 43, 46 ⊢ ∅ = app (χ A X) x, eq_symm 68.
+070. 38, 42, 43, 46 ⊢ app f x = app (χ A X) x, eq_trans 47 69.
+071. 71 ⊢ app f x ∈ {{∅}}, hypo.
+072. 71 ⊢ app f x = {∅}, sg_elim 61 71.
+073. 71 ⊢ {∅} = app f x, eq_symm 72.
+074. 38, 43, 71 ⊢ (x, {∅}) ∈ f, map_app_elim 39 43 73.
+075. ⊢ {∅} = {∅}, eq_refl.
+076. ⊢ {∅} ∈ {{∅}}, sg_intro 61 75.
+077. 38, 43, 71 ⊢ x ∈ inv_img f {{∅}}, inv_img_intro 76 74.
+078. 38, 42, 43, 71 ⊢ x ∈ A, eq_subst_rev 42 77, P t ↔ x ∈ t.
+079. 38, 42, 43, 71 ⊢ app (χ A X) x = {∅}, indicator_app_is_one 52 78.
+080. 38, 42, 43, 71 ⊢ {∅} = app (χ A X) x, eq_symm 79.
+081. 38, 42, 43, 71 ⊢ app f x = app (χ A X) x, eq_trans 72 80.
+082. 38, 42, 43 ⊢ app f x = app (χ A X) x, disj_elim 45 70 81.
+083. 38, 42 ⊢ x ∈ X → app f x = app (χ A X) x, subj_intro 82.
+084. 38, 42 ⊢ ∀x. x ∈ X → app f x = app (χ A X) x, uq_intro 83.
+085. 38, 42 ⊢ map (χ A X) X {∅, {∅}}, indicator_is_map 52.
+086. 38, 42 ⊢ f = χ A X, map_extensionality 39 85 84.
+087. 1, 38, 42 ⊢ set A, subset 52 1.
+088. 1, 38, 42 ⊢ A ∈ power X, power_intro 87 52.
+089. 1, 2, 38, 42 ⊢ app φ A = χ A X, map_from_term_app 2 8 88.
+090. 1, 2, 38, 42 ⊢ χ A X = app φ A, eq_symm 89.
+091. 1, 2, 38, 42 ⊢ f = app φ A, eq_trans 86 90.
+092. 1, 2, 38, 42 ⊢ (A, f) ∈ φ, map_app_elim 9 88 91.
+093. 1, 2, 38, 42 ⊢ f ∈ rng φ, rng_intro 92.
+094. 1, 2, 38 ⊢ A = inv_img f {{∅}} → f ∈ rng φ, subj_intro 93.
+095. 1, 2, 38 ⊢ ∀A. A = inv_img f {{∅}} → f ∈ rng φ, uq_intro 94.
+096. 1, 2, 38 ⊢ f ∈ rng φ, disused_eq 95.
+097. 1, 2 ⊢ f ∈ Map X {∅, {∅}} → f ∈ rng φ, subj_intro 96.
+098. 1, 2 ⊢ ∀f. f ∈ Map X {∅, {∅}} → f ∈ rng φ, uq_intro 97.
+099. 1, 2 ⊢ Map X {∅, {∅}} ⊆ rng φ, incl_intro 98.
+100. 1, 2 ⊢ sur φ (power X) (Map X {∅, {∅}}), sur_intro 9 99.
+
+101. 1, 2 ⊢ bij φ (power X) (Map X {∅, {∅}}), bij_from_inj_sur 37 100.
+102. 1, 2 ⊢ ∃φ. bij φ (power X) (Map X {∅, {∅}}), ex_intro 101.
+103. 1 ⊢ φ = {t | ∃A. A ∈ power X ∧ t = (A, χ A X)} →
+  ∃φ. bij φ (power X) (Map X {∅, {∅}}), subj_intro 102.
+104. 1 ⊢ ∀φ. φ = {t | ∃A. A ∈ power X ∧ t = (A, χ A X)} →
+  ∃φ. bij φ (power X) (Map X {∅, {∅}}), uq_intro 103.
+105. 1 ⊢ ∃φ. bij φ (power X) (Map X {∅, {∅}}), disused_eq 104.
+106. 1 ⊢ equinum (power X) (Map X {∅, {∅}}), equinum_intro 105.
+power_equinum_indicators. ⊢ set X →
+  equinum (power X) (Map X {∅, {∅}}), subj_intro 106.
+

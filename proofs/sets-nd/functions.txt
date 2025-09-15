@@ -191,6 +191,16 @@ subclass_dom_from_ex_uniq. ⊢
 08. 1, 2 ⊢ map f X Z, map_intro 4 5 7.
 map_rng_weaken. ⊢ map f X Y → Y ⊆ Z → map f X Z, subj_intro_ii 8.
 
+01. 1 ⊢ map f X Y, hypo.
+02. 1 ⊢ function f ∧ dom f = X ∧ rng f ⊆ Y, map_unfold 1.
+03. 1 ⊢ function f, conj_elimll 2.
+04. 1 ⊢ relation f, fn_is_rel 3.
+05. 1 ⊢ dom f = X, conj_elimlr 2.
+06. 1 ⊢ dom f ⊆ X, incl_from_eq 5.
+07. 1 ⊢ rng f ⊆ Y, conj_elimr 2.
+08. 1 ⊢ f ⊆ X × Y, relation_incl_prod 4 6 7.
+map_incl_in_prod. ⊢ map f X Y → f ⊆ X × Y, subj_intro 8.
+
 
 (*/section Function application *)
 
@@ -875,6 +885,34 @@ id_app. ⊢ x ∈ X → app (id X) x = x, subj_intro 4.
 23. 1 ⊢ img (id X) A = A, ext 22.
 id_img. ⊢ A ⊆ X → img (id X) A = A, subj_intro 23.
 
+01. 1 ⊢ map f X Y, hypo.
+02. 2 ⊢ x ∈ X, hypo.
+03. ⊢ map (id Y) Y Y, id_is_map.
+04. 1, 2 ⊢ app f x ∈ Y, map_app_in_cod 1 2.
+05. 1, 2 ⊢ app (id Y) (app f x) = app f x, id_app 4.
+06. 1, 2 ⊢ app (id Y ∘ f) x = app (id Y) (app f x),
+  map_app_composition 1 3 2.
+07. 1, 2 ⊢ app (id Y ∘ f) x = app f x, eq_trans 6 5.
+08. 1 ⊢ x ∈ X → app (id Y ∘ f) x = app f x, subj_intro 7.
+09. 1 ⊢ ∀x. x ∈ X → app (id Y ∘ f) x = app f x, uq_intro 8.
+10. 1 ⊢ map (id Y ∘ f) X Y, composition_is_map 1 3.
+11. 1 ⊢ id Y ∘ f = f, map_extensionality 10 1 9.
+id_neutl. ⊢ map f X Y → id Y ∘ f = f, subj_intro 11.
+
+01. 1 ⊢ map f X Y, hypo.
+02. 2 ⊢ x ∈ X, hypo.
+03. ⊢ map (id X) X X, id_is_map.
+04. 2 ⊢ app (id X) x = x, id_app 2.
+05. 1, 2 ⊢ app (f ∘ id X) x = app f (app (id X) x),
+  map_app_composition 3 1 2.
+06. 1, 2 ⊢ app (f ∘ id X) x = app f x, eq_subst 4 5,
+  P t ↔ app (f ∘ id X) x = app f t.
+07. 1 ⊢ x ∈ X → app (f ∘ id X) x = app f x, subj_intro 6.
+08. 1 ⊢ ∀x. x ∈ X → app (f ∘ id X) x = app f x, uq_intro 7.
+09. 1 ⊢ map (f ∘ id X) X Y, composition_is_map 3 1.
+10. 1 ⊢ f ∘ id X = f, map_extensionality 9 1 8.
+id_neutr. ⊢ map f X Y → f ∘ id X = f, subj_intro 10.
+
 01. 1 ⊢ set a, hypo.
 02. 2 ⊢ set b, hypo.
 03. 3 ⊢ (x, y1) ∈ {(a, b)}, hypo.
@@ -926,7 +964,7 @@ sg_map. ⊢ set a → b ∈ Y → map {(a, b)} {a} Y, subj_intro_ii 10.
   = img {({∅}, y)} {∅} ∪ img {({∅}, y)} {{∅}}, img_dist_union.
 08. 1 ⊢ img {(∅, x)} {∅} = {x}, img_sg_sg 3 1.
 09. 2 ⊢ img {({∅}, y)} {{∅}} = {y}, img_sg_sg 4 2.
-10. ⊢ ¬∅ = {∅}, empty_set_neq_sg_empty_set.
+10. ⊢ ¬∅ = {∅}, zero_neq_one.
 11. ⊢ ¬{∅} = ∅, neq_symm 10.
 12. 1 ⊢ img {(∅, x)} {{∅}} = ∅, img_sg_sg_neq 3 1 4 10.
 13. 2 ⊢ img {({∅}, y)} {∅} = ∅, img_sg_sg_neq 4 2 3 11.
@@ -1471,7 +1509,7 @@ choice_on_class. ⊢ ∃f. choice_function f ∧ dom f = A \ {∅}, ex_elim 1 17
 076. 76 ⊢ app f Y ∈ {∅}, hypo.
 077. 76 ⊢ app f Y = ∅, sg_elim 3 76.
 078. 1, 2, 49, 76 ⊢ A ∨ ∅ = {∅}, eq_subst 77 71, P u ↔ A ∨ u = {∅}.
-079. 1, 2, 49, 76 ⊢ A, tollendo_ponens_left 78 empty_set_neq_sg_empty_set.
+079. 1, 2, 49, 76 ⊢ A, tollendo_ponens_left 78 zero_neq_one.
 080. 1, 2, 49, 76 ⊢ A ∨ ¬A, disj_introl 79.
 081. 81 ⊢ app f Y ∈ {{∅}}, hypo.
 082. 81 ⊢ app f Y = {∅}, sg_elim 4 81.
@@ -1505,13 +1543,13 @@ choice_on_class. ⊢ ∃f. choice_function f ∧ dom f = A \ {∅}, ex_elim 1 17
 110. 83 ⊢ ∅ = app f X, eq_symm 84.
 111. 1, 2, 83, 85 ⊢ ∅ = app f Y, eq_trans 110 109.
 112. 1, 2, 81, 83, 85 ⊢ ∅ = {∅}, eq_trans 111 82.
-113. 1, 2, 81, 83, 85 ⊢ ⊥, neg_elim empty_set_neq_sg_empty_set 112.
+113. 1, 2, 81, 83, 85 ⊢ ⊥, neg_elim zero_neq_one 112.
 114. 1, 2, 81, 83 ⊢ ¬A, neg_intro 113.
 115. 1, 2, 81, 83 ⊢ A ∨ ¬A, disj_intror 114.
 116. 116 ⊢ app f X ∈ {{∅}}, hypo.
 117. 116 ⊢ app f X = {∅}, sg_elim 4 116.
 118. 1, 2, 49, 116 ⊢ A ∨ {∅} = ∅, eq_subst 117 70, P u ↔ A ∨ u = ∅.
-119. ⊢ ¬{∅} = ∅, neq_symm empty_set_neq_sg_empty_set.
+119. ⊢ ¬{∅} = ∅, neq_symm zero_neq_one.
 120. 1, 2, 49, 116 ⊢ A, tollendo_ponens_left 118 119.
 121. 1, 2, 49, 116 ⊢ A ∨ ¬A, disj_introl 120.
 122. 1, 2, 49, 81 ⊢ A ∨ ¬A, disj_elim 74 115 121.

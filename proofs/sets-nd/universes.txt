@@ -65,7 +65,7 @@ univ_closed_intersection. ⊢ univ U → x ∈ U → x ∩ y ∈ U,
 12. 8 ⊢ map {(∅, x)} {∅} U, sg_map 10 8.
 13. 9 ⊢ map {({∅}, y)} {{∅}} U, sg_map 11 9.
 14. ⊢ {∅} ∩ {{∅}} = ∅,
-  disjoint_sg_from_neq 10 11 empty_set_neq_sg_empty_set.
+  disjoint_sg_from_neq 10 11 zero_neq_one.
 15. 8, 9 ⊢ map {(∅, x), ({∅}, y)} {∅, {∅}} U,
   map_union_eq_rngs 12 13 14.
 16. 1, 8, 9 ⊢ ⋃(img {(∅, x), ({∅}, y)} {∅, {∅}}) ∈ U,

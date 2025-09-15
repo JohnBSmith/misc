@@ -1,10 +1,10 @@
 
 (*/chapter Well-founded relations *)
 
-wf_equi. ⊢ wf M R ↔ ∀A. A ⊆ M → ¬A = ∅ →
+wf_equi. ⊢ wf R M ↔ ∀A. A ⊆ M → ¬A = ∅ →
   ∃y. y ∈ A ∧ ¬∃x. x ∈ A ∧ (x, y) ∈ R, def.
 
-wf_unfold. ⊢ wf M R → ∀A. A ⊆ M → ¬A = ∅ →
+wf_unfold. ⊢ wf R M → ∀A. A ⊆ M → ¬A = ∅ →
   ∃y. y ∈ A ∧ ¬∃x. x ∈ A ∧ (x, y) ∈ R, bij_eliml wf_equi.
 
 01. 1 ⊢ A ⊆ M, hypo.
@@ -16,7 +16,7 @@ wf_unfold. ⊢ wf M R → ∀A. A ⊆ M → ¬A = ∅ →
 
 07. 7 ⊢ ¬A = M, hypo.
 08. 1, 7 ⊢ ¬M \ A = ∅, subj_elim 6 7.
-09. 9 ⊢ wf M R, hypo.
+09. 9 ⊢ wf R M, hypo.
 10. 9 ⊢ ∀A. A ⊆ M → ¬A = ∅ → ∃y. y ∈ A ∧ ¬∃x. x ∈ A ∧ (x, y) ∈ R,
   wf_unfold 9.
 11. 9 ⊢ M \ A ⊆ M → ¬M \ A = ∅ → ∃y. y ∈ M \ A ∧ ¬∃x. x ∈ M \ A ∧ (x, y) ∈ R,
@@ -54,11 +54,11 @@ wf_unfold. ⊢ wf M R → ∀A. A ⊆ M → ¬A = ∅ →
 38. 9, 1, 21, 7 ⊢ ⊥, ex_elim 14 37.
 39. 9, 1, 21 ⊢ ¬¬A = M, neg_intro 38.
 40. 9, 1, 21 ⊢ A = M, dne 39.
-wf_induction_set. ⊢ wf M R → A ⊆ M →
+wf_induction_set. ⊢ wf R M → A ⊆ M →
   (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → y ∈ A) → x ∈ A) → A = M,
   subj_intro_iii 40.
 
-01. 1 ⊢ wf M R, hypo.
+01. 1 ⊢ wf R M, hypo.
 02. 2 ⊢ A = {x | x ∈ M ∧ P x}, hypo.
 03. 3 ⊢ ∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → P y) → P x, hypo.
 04. 3 ⊢ x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → P y) → P x, uq_elim 3.
@@ -103,11 +103,11 @@ wf_induction_set. ⊢ wf M R → A ⊆ M →
 43. 1, 3 ⊢ {x | x ∈ M ∧ P x} = {x | x ∈ M ∧ P x} → ∀x. x ∈ M → P x, 42.
 44. ⊢ {x | x ∈ M ∧ P x} = {x | x ∈ M ∧ P x}, eq_refl.
 45. 1, 3 ⊢ ∀x. x ∈ M → P x, subj_elim 43 44.
-wf_induction. ⊢ wf M R →
+wf_induction. ⊢ wf R M →
   (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → P y) → P x) →
   (∀x. x ∈ M → P x), subj_intro_ii 45.
 
-01. 1 ⊢ wf X R, hypo.
+01. 1 ⊢ wf R X, hypo.
 02. 2 ⊢ ∀u. u ∈ X → (u, x) ∈ R → app f u = app g u, hypo.
 03. 2 ⊢ u ∈ X → (u, x) ∈ R → app f u = app g u, uq_elim 2.
 04. 4 ⊢ u ∈ inv_img R {x}, hypo.
@@ -120,15 +120,15 @@ wf_induction. ⊢ wf M R →
 11. 6 ⊢ (u, y) ∈ R, conj_elimr 6.
 12. 8, 6 ⊢ (u, x) ∈ R, eq_subst 10 11, P x ↔ (u, x) ∈ R.
 13. 8, 4 ⊢ (u, x) ∈ R, ex_elim 5 12.
-14. 14 ⊢ dom R = X, hypo.
+14. 14 ⊢ dom R ⊆ X, hypo.
 15. 8, 4 ⊢ u ∈ dom R, dom_intro 13.
-16. 14, 8, 4 ⊢ u ∈ X, eq_subst 14 15, P x ↔ u ∈ x.
+16. 14, 8, 4 ⊢ u ∈ X, incl_elim 14 15.
 17. 14, 2, 8, 4 ⊢ (u, x) ∈ R → app f u = app g u, subj_elim 3 16.
 18. 14, 2, 8, 4 ⊢ app f u = app g u, subj_elim 17 13.
 19. 19 ⊢ map f X Y, hypo.
 20. 20 ⊢ map g X Y, hypo.
 21. ⊢ inv_img R {x} ⊆ dom R, inv_img_incl_in_dom.
-22. 14 ⊢ inv_img R {x} ⊆ X, eq_subst 14 21, P u ↔ inv_img R {x} ⊆ u.
+22. 14 ⊢ inv_img R {x} ⊆ X, incl_trans 21 14.
 23. 19, 14, 4 ⊢ app f u = app (restr f (inv_img R {x})) u, app_restr 19 22 4.
 24. 20, 14, 4 ⊢ app g u = app (restr g (inv_img R {x})) u, app_restr 20 22 4.
 25. 19, 14, 2, 8, 4 ⊢ app (restr f (inv_img R {x})) u = app g u,
@@ -173,13 +173,13 @@ wf_induction. ⊢ wf M R →
   (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
   (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
   f = g, subj_intro_ii 44.
-wf_rec_unique. ⊢ wf X R → dom R = X → map f X Y → map g X Y →
+wf_rec_unique. ⊢ wf R X → dom R ⊆ X → map f X Y → map g X Y →
   (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
   (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
   f = g, subj_intro_iv 45.
 
-01. 1 ⊢ wf X R, hypo.
-02. 2 ⊢ dom R = X, hypo.
+01. 1 ⊢ wf R X, hypo.
+02. 2 ⊢ dom R ⊆ X, hypo.
 03. 3 ⊢ ∀x. ∀f. φ x f ∈ Y, hypo.
 04. 4 ⊢ F = {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
   ∀g. fn_on g (inv_img R {x}) →
@@ -324,7 +324,7 @@ wf_rec_unique. ⊢ wf X R → dom R = X → map f X Y → map g X Y →
 72. 61, 63 ⊢ (u, x) ∈ R, ex_elim 65 71.
 73. 66 ⊢ u ∈ dom R, dom_intro 68.
 74. 63 ⊢ u ∈ dom R, ex_elim 65 73.
-75. 2, 63 ⊢ u ∈ X, eq_subst 2 74, P X ↔ u ∈ X.
+75. 2, 63 ⊢ u ∈ X, incl_elim 2 74.
 76. 2, 62, 63 ⊢ (u, x) ∈ R → ∃y0. y0 ∈ Y ∧ ∀y. y0 = y ↔ (u, y) ∈ f,
   subj_elim 64 75.
 77. 2, 61, 62, 63 ⊢ ∃y0. y0 ∈ Y ∧ ∀y. y0 = y ↔ (u, y) ∈ f,
@@ -509,7 +509,7 @@ wf_rec_unique. ⊢ wf X R → dom R = X → map f X Y → map g X Y →
 179. 50, 51, 1, 2, 3, 4, 5 ⊢ map f X Y, map_intro 178 176 174.
 
 180. ⊢ inv_img R {x} ⊆ dom R, inv_img_incl_in_dom.
-181. 2 ⊢ inv_img R {x} ⊆ X, eq_subst 2 180, P X ↔ inv_img R {x} ⊆ X.
+181. 2 ⊢ inv_img R {x} ⊆ X, incl_trans 180 2.
 182. 182 ⊢ u ∈ inv_img R {x}, hypo.
 183. 2, 182 ⊢ u ∈ X, incl_elim 181 182.
 184. ⊢ app f u = app f u, eq_refl.
@@ -565,10 +565,28 @@ wf_rec_unique. ⊢ wf X R → dom R = X → map f X Y → map g X Y →
   ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), uq_intro 203.
 205. 50, 51, 1, 2, 3 ⊢ ∃f. set f ∧ map f X Y ∧
   ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), disused_eq 204.
-206. 50, 51 ⊢ wf X R → dom R = X → (∀x. ∀g. φ x g ∈ Y) →
+206. 50, 51 ⊢ wf R X → dom R ⊆ X → (∀x. ∀g. φ x g ∈ Y) →
   ∃f. set f ∧ map f X Y ∧
   ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_intro_iii 205.
-wf_rec_existence. ⊢ set X → set Y → wf X R →
-  dom R = X → (∀x. ∀g. φ x g ∈ Y) → ∃f. set f ∧ map f X Y ∧
+wf_rec_existence. ⊢ set X → set Y → wf R X →
+  dom R ⊆ X → (∀x. ∀g. φ x g ∈ Y) → ∃f. set f ∧ map f X Y ∧
   ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), subj_intro_ii 206.
+
+(*/note wf_equi A relation R is called <i>well-founded</i> on M, if every
+non-empty set A ⊆ M posesses a minimal element y. The corresponding
+induction principle is shown by [[wf_induction_set]] and [[wf_induction]]. *)
+
+(*/note wf_rec_unique
+This theorem states that the solution to a [[wf_equi|well-founded]] recursion must be unique.<br>
+<br>
+<b>Proof sketch</b><br>
+Let f, g be two solutions of the recurrence. We want to show f\_=\_g.
+By [[map_extensionality|function extensionality]] it suffices to show ∀x\_∈\_X. f\_x = g\_x.
+[[wf_induction|Induction]] over\_x. The induction hypothesis has the
+equivalent transformation<br>
+\_\_∀u ∈ X. (u, x) ∈ R → f u = g u<br>
+↔ ∀u ∈ R⁻¹ {x}. f u = g u<br>
+↔ f|<sub>R⁻¹ {x}</sub>  = g|<sub>R⁻¹ {x}</sub>.<br>
+We need to show f x = g x. Now, by the given recurrences we obtain<br>
+\_\_f x = φ x (f|<sub>R⁻¹ {x}</sub>) = φ x (g|<sub>R⁻¹ {x}</sub>) = g x. q.e.d. *)
 

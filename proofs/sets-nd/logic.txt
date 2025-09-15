@@ -333,6 +333,12 @@ f_equal. ⊢ x = y → f x = f y, subj_intro 3.
 04. 1, 2 ⊢ x = z, eq_subst 3 2, P u ↔ u = z.
 eq_trans. ⊢ x = y → y = z → x = z, subj_intro_ii 4.
 
+01. 1 ⊢ y = x, hypo.
+02. 2 ⊢ y = z, hypo.
+03. 1 ⊢ x = y, eq_symm 1.
+04. 1, 2 ⊢ x = z, eq_trans 3 2.
+eq_symm_trans. ⊢ y = x → y = z → x = z, subj_intro_ii 4.
+
 01. 1 ⊢ ¬x = y, hypo.
 02. 2 ⊢ y = x, hypo.
 03. 2 ⊢ x = y, eq_symm 2.

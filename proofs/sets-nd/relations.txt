@@ -9,6 +9,13 @@ relation_unfold. ⊢ relation R → ∀t. t ∈ R → ∃x. ∃y. t = (x, y),
 relation_fold. ⊢ (∀t. t ∈ R → ∃x. ∃y. t = (x, y)) → relation R,
   bij_elimr relation_equi.
 
+01. 1 ⊢ relation R, hypo.
+02. 2 ⊢ t ∈ R, hypo.
+03. 1 ⊢ ∀t. t ∈ R → ∃x. ∃y. t = (x, y), relation_unfold 1.
+04. 1, 2 ⊢ ∃x. ∃y. t = (x, y), uq_bounded_elim 3 2.
+relation_elim. ⊢ relation R → t ∈ R → ∃x. ∃y. t = (x, y),
+  subj_intro_ii 4.
+
 01. 1 ⊢ R ⊆ X × Y, hypo.
 02. 2 ⊢ t ∈ R, hypo.
 03. 1, 2 ⊢ t ∈ X × Y, incl_elim 1 2.
@@ -57,6 +64,7 @@ relation_subclass. ⊢ R ⊆ Q → relation Q → relation R, subj_intro_ii 10.
 16. 1, 2 ⊢ relation (R ∪ Q), relation_fold 15.
 relation_union. ⊢ relation R → relation Q → relation (R ∪ Q),
   subj_intro_ii 16.
+
 
 (*/section Domains and ranges *)
 

@@ -8,3 +8,5 @@
 (onat: MK logic basic relations functions)
 (clops: MK logic basic relations functions powers)
 (universes: MK logic basic relations functions powers onat)
+(cn: MK logic basic relations functions powers)
+(on: MK logic basic relations functions powers wellfounded)

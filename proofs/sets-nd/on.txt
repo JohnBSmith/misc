@@ -1,0 +1,135 @@
+
+(*/chapter Ordinal numbers *)
+
+(*/section Transitive sets *)
+
+transitive_equi. ⊢ transitive x ↔ ∀u. u ∈ x → u ⊆ x, def.
+
+01. 1 ⊢ transitive x, hypo.
+02. 1 ⊢ ∀u. u ∈ x → u ⊆ x, lsubj_elim transitive_equi 1.
+03. 1 ⊢ u ∈ x → u ⊆ x, uq_elim 2.
+transitive_elim. ⊢ transitive x → u ∈ x → u ⊆ x, subj_intro 3.
+
+transitive_intro. ⊢ (∀u. u ∈ x → u ⊆ x) → transitive x,
+  rsubj_elim transitive_equi.
+
+01. 1 ⊢ set x, hypo.
+02. 2 ⊢ transitive x, hypo.
+03. 3 ⊢ u ∈ x ∪ {x}, hypo.
+04. 3 ⊢ u ∈ x ∨ u ∈ {x}, union_elim 3.
+05. 5 ⊢ u ∈ x, hypo.
+06. 2, 5 ⊢ u ⊆ x, transitive_elim 2 5.
+07. 7 ⊢ u ∈ {x}, hypo.
+08. 1, 7 ⊢ u = x, sg_elim 1 7.
+09. 1, 7 ⊢ u ⊆ x, incl_from_eq 8.
+10. 1, 2, 3 ⊢ u ⊆ x, disj_elim 4 6 9.
+11. ⊢ x ⊆ x ∪ {x}, union_incl_left.
+12. 1, 2, 3 ⊢ u ⊆ x ∪ {x}, incl_trans 10 11.
+13. 1, 2 ⊢ u ∈ x ∪ {x} → u ⊆ x ∪ {x}, subj_intro 12.
+14. 1, 2 ⊢ ∀u. u ∈ x ∪ {x} → u ⊆ x ∪ {x}, uq_intro 13.
+15. 1, 2 ⊢ transitive (x ∪ {x}), transitive_intro 14.
+transitive_closed_succ. ⊢ set x → transitive x →
+  transitive (x ∪ {x}), subj_intro_ii 15.
+
+01. 1 ⊢ ∀x. x ∈ M → transitive x, hypo.
+02. 2 ⊢ u ∈ ⋂M, hypo.
+03. 3 ⊢ y ∈ u, hypo.
+04. 4 ⊢ x ∈ M, hypo.
+05. 1, 4 ⊢ transitive x, uq_bounded_elim 1 4.
+06. 2, 4 ⊢ u ∈ x, Intersection_elim 2 4.
+07. 1, 2, 4 ⊢ u ⊆ x, transitive_elim 5 6.
+08. 1, 2, 3, 4 ⊢ y ∈ x, incl_elim 7 3.
+09. 1, 2, 3 ⊢ x ∈ M → y ∈ x, subj_intro 8.
+10. 1, 2, 3 ⊢ ∀x. x ∈ M → y ∈ x, uq_intro 9.
+11. 3 ⊢ set y, set_intro 3.
+12. 1, 2, 3 ⊢ y ∈ ⋂M, Intersection_intro 11 10.
+13. 1, 2 ⊢ y ∈ u → y ∈ ⋂M, subj_intro 12.
+14. 1, 2 ⊢ ∀y. y ∈ u → y ∈ ⋂M, uq_intro 13.
+15. 1, 2 ⊢ u ⊆ ⋂M, incl_intro 14.
+16. 1 ⊢ u ∈ ⋂M → u ⊆ ⋂M, subj_intro 15.
+17. 1 ⊢ ∀u. u ∈ ⋂M → u ⊆ ⋂M, uq_intro 16.
+18. 1 ⊢ transitive (⋂M), transitive_intro 17.
+transitive_closed_Intersection. ⊢
+  (∀x. x ∈ M → transitive x) → transitive (⋂M), subj_intro 18.
+
+01. 1 ⊢ ∀x. x ∈ M → transitive x, hypo.
+02. 2 ⊢ u ∈ ⋃M, hypo.
+03. 2 ⊢ ∃x. x ∈ M ∧ u ∈ x, Union_elim 2.
+04. 4 ⊢ x ∈ M ∧ u ∈ x, hypo.
+05. 4 ⊢ x ∈ M, conj_eliml 4.
+06. 4 ⊢ u ∈ x, conj_elimr 4.
+07. 1, 4 ⊢ transitive x, uq_bounded_elim 1 5.
+08. 1, 4 ⊢ u ⊆ x, transitive_elim 7 6.
+09. 9 ⊢ y ∈ u, hypo.
+10. 1, 4, 9 ⊢ y ∈ x, incl_elim 8 9.
+11. 1, 4, 9 ⊢ y ∈ ⋃M, Union_intro 5 10.
+12. 1, 4 ⊢ y ∈ u → y ∈ ⋃M, subj_intro 11.
+13. 1, 4 ⊢ ∀y. y ∈ u → y ∈ ⋃M, uq_intro 12.
+14. 1, 4 ⊢ u ⊆ ⋃M, incl_intro 13.
+15. 1, 2 ⊢ u ⊆ ⋃M, ex_elim 3 14.
+16. 1 ⊢ u ∈ ⋃M → u ⊆ ⋃M, subj_intro 15.
+17. 1 ⊢ ∀u. u ∈ ⋃M → u ⊆ ⋃M, uq_intro 16.
+18. 1 ⊢ transitive (⋃M), transitive_intro 17.
+transitive_closed_Union. ⊢ (∀x. x ∈ M → transitive x) →
+  transitive (⋃M), subj_intro 18.
+
+01. 1 ⊢ transitive x, hypo.
+02. 2 ⊢ u ∈ power x, hypo.
+03. 2 ⊢ u ⊆ x, power_elim 2.
+04. 4 ⊢ y ∈ u, hypo.
+05. 2, 4 ⊢ y ∈ x, incl_elim 3 4.
+06. 1, 2, 4 ⊢ y ⊆ x, transitive_elim 1 5.
+07. 4 ⊢ set y, set_intro 4.
+08. 1, 2, 4 ⊢ y ∈ power x, power_intro 7 6.
+09. 1, 2 ⊢ y ∈ u → y ∈ power x, subj_intro 8.
+10. 1, 2 ⊢ ∀y. y ∈ u → y ∈ power x, uq_intro 9.
+11. 1, 2 ⊢ u ⊆ power x, incl_intro 10.
+12. 1 ⊢ u ∈ power x → u ⊆ power x, subj_intro 11.
+13. 1 ⊢ ∀u. u ∈ power x → u ⊆ power x, uq_intro 12.
+14. 1 ⊢ transitive (power x), transitive_intro 13.
+transitive_closed_power. ⊢ transitive x →
+  transitive (power x), subj_intro 14.
+
+
+(*/section Ordinal numbers *)
+
+well_order_equi. ⊢ well_order R M ↔ wf R M ∧
+  (∀x. ∀y. ∀z. (x, y) ∈ R → (y, z) ∈ R → (x, z) ∈ R) ∧
+  (∀x. ∀y. ¬(¬((x, y) ∈ R ↔ x = y) ↔ (y, x) ∈ R)), def.
+
+diag_rl_eq. ⊢ diag_rl = {t | ∃x. ∃y. t = (x, y) ∧ x ∈ y}, def.
+On_eq. ⊢ On = Univ ∩ {α | transitive α ∧ ∀x. x ∈ α → transitive x}, def.
+on_lt_equi. ⊢ on_lt = {t | ∃α. ∃β.
+  α ∈ On ∧ β ∈ On ∧ α ∈ β ∧ t = (α, β)}, def.
+
+01. 1 ⊢ β ∈ On, hypo.
+02. 2 ⊢ α ∈ β, hypo.
+03. 1 ⊢ β ∈ Univ ∩ {α | transitive α ∧ ∀x. x ∈ α → transitive x},
+  eq_subst On_eq 1.
+04. 1 ⊢ β ∈ Univ, intersection_eliml 3.
+05. 1 ⊢ β ∈ {α | transitive α ∧ ∀x. x ∈ α → transitive x},
+  intersection_elimr 3.
+06. 1 ⊢ transitive β ∧ ∀x. x ∈ β → transitive x, comp_elim 5.
+07. 1 ⊢ transitive β, conj_eliml 6.
+08. 1 ⊢ ∀x. x ∈ β → transitive x, conj_elimr 6.
+09. 1, 2 ⊢ transitive α, uq_bounded_elim 8 2.
+10. 10 ⊢ x ∈ α, hypo.
+11. 1, 2 ⊢ α ⊆ β, transitive_elim 7 2.
+12. 1, 2, 10 ⊢ x ∈ β, incl_elim 11 10.
+13. 1, 2, 10 ⊢ transitive x, uq_bounded_elim 8 12.
+14. 1, 2 ⊢ x ∈ α → transitive x, subj_intro 13.
+15. 1, 2 ⊢ ∀x. x ∈ α → transitive x, uq_intro 14.
+16. 1, 2 ⊢ transitive α ∧ ∀x. x ∈ α → transitive x, conj_intro 9 15.
+17. 2 ⊢ set α, set_intro 2.
+18. 1, 2 ⊢ α ∈ {α | transitive α ∧ ∀x. x ∈ α → transitive x},
+  comp_intro 17 16.
+19. 1 ⊢ β ⊆ Univ, univ_trans Univ_is_univ 4.
+20. 1, 2 ⊢ α ∈ Univ, incl_elim 19 2.
+21. 1, 2 ⊢ α ∈ Univ ∩ {α | transitive α ∧ ∀x. x ∈ α → transitive x},
+  intersection_intro 20 18.
+22. 1, 2 ⊢ α ∈ On, eq_subst_rev On_eq 21, P t ↔ α ∈ t.
+23. 1 ⊢ α ∈ β → α ∈ On, subj_intro 22.
+24. 1 ⊢ ∀α. α ∈ β → α ∈ On, uq_intro 23.
+25. 1 ⊢ β ⊆ On, incl_intro 24.
+On_is_transitive. ⊢ β ∈ On → β ⊆ On, subj_intro 25.
+

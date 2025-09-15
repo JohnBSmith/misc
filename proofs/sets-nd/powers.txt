@@ -122,3 +122,32 @@ power_sg. ⊢ set a → power {a} = {∅, {a}}, subj_intro 30.
 08. 1 ⊢ ∀u. u ∈ {x} → u ∈ power x, uq_intro 7.
 09. 1 ⊢ {x} ⊆ power x, incl_intro 8.
 sg_incl_in_power. ⊢ set x → {x} ⊆ power x, subj_intro 9.
+
+01. 1 ⊢ function f, hypo.
+02. 2 ⊢ set (dom f), hypo.
+03. 1, 2 ⊢ set (rng f), substitution 1 2.
+04. 1 ⊢ relation f, fn_is_rel 1.
+05. ⊢ dom f ⊆ dom f, incl_refl.
+06. ⊢ rng f ⊆ rng f, incl_refl.
+07. 1 ⊢ f ⊆ dom f × rng f, relation_incl_prod 4 5 6.
+08. 1, 2 ⊢ set (dom f × rng f), set_prod 2 3.
+09. 1, 2 ⊢ set f, subset 7 8.
+function_is_set. ⊢ function f → set (dom f) → set f, subj_intro_ii 9.
+
+01. 1 ⊢ map f X Y, hypo.
+02. 2 ⊢ set X, hypo.
+03. 1 ⊢ function f ∧ dom f = X ∧ rng f ⊆ Y, map_unfold 1.
+04. 1 ⊢ function f, conj_elimll 3.
+05. 1 ⊢ dom f = X, conj_elimlr 3.
+06. 1, 2 ⊢ set (dom f), eq_subst_rev 5 2.
+07. 1, 2 ⊢ set f, function_is_set 4 6.
+map_is_set. ⊢ map f X Y → set X → set f, subj_intro_ii 7.
+
+01. 1 ⊢ map f X Y, hypo.
+02. 2 ⊢ set X, hypo.
+03. 3 ⊢ set Y, hypo.
+04. 2, 3 ⊢ set (X × Y), set_prod 2 3.
+05. 1 ⊢ f ⊆ X × Y, map_incl_in_prod 1.
+06. 1, 2, 3 ⊢ set f, subset 5 4.
+map_is_set_dom_cod. ⊢ map f X Y → set X → set Y → set f,
+  subj_intro_iii 6.
