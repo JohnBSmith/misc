@@ -76,7 +76,7 @@ lem_from_dne. ⊢ A ∨ ¬A, dne 8.
 07. 1 ⊢ ¬A → A, bij_elimr 1.
 08. 1 ⊢ A, subj_elim 7 6.
 09. 1 ⊢ ⊥, neg_elim 6 8.
-diag_contra. ⊢ ¬(A ↔ ¬A), neg_intro 9.
+diag_contra. ⊢ (A ↔ ¬A) → ⊥, subj_intro 9.
 
 01. 1 ⊢ A, hypo.
 02. 2 ⊢ ¬A, hypo.
@@ -129,6 +129,36 @@ tollendo_ponens_left. ⊢ A ∨ B → ¬B → A, subj_intro_ii 7.
 06. 6 ⊢ B, hypo.
 07. 1, 2 ⊢ B, disj_elim 1 5 6.
 tollendo_ponens_right. ⊢ A ∨ B → ¬A → B, subj_intro_ii 7.
+
+01. 1 ⊢ A → B, hypo.
+02. 2 ⊢ B → C, hypo.
+03. 3 ⊢ A, hypo.
+04. 1, 3 ⊢ B, subj_elim 1 3.
+05. 1, 2, 3 ⊢ C, subj_elim 2 4.
+hypothetical_syllogism. ⊢ (A → B) → (B → C) → (A → C),
+  subj_intro_iii 5.
+
+01. 1 ⊢ A, hypo.
+02. ⊢ A → A, subj_intro 1.
+equi_refl. ⊢ A ↔ A, bij_intro 2 2.
+
+01. 1 ⊢ A ↔ B, hypo.
+02. 1 ⊢ A → B, bij_eliml 1.
+03. 1 ⊢ B → A, bij_elimr 1.
+04. 1 ⊢ B ↔ A, bij_intro 3 2.
+equi_symm. ⊢ (A ↔ B) → (B ↔ A), subj_intro 4.
+
+01. 1 ⊢ A ↔ B, hypo.
+02. 2 ⊢ B ↔ C, hypo.
+03. 1 ⊢ A → B, bij_eliml 1.
+04. 2 ⊢ B → C, bij_eliml 2.
+05. 1 ⊢ B → A, bij_elimr 1.
+06. 2 ⊢ C → B, bij_elimr 2.
+07. 1, 2 ⊢ A → C, hypothetical_syllogism 3 4.
+08. 1, 2 ⊢ C → A, hypothetical_syllogism 6 5.
+09. 1, 2 ⊢ A ↔ C, bij_intro 7 8.
+equi_trans. ⊢ (A ↔ B) → (B ↔ C) → (A ↔ C), subj_intro_ii 9.
+
 
 (*/subsection De Morgan's laws *)
 

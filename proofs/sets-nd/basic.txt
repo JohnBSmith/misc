@@ -736,8 +736,8 @@ UnivCl_is_greatest. ⊢ A ⊆ UnivCl, incl_intro 5.
 11. 1, 7 ⊢ ¬R ∈ R → R ∈ R, subj_intro 10.
 
 12. 1, 7 ⊢ R ∈ R ↔ ¬R ∈ R, bij_intro 6 11.
-13. ⊢ ¬(R ∈ R ↔ ¬R ∈ R), diag_contra.
-14. 1, 7 ⊢ ⊥, neg_elim 13 12.
+13. ⊢ (R ∈ R ↔ ¬R ∈ R) → ⊥, diag_contra.
+14. 1, 7 ⊢ ⊥, subj_elim 13 12.
 15. 1 ⊢ ¬set R, neg_intro 14.
 16. ⊢ R = {x | ¬x ∈ x} → ¬set R, subj_intro 15.
 
@@ -902,13 +902,25 @@ Intersection_sg. ⊢ set a → ⋂{a} = a, subj_intro 20.
 01. 1 ⊢ set x, hypo.
 02. 2 ⊢ set y, hypo.
 03. 3 ⊢ {x} = {y}, hypo.
+04. ⊢ x = x, eq_refl.
+05. 1 ⊢ x ∈ {x}, sg_intro 1 4.
+06. 1, 3 ⊢ x ∈ {y}, eq_subst 3 5, P t ↔ x ∈ t.
+07. 1, 2, 3 ⊢ x = y, sg_elim 2 6.
+sg_is_inj. ⊢ set x → set y → {x} = {y} → x = y,
+  subj_intro_iii 7.
+
+(* Alternative proof.
+01. 1 ⊢ set x, hypo.
+02. 2 ⊢ set y, hypo.
+03. 3 ⊢ {x} = {y}, hypo.
 04. 3 ⊢ ⋂{x} = ⋂{y}, f_equal 3, f u = ⋂u.
 05. 1 ⊢ ⋂{x} = x, Intersection_sg 1.
 06. 2 ⊢ ⋂{y} = y, Intersection_sg 2.
 07. 1, 3 ⊢ x = ⋂{y}, eq_subst 5 4, P u ↔ u = ⋂{y}.
 08. 1, 2, 3 ⊢ x = y, eq_subst 6 7, P u ↔ x = u.
 09. 1, 2 ⊢ {x} = {y} → x = y, subj_intro 8.
-sg_inj. ⊢ set x → set y → {x} = {y} → x = y, subj_intro_ii 9.
+sg_is_inj. ⊢ set x → set y → {x} = {y} → x = y, subj_intro_ii 9.
+*)
 
 01. 1 ⊢ ¬set A, hypo.
 02. 2 ⊢ set A, hypo.

@@ -1,9 +1,11 @@
 
 (*/chapter Cardinal numbers *)
 
-(*/section Equinumerousities *)
+(*/section Numerousities *)
 
-equinum_equi. ⊢ equinum X Y ↔ ∃f. bij f X Y, def.
+num_eq_equi. ⊢ num_eq X Y ↔ ∃f. bij f X Y, def.
+num_le_equi. ⊢ num_le X Y ↔ ∃f. inj f X Y, def.
+num_lt_equi. ⊢ num_lt X Y ↔ num_le X Y ∧ ¬∃f. sur f X Y, def.
 
 Map_eq. ⊢ Map X Y = {f | map f X Y}, def.
 
@@ -11,8 +13,18 @@ indicator_eq. ⊢ χ A X =
   {t | ∃x. x ∈ X \ A ∧ t = (x, ∅)} ∪
   {t | ∃x. x ∈ A ∧ t = (x, {∅})}, def.
 
-equinum_intro. ⊢ (∃f. bij f X Y) → equinum X Y,
-  bij_elimr equinum_equi.
+num_eq_intro. ⊢ (∃f. bij f X Y) → num_eq X Y,
+  bij_elimr num_eq_equi.
+
+num_le_intro. ⊢ (∃f. inj f X Y) → num_le X Y,
+  bij_elimr num_le_equi.
+
+01. 1 ⊢ num_le X Y, hypo.
+02. 2 ⊢ ¬∃f. sur f X Y, hypo.
+03. 1, 2 ⊢ num_le X Y ∧ ¬∃f. sur f X Y, conj_intro 1 2.
+04. 1, 2 ⊢ num_lt X Y, rsubj_elim num_lt_equi 3.
+num_lt_intro. ⊢ num_le X Y → (¬∃f. sur f X Y) → num_lt X Y,
+  subj_intro_ii 4.
 
 01. 1 ⊢ map f X Y, hypo.
 02. 2 ⊢ set X, hypo.
@@ -252,7 +264,78 @@ from_indicator_app_is_one. ⊢ A ⊆ X → x ∈ X →
 104. 1 ⊢ ∀φ. φ = {t | ∃A. A ∈ power X ∧ t = (A, χ A X)} →
   ∃φ. bij φ (power X) (Map X {∅, {∅}}), uq_intro 103.
 105. 1 ⊢ ∃φ. bij φ (power X) (Map X {∅, {∅}}), disused_eq 104.
-106. 1 ⊢ equinum (power X) (Map X {∅, {∅}}), equinum_intro 105.
+106. 1 ⊢ num_eq (power X) (Map X {∅, {∅}}), num_eq_intro 105.
 power_equinum_indicators. ⊢ set X →
-  equinum (power X) (Map X {∅, {∅}}), subj_intro 106.
+  num_eq (power X) (Map X {∅, {∅}}), subj_intro 106.
 
+01. 1 ⊢ i = {t | ∃x. x ∈ X ∧ t = (x, {x})}, hypo.
+02. 2 ⊢ x ∈ X, hypo.
+03. 2 ⊢ {x} ⊆ X, sg_incl_in 2.
+04. 2 ⊢ set x, set_intro 2.
+05. 2 ⊢ set {x}, set_sg 4.
+06. 2 ⊢ {x} ∈ power X, power_intro 5 3.
+07. ⊢ x ∈ X → {x} ∈ power X, subj_intro 6.
+08. ⊢ ∀x. x ∈ X → {x} ∈ power X, uq_intro 7.
+09. 1 ⊢ map i X (power X), map_from_term 1 8.
+10. 10 ⊢ a ∈ X, hypo.
+11. 11 ⊢ b ∈ X, hypo.
+12. 12 ⊢ app i a = app i b, hypo.
+13. 1, 10 ⊢ app i a = {a}, map_from_term_app 1 8 10.
+14. 1, 11 ⊢ app i b = {b}, map_from_term_app 1 8 11.
+15. 1, 11, 12 ⊢ app i a = {b}, eq_trans 12 14.
+16. 1, 10, 11, 12 ⊢ {a} = {b}, eq_symm_trans 13 15.
+17. 10 ⊢ set a, set_intro 10.
+18. 11 ⊢ set b, set_intro 11.
+19. 1, 10, 11, 12 ⊢ a = b, sg_is_inj 17 18 16.
+20. 1 ⊢ a ∈ X → b ∈ X → app i a = app i b → a = b, subj_intro_iii 19.
+21. 1 ⊢ ∀b. a ∈ X → b ∈ X → app i a = app i b → a = b, uq_intro 20.
+22. 1 ⊢ ∀a. ∀b. a ∈ X → b ∈ X → app i a = app i b → a = b, uq_intro 21.
+23. 1 ⊢ inj i X (power X), inj_intro 9 22.
+24. 1 ⊢ ∃i. inj i X (power X), ex_intro 23.
+25. ⊢ i = {t | ∃x. x ∈ X ∧ t = (x, {x})} →
+  ∃i. inj i X (power X), subj_intro 24.
+26. ⊢ ∀i. i = {t | ∃x. x ∈ X ∧ t = (x, {x})} →
+  ∃i. inj i X (power X), uq_intro 25.
+27. ⊢ ∃i. inj i X (power X), disused_eq 26.
+
+28. 28 ⊢ set X, hypo.
+29. 29 ⊢ ∃f. sur f X (power X), hypo.
+30. 30 ⊢ sur f X (power X), hypo.
+31. 31 ⊢ D = {x | x ∈ X ∧ ¬x ∈ app f x}, hypo.
+32. ⊢ {x | x ∈ X ∧ ¬x ∈ app f x} ⊆ X, sep_is_subclass.
+33. 31 ⊢ D ⊆ X, eq_subst_rev 31 32, P t ↔ t ⊆ X.
+34. 28, 31 ⊢ set D, subset 33 28.
+35. 28, 31 ⊢ D ∈ power X, power_intro 34 33.
+36. 30 ⊢ rng f = power X, sur_elim 30.
+37. 28, 30, 31 ⊢ D ∈ rng f, eq_subst_rev 36 35, P t ↔ D ∈ t.
+38. 30 ⊢ map f X (power X), sur_is_map 30.
+39. 28, 30, 31 ⊢ ∃x. x ∈ X ∧ D = app f x, map_rng_elim 38 37.
+40. 40 ⊢ x ∈ X ∧ D = app f x, hypo.
+41. 40 ⊢ x ∈ X, conj_eliml 40.
+42. 40 ⊢ D = app f x, conj_elimr 40.
+43. ⊢ x ∈ D ↔ x ∈ D, equi_refl.
+44. 40 ⊢ x ∈ app f x ↔ x ∈ D, eq_subst 42 43, P t ↔ (x ∈ t ↔ x ∈ D).
+45. 45 ⊢ x ∈ D, hypo.
+46. 31, 45 ⊢ x ∈ {x | x ∈ X ∧ ¬x ∈ app f x}, eq_subst 31 45.
+47. 31, 45 ⊢ x ∈ X ∧ ¬x ∈ app f x, comp_elim 46.
+48. 31, 45 ⊢ ¬x ∈ app f x, conj_elimr 47.
+49. 31 ⊢ x ∈ D → ¬x ∈ app f x, subj_intro 48.
+50. 50 ⊢ ¬x ∈ app f x, hypo.
+51. 40, 50  ⊢ x ∈ X ∧ ¬x ∈ app f x, conj_intro 41 50.
+52. 40 ⊢ set x, set_intro 41.
+53. 40, 50 ⊢ x ∈ {x | x ∈ X ∧ ¬x ∈ app f x}, comp_intro 52 51.
+54. 31, 40, 50 ⊢ x ∈ D, eq_subst_rev 31 53, P t ↔ x ∈ t.
+55. 31, 40 ⊢ ¬x ∈ app f x → x ∈ D, subj_intro 54.
+56. 31, 40 ⊢ x ∈ D ↔ ¬x ∈ app f x, bij_intro 49 55.
+57. 31, 40 ⊢ x ∈ app f x ↔ ¬x ∈ app f x, equi_trans 44 56.
+58. 31, 40 ⊢ ⊥, diag_contra 57.
+59. 28, 30, 31 ⊢ ⊥, ex_elim 39 58.
+60. 28, 30 ⊢ D = {x | x ∈ X ∧ ¬x ∈ app f x} → ⊥, subj_intro 59.
+61. 28, 30 ⊢ ∀D. D = {x | x ∈ X ∧ ¬x ∈ app f x} → ⊥, uq_intro 60.
+62. 28, 30 ⊢ ⊥, disused_eq 61.
+63. 28, 29 ⊢ ⊥, ex_elim 29 62.
+64. 28 ⊢ ¬∃f. sur f X (power X), neg_intro 63.
+
+65. ⊢ num_le X (power X), num_le_intro 27.
+66. 28 ⊢ num_lt X (power X), num_lt_intro 65 64.
+Cantor's_theorem. ⊢ set X → num_lt X (power X), subj_intro 66.

@@ -286,10 +286,10 @@ wf_rec_unique. ⊢ wf R X → dom R ⊆ X → map f X Y → map g X Y →
   ∀g. fn_on g (inv_img R {x}) →
   (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
   (x, φ x f) ∈ A}, comp_intro 52 49, P A ↔
-    A ⊆ X × Y ∧ ∀x. x ∈ X →
+    (A ⊆ X × Y ∧ ∀x. x ∈ X →
     ∀g. fn_on g (inv_img R {x}) →
     (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
-    (x, φ x f) ∈ A.
+    (x, φ x f) ∈ A).
 54. 50, 51, 3 ⊢ X × Y ∈ {A | A ⊆ X × Y ∧ ∀x. x ∈ X →
   ∀g. fn_on g (inv_img R {x}) →
   (∀u. u ∈ inv_img R {x} → (u, app g u) ∈ A) →
@@ -459,10 +459,10 @@ wf_rec_unique. ⊢ wf R X → dom R ⊆ X → map f X Y → map g X Y →
     ∀g. fn_on g (inv_img R {a}) →
     (∀u. u ∈ inv_img R {a} → (u, app g u) ∈ A) →
     (a, φ a (restr g (inv_img R {a}))) ∈ A}, comp_intro 153 151,
-    P A ↔ A ⊆ X × Y ∧
+    P A ↔ (A ⊆ X × Y ∧
       ∀a. a ∈ X → ∀g. fn_on g (inv_img R {a}) →
       (∀u. u ∈ inv_img R {a} → (u, app g u) ∈ A) →
-      (a, φ a (restr g (inv_img R {a}))) ∈ A.
+      (a, φ a (restr g (inv_img R {a}))) ∈ A).
 155. 50, 51, 2, 3, 4, 5, 61, 62, 106, 107 ⊢
   f \ {(x, y')} ∈ F, eq_subst_rev 4 154, P u ↔ f \ {(x, y')} ∈ u.
 156. 50, 51, 2, 3, 4, 5, 61, 62, 106, 107 ⊢

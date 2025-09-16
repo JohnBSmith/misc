@@ -65,6 +65,11 @@ map_intro. ⊢ function f → dom f = X → rng f ⊆ Y → map f X Y,
 04. 1, 2 ⊢ map f X UnivCl, map_intro 1 2 3.
 fn_is_map. ⊢ function f → dom f = X → map f X UnivCl, subj_intro_ii 4.
 
+01. 1 ⊢ map f X Y, hypo.
+02. 1 ⊢ function f ∧ dom f = X ∧ rng f ⊆ Y, map_unfold 1.
+03. 1 ⊢ dom f = X, conj_elimlr 2.
+map_dom. ⊢ map f X Y → dom f = X, subj_intro 3.
+
 01. 1 ⊢ f ⊆ g, hypo.
 02. 2 ⊢ function g, hypo.
 03. 2 ⊢ relation g, fn_is_rel 2.
@@ -829,6 +834,30 @@ app_restr. ⊢ map f X Y → A ⊆ X → x ∈ A → app f x = app (restr f A) x
 13. 1, 2, 3 ⊢ app f x = app (restr f A) x, app_intro 12 11.
 fn_app_restr. ⊢ function f → x ∈ dom f → x ∈ A → app f x = app (restr f A) x,
   subj_intro_iii 13.
+
+
+(* Images and inverse images *)
+
+01. 1 ⊢ map f X Y, hypo.
+02. 1 ⊢ dom f = X, map_dom 1.
+03. ⊢ img f (dom f) = rng f, img_of_dom_is_rng.
+04. 1 ⊢ img f X = rng f, eq_subst 2 3, P t ↔ img f t = rng f.
+map_img_of_dom_is_rng. ⊢ map f X Y → img f X = rng f, subj_intro 4.
+
+01. 1 ⊢ map f X Y, hypo.
+02. 2 ⊢ y ∈ rng f, hypo.
+03. 1 ⊢ img f X = rng f, map_img_of_dom_is_rng 1.
+04. 1, 2 ⊢ y ∈ img f X, eq_subst_rev 3 2, P t ↔ y ∈ t.
+05. 1, 2 ⊢ ∃x. x ∈ X ∧ (x, y) ∈ f, img_elim 4.
+06. 6 ⊢ x ∈ X ∧ (x, y) ∈ f, hypo.
+07. 6 ⊢ x ∈ X, conj_eliml 6.
+08. 6 ⊢ (x, y) ∈ f, conj_elimr 6.
+09. 1, 6 ⊢ y = app f x, map_app_intro 1 8.
+10. 1, 6 ⊢ x ∈ X ∧ y = app f x, conj_intro 7 9.
+11. 1, 6 ⊢ ∃x. x ∈ X ∧ y = app f x, ex_intro 10.
+12. 1, 2 ⊢ ∃x. x ∈ X ∧ y = app f x, ex_elim 5 11.
+map_rng_elim. ⊢ map f X Y → y ∈ rng f →
+  ∃x. x ∈ X ∧ y = app f x, subj_intro_ii 12.
 
 
 (*/section Special functions *)

@@ -97,9 +97,13 @@ def consume_ident_list(s, n, i):
 
 non_link = {"axiom", "def"}
 
+def url_escape(s):
+    return s.replace("'", "%27")
+
 def link_ident(ident):
     if ident[0].isalpha() and not ident in non_link:
-        return f"<a href='{ident}.htm'>{ident}</a>"
+        ident_esc = url_escape(ident)
+        return f"<a href='{ident_esc}.htm'>{ident}</a>"
     else:
         return ident
 
@@ -128,7 +132,7 @@ def extract(s, acc, env):
                 i += 1
         else:
             start = i
-            named = i < n and (s[i+1].isalpha() or s[i+1] == '_')
+            named = s[i].isalpha() or s[i] == '_'
             i, ident = consume_ident(s, n, i)
             if ident.isdigit() and int(ident) > 1:
                 env.propose_clear = False
@@ -163,8 +167,9 @@ def extract(s, acc, env):
             idents = " ".join(link_ident(x) for x in idents)
             env.buf.append(s[start:idents_from] + idents + s[idents_to:i])
             if named:
+                ident_esc = url_escape(ident)
                 acc.append(f"<div class='box'><div class='{cl}'><b class='{cl}'>{kind}.</b> ")
-                acc.append(f"<a href='{DIR_NAME}/{ident}.htm'>{ident}</a><br>\n{s[i0:j]}</div></div>\n")
+                acc.append(f"<a href='{DIR_NAME}/{ident_esc}.htm'>{ident}</a><br>\n{s[i0:j]}</div></div>\n")
                 item = (f"<div class='box'><div class='{cl}'><b class='{cl}'>{kind}.</b> "
                   + f"{ident}<br>\n{s[i0:j]}</div></div>\n")
                 env.proofs.append({

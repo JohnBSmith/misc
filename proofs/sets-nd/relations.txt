@@ -344,6 +344,19 @@ img_incl. ⊢ A ⊆ B → img R A ⊆ img R B, subj_intro 6.
 08. ⊢ ∀y. y ∈ img R A → y ∈ rng R, uq_intro 7.
 img_incl_in_rng. ⊢ img R A ⊆ rng R, incl_intro 8.
 
+01. 1 ⊢ relation R, hypo.
+02. 2 ⊢ y ∈ rng R, hypo.
+03. 2 ⊢ ∃x. (x, y) ∈ R, rng_elim 2.
+04. 4 ⊢ (x, y) ∈ R, hypo.
+05. 4 ⊢ x ∈ dom R, dom_intro 4.
+06. 4 ⊢ y ∈ img R (dom R), img_intro 5 4.
+07. 2 ⊢ y ∈ img R (dom R), ex_elim 3 6.
+08. ⊢ y ∈ rng R → y ∈ img R (dom R), subj_intro 7.
+09. ⊢ ∀y. y ∈ rng R → y ∈ img R (dom R), uq_intro 8.
+10. ⊢ rng R ⊆ img R (dom R), incl_intro 9.
+11. ⊢ img R (dom R) ⊆ rng R, img_incl_in_rng.
+img_of_dom_is_rng. ⊢ img R (dom R) = rng R, incl_antisym 11 10.
+
 01. 1 ⊢ x ∈ inv_img R (A ∩ B), hypo.
 02. 1 ⊢ ∃y. y ∈ A ∩ B ∧ (x, y) ∈ R, inv_img_elim 1.
 03. 3 ⊢ y ∈ A ∩ B ∧ (x, y) ∈ R, hypo.
