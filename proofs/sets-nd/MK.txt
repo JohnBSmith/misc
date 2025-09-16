@@ -98,6 +98,56 @@ greatest element of the class universe. Thus, all classes are
 M is allowed to be [[empty_set_eq|empty]], then ⋂M is [[UnivCl_eq|UnivCl]],
 as [[Intersection_empty_set]] shows. *)
 
+(*/note union_eq The <i>union</i> of two classes is the class
+containing every element that appears in at least one of them. *)
+
+(*/note sg_eq The <i>singleton</i> set {a} is explained as the set that
+contains only a. Thus it could have been defined simply as
+{x | x = a}, but for ergonomic reasons we force the condition x = a
+only if a is a set. Namely, given that we are only aware of a to be
+a set under the classes a and b, we can nevertheless deduce a = b from
+{a} = {b}. *)
+
+(*/note pair_eq The Kuratowski representation of an <i>ordered pair</i>
+as a pure set. Note that {x, y} is a shorthand for {x} ∪ {y},
+the [[union_eq|union]] of two [[sg_eq|singletons]]. And it is important
+to note that {x, y}, despite being called "pair set", does not necessarily
+consist of two elements; namely, in case x = y it contains only one.
+The characteristic property of ordered pairs is shown in
+[[pair_property]]. Alternatively, this property is accomplished
+by telling what the projection on the [[fst_eq|first]] and [[scd_eq|second]]
+component of the pair is, see [[pair_fst]] and [[pair_scd]]. *)
+
+(*/note power_eq The <i>power set</i> of a set is the set of all
+its [[incl_equi|subclasses]]. According to the [[power|axiom of power
+sets]] it can never be a proper class. The power of the universal
+class is the universal class itself, as shown in [[power_UnivCl]]. This
+strange behavior can be explained in terms of [[univ_equi|universes]].
+The true power, that is power\_M, is replaced by a cut-off version
+U ∩ power\_M where U is a universe, a set with M\_⊆\_U that resembles
+the universal class. *)
+
+(*/note fst_eq Projection on the first component of a
+[[pair_eq|Kuratowski pair]]. *)
+
+(*/note scd_eq Projection on the second component of a
+[[pair_eq|Kuratowski pair]]. *)
+
+(*/note relation_equi A class is called <i>relation</i> if all of
+its elements are [[pair_eq|pairs]]. *)
+
+(*/note function_equi A [[relation_equi|relation]] f is called a
+<i>function</i> if for any position x there is at most one y such
+that (x,\_y)\_∈\_f. *)
+
+(*/note map_equi A [[function_equi|function]] f is called a
+<i>mapping</i> or <i>map</i> from X to Y if its [[dom_eq|domain]] is X
+and its [[rng_eq|range]] is a [[incl_equi|subclass]] of Y. *)
+
+(*/note inj_equi A [[map_equi|mapping]] f from X to Y is called
+<i>injective</i> if any two elements of X with the same image must be
+equal. *)
+
 (*/note efq Ex falso quodlibet. From a contradiction,
 any proposition follows. *)
 

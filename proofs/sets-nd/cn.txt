@@ -339,3 +339,33 @@ power_equinum_indicators. ⊢ set X →
 65. ⊢ num_le X (power X), num_le_intro 27.
 66. 28 ⊢ num_lt X (power X), num_lt_intro 65 64.
 Cantor's_theorem. ⊢ set X → num_lt X (power X), subj_intro 66.
+
+(*/note num_le_equi
+A set X is called <i>not greater than</i> Y, written |X| ≤ |Y|, if
+there exists an [[inj_equi|injection]] from X to Y. *)
+
+(*/note num_lt_equi
+A set X is called <i>strictly smaller than</i> Y, written
+|X| &lt; |Y|, if X is [[num_le_equi|not greater]] than Y and
+there is no [[sur_equi|surjection]] from X to Y. *)
+
+(*/note Cantor's_theorem
+This theorem states that any [[set_equi|set]] is [[num_lt_equi|strictly less numerous]]
+than its power set.<br>
+<br>
+<b>Proof sketch</b><br>
+First, it must be shown that an [[inj_equi|injection]] i: X →
+power\_X exists. This is easily witnessed by i\_x := {x}, since we have
+[[sg_is_inj]]. Now it must be shown that no [[sur_equi|surjection]]
+f: X → power\_X exists. So let f be such a surjection; we need to find
+a contradiction. Consider the "diagonal" set<br>
+\_\_D = {x ∈ X | x ∉ f x}.<br>
+Because D ⊆ X, we have D ∈ power\_X. Furthermore, because\_f is
+surjective, we have D\_∈\_rng\_f. So there is an x\_∈\_X with
+D = f\_x. Since x\_∈\_X, we obtain the equivalence
+x\_∈\_D\_↔ x\_∉\_f\_x
+directly from the Definition of\_D. Thus<br>
+\_\_x ∈ f x ↔ x ∉ f x,<br>
+but this is a contradiction, as shown in [[diag_contra]]. q.e.d.
+*)
+

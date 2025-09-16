@@ -14,6 +14,16 @@ power_intro. ⊢ set x → x ⊆ y → x ∈ power y, subj_intro_ii 5.
 04. 1 ⊢ x ⊆ M, comp_elim 3.
 power_elim. ⊢ x ∈ power M → x ⊆ M, subj_intro 4.
 
+01. 1 ⊢ x ∈ UnivCl, hypo.
+02. 1 ⊢ set x, set_intro 1.
+03. ⊢ x ⊆ UnivCl, UnivCl_is_greatest.
+04. 1 ⊢ x ∈ power UnivCl, power_intro 2 3.
+05. ⊢ x ∈ UnivCl → x ∈ power UnivCl, subj_intro 4.
+06. ⊢ ∀x. x ∈ UnivCl → x ∈ power UnivCl, uq_intro 5.
+07. ⊢ UnivCl ⊆ power UnivCl, incl_intro 6.
+08. ⊢ power UnivCl ⊆ UnivCl, UnivCl_is_greatest.
+power_UnivCl. ⊢ power UnivCl = UnivCl, incl_antisym 8 7.
+
 01. 1 ⊢ t ∈ A × B, hypo.
 02. 1 ⊢ ∃x. ∃y. x ∈ A ∧ y ∈ B ∧ t = (x, y), prod_elim 1.
 03. 3 ⊢ ∃y. x ∈ A ∧ y ∈ B ∧ t = (x, y), hypo.
