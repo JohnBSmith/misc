@@ -50,31 +50,29 @@ clop_monotony. ⊢ closure_operator H U →
 clop_idem. ⊢ closure_operator H U →
   X ⊆ U → app H (app H X) = app H X, subj_intro_ii 7.
 
+begin
+let HX = ⋂{A | A ∈ M ∧ X ⊆ A}.
+let HY = ⋂{A | A ∈ M ∧ Y ⊆ A}.
 01. 1 ⊢ closure_system M U, hypo.
-02. 2 ⊢ H = {t | ∃X. X ∈ power U ∧
-  t = (X, ⋂{A | A ∈ M ∧ X ⊆ A})}, hypo.
+02. 2 ⊢ H = {t | ∃X. X ∈ power U ∧ t = (X, HX)}, hypo.
 03. 1 ⊢ U ∈ M, lsubj_conj_elimlr closure_system_equi 1.
 04. 4 ⊢ X ∈ power U, hypo.
 05. 4 ⊢ X ⊆ U, power_elim 4.
 06. 1, 4 ⊢ U ∈ M ∧ X ⊆ U, conj_intro 3 5.
 07. 1, 4 ⊢ U ∈ {A | A ∈ M ∧ X ⊆ A}, comp_intro_from 3 6.
-08. ⊢ ⋂{A | A ∈ M ∧ X ⊆ A} = ⋂{A | A ∈ M ∧ X ⊆ A}, eq_refl.
-09. 1, 4 ⊢ ⋂{A | A ∈ M ∧ X ⊆ A} ⊆ U,
-  Intersection_is_lower_bound 8 7.
+08. ⊢ HX = HX, eq_refl.
+09. 1, 4 ⊢ HX ⊆ U, Intersection_is_lower_bound 8 7.
 10. 1 ⊢ set U, set_intro 3.
-11. 1, 4 ⊢ set (⋂{A | A ∈ M ∧ X ⊆ A}), subset 9 10.
-12. 1, 4 ⊢ ⋂{A | A ∈ M ∧ X ⊆ A} ∈ power U, power_intro 11 9.
-13. 1 ⊢ X ∈ power U →
-  ⋂{A | A ∈ M ∧ X ⊆ A} ∈ power U, subj_intro 12.
-14. 1 ⊢ ∀X. X ∈ power U →
-  ⋂{A | A ∈ M ∧ X ⊆ A} ∈ power U, uq_intro 13.
+11. 1, 4 ⊢ set HX, subset 9 10.
+12. 1, 4 ⊢ HX ∈ power U, power_intro 11 9.
+13. 1 ⊢ X ∈ power U → HX ∈ power U, subj_intro 12.
+14. 1 ⊢ ∀X. X ∈ power U → HX ∈ power U, uq_intro 13.
 15. 1, 2 ⊢ map H (power U) (power U), map_from_term 2 14.
 
 16. 16 ⊢ X ⊆ U, hypo.
 17. 1, 16 ⊢ set X, subset 16 10.
 18. 1, 16 ⊢ X ∈ power U, power_intro 17 16.
-19. 1, 2, 16 ⊢ app H X = ⋂{A | A ∈ M ∧ X ⊆ A},
-  map_from_term_app 2 14 18.
+19. 1, 2, 16 ⊢ app H X = HX, map_from_term_app 2 14 18.
 20. 20 ⊢ x ∈ X, hypo.
 21. 21 ⊢ A ∈ {A | A ∈ M ∧ X ⊆ A}, hypo.
 22. 21 ⊢ A ∈ M ∧ X ⊆ A, comp_elim 21.
@@ -83,8 +81,7 @@ clop_idem. ⊢ closure_operator H U →
 25. 20 ⊢ A ∈ {A | A ∈ M ∧ X ⊆ A} → x ∈ A, subj_intro 24.
 26. 20 ⊢ ∀A. A ∈ {A | A ∈ M ∧ X ⊆ A} → x ∈ A, uq_intro 25.
 27. 20 ⊢ set x, set_intro 20.
-28. 20 ⊢ x ∈ ⋂{A | A ∈ M ∧ X ⊆ A},
-  Intersection_intro 27 26.
+28. 20 ⊢ x ∈ HX, Intersection_intro 27 26.
 29. 1, 2, 16, 20 ⊢ x ∈ app H X,
   eq_subst_rev  19 28, P t ↔ x ∈ t.
 30. 1, 2, 16 ⊢ x ∈ X → x ∈ app H X, subj_intro 29.
@@ -96,31 +93,27 @@ clop_idem. ⊢ closure_operator H U →
 35. 35 ⊢ Y ⊆ U, hypo.
 36. 1, 35 ⊢ set Y, subset 35 10.
 37. 1, 35 ⊢ Y ∈ power U, power_intro 36 35.
-38. 1, 2, 35 ⊢ app H Y = ⋂{A | A ∈ M ∧ Y ⊆ A},
-  map_from_term_app 2 14 37.
+38. 1, 2, 35 ⊢ app H Y = HY, map_from_term_app 2 14 37.
 39. 39 ⊢ X ⊆ Y, hypo.
 40. 35, 39 ⊢ X ⊆ U, incl_trans 39 35.
 41. 1, 35, 39 ⊢ set X, subset 40 10.
 42. 1, 35, 39 ⊢ X ∈ power U, power_intro 41 40.
-43. 1, 2, 35, 39 ⊢ app H X = ⋂{A | A ∈ M ∧ X ⊆ A},
-  map_from_term_app 2 14 42.
+43. 1, 2, 35, 39 ⊢ app H X = HX, map_from_term_app 2 14 42.
 44. 44 ⊢ A ∈ {A | A ∈ M ∧ Y ⊆ A}, hypo.
 45. 44 ⊢ A ∈ M ∧ Y ⊆ A, comp_elim 44.
 46. 44 ⊢ A ∈ M, conj_eliml 45.
 47. 44 ⊢ Y ⊆ A, conj_elimr 45.
 48. 39, 44 ⊢ X ⊆ A, incl_trans 39 47.
 49. 39, 44 ⊢ A ∈ M ∧ X ⊆ A, conj_intro 46 48.
-50. 39, 44 ⊢ A ∈ {A | A ∈ M ∧ X ⊆ A},
-  comp_intro_from 46 49.
+50. 39, 44 ⊢ A ∈ {A | A ∈ M ∧ X ⊆ A}, comp_intro_from 46 49.
 51. 39 ⊢ A ∈ {A | A ∈ M ∧ Y ⊆ A} →
   A ∈ {A | A ∈ M ∧ X ⊆ A}, subj_intro 50.
 52. 39 ⊢ ∀A. A ∈ {A | A ∈ M ∧ Y ⊆ A} →
   A ∈ {A | A ∈ M ∧ X ⊆ A}, uq_intro 51.
 53. 39 ⊢ {A | A ∈ M ∧ Y ⊆ A} ⊆ {A | A ∈ M ∧ X ⊆ A}, incl_intro 52.
-54. 39 ⊢ ⋂{A | A ∈ M ∧ X ⊆ A} ⊆ ⋂{A | A ∈ M ∧ Y ⊆ A},
-  Intersection_dec 53.
-55. 1, 2, 35, 39 ⊢ app H X ⊆ ⋂{A | A ∈ M ∧ Y ⊆ A},
-  eq_subst_rev 43 54, P t ↔ t ⊆ ⋂{A | A ∈ M ∧ Y ⊆ A}.
+54. 39 ⊢ HX ⊆ HY, Intersection_dec 53.
+55. 1, 2, 35, 39 ⊢ app H X ⊆ HY,
+  eq_subst_rev 43 54, P t ↔ t ⊆ HY.
 56. 1, 2, 39, 35 ⊢ app H X ⊆ app H Y,
   eq_subst_rev 38 55, P t ↔ app H X ⊆ t.
 57. 1, 2 ⊢ X ⊆ Y → Y ⊆ U → app H X ⊆ app H Y, subj_intro_ii 56.
@@ -133,9 +126,8 @@ clop_idem. ⊢ closure_operator H U →
 62. 1, 16 ⊢ U ∈ M ∧ X ⊆ U, conj_intro 3 16.
 63. 1, 16 ⊢ U ∈ {A | A ∈ M ∧ X ⊆ A}, comp_intro_from 3 62.
 64. 1, 16 ⊢ ¬{A | A ∈ M ∧ X ⊆ A} = ∅, non_empty_from_witness 63.
-65. 1 ⊢ ¬{A | A ∈ M ∧ X ⊆ A} = ∅ → ⋂{A | A ∈ M ∧ X ⊆ A} ∈ M,
-  uq_bounded_elim 60 61.
-66. 1, 16 ⊢ ⋂{A | A ∈ M ∧ X ⊆ A} ∈ M, subj_elim 65 64.
+65. 1 ⊢ ¬{A | A ∈ M ∧ X ⊆ A} = ∅ → HX ∈ M, uq_bounded_elim 60 61.
+66. 1, 16 ⊢ HX ∈ M, subj_elim 65 64.
 67. 1, 2, 16 ⊢ app H X ∈ M, eq_subst_rev 19 66, P t ↔ t ∈ M.
 68. ⊢ app H X ⊆ app H X, incl_refl.
 69. 1, 2, 16 ⊢ app H X ∈ M ∧ app H X ⊆ app H X, conj_intro 67 68.
@@ -166,4 +158,4 @@ clop_idem. ⊢ closure_operator H U →
 clop_from_closure_system. ⊢ closure_system M U →
   H = {t | ∃X. X ∈ power U ∧ t = (X, ⋂{A | A ∈ M ∧ X ⊆ A})} →
   closure_operator H U, subj_intro_ii 82.
-
+end

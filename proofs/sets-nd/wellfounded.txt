@@ -107,6 +107,9 @@ wf_induction. ⊢ wf R M →
   (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → P y) → P x) →
   (∀x. x ∈ M → P x), subj_intro_ii 45.
 
+begin
+let fr = restr f (inv_img R {x}).
+let gr = restr g (inv_img R {x}).
 01. 1 ⊢ wf R X, hypo.
 02. 2 ⊢ ∀u. u ∈ X → (u, x) ∈ R → app f u = app g u, hypo.
 03. 2 ⊢ u ∈ X → (u, x) ∈ R → app f u = app g u, uq_elim 2.
@@ -129,31 +132,27 @@ wf_induction. ⊢ wf R M →
 20. 20 ⊢ map g X Y, hypo.
 21. ⊢ inv_img R {x} ⊆ dom R, inv_img_incl_in_dom.
 22. 14 ⊢ inv_img R {x} ⊆ X, incl_trans 21 14.
-23. 19, 14, 4 ⊢ app f u = app (restr f (inv_img R {x})) u, app_restr 19 22 4.
-24. 20, 14, 4 ⊢ app g u = app (restr g (inv_img R {x})) u, app_restr 20 22 4.
-25. 19, 14, 2, 8, 4 ⊢ app (restr f (inv_img R {x})) u = app g u,
+23. 19, 14, 4 ⊢ app f u = app fr u, app_restr 19 22 4.
+24. 20, 14, 4 ⊢ app g u = app gr u, app_restr 20 22 4.
+25. 19, 14, 2, 8, 4 ⊢ app fr u = app g u,
   eq_subst 23 18, P t ↔ t = app g u.
 26. 19, 20, 14, 2, 8, 4 ⊢
-  app (restr f (inv_img R {x})) u = app (restr g (inv_img R {x})) u,
-  eq_subst 24 25, P t ↔ app (restr f (inv_img R {x})) u = t.
+  app fr u = app gr u, eq_subst 24 25, P t ↔ app fr u = t.
 27. 19, 20, 14, 2, 8 ⊢ u ∈ inv_img R {x} →
-  app (restr f (inv_img R {x})) u = app (restr g (inv_img R {x})) u,
-  subj_intro 26.
+  app fr u = app gr u, subj_intro 26.
 28. 19, 20, 14, 2, 8 ⊢ ∀u. u ∈ inv_img R {x} →
-  app (restr f (inv_img R {x})) u = app (restr g (inv_img R {x})) u,
-  uq_intro 27.
-29. 19, 14 ⊢ map (restr f (inv_img R {x})) (inv_img R {x}) Y, map_restr 19 22.
-30. 20, 14 ⊢ map (restr g (inv_img R {x})) (inv_img R {x}) Y, map_restr 20 22.
-31. 19, 20, 14, 2, 8 ⊢ restr f (inv_img R {x}) = restr g (inv_img R {x}),
-  map_extensionality 29 30 28.
+  app fr u = app gr u, uq_intro 27.
+29. 19, 14 ⊢ map fr (inv_img R {x}) Y, map_restr 19 22.
+30. 20, 14 ⊢ map gr (inv_img R {x}) Y, map_restr 20 22.
+31. 19, 20, 14, 2, 8 ⊢ fr = gr, map_extensionality 29 30 28.
 
-32. 32 ⊢ ∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x})), hypo.
-33. 33 ⊢ ∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x})), hypo.
-34. 32 ⊢ x ∈ X → app f x = φ x (restr f (inv_img R {x})), uq_elim 32.
-35. 33 ⊢ x ∈ X → app g x = φ x (restr g (inv_img R {x})), uq_elim 33.
-36. 32, 8 ⊢ app f x = φ x (restr f (inv_img R {x})), subj_elim 34 8.
-37. 33, 8 ⊢ app g x = φ x (restr g (inv_img R {x})), subj_elim 35 8.
-38. 19, 20, 14, 32, 2, 8 ⊢ app f x = φ x (restr g (inv_img R {x})),
+32. 32 ⊢ ∀x. x ∈ X → app f x = φ x fr, hypo.
+33. 33 ⊢ ∀x. x ∈ X → app g x = φ x gr, hypo.
+34. 32 ⊢ x ∈ X → app f x = φ x fr, uq_elim 32.
+35. 33 ⊢ x ∈ X → app g x = φ x gr, uq_elim 33.
+36. 32, 8 ⊢ app f x = φ x fr, subj_elim 34 8.
+37. 33, 8 ⊢ app g x = φ x gr, subj_elim 35 8.
+38. 19, 20, 14, 32, 2, 8 ⊢ app f x = φ x gr,
   eq_subst 31 36, P t ↔ app f x = φ x t.
 39. 19, 20, 14, 32, 33, 8, 2 ⊢ app f x = app g x,
   eq_subst_rev 37 38, P t ↔ app f x = t.
@@ -170,13 +169,14 @@ wf_induction. ⊢ wf R M →
   ∀x. x ∈ X → app f x = app g x, wf_induction 1 42.
 44. 1, 14, 19, 20, 32, 33 ⊢ f = g, map_extensionality 19 20 43.
 45. 1, 14, 19, 20 ⊢
-  (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
-  (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
+  (∀x. x ∈ X → app f x = φ x fr) →
+  (∀x. x ∈ X → app g x = φ x gr) →
   f = g, subj_intro_ii 44.
 wf_rec_unique. ⊢ wf R X → dom R ⊆ X → map f X Y → map g X Y →
   (∀x. x ∈ X → app f x = φ x (restr f (inv_img R {x}))) →
   (∀x. x ∈ X → app g x = φ x (restr g (inv_img R {x}))) →
   f = g, subj_intro_iv 45.
+end
 
 01. 1 ⊢ wf R X, hypo.
 02. 2 ⊢ dom R ⊆ X, hypo.

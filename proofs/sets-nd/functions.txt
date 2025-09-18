@@ -1451,150 +1451,151 @@ restr_is_choice_fn. ⊢ choice_function f →
 17. 2 ⊢ ∃f. choice_function f ∧ dom f = A \ {∅}, ex_intro 16.
 choice_on_class. ⊢ ∃f. choice_function f ∧ dom f = A \ {∅}, ex_elim 1 17.
 
-001. 1 ⊢ X = {x | x ∈ {∅, {∅}} ∧ (A ∨ x = ∅)}, hypo.
-002. 2 ⊢ Y = {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})}, hypo.
-003. ⊢ set ∅, empty_set_is_set.
-004. ⊢ set {∅}, set_sg 3.
-005. ⊢ ∅ ∈ {∅, {∅}}, in21 3.
-006. ⊢ {∅} ∈ {∅, {∅}}, in22 4.
-007. ⊢ u = u, eq_refl.
-008. ⊢ A ∨ u = u, disj_intror 7.
-009. ⊢ A ∨ ∅ = ∅, 8.
-010. ⊢ A ∨ {∅} = {∅}, 8.
-011. ⊢ ∅ ∈ {∅, {∅}} ∧ (A ∨ ∅ = ∅), conj_intro 5 9.
-012. ⊢ {∅} ∈ {∅, {∅}} ∧ (A ∨ {∅} = {∅}), conj_intro 6 10.
-013. ⊢ ∅ ∈ {x | x ∈ {∅, {∅}} ∧ (A ∨ x = ∅)}, comp_intro 3 11,
-  P x ↔ x ∈ {∅, {∅}} ∧ (A ∨ x = ∅).
-014. ⊢ {∅} ∈ {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})}, comp_intro 4 12,
-  P y ↔ y ∈ {∅, {∅}} ∧ (A ∨ y = {∅}).
-015. 1 ⊢ ∅ ∈ X, eq_subst_rev 1 13, P u ↔ ∅ ∈ u.
-016. 2 ⊢ {∅} ∈ Y, eq_subst_rev 2 14, P u ↔ {∅} ∈ u.
+begin
+let X = {x | x ∈ {∅, {∅}} ∧ (A ∨ x = ∅)}.
+let Y = {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})}.
+001. ⊢ set ∅, empty_set_is_set.
+002. ⊢ set {∅}, set_sg 1.
+003. ⊢ ∅ ∈ {∅, {∅}}, in21 1.
+004. ⊢ {∅} ∈ {∅, {∅}}, in22 2.
+005. ⊢ u = u, eq_refl.
+006. ⊢ A ∨ u = u, disj_intror 5.
+007. ⊢ A ∨ ∅ = ∅, 6.
+008. ⊢ A ∨ {∅} = {∅}, 6.
+009. ⊢ ∅ ∈ {∅, {∅}} ∧ (A ∨ ∅ = ∅), conj_intro 3 7.
+010. ⊢ {∅} ∈ {∅, {∅}} ∧ (A ∨ {∅} = {∅}), conj_intro 4 8.
+011. ⊢ ∅ ∈ X, comp_intro 1 9, P x ↔ x ∈ {∅, {∅}} ∧ (A ∨ x = ∅).
+012. ⊢ {∅} ∈ Y, comp_intro 2 10, P y ↔ y ∈ {∅, {∅}} ∧ (A ∨ y = {∅}).
 
-017. ⊢ set {{∅}}, set_sg 4.
-018. ⊢ set {∅, {∅}}, set_union 4 17.
-019. ⊢ set {x | x ∈ {∅, {∅}} ∧ (A ∨ x = ∅)}, sep_is_set 18.
-020. ⊢ set {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})}, sep_is_set 18.
-021. 1 ⊢ set X, eq_subst_rev 1 19, P u ↔ set u.
-022. 2 ⊢ set Y, eq_subst_rev 2 20, P u ↔ set u.
+013. ⊢ set {{∅}}, set_sg 2.
+014. ⊢ set {∅, {∅}}, set_union 2 13.
+015. ⊢ set X, sep_is_set 14.
+016. ⊢ set Y, sep_is_set 14.
+017. 17 ⊢ u ∈ {X, Y} ∩ {∅}, hypo.
+018. 17 ⊢ u ∈ {∅}, intersection_elimr 17.
+019. 17 ⊢ u = ∅, sg_elim 1 18.
+020. 17 ⊢ u ∈ {X, Y}, intersection_eliml 17.
+021. 17 ⊢ u ∈ {X} ∨ u ∈ {Y}, union_elim 20.
+022. 22 ⊢ u ∈ {X}, hypo.
+023. 22 ⊢ u = X, sg_elim 15 22.
+024. 22 ⊢ X = u, eq_symm 23.
+025. 17, 22 ⊢ X = ∅, eq_trans 24 19.
+026. 17, 22 ⊢ ∅ ∈ ∅, eq_subst 25 11, P t ↔ ∅ ∈ t.
+027. 17, 22 ⊢ u ∈ ∅, empty_efq 26.
+028. 28 ⊢ u ∈ {Y}, hypo.
+029. 28 ⊢ u = Y, sg_elim 16 28.
+030. 28 ⊢ Y = u, eq_symm 29.
+031. 17, 28 ⊢ Y = ∅, eq_trans 30 19.
+032. 17, 28 ⊢ {∅} ∈ ∅, eq_subst 31 12, P t ↔ {∅} ∈ t.
+033. 17, 28 ⊢ u ∈ ∅, empty_efq 32.
+034. 17 ⊢ u ∈ ∅, disj_elim 21 27 33.
+035. ⊢ u ∈ {X, Y} ∩ {∅} → u ∈ ∅, subj_intro 34.
+036. ⊢ ∀u. u ∈ {X, Y} ∩ {∅} → u ∈ ∅, uq_intro 35.
+037. ⊢ {X, Y} ∩ {∅} ⊆ ∅, incl_intro 36.
+038. ⊢ ∅ ⊆ {X, Y} ∩ {∅}, empty_set_is_least.
+039. ⊢ {X, Y} ∩ {∅} = ∅, incl_antisym 37 38.
 
-023. 23 ⊢ u ∈ {X, Y} ∩ {∅}, hypo.
-024. 23 ⊢ u ∈ {∅}, intersection_elimr 23.
-025. 23 ⊢ u = ∅, sg_elim 3 24.
-026. 23 ⊢ u ∈ {X, Y}, intersection_eliml 23.
-027. 23 ⊢ u ∈ {X} ∨ u ∈ {Y}, union_elim 26.
-028. 28 ⊢ u ∈ {X}, hypo.
-029. 1, 28 ⊢ u = X, sg_elim 21 28.
-030. 1, 28 ⊢ X = u, eq_symm 29.
-031. 1, 23, 28 ⊢ X = ∅, eq_trans 30 25.
-032. 1, 23, 28 ⊢ ∅ ∈ ∅, eq_subst 31 15.
-033. 1, 23, 28 ⊢ u ∈ ∅, empty_efq 32.
-034. 34 ⊢ u ∈ {Y}, hypo.
-035. 2, 34 ⊢ u = Y, sg_elim 22 34.
-036. 2, 34 ⊢ Y = u, eq_symm 35.
-037. 2, 23, 34 ⊢ Y = ∅, eq_trans 36 25.
-038. 2, 23, 34 ⊢ {∅} ∈ ∅, eq_subst 37 16.
-039. 2, 23, 34 ⊢ u ∈ ∅, empty_efq 38.
-040. 1, 2, 23 ⊢ u ∈ ∅, disj_elim 27 33 39.
-041. 1, 2 ⊢ u ∈ {X, Y} ∩ {∅} → u ∈ ∅, subj_intro 40.
-042. 1, 2 ⊢ ∀u. u ∈ {X, Y} ∩ {∅} → u ∈ ∅, uq_intro 41.
-043. 1, 2 ⊢ {X, Y} ∩ {∅} ⊆ ∅, incl_intro 42.
-044. ⊢ ∅ ⊆ {X, Y} ∩ {∅}, empty_set_is_least.
-045. 1, 2 ⊢ {X, Y} ∩ {∅} = ∅, incl_antisym 43 44.
+040. ⊢ {X, Y} \ {∅} = {X, Y}, diff_disjoint 39.
+041. 41 ⊢ ∀M. ∃f. choice_function f ∧ dom f = M \ {∅}, hypo.
+042. 41 ⊢ ∃f. choice_function f ∧ dom f = {X, Y} \ {∅}, uq_elim 41.
+043. 43 ⊢ choice_function f ∧ dom f = {X, Y} \ {∅}, hypo.
+044. 43 ⊢ choice_function f, conj_eliml 43.
+045. 43 ⊢ dom f = {X, Y} \ {∅}, conj_elimr 43.
+046. 43 ⊢ dom f = {X, Y}, eq_trans 45 40.
+047. 43 ⊢ function f ∧ ∀x. x ∈ dom f → app f x ∈ x,
+  choice_fn_unfold 44.
+048. 43 ⊢ function f, conj_eliml 47.
+049. 43 ⊢ ∀x. x ∈ dom f → app f x ∈ x, conj_elimr 47.
 
-046. 1, 2 ⊢ {X, Y} \ {∅} = {X, Y}, diff_disjoint 45.
-047. 47 ⊢ ∀M. ∃f. choice_function f ∧ dom f = M \ {∅}, hypo.
-048. 47 ⊢ ∃f. choice_function f ∧ dom f = {X, Y} \ {∅}, uq_elim 47.
-049. 49 ⊢ choice_function f ∧ dom f = {X, Y} \ {∅}, hypo.
-050. 49 ⊢ choice_function f, conj_eliml 49.
-051. 49 ⊢ dom f = {X, Y} \ {∅}, conj_elimr 49.
-052. 1, 2, 49 ⊢ dom f = {X, Y}, eq_trans 51 46.
-053. 49 ⊢ function f ∧ ∀x. x ∈ dom f → app f x ∈ x,
-  choice_fn_unfold 50.
-054. 49 ⊢ function f, conj_eliml 53.
-055. 49 ⊢ ∀x. x ∈ dom f → app f x ∈ x, conj_elimr 53.
+050. ⊢ X ⊆ {∅, {∅}}, sep_is_subclass.
+051. ⊢ Y ⊆ {∅, {∅}}, sep_is_subclass.
+052. ⊢ X ∈ {X, Y}, in21 15.
+053. ⊢ Y ∈ {X, Y}, in22 16.
+054. 43 ⊢ X ∈ dom f, eq_subst_rev 46 52, P u ↔ X ∈ u.
+055. 43 ⊢ Y ∈ dom f, eq_subst_rev 46 53, P u ↔ Y ∈ u.
+056. 43 ⊢ app f X ∈ X, uq_bounded_elim 49 54.
+057. 43 ⊢ app f Y ∈ Y, uq_bounded_elim 49 55.
+058. 43 ⊢ app f X ∈ {∅, {∅}} ∧ (A ∨ app f X = ∅), comp_elim 56.
+059. 43 ⊢ app f Y ∈ {∅, {∅}} ∧ (A ∨ app f Y = {∅}), comp_elim 57.
+060. 43 ⊢ A ∨ app f X = ∅, conj_elimr 58.
+061. 43 ⊢ A ∨ app f Y = {∅}, conj_elimr 59.
+062. 43 ⊢ app f X ∈ {∅, {∅}}, conj_eliml 58.
+063. 43 ⊢ app f Y ∈ {∅, {∅}}, conj_eliml 59.
+064. 43 ⊢ app f X ∈ {∅} ∨ app f X ∈ {{∅}}, union_elim 62.
+065. 43 ⊢ app f Y ∈ {∅} ∨ app f Y ∈ {{∅}}, union_elim 63.
 
-056. ⊢ {x | x ∈ {∅, {∅}} ∧ (A ∨ x = ∅)} ⊆ {∅, {∅}}, sep_is_subclass.
-057. ⊢ {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})} ⊆ {∅, {∅}}, sep_is_subclass.
-058. 1 ⊢ X ⊆ {∅, {∅}}, eq_subst_rev 1 56, P u ↔ u ⊆ {∅, {∅}}.
-059. 2 ⊢ Y ⊆ {∅, {∅}}, eq_subst_rev 2 57, P u ↔ u ⊆ {∅, {∅}}.
-060. 1 ⊢ X ∈ {X, Y}, in21 21.
-061. 2 ⊢ Y ∈ {X, Y}, in22 22.
-062. 1, 2, 49 ⊢ X ∈ dom f, eq_subst_rev 52 60, P u ↔ X ∈ u.
-063. 1, 2, 49 ⊢ Y ∈ dom f, eq_subst_rev 52 61, P u ↔ Y ∈ u.
-064. 1, 2, 49 ⊢ app f X ∈ X, uq_bounded_elim 55 62.
-065. 1, 2, 49 ⊢ app f Y ∈ Y, uq_bounded_elim 55 63.
-066. 1, 2, 49 ⊢ app f X ∈ {x | x ∈ {∅, {∅}} ∧ (A ∨ x = ∅)},
-  eq_subst 1 64, P u ↔ app f X ∈ u.
-067. 1, 2, 49 ⊢ app f Y ∈ {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})},
-  eq_subst 2 65, P u ↔ app f Y ∈ u.
-068. 1, 2, 49 ⊢ app f X ∈ {∅, {∅}} ∧ (A ∨ app f X = ∅), comp_elim 66.
-069. 1, 2, 49 ⊢ app f Y ∈ {∅, {∅}} ∧ (A ∨ app f Y = {∅}), comp_elim 67.
-070. 1, 2, 49 ⊢ A ∨ app f X = ∅, conj_elimr 68.
-071. 1, 2, 49 ⊢ A ∨ app f Y = {∅}, conj_elimr 69.
-072. 1, 2, 49 ⊢ app f X ∈ {∅, {∅}}, conj_eliml 68.
-073. 1, 2, 49 ⊢ app f Y ∈ {∅, {∅}}, conj_eliml 69.
-074. 1, 2, 49 ⊢ app f X ∈ {∅} ∨ app f X ∈ {{∅}}, union_elim 72.
-075. 1, 2, 49 ⊢ app f Y ∈ {∅} ∨ app f Y ∈ {{∅}}, union_elim 73.
-076. 76 ⊢ app f Y ∈ {∅}, hypo.
-077. 76 ⊢ app f Y = ∅, sg_elim 3 76.
-078. 1, 2, 49, 76 ⊢ A ∨ ∅ = {∅}, eq_subst 77 71, P u ↔ A ∨ u = {∅}.
-079. 1, 2, 49, 76 ⊢ A, tollendo_ponens_left 78 zero_neq_one.
-080. 1, 2, 49, 76 ⊢ A ∨ ¬A, disj_introl 79.
-081. 81 ⊢ app f Y ∈ {{∅}}, hypo.
-082. 81 ⊢ app f Y = {∅}, sg_elim 4 81.
-083. 83 ⊢ app f X ∈ {∅}, hypo.
-084. 83 ⊢ app f X = ∅, sg_elim 3 83.
-085. 85 ⊢ A, hypo.
-086. 86 ⊢ u ∈ X, hypo.
-087. 1, 86 ⊢ u ∈ {x | x ∈ {∅, {∅}} ∧ (A ∨ x = ∅)}, eq_subst 1 86.
-088. 1, 86 ⊢ u ∈ {∅, {∅}} ∧ (A ∨ u = ∅), comp_elim 87.
-089. 1, 86 ⊢ u ∈ {∅, {∅}}, conj_eliml 88.
-090. 85 ⊢ A ∨ u = {∅}, disj_introl 85.
-091. 1, 85, 86 ⊢ u ∈ {∅, {∅}} ∧ (A ∨ u = {∅}), conj_intro 89 90.
-092. 1, 86 ⊢ set u, set_intro 89.
-093. 1, 85, 86 ⊢ u ∈ {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})}, comp_intro 92 91.
-094. 1, 2, 85, 86 ⊢ u ∈ Y, eq_subst_rev 2 93, P t ↔ u ∈ t.
-095. 1, 2, 85 ⊢ u ∈ X → u ∈ Y, subj_intro 94.
-096. 96 ⊢ u ∈ Y, hypo.
-097. 2, 96 ⊢ u ∈ {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})}, eq_subst 2 96.
-098. 2, 96 ⊢ u ∈ {∅, {∅}} ∧ (A ∨ u = {∅}), comp_elim 97.
-099. 2, 96 ⊢ u ∈ {∅, {∅}}, conj_eliml 98.
-100. 85 ⊢ A ∨ u = ∅, disj_introl 85.
-101. 2, 85, 96 ⊢ u ∈ {∅, {∅}} ∧ (A ∨ u = ∅), conj_intro 99 100.
-102. 2, 96 ⊢ set u, set_intro 99.
-103. 2, 85, 96 ⊢ u ∈ {x | x ∈ {∅, {∅}} ∧ (A ∨ x = ∅)}, comp_intro 102 101.
-104. 1, 2, 85, 96 ⊢ u ∈ X, eq_subst_rev 1 103, P t ↔ u ∈ t.
-105. 1, 2, 85 ⊢ u ∈ Y → u ∈ X, subj_intro 104.
-106. 1, 2, 85 ⊢ u ∈ X ↔ u ∈ Y, bij_intro 95 105.
-107. 1, 2, 85 ⊢ ∀u. u ∈ X ↔ u ∈ Y, uq_intro 106.
-108. 1, 2, 85 ⊢ X = Y, ext 107.
-109. 1, 2, 85 ⊢ app f X = app f Y, f_equal 108, g x = app f x.
-110. 83 ⊢ ∅ = app f X, eq_symm 84.
-111. 1, 2, 83, 85 ⊢ ∅ = app f Y, eq_trans 110 109.
-112. 1, 2, 81, 83, 85 ⊢ ∅ = {∅}, eq_trans 111 82.
-113. 1, 2, 81, 83, 85 ⊢ ⊥, neg_elim zero_neq_one 112.
-114. 1, 2, 81, 83 ⊢ ¬A, neg_intro 113.
-115. 1, 2, 81, 83 ⊢ A ∨ ¬A, disj_intror 114.
-116. 116 ⊢ app f X ∈ {{∅}}, hypo.
-117. 116 ⊢ app f X = {∅}, sg_elim 4 116.
-118. 1, 2, 49, 116 ⊢ A ∨ {∅} = ∅, eq_subst 117 70, P u ↔ A ∨ u = ∅.
-119. ⊢ ¬{∅} = ∅, neq_symm zero_neq_one.
-120. 1, 2, 49, 116 ⊢ A, tollendo_ponens_left 118 119.
-121. 1, 2, 49, 116 ⊢ A ∨ ¬A, disj_introl 120.
-122. 1, 2, 49, 81 ⊢ A ∨ ¬A, disj_elim 74 115 121.
-123. 1, 2, 49 ⊢ A ∨ ¬A, disj_elim 75 80 122.
-124. 47, 1, 2 ⊢ A ∨ ¬A, ex_elim 48 123.
-125. 47, 1 ⊢ Y = {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})} → A ∨ ¬A,
-  subj_intro 124.
-126. 47, 1 ⊢ ∀Y. Y = {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})} → A ∨ ¬A,
-  uq_intro 125.
-127. 47, 1 ⊢ A ∨ ¬A, disused_eq 126.
-128. 47 ⊢ X = {x | x ∈ {∅, {∅}} ∧ (A ∨ x = ∅)} → A ∨ ¬A,
-  subj_intro 127.
-129. 47 ⊢ ∀X. X = {x | x ∈ {∅, {∅}} ∧ (A ∨ x = ∅)} → A ∨ ¬A,
-  uq_intro 128.
-130. 47 ⊢ A ∨ ¬A, disused_eq 129.
+066. 66 ⊢ app f Y ∈ {∅}, hypo.
+067. 66 ⊢ app f Y = ∅, sg_elim 1 66.
+068. 43, 66 ⊢ A ∨ ∅ = {∅}, eq_subst 67 61, P u ↔ A ∨ u = {∅}.
+069. 43, 66 ⊢ A, tollendo_ponens_left 68 zero_neq_one.
+070. 43, 66 ⊢ A ∨ ¬A, disj_introl 69.
+
+071. 71 ⊢ app f Y ∈ {{∅}}, hypo.
+072. 71 ⊢ app f Y = {∅}, sg_elim 2 71.
+073. 73 ⊢ app f X ∈ {∅}, hypo.
+074. 73 ⊢ app f X = ∅, sg_elim 1 73.
+075. 75 ⊢ A, hypo.
+076. 76 ⊢ u ∈ X, hypo.
+077. 76 ⊢ u ∈ {∅, {∅}} ∧ (A ∨ u = ∅), comp_elim 76.
+078. 76 ⊢ u ∈ {∅, {∅}}, conj_eliml 77.
+079. 75 ⊢ A ∨ u = {∅}, disj_introl 75.
+080. 75, 76 ⊢ u ∈ {∅, {∅}} ∧ (A ∨ u = {∅}), conj_intro 78 79.
+081. 76 ⊢ set u, set_intro 78.
+082. 75, 76 ⊢ u ∈ Y, comp_intro 81 80.
+083. 75 ⊢ u ∈ X → u ∈ Y, subj_intro 82.
+084. 84 ⊢ u ∈ Y, hypo.
+085. 84 ⊢ u ∈ {∅, {∅}} ∧ (A ∨ u = {∅}), comp_elim 84.
+086. 84 ⊢ u ∈ {∅, {∅}}, conj_eliml 85.
+087. 75 ⊢ A ∨ u = ∅, disj_introl 75.
+088. 75, 84 ⊢ u ∈ {∅, {∅}} ∧ (A ∨ u = ∅), conj_intro 86 87.
+089. 84 ⊢ set u, set_intro 86.
+090. 75, 84 ⊢ u ∈ X, comp_intro 89 88.
+091. 75 ⊢ u ∈ Y → u ∈ X, subj_intro 90.
+092. 75 ⊢ u ∈ X ↔ u ∈ Y, bij_intro 83 91.
+093. 75 ⊢ ∀u. u ∈ X ↔ u ∈ Y, uq_intro 92.
+094. 75 ⊢ X = Y, ext 93.
+095. 75 ⊢ app g X = app g Y, f_equal 94, f x = app g x.
+096. 75 ⊢ app f X = app f Y, 95.
+097. 73 ⊢ ∅ = app f X, eq_symm 74.
+098. 73, 75 ⊢ ∅ = app f Y, eq_trans 97 96.
+099. 71, 73, 75 ⊢ ∅ = {∅}, eq_trans 98 72.
+100. 71, 73, 75 ⊢ ⊥, neg_elim zero_neq_one 99.
+101. 71, 73 ⊢ ¬A, neg_intro 100.
+102. 71, 73 ⊢ A ∨ ¬A, disj_intror 101.
+
+103. 103 ⊢ app f X ∈ {{∅}}, hypo.
+104. 103 ⊢ app f X = {∅}, sg_elim 2 103.
+105. 43, 103 ⊢ A ∨ {∅} = ∅, eq_subst 104 60, P u ↔ A ∨ u = ∅.
+106. ⊢ ¬{∅} = ∅, neq_symm zero_neq_one.
+107. 43, 103 ⊢ A, tollendo_ponens_left 105 106.
+108. 43, 103 ⊢ A ∨ ¬A, disj_introl 107.
+
+109. 43, 71 ⊢ A ∨ ¬A, disj_elim 64 102 108.
+110. 43 ⊢ A ∨ ¬A, disj_elim 65 70 109.
+111. 41 ⊢ A ∨ ¬A, ex_elim 42 110.
 Diaconescu_Goodman_Myhill_theorem. ⊢
   (∀M. ∃f. choice_function f ∧ dom f = M \ {∅}) →
-  A ∨ ¬A, subj_intro 130.
+  A ∨ ¬A, subj_intro 111.
+end
+
+(*/note Diaconescu_Goodman_Myhill_theorem
+This theorem states that the [[lem|law of excluded middle]] follows from
+the [[choice|axiom of choice]].<br>
+<br>
+<b>Proof sketch</b><br>
+Let A be an arbitrary proposition. Consider the two sets<br>
+\_\_X := {x | x ∈ {0, 1} ∧ (A ∨ (x = 0))},<br>
+\_\_Y := {y | y ∈ {0, 1} ∧ (A ∨ (y = 1))},<br>
+which are non-empty due to 0 ∈ X and 1 ∈ Y, respectively. Accordingly,
+there exists a choice function f:\_{X,\_Y} → X\_∪\_Y with f\_X ∈ X and
+f\_Y ∈ Y. Since f\_X ∈ {0,\_1} and f\_Y ∈ {0,\_1}, there are only four
+cases for the function values in total. We perform a case distinction.
+In the two cases where f\_Y = 0, it holds that 0 ∈ Y, which simplifies
+to A\_∨\_(0\_=\_1), i.e., to A, by which A\_∨\_¬A is all the more true.
+In the two cases where f\_X = 1, it holds that 1\_∈\_X, which simplifies
+to A\_∨\_(1\_=\_0), i.e., to\_A, by which A\_∨\_¬A is all the more true.
+In the remaining case f\_X =\_0, f\_Y\_=\_1, ¬A must hold, because
+assuming\_A would imply f\_X = f\_Y, hence 0 = 1, which is absurd.
+With ¬A, A\_∨\_¬A is all the more true. Thus, A\_∨\_¬A is shown in all
+cases. q.e.d. *)
 

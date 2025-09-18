@@ -118,14 +118,14 @@ The characteristic property of ordered pairs is shown in
 by telling what the projection on the [[fst_eq|first]] and [[scd_eq|second]]
 component of the pair is, see [[pair_fst]] and [[pair_scd]]. *)
 
-(*/note power_eq The <i>power set</i> of a set is the set of all
-its [[incl_equi|subclasses]]. According to the [[power|axiom of power
-sets]] it can never be a proper class. The power of the universal
-class is the universal class itself, as shown in [[power_UnivCl]]. This
-strange behavior can be explained in terms of [[univ_equi|universes]].
-The true power, that is power\_M, is replaced by a cut-off version
-U ∩ power\_M where U is a universe, a set with M\_⊆\_U that resembles
-the universal class. *)
+(*/note power_eq The <i>power set</i> of a [[set_equi|set]] is the set
+of all its [[incl_equi|subclasses]]. According to the [[power|axiom of
+power sets]] it can never be a proper class. One could consider powers
+of proper classes. The power of the universal class is the universal
+class itself, as shown in [[power_UnivCl]]. This strange behavior can be
+explained in terms of [[univ_equi|universes]]. The true power, that is
+power\_M, is replaced by a cut-off version U ∩ power\_M where U is a
+universe, a set with M\_⊆\_U that resembles the universal class. *)
 
 (*/note fst_eq Projection on the first component of a
 [[pair_eq|Kuratowski pair]]. *)
@@ -156,7 +156,7 @@ but not in intuitionistic logic. *)
 
 (*/note ext The axiom of extensionality. It states that two sets with
 the same elements are equal. Thus, a set contains an element neither
-multiple times nor in a specific order, or so to say, it would be
+multiple times nor in a specific order, or, so to say, it would be
 indistinguishable from one presented in different order. *)
 
 (*/note eq_refl States, that equality is a reflexive relation. Note that

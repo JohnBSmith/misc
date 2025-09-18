@@ -112,10 +112,14 @@ def update_dependencies(env, idents):
         if ident[0].isalpha():
             env.dependencies.add(ident)
 
+KEYWORDS = {"let", "begin", "end"}
+
 def extract(s, acc, env):
     i = 0; n = len(s)
     while i < n:
         if s[i].isspace():
+            if s[i] == '\n' and i + 1 < n and s[i + 1] == '\n':
+                env.buf.append("")
             i += 1
         elif s[i] == '#':
             i += 1
@@ -134,6 +138,17 @@ def extract(s, acc, env):
             start = i
             named = s[i].isalpha() or s[i] == '_'
             i, ident = consume_ident(s, n, i)
+            if ident in KEYWORDS:
+                if ident == "let":
+                    j = consume_until('.', s, n, i)
+                    env.buf.append(f"let{s[i:j]}.")
+                    i = j + 1
+                elif ident == "begin":
+                    if env.propose_clear:
+                        env.dependencies.clear()
+                        env.buf.clear()
+                        env.propose_clear = False
+                continue
             if ident.isdigit() and int(ident) > 1:
                 env.propose_clear = False
             i = consume_space(s, n, i)
