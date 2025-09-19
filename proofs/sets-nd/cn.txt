@@ -335,7 +335,7 @@ A set X is called <i>strictly smaller than</i> Y, written
 there is no [[sur_equi|surjection]] from X to Y. *)
 
 (*/note power_equinum_indicators
-This theorem states that the [[power_eq|power set]] of X is
+This theorem states that the [[power_eq|power set]] of a set X is
 [[num_eq_equi|equinumerous]] to set of [[map_equi|maps]]
 from X to {0,\_1}.<br>
 <br>

@@ -264,6 +264,25 @@ Univ_is_set. ⊢ set Univ, eq_subst_rev Univ_eq 2, P t ↔ set t.
 02. ⊢ univ (least_univ onat), conj_elimr 1.
 Univ_is_univ. ⊢ univ Univ, eq_subst_rev Univ_eq 2, P t ↔ univ t.
 
+01. 1 ⊢ univ U, hypo.
+02. 2 ⊢ x ∈ U, hypo.
+03. 1, 2 ⊢ power x ∈ U, univ_closed_power 1 2.
+04. ⊢ U ∩ power x ⊆ power x, intersection_incl_right.
+05. 1, 2 ⊢ U ∩ power x ∈ U, univ_closed_subset 1 4 3.
+truncated_power_closed. ⊢ univ U → x ∈ U → U ∩ power x ∈ U,
+  subj_intro_ii 5.
+
+01. 1 ⊢ univ U, hypo.
+02. 2 ⊢ x ∈ U, hypo.
+03. 1, 2 ⊢ x ⊆ U, univ_trans 1 2.
+04. 2 ⊢ set x, set_intro 2.
+05. 1, 2 ⊢ x ∈ power U, power_intro 4 3.
+06. 1 ⊢ x ∈ U → x ∈ power U, subj_intro 5.
+07. 1 ⊢ ∀x. x ∈ U → x ∈ power U, uq_intro 6.
+08. 1 ⊢ U ⊆ power U, incl_intro 7.
+09. 1 ⊢ U ∩ power U = U, intersection_from_incl 8.
+truncated_power_idem. ⊢ univ U → U ∩ power U = U, subj_intro 9.
+
 (*/note univ_equi Defines what is considered to be the Grothendieck
 universe. Their existence is assured by the
 [[universes|axiom of universes]]. *)

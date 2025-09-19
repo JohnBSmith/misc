@@ -121,11 +121,13 @@ component of the pair is, see [[pair_fst]] and [[pair_scd]]. *)
 (*/note power_eq The <i>power set</i> of a [[set_equi|set]] is the set
 of all its [[incl_equi|subclasses]]. According to the [[power|axiom of
 power sets]] it can never be a proper class. One could consider powers
-of proper classes. The power of the universal class is the universal
-class itself, as shown in [[power_UnivCl]]. This strange behavior can be
-explained in terms of [[univ_equi|universes]]. The true power, that is
-power\_M, is replaced by a cut-off version U ∩ power\_M where U is a
-universe, a set with M\_⊆\_U that resembles the universal class. *)
+of proper classes. The power of the [[UnivCl_eq|universal class]] is the
+universal class itself, as shown in [[power_UnivCl]]. This strange
+behavior can be explained in terms of [[univ_equi|universes]]. The true
+power, that is power\_M, is replaced by a truncated version U ∩ power\_M
+where U is a universe, a set with M\_⊆\_U that resembles the universal
+class. Under these circumstances, we observe [[truncated_power_closed]]
+and [[truncated_power_idem]]. *)
 
 (*/note fst_eq Projection on the first component of a
 [[pair_eq|Kuratowski pair]]. *)
