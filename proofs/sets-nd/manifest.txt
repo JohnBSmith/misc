@@ -10,3 +10,6 @@
 (universes: MK logic basic relations functions powers onat)
 (cn: MK logic basic relations functions powers)
 (on: MK logic basic relations functions powers wellfounded)
+(real: MK logic basic relations functions)
+(nat: MK logic basic relations functions real)
+(int: MK logic basic relations functions real nat)

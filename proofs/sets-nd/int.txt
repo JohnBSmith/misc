@@ -1,0 +1,7 @@
+
+(*/chapter The integers *)
+
+(*/section Basic results *)
+
+int_eq. ⊢ ℤ = {z | z ∈ ℝ ∧
+  ∃a. ∃b. a ∈ ℕ ∧ b ∈ ℕ ∧ z = a - b}, def.
