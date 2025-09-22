@@ -100,6 +100,9 @@ non_link = {"axiom", "def"}
 def url_escape(s):
     return s.replace("'", "%27")
 
+def htm_escape(s):
+    return s.replace("<", "&lt;")
+
 def link_ident(ident):
     if ident[0].isalpha() and not ident in non_link:
         ident_esc = url_escape(ident)
@@ -141,7 +144,7 @@ def extract(s, acc, env):
             if ident in KEYWORDS:
                 if ident == "let":
                     j = consume_until('.', s, n, i)
-                    env.buf.append(f"let{s[i:j]}.")
+                    env.buf.append(f"let{htm_escape(s[i:j])}.")
                     i = j + 1
                 elif ident == "begin":
                     if env.propose_clear:
@@ -180,13 +183,14 @@ def extract(s, acc, env):
                 env.propose_clear = False
             update_dependencies(env, idents)
             idents = " ".join(link_ident(x) for x in idents)
-            env.buf.append(s[start:idents_from] + idents + s[idents_to:i])
+            env.buf.append(htm_escape(s[start:idents_from]) + idents + s[idents_to:i])
             if named:
                 ident_esc = url_escape(ident)
+                text = htm_escape(s[i0:j])
                 acc.append(f"<div class='box'><div class='{cl}'><b class='{cl}'>{kind}.</b> ")
-                acc.append(f"<a href='{DIR_NAME}/{ident_esc}.htm'>{ident}</a><br>\n{s[i0:j]}</div></div>\n")
+                acc.append(f"<a href='{DIR_NAME}/{ident_esc}.htm'>{ident}</a><br>\n{text}</div></div>\n")
                 item = (f"<div class='box'><div class='{cl}'><b class='{cl}'>{kind}.</b> "
-                  + f"{ident}<br>\n{s[i0:j]}</div></div>\n")
+                  + f"{ident}<br>\n{text}</div></div>\n")
                 env.proofs.append({
                     "ident": ident, "kind": kind, "item": item,
                     "proof": "\n".join(env.buf)
@@ -336,6 +340,9 @@ def format_text(s):
         elif s[i] == '\\' and i + 1 < n and s[i + 1] == '_':
             acc.append("&nbsp;")
             i += 2
+        elif s[i] == '<' and i + 1 < n and s[i + 1].isspace():
+            acc.append("&lt;")
+            i += 1
         else:
             acc.append(s[i])
             i += 1

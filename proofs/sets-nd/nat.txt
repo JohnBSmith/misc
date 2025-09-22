@@ -104,15 +104,50 @@ nat_induction. ⊢ P 0 → (∀n. n ∈ ℕ → P n → P (n + 1)) →
   (∀n. n ∈ ℕ → P n), subj_intro_ii 26.
 end
 
-01. 1 ⊢ a ∈ ℕ, hypo.
-02. 1 ⊢ a ∈ ℝ, incl_elim nat_incl_in_real 1.
-03. 1 ⊢ 0 + a = a, radd_neutl 2.
-nadd_neutl. ⊢ a ∈ ℕ → 0 + a = a, subj_intro 3.
+nadd_neutl. ⊢ a ∈ ℕ → 0 + a = a,
+  pred_restr nat_incl_in_real radd_neutl.
 
-01. 1 ⊢ a ∈ ℕ, hypo.
-02. 1 ⊢ a ∈ ℝ, incl_elim nat_incl_in_real 1.
-03. 1 ⊢ a + 0 = a, radd_neutr 2.
-nadd_neutr. ⊢ a ∈ ℕ → a + 0 = a, subj_intro 3.
+nadd_neutr. ⊢ a ∈ ℕ → a + 0 = a,
+  pred_restr nat_incl_in_real radd_neutr.
+
+nmul_neutl. ⊢ a ∈ ℕ → 1⋅a = a,
+  pred_restr nat_incl_in_real rmul_neutl.
+
+nmul_neutr. ⊢ a ∈ ℕ → a⋅1 = a,
+  pred_restr nat_incl_in_real rmul_neutr.
+
+nmul_lzero. ⊢ a ∈ ℕ → 0⋅a = 0,
+  pred_restr nat_incl_in_real rmul_lzero.
+
+nmul_rzero. ⊢ a ∈ ℕ → a⋅0 = 0,
+  pred_restr nat_incl_in_real rmul_rzero.
+
+nadd_comm. ⊢ a ∈ ℕ → b ∈ ℕ → a + b = b + a,
+  pred_ii_restr nat_incl_in_real radd_comm.
+
+nmul_comm. ⊢ a ∈ ℕ → b ∈ ℕ → a⋅b = b⋅a,
+  pred_ii_restr nat_incl_in_real rmul_comm.
+
+nadd_assoc. ⊢ a ∈ ℕ → b ∈ ℕ → c ∈ ℕ → (a + b) + c = a + (b + c),
+  pred_iii_restr nat_incl_in_real radd_assoc.
+
+nmul_distl_add. ⊢ a ∈ ℕ → b ∈ ℕ → c ∈ ℕ → a⋅(b + c) = a⋅b + a⋅c,
+  pred_iii_restr nat_incl_in_real rmul_distl_add.
+
+nmul_distr_add. ⊢ a ∈ ℕ → b ∈ ℕ → c ∈ ℕ → (a + b)⋅c = a⋅c + b⋅c,
+  pred_iii_restr nat_incl_in_real rmul_distr_add.
+
+nmul_distl_sub. ⊢ a ∈ ℕ → b ∈ ℕ → c ∈ ℕ → a⋅(b - c) = a⋅b - a⋅c,
+  pred_iii_restr nat_incl_in_real rmul_distl_sub.
+
+nmul_distr_sub. ⊢ a ∈ ℕ → b ∈ ℕ → c ∈ ℕ → (a - b)⋅c = a⋅c - b⋅c,
+  pred_iii_restr nat_incl_in_real rmul_distr_sub.
+
+nmul_compatl_neg. ⊢ a ∈ ℕ → b ∈ ℕ → -(a⋅b) = (-a)⋅b,
+  pred_ii_restr nat_incl_in_real rmul_compatl_neg.
+
+nmul_compatr_neg. ⊢ a ∈ ℕ → b ∈ ℕ → -(a⋅b) = a⋅(-b),
+  pred_ii_restr nat_incl_in_real rmul_compatr_neg.
 
 01. 1 ⊢ b ∈ ℕ, hypo.
 02. 1 ⊢ 0 + b = b, nadd_neutl 1.
@@ -139,54 +174,24 @@ nadd_neutr. ⊢ a ∈ ℕ → a + 0 = a, subj_intro 3.
 21. 20, 1 ⊢ a + b ∈ ℕ, uq_bounded_elim 19 20.
 nadd_closed. ⊢ a ∈ ℕ → b ∈ ℕ → a + b ∈ ℕ, subj_intro_ii 21.
 
-01. 1 ⊢ x ∈ A, hypo.
-02. 2 ⊢ y ∈ A, hypo.
-03. 3 ⊢ A ⊆ B, hypo.
-04. 1, 3 ⊢ x ∈ B, incl_elim 3 1.
-05. 2, 3 ⊢ y ∈ B, incl_elim 3 2.
-06. 6 ⊢ x ∈ B → y ∈ B → P x y, hypo.
-07. 3, 6, 1 ⊢ y ∈ B → P x y, subj_elim 6 4.
-08. 3, 6, 1, 2 ⊢ P x y, subj_elim 7 5.
-pred_ii_restr. ⊢ A ⊆ B → (x ∈ B → y ∈ B → P x y) →
-  (x ∈ A → y ∈ A → P x y), subj_intro_iv 8.
-
-01. 1 ⊢ x ∈ A, hypo.
-02. 2 ⊢ y ∈ A, hypo.
-03. 3 ⊢ z ∈ A, hypo.
-04. 4 ⊢ A ⊆ B, hypo.
-05. 1, 4 ⊢ x ∈ B, incl_elim 4 1.
-06. 2, 4 ⊢ y ∈ B, incl_elim 4 2.
-07. 3, 4 ⊢ z ∈ B, incl_elim 4 3.
-08. 8 ⊢ x ∈ B → y ∈ B → z ∈ B → P x y z, hypo.
-09. 4, 8, 1 ⊢ y ∈ B → z ∈ B → P x y z, subj_elim 8 5.
-10. 4, 8, 1, 2 ⊢ z ∈ B → P x y z, subj_elim 9 6.
-11. 4, 8, 1, 2, 3 ⊢ P x y z, subj_elim 10 7.
-12. 4, 8 ⊢ x ∈ A → y ∈ A → z ∈ A → P x y z, subj_intro_iii 11.
-pred_iii_restr. ⊢ A ⊆ B → (x ∈ B → y ∈ B → z ∈ B → P x y z) →
-  (x ∈ A → y ∈ A → z ∈ A → P x y z), subj_intro_ii 12.
-
-nadd_comm. ⊢ a ∈ ℕ → b ∈ ℕ → a + b = b + a,
-  pred_ii_restr nat_incl_in_real radd_comm.
-
-nmul_comm. ⊢ a ∈ ℕ → b ∈ ℕ → a⋅b = b⋅a,
-  pred_ii_restr nat_incl_in_real rmul_comm.
-
-nadd_assoc. ⊢ a ∈ ℕ → b ∈ ℕ → c ∈ ℕ → (a + b) + c = a + (b + c),
-  pred_iii_restr nat_incl_in_real radd_assoc.
-
-nmul_distl_add. ⊢ a ∈ ℕ → b ∈ ℕ → c ∈ ℕ → a⋅(b + c) = a⋅b + a⋅c,
-  pred_iii_restr nat_incl_in_real rmul_distl_add.
-
-nmul_distr_add. ⊢ a ∈ ℕ → b ∈ ℕ → c ∈ ℕ → (a + b)⋅c = a⋅c + b⋅c,
-  pred_iii_restr nat_incl_in_real rmul_distr_add.
-
-nmul_distl_sub. ⊢ a ∈ ℕ → b ∈ ℕ → c ∈ ℕ → a⋅(b - c) = a⋅b - a⋅c,
-  pred_iii_restr nat_incl_in_real rmul_distl_sub.
-
-nmul_distr_sub. ⊢ a ∈ ℕ → b ∈ ℕ → c ∈ ℕ → (a - b)⋅c = a⋅c - b⋅c,
-  pred_iii_restr nat_incl_in_real rmul_distr_sub.
-
-nmul_compatr_neg. ⊢ a ∈ ℕ → b ∈ ℕ → -(a⋅b) = a⋅(-b),
-  pred_ii_restr nat_incl_in_real rmul_compatr_neg.
-
+01. 1 ⊢ a ∈ ℕ, hypo.
+02. 1 ⊢ a⋅0 = 0, nmul_rzero 1.
+03. 1 ⊢ a⋅0 ∈ ℕ, eq_subst_rev 2 zero_in_nat,
+  P t ↔ t ∈ ℕ.
+04. 4 ⊢ n ∈ ℕ, hypo.
+05. 5 ⊢ a⋅n ∈ ℕ, hypo.
+06. 1, 5 ⊢ a⋅n + a ∈ ℕ, nadd_closed 5 1.
+07. 1 ⊢ a⋅1 = a, nmul_neutr 1.
+08. 1 ⊢ a⋅n + a⋅1 = a⋅n + a, f_equal 7, f t = a⋅n + t.
+09. ⊢ 1 ∈ ℕ, calc.
+10. 1, 4 ⊢ a⋅(n + 1) = a⋅n + a⋅1, nmul_distl_add 1 4 9.
+11. 1, 4 ⊢ a⋅(n + 1) = a⋅n + a, eq_trans 10 8.
+12. 1, 4, 5 ⊢ a⋅(n + 1) ∈ ℕ, eq_subst_rev 11 6, P t ↔ t ∈ ℕ.
+13. 1 ⊢ n ∈ ℕ → a⋅n ∈ ℕ → a⋅(n + 1) ∈ ℕ, subj_intro_ii 12.
+14. 1 ⊢ ∀n. n ∈ ℕ → a⋅n ∈ ℕ → a⋅(n + 1) ∈ ℕ, uq_intro 13.
+15. 1 ⊢ ∀n. n ∈ ℕ → a⋅n ∈ ℕ,
+  nat_induction 3 14, P n ↔ a⋅n ∈ ℕ.
+16. 16 ⊢ b ∈ ℕ, hypo.
+17. 1, 16 ⊢ a⋅b ∈ ℕ, uq_bounded_elim 15 16.
+nmul_closed. ⊢ a ∈ ℕ → b ∈ ℕ → a⋅b ∈ ℕ, subj_intro_ii 17.
 
