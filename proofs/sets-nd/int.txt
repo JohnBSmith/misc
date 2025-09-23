@@ -5,3 +5,189 @@
 
 int_eq. ⊢ ℤ = {z | z ∈ ℝ ∧
   ∃a. ∃b. a ∈ ℕ ∧ b ∈ ℕ ∧ z = a - b}, def.
+
+01. ⊢ {z | z ∈ ℝ ∧ ∃a. ∃b. a ∈ ℕ ∧ b ∈ ℕ ∧ z = a - b} ⊆ ℝ,
+  sep_is_subclass.
+int_incl_in_real. ⊢ ℤ ⊆ ℝ, eq_subst_rev int_eq 1, P t ↔ t ⊆ ℝ.
+
+begin
+let is_diff n ↔ (∃a. ∃b. a ∈ ℕ ∧ b ∈ ℕ ∧ n = a - b).
+01. 1 ⊢ n ∈ ℕ, hypo.
+02. 1 ⊢ n - 0 = n, nsub_zero 1.
+03. 1 ⊢ n = n - 0, eq_symm 2.
+04. ⊢ 0 ∈ ℕ, zero_in_nat.
+05. 1 ⊢ n ∈ ℕ ∧ 0 ∈ ℕ, conj_intro 1 4.
+06. 1 ⊢ n ∈ ℕ ∧ 0 ∈ ℕ ∧ n = n - 0, conj_intro 5 3.
+07. 1 ⊢ ∃b. n ∈ ℕ ∧ b ∈ ℕ ∧ n = n - b, ex_intro 6.
+08. 1 ⊢ is_diff n, ex_intro 7.
+09. 1 ⊢ n ∈ ℝ, incl_elim nat_incl_in_real 1.
+10. 1 ⊢ n ∈ ℝ ∧ is_diff n, conj_intro 9 8.
+11. 1 ⊢ set n, set_intro 1.
+12. 1 ⊢ n ∈ {z | z ∈ ℝ ∧ is_diff z}, comp_intro 11 10.
+13. 1 ⊢ n ∈ ℤ, eq_subst_rev int_eq 12, P t ↔ n ∈ t.
+14. ⊢ n ∈ ℕ → n ∈ ℤ, subj_intro 13.
+15. ⊢ ∀n. n ∈ ℕ → n ∈ ℤ, uq_intro 14.
+nat_incl_in_int. ⊢ ℕ ⊆ ℤ, incl_intro 15.
+end
+
+begin
+let is_diff z ↔ (∃m. ∃n. m ∈ ℕ ∧ n ∈ ℕ ∧ z = m - n).
+01. 1 ⊢ a ∈ ℤ, hypo.
+02. 2 ⊢ b ∈ ℤ, hypo.
+03. 1 ⊢ a ∈ {z | z ∈ ℝ ∧ is_diff z},
+  eq_subst int_eq 1, P t ↔ a ∈ t.
+04. 2 ⊢ b ∈ {z | z ∈ ℝ ∧ is_diff z},
+  eq_subst int_eq 2, P t ↔ b ∈ t.
+05. 1 ⊢ a ∈ ℝ ∧ is_diff a, comp_elim 3.
+06. 2 ⊢ b ∈ ℝ ∧ is_diff b, comp_elim 4.
+07. 1 ⊢ is_diff a, conj_elimr 5.
+08. 2 ⊢ is_diff b, conj_elimr 6.
+09. 9 ⊢ ∃n. m ∈ ℕ ∧ n ∈ ℕ ∧ a = m - n, hypo.
+10. 10 ⊢ ∃n. m' ∈ ℕ ∧ n ∈ ℕ ∧ b = m' - n, hypo.
+11. 11 ⊢ m ∈ ℕ ∧ n ∈ ℕ ∧ a = m - n, hypo.
+12. 12 ⊢ m' ∈ ℕ ∧ n' ∈ ℕ ∧ b = m' - n', hypo.
+13. 11 ⊢ a = m - n, conj_elimr 11.
+14. 12 ⊢ b = m' - n', conj_elimr 12.
+15. ⊢ m - n = m + -n, rsub_eq.
+16. ⊢ m' - n' = m' + -n', rsub_eq.
+17. 11 ⊢ a = m + -n, eq_trans 13 15.
+18. 12 ⊢ b = m' + -n', eq_trans 14 16.
+19. 11, 12 ⊢ a + b = (m + -n) + (m' + -n'),
+  f_equal_ii 17 18, f x y = x + y.
+20. 11 ⊢ m ∈ ℕ, conj_elimll 11.
+21. 11 ⊢ n ∈ ℕ, conj_elimlr 11.
+22. 12 ⊢ m' ∈ ℕ, conj_elimll 12.
+23. 12 ⊢ n' ∈ ℕ, conj_elimlr 12.
+24. 11 ⊢ m ∈ ℝ, incl_elim nat_incl_in_real 20.
+25. 11 ⊢ n ∈ ℝ, incl_elim nat_incl_in_real 21.
+26. 12 ⊢ m' ∈ ℝ, incl_elim nat_incl_in_real 22.
+27. 12 ⊢ n' ∈ ℝ, incl_elim nat_incl_in_real 23.
+28. 11 ⊢ -n ∈ ℝ, rneg_closed 25.
+29. 12 ⊢ -n' ∈ ℝ, rneg_closed 27.
+30. 11 ⊢ m + -n ∈ ℝ, radd_closed 24 28.
+31. 11, 12 ⊢ m + -n + m' + -n' = m + -n + (m' + -n'),
+  radd_assoc 30 26 29.
+32. 11, 12 ⊢ a + b = m + -n + m' + -n', eq_trans_rr 19 31.
+33. 11, 12 ⊢ m + -n + m' = m + (-n + m'), radd_assoc 24 28 26.
+34. 11, 12 ⊢ -n + m' = m' + -n, radd_comm 28 26.
+35. 11, 12 ⊢ m + -n + m' = m + (m' + -n),
+  eq_subst 34 33, P t ↔ m + -n + m' = m + t.
+36. 11, 12 ⊢ m + m' + -n = m + (m' + -n), radd_assoc 24 26 28.
+37. 11, 12 ⊢ m + -n + m' = m + m' + -n, eq_trans_rr 35 36.
+38. 11, 12 ⊢ a + b = m + m' + -n + -n',
+  eq_subst 37 32, P t ↔ a + b = t + -n'.
+39. 11, 12 ⊢ m + m' ∈ ℝ, radd_closed 24 26.
+40. 11, 12 ⊢ m + m' + -n + -n' = (m + m') + (-n + -n'),
+  radd_assoc 39 28 29.
+41. 11, 12 ⊢ a + b = (m + m') + (-n + -n'), eq_trans 38 40.
+42. 11, 12 ⊢ -(n + n') = -n + -n', rneg_dist_add 25 27.
+43. 11, 12 ⊢ a + b = (m + m') + -(n + n'),
+  eq_subst_rev 42 41, P t ↔ a + b = (m + m') + t.
+44. ⊢ (m + m') - (n + n') = (m + m') + -(n + n'), rsub_eq.
+45. 11, 12 ⊢ a + b = (m + m') - (n + n'), eq_trans_rr 43 44.
+46. 11, 12 ⊢ m + m' ∈ ℕ, nadd_closed 20 22.
+47. 11, 12 ⊢ n + n' ∈ ℕ, nadd_closed 21 23.
+48. 11, 12 ⊢ m + m' ∈ ℕ ∧ n + n' ∈ ℕ, conj_intro 46 47.
+49. 11, 12 ⊢ m + m' ∈ ℕ ∧ n + n' ∈ ℕ ∧
+  a + b = (m + m') - (n + n'), conj_intro 48 45.
+50. 11, 12 ⊢ ∃n. m + m' ∈ ℕ ∧ n ∈ ℕ ∧
+  a + b = (m + m') - n, ex_intro 49.
+51. 11, 12 ⊢ is_diff (a + b), ex_intro 50.
+52. 12 ⊢ m' + -n' ∈ ℝ, radd_closed 26 29.
+53. 11 ⊢ a ∈ ℝ, eq_subst_rev 17 30, P t ↔ t ∈ ℝ.
+54. 12 ⊢ b ∈ ℝ, eq_subst_rev 18 52, P t ↔ t ∈ ℝ.
+55. 11, 12 ⊢ a + b ∈ ℝ, radd_closed 53 54.
+56. 11, 12 ⊢ set (a + b), set_intro 55.
+57. 11, 12 ⊢ a + b ∈ ℝ ∧ is_diff (a + b), conj_intro 55 51.
+58. 11, 12 ⊢ a + b ∈ {z | z ∈ ℝ ∧ is_diff z},
+  comp_intro 56 57, P z ↔ z ∈ ℝ ∧ is_diff z.
+59. 11, 12 ⊢ a + b ∈ ℤ,
+  eq_subst_rev int_eq 58, P t ↔ a + b ∈ t.
+60. 10, 11 ⊢ a + b ∈ ℤ, ex_elim 10 59.
+61. 9, 10 ⊢ a + b ∈ ℤ, ex_elim 9 60.
+62. 2, 9 ⊢ a + b ∈ ℤ, ex_elim 8 61.
+63. 1, 2 ⊢ a + b ∈ ℤ, ex_elim 7 62.
+iadd_closed. ⊢ a ∈ ℤ → b ∈ ℤ → a + b ∈ ℤ, subj_intro_ii 63.
+end
+
+begin
+let is_diff z ↔ (∃m. ∃n. m ∈ ℕ ∧ n ∈ ℕ ∧ z = m - n).
+01. 1 ⊢ a ∈ ℤ, hypo.
+02. 1 ⊢ a ∈ {z | z ∈ ℝ ∧ is_diff z},
+  eq_subst int_eq 1, P t ↔ a ∈ t.
+03. 1 ⊢ a ∈ ℝ ∧ is_diff a, comp_elim 2.
+04. 1 ⊢ a ∈ ℝ, conj_eliml 3.
+05. 1 ⊢ is_diff a, conj_elimr 3.
+06. 6 ⊢ ∃n. m ∈ ℕ ∧ n ∈ ℕ ∧ a = m - n, hypo.
+07. 7 ⊢ m ∈ ℕ ∧ n ∈ ℕ ∧ a = m - n, hypo.
+08. 7 ⊢ m ∈ ℕ, conj_elimll 7.
+09. 7 ⊢ n ∈ ℕ, conj_elimlr 7.
+10. 7 ⊢ m ∈ ℝ, incl_elim nat_incl_in_real 8.
+11. 7 ⊢ n ∈ ℝ, incl_elim nat_incl_in_real 9.
+12. 7 ⊢ a = m - n, conj_elimr 7.
+13. 7 ⊢ -a = -(m - n), f_equal 12, f t = -t.
+14. 7 ⊢ -(m - n) = n - m, rsub_neg 10 11.
+15. 7 ⊢ -a = n - m, eq_trans 13 14.
+16. 7 ⊢ n ∈ ℕ ∧ m ∈ ℕ, conj_intro 9 8.
+17. 7 ⊢ n ∈ ℕ ∧ m ∈ ℕ ∧ -a = n - m, conj_intro 16 15.
+18. 7 ⊢ ∃m. n ∈ ℕ ∧ m ∈ ℕ ∧ -a = n - m, ex_intro 17.
+19. 7 ⊢ is_diff (-a), ex_intro 18.
+20. 1 ⊢ -a ∈ ℝ, rneg_closed 4.
+21. 1 ⊢ set (-a), set_intro 20.
+22. 1, 7 ⊢ -a ∈ ℝ ∧ is_diff (-a), conj_intro 20 19.
+23. 1, 7 ⊢ -a ∈ {z | z ∈ ℝ ∧ is_diff z},
+  comp_intro 21 22, P z ↔ z ∈ ℝ ∧ is_diff z.
+24. 1, 7 ⊢ -a ∈ ℤ, eq_subst_rev int_eq 23, P t ↔ -a ∈ t.
+25. 1, 6 ⊢ -a ∈ ℤ, ex_elim 6 24.
+26. 1 ⊢ -a ∈ ℤ, ex_elim 5 25.
+ineg_closed. ⊢ a ∈ ℤ → -a ∈ ℤ, subj_intro 26.
+end
+
+iadd_neutl. ⊢ a ∈ ℤ → 0 + a = a,
+  pred_restr int_incl_in_real radd_neutl.
+
+iadd_neutr. ⊢ a ∈ ℤ → a + 0 = a,
+  pred_restr int_incl_in_real radd_neutr.
+
+isub_zero. ⊢ a ∈ ℤ → a - 0 = a,
+  pred_restr int_incl_in_real rsub_zero.
+
+imul_neutl. ⊢ a ∈ ℤ → 1⋅a = a,
+  pred_restr int_incl_in_real rmul_neutl.
+
+imul_neutr. ⊢ a ∈ ℤ → a⋅1 = a,
+  pred_restr int_incl_in_real rmul_neutr.
+
+imul_lzero. ⊢ a ∈ ℤ → 0⋅a = 0,
+  pred_restr int_incl_in_real rmul_lzero.
+
+imul_rzero. ⊢ a ∈ ℤ → a⋅0 = 0,
+  pred_restr int_incl_in_real rmul_rzero.
+
+iadd_comm. ⊢ a ∈ ℤ → b ∈ ℤ → a + b = b + a,
+  pred_ii_restr int_incl_in_real radd_comm.
+
+imul_comm. ⊢ a ∈ ℤ → b ∈ ℤ → a⋅b = b⋅a,
+  pred_ii_restr int_incl_in_real rmul_comm.
+
+iadd_assoc. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ → (a + b) + c = a + (b + c),
+  pred_iii_restr int_incl_in_real radd_assoc.
+
+imul_distl_add. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ → a⋅(b + c) = a⋅b + a⋅c,
+  pred_iii_restr int_incl_in_real rmul_distl_add.
+
+imul_distr_add. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ → (a + b)⋅c = a⋅c + b⋅c,
+  pred_iii_restr int_incl_in_real rmul_distr_add.
+
+imul_distl_sub. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ → a⋅(b - c) = a⋅b - a⋅c,
+  pred_iii_restr int_incl_in_real rmul_distl_sub.
+
+imul_distr_sub. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ → (a - b)⋅c = a⋅c - b⋅c,
+  pred_iii_restr int_incl_in_real rmul_distr_sub.
+
+imul_compatl_neg. ⊢ a ∈ ℤ → b ∈ ℤ → -(a⋅b) = (-a)⋅b,
+  pred_ii_restr int_incl_in_real rmul_compatl_neg.
+
+imul_compatr_neg. ⊢ a ∈ ℤ → b ∈ ℤ → -(a⋅b) = a⋅(-b),
+  pred_ii_restr int_incl_in_real rmul_compatr_neg.
+

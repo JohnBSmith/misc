@@ -164,7 +164,7 @@ let φ = {t | ∃A. A ∈ power X ∧ t = (A, χ A X)}.
 12. 12 ⊢ app φ A = app φ B, hypo.
 13. 1, 10 ⊢ app φ A = χ A X, map_from_term_app 8 7 10.
 14. 1, 11 ⊢ app φ B = χ B X, map_from_term_app 8 7 11.
-15. 1, 10, 12 ⊢ χ A X = app φ B, eq_symm_trans 13 12.
+15. 1, 10, 12 ⊢ χ A X = app φ B, eq_trans_ll 13 12.
 16. 1, 10, 11, 12 ⊢ χ A X = χ B X, eq_trans 15 14.
 17. 10 ⊢ A ⊆ X, power_elim 10.
 18. 11 ⊢ B ⊆ X, power_elim 11.
@@ -217,7 +217,7 @@ let A = inv_img f {{∅}}.
 57. 38, 42, 45, 53 ⊢ y = ∅, fn_unique_value 56 55 48.
 58. ⊢ set {∅}, set_sg empty_set_is_set.
 59. 53 ⊢ y = {∅}, sg_elim 58 54.
-60. 38, 42, 45, 53 ⊢ ∅ = {∅}, eq_symm_trans 57 59.
+60. 38, 42, 45, 53 ⊢ ∅ = {∅}, eq_trans_ll 57 59.
 61. 38, 42, 45, 53 ⊢ ⊥, neg_elim zero_neq_one 60.
 62. 38, 42, 45, 51 ⊢ ⊥, ex_elim 52 61.
 63. 38, 42, 45 ⊢ ¬x ∈ A, neg_intro 62.
@@ -278,7 +278,7 @@ let i = {t | ∃x. x ∈ X ∧ t = (x, {x})}.
 13. 10 ⊢ app i a = {a}, map_from_term_app 1 8 10.
 14. 11 ⊢ app i b = {b}, map_from_term_app 1 8 11.
 15. 11, 12 ⊢ app i a = {b}, eq_trans 12 14.
-16. 10, 11, 12 ⊢ {a} = {b}, eq_symm_trans 13 15.
+16. 10, 11, 12 ⊢ {a} = {b}, eq_trans_ll 13 15.
 17. 10 ⊢ set a, set_intro 10.
 18. 11 ⊢ set b, set_intro 11.
 19. 10, 11, 12 ⊢ a = b, sg_is_inj 17 18 16.

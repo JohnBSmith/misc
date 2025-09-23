@@ -110,6 +110,9 @@ nadd_neutl. ⊢ a ∈ ℕ → 0 + a = a,
 nadd_neutr. ⊢ a ∈ ℕ → a + 0 = a,
   pred_restr nat_incl_in_real radd_neutr.
 
+nsub_zero. ⊢ a ∈ ℕ → a - 0 = a,
+  pred_restr nat_incl_in_real rsub_zero.
+
 nmul_neutl. ⊢ a ∈ ℕ → 1⋅a = a,
   pred_restr nat_incl_in_real rmul_neutl.
 

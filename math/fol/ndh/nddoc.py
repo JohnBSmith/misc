@@ -5,6 +5,7 @@
 from sys import argv
 from os.path import isdir
 from os import mkdir
+from urllib.parse import quote
 
 DIR_NAME = "proofs-doc"
 
@@ -95,18 +96,14 @@ def consume_ident_list(s, n, i):
         i = consume_space(s, n, i)
     return i, idents
 
-non_link = {"axiom", "def"}
-
-def url_escape(s):
-    return s.replace("'", "%27")
+non_link = {"axiom", "def", "calc"}
 
 def htm_escape(s):
     return s.replace("<", "&lt;")
 
 def link_ident(ident):
     if ident[0].isalpha() and not ident in non_link:
-        ident_esc = url_escape(ident)
-        return f"<a href='{ident_esc}.htm'>{ident}</a>"
+        return f"<a href='{quote(ident)}.htm'>{ident}</a>"
     else:
         return ident
 
@@ -185,10 +182,10 @@ def extract(s, acc, env):
             idents = " ".join(link_ident(x) for x in idents)
             env.buf.append(htm_escape(s[start:idents_from]) + idents + s[idents_to:i])
             if named:
-                ident_esc = url_escape(ident)
+                qident = quote(ident)
                 text = htm_escape(s[i0:j])
                 acc.append(f"<div class='box'><div class='{cl}'><b class='{cl}'>{kind}.</b> ")
-                acc.append(f"<a href='{DIR_NAME}/{ident_esc}.htm'>{ident}</a><br>\n{text}</div></div>\n")
+                acc.append(f"<a href='{DIR_NAME}/{qident}.htm'>{ident}</a><br>\n{text}</div></div>\n")
                 item = (f"<div class='box'><div class='{cl}'><b class='{cl}'>{kind}.</b> "
                   + f"{ident}<br>\n{text}</div></div>\n")
                 env.proofs.append({
