@@ -1,0 +1,49 @@
+
+(*/chapter Orders *)
+
+(*/section General concepts *)
+
+is_max_equi. ⊢ is_max R y A ↔ y ∈ A ∧ ∀x. x ∈ A → R x y, def.
+is_min_equi. ⊢ is_min R y A ↔ y ∈ A ∧ ∀x. x ∈ A → R y x, def.
+
+is_sup_equi. ⊢ is_sup R M y A ↔
+  (∀x. x ∈ A → R x y) ∧
+  (∀b. b ∈ M → (∀x. x ∈ A → R x b) → R y b), def.
+
+is_inf_equi. ⊢ is_inf R M y A ↔
+  (∀x. x ∈ A → R y x) ∧
+  (∀b. b ∈ M → (∀x. x ∈ A → R b x) → R b y), def.
+
+
+(*/section Partial orders *)
+
+po_equi. ⊢ partial_order R M ↔
+  (∀x. x ∈ M → R x x) ∧
+  (∀x. ∀y. x ∈ M → y ∈ M → R x y → R y x → x = y) ∧
+  (∀x. ∀y. ∀z. x ∈ M → y ∈ M → z ∈ M → R x y → R y z → R x z), def.
+
+01. 1 ⊢ partial_order R M, hypo.
+02. 1 ⊢ ∀x. x ∈ M → R x x, lsubj_conj_elimll po_equi 1.
+03. 1 ⊢ x ∈ M → R x x, uq_elim 2.
+po_refl. ⊢ partial_order R M → x ∈ M → R x x, subj_intro 3.
+
+01. 1 ⊢ partial_order R M, hypo.
+02. 1 ⊢ ∀x. ∀y. x ∈ M → y ∈ M → R x y → R y x → x = y,
+  lsubj_conj_elimlr po_equi 1.
+03. 1 ⊢ ∀y. x ∈ M → y ∈ M → R x y → R y x → x = y, uq_elim 2.
+04. 1 ⊢ x ∈ M → y ∈ M → R x y → R y x → x = y, uq_elim 3.
+po_antisym. ⊢ partial_order R M → x ∈ M → y ∈ M →
+  R x y → R y x → x = y, subj_intro 4.
+
+01. 1 ⊢ partial_order R M, hypo.
+02. 1 ⊢ ∀x. ∀y. ∀z. x ∈ M → y ∈ M → z ∈ M →
+  R x y → R y z → R x z, lsubj_conj_elimr po_equi 1.
+03. 1 ⊢ ∀y. ∀z. x ∈ M → y ∈ M → z ∈ M →
+  R x y → R y z → R x z, uq_elim 2.
+04. 1 ⊢ ∀z. x ∈ M → y ∈ M → z ∈ M →
+  R x y → R y z → R x z, uq_elim 3.
+05. 1 ⊢ x ∈ M → y ∈ M → z ∈ M →
+  R x y → R y z → R x z, uq_elim 4.
+po_trans. ⊢ partial_order R M → x ∈ M → y ∈ M → z ∈ M →
+  R x y → R y z → R x z, subj_intro 5.
+

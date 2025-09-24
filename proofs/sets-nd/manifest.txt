@@ -4,6 +4,7 @@
 (relations: MK logic basic)
 (functions: MK logic basic relations)
 (powers: MK logic basic)
+(orders: MK logic basic)
 (wellfounded: MK logic basic powers functions)
 (onat: MK logic basic relations functions)
 (clops: MK logic basic relations functions powers)
