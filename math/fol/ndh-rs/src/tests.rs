@@ -10,7 +10,7 @@ const ESYNTAX: Expected = Expected::ErrSyntax;
 
 #[test]
 fn keywords_sorted() {
-    fn is_sorted(a: &[(&[u8], &str)]) -> bool {
+    fn is_sorted(a: &[(&[u8], &str, u8)]) -> bool {
         let mut i = 1;
         while i < a.len() {
             if a[i-1].0 >= a[i].0 {return false;}

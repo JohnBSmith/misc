@@ -5,6 +5,12 @@
 //   Man beachte auch den Unterschied in der Logik, dass Symbole der
 //   Symboltabelle niemals als Muster zur Verfügung stehen. Eigentlich
 //   ein gewolltes Verhalten.
+// todo: Makros erst nach dem Parsen expandieren? Dann wären sie
+//   hygienisch in Bezug auf gebundene Variablen, was man als
+//   wünschenswert erachten kann.
+// todo: Typinferenz nicht bereits während dem Parsen durchführen.
+//   Wieder teilweise schwierig durchschaubar geworden. Muss ordentlich
+//   gemacht werden. Hier wären extra Unit-Tests wünschenswert.
 
 use std::{env::args, fs, io::Write};
 use std::{rc::Rc, cell::Cell};
@@ -75,6 +81,7 @@ fn in_sym2(s: &[u8], i: usize, n: usize) -> Option<Bstr> {
         b"->" => Some(Bstr::from("→")),
         b"/\\" => Some(Bstr::from("∧")),
         b"\\/" => Some(Bstr::from("∨")),
+        b"<=" => Some(Bstr::from("≤")),
         _ => None
     }
 }
@@ -87,24 +94,35 @@ fn in_sym3(s: &[u8], i: usize, n: usize) -> Option<Bstr> {
     }
 }
 
-static KEYWORDS: &[(&[u8], &str)] = &[
-    (b"Cap", "⋂"),
-    (b"Cup", "⋃"),
-    (b"and", "∧"),
-    (b"cap", "∩"),
-    (b"circ", "∘"),
-    (b"cong", "≡"),
-    (b"cup", "∪"),
-    (b"exists", "∃"),
-    (b"false", "⊥"),
-    (b"forall", "∀"),
-    (b"in", "∈"),
-    (b"not", "¬"),
-    (b"or", "∨"),
-    (b"prod", "∏"),
-    (b"sub", "⊆"),
-    (b"times", "×"),
-    (b"true", "⊤")
+const SYMBOL: u8 = 0;
+const IDENT: u8 = 1;
+
+static KEYWORDS: &[(&[u8], &str, u8)] = &[
+    (b"Cap", "⋂", SYMBOL),
+    (b"Complex", "ℂ", IDENT),
+    (b"Cup", "⋃", SYMBOL),
+    (b"Int", "ℤ", IDENT),
+    (b"Nat", "ℕ", IDENT),
+    (b"Rat", "ℚ", IDENT),
+    (b"Real", "ℝ", IDENT),
+    (b"and", "∧", SYMBOL),
+    (b"begin", "begin", SYMBOL),
+    (b"cap", "∩", SYMBOL),
+    (b"circ", "∘", SYMBOL),
+    (b"cup", "∪", SYMBOL),
+    (b"end", "end", SYMBOL),
+    (b"equiv", "≡", SYMBOL),
+    (b"exists", "∃", SYMBOL),
+    (b"false", "⊥", SYMBOL),
+    (b"forall", "∀", SYMBOL),
+    (b"in", "∈", SYMBOL),
+    (b"let", "let", SYMBOL),
+    (b"not", "¬", SYMBOL),
+    (b"or", "∨", SYMBOL),
+    (b"prod", "∏", SYMBOL),
+    (b"sub", "⊆", SYMBOL),
+    (b"times", "×", SYMBOL),
+    (b"true", "⊤", SYMBOL),
 ];
 
 fn is_utf8_continuation_byte(byte: u8) -> bool {
@@ -162,7 +180,14 @@ fn scan(s: &[u8]) -> Vec<Token> {
                 i = unicode_identifier(s, i, n);
             }
             let value = match KEYWORDS.binary_search_by_key(&&s[j..i], |t| t.0) {
-                Ok(index) => TokenValue::Symbol(Bstr::from(KEYWORDS[index].1)),
+                Ok(index) => {
+                    let record = &KEYWORDS[index];
+                    if record.2 == SYMBOL {
+                        TokenValue::Symbol(Bstr::from(record.1))
+                    } else {
+                        TokenValue::Identifier(Bstr::from(record.1))
+                    }
+                },
                 _ => TokenValue::Identifier(Bstr::from(&s[j..i]))
             };
             acc.push(Token {line, value});
@@ -268,7 +293,10 @@ struct Substitution {
 
 impl Substitution {
     fn call(&self, argv: &[Term]) -> Term {
-        substitute_terms(&self.term, &self.args, argv)
+        substitute_terms(&self.term, &self.args, argv, false)
+    }
+    fn macro_call(&self, argv: &[Term]) -> Term {
+        substitute_terms(&self.term, &self.args, argv, true)
     }
 }
 
@@ -279,6 +307,7 @@ enum TermValue {
     PatVar(Bstr),
     BoundVar(usize),
     App(Rc<[Term]>),
+    Int(i64),
     Forall(Rc<(Term, Term)>),
     Exists(Rc<(Term, Term)>),
     Lambda(Rc<(Term, Term)>),
@@ -310,10 +339,14 @@ impl Term {
             _ => panic!()
         }
     }
+
+    fn deep_copy(&self) -> Term {
+        Term {value: self.value.deep_copy(), ty: self.ty.clone()}
+    }
 }
 
 use TermValue::{
-    Var, Const, PatVar, BoundVar, App, Forall, Exists, Lambda, Subst
+    Var, Const, PatVar, BoundVar, App, Int, Forall, Exists, Lambda, Subst
 };
 
 fn term(value: TermValue, ty: Type) -> Term {
@@ -336,6 +369,25 @@ fn conjunction(a: Term, b: Term) -> Term {
     app([constant("conj", prop_prop_prop()), a, b], Prop)
 }
 
+impl TermValue {
+    fn deep_copy(&self) -> TermValue {
+        match self {
+            Var(x) => Var(x.clone()),
+            Const(x) => Const(x.clone()),
+            PatVar(x) => PatVar(x.clone()),
+            BoundVar(n) => BoundVar(*n),
+            Int(n) => Int(*n),
+            App(a) => {
+                App(Rc::from(a.iter().map(|x| x.deep_copy()).collect::<Vec<_>>()))
+            },
+            Forall(x) => Forall(Rc::new((x.0.deep_copy(), x.1.deep_copy()))),
+            Exists(x) => Exists(Rc::new((x.0.deep_copy(), x.1.deep_copy()))),
+            Lambda(x) => Lambda(Rc::new((x.0.deep_copy(), x.1.deep_copy()))),
+            Subst(subs) => Subst(subs.clone())
+        }
+    }
+}
+
 impl std::fmt::Debug for Term {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if f.alternate() {
@@ -352,6 +404,7 @@ impl std::fmt::Display for Term {
         match &self.value {
             Var(x) | Const(x) | PatVar(x) => write!(f, "{}", x),
             BoundVar(x) => write!(f, "${}", x),
+            Int(x) => write!(f, "{}", x),
             App(a) => {
                 write!(f, "(")?;
                 let mut first = true;
@@ -424,7 +477,7 @@ fn init_infix_table() -> HashMap<&'static [u8], (u32, Assoc, Infix)> {
         ("⊆".as_bytes(), (70, L, infix("subset", Ind, Prop))),
         ("∈".as_bytes(), (70, L, infix("element", Ind, Prop))),
         ("=".as_bytes(), (70, L, infix("eq",   Ind,  Prop))),
-        ("≡".as_bytes(), (70, L, infix("cong", Ind,  Prop))),
+        ("≡".as_bytes(), (70, L, infix("equiv", Ind,  Prop))),
         ("∧".as_bytes(), (50, L, infix("conj", Prop, Prop))),
         ("∨".as_bytes(), (40, L, infix("disj", Prop, Prop))),
         ("→".as_bytes(), (30, R, infix("subj", Prop, Prop))),
@@ -466,6 +519,7 @@ fn init_prefix_table() -> HashMap<&'static [u8], (u32, Prefix)> {
     HashMap::from([
         ("⋂".as_bytes(), (100, prefix("Intersection", Ind, Ind))),
         ("⋃".as_bytes(), (100, prefix("Union", Ind, Ind))),
+        ("-".as_bytes(), (100, prefix("minus", Ind, Ind))),
         ("~".as_bytes(), ( 60, prefix("neg", Prop, Prop))),
         ("¬".as_bytes(), ( 60, prefix("neg", Prop, Prop))),
         ("□".as_bytes(), ( 60, prefix("nec", Prop, Prop))),
@@ -525,6 +579,7 @@ struct Env {
     book: HashMap<Bstr, Term>,
     var_counter: Cell<usize>,
     definitions: HashMap<Bstr, Type>,
+    macro_stack: Vec<Vec<(Bstr, Term)>>,
 
     #[cfg(debug_assertions)]
     mismatch_trace: std::cell::RefCell<Vec<(Term, Term)>>
@@ -540,6 +595,7 @@ impl Env {
             book: HashMap::new(),
             var_counter: Cell::new(0),
             definitions: init_definitions(),
+            macro_stack: vec![Vec::new()],
 
             #[cfg(debug_assertions)]
             mismatch_trace: std::cell::RefCell::new(Vec::new())
@@ -571,7 +627,7 @@ impl Env {
         let a = self.mismatch_trace.borrow();
         println!("Traceback:\n");
         for (x, y) in a.iter() {
-            println!("     {}\nwith {}\n", x, y);
+            println!("     {}: {}\nwith {}: {}\n", x, x.ty, y, y.ty);
         }
     }
 }
@@ -596,12 +652,26 @@ fn substitute_term(t: &Term, x: &Term, u: &Term) -> Term {
     }
 }
 
-fn substitute_terms(t: &Term, x: &[Term], u: &[Term]) -> Term {
+// mc: macro call flag
+fn substitute_terms(t: &Term, x: &[Term], u: &[Term], mc: bool) -> Term {
     match &t.value {
         Var(tv) => {
             for i in 0..x.len() {
                 match &x[i].value {
-                    Var(xiv) if tv == xiv => {return u[i].clone();}
+                    Var(xiv) if tv == xiv => {
+                        let mut result = u[i].clone();
+                        // ^panic here reachable, can u.len() < x.len()??
+                        // Apply f x y = term as f x.
+                        if mc {
+                            if result.ty == Type::Some && t.ty != Type::Some {
+                                result.ty = t.ty.clone();
+                            } else if t.ty != Type::Some && result.ty != t.ty {
+                                panic!("Type error\ntype of result: {}\ntype expected: {}",
+                                    result.ty, t.ty)
+                            }
+                        }
+                        return result;
+                    }
                     _ => {}
                 }
             }
@@ -626,15 +696,15 @@ fn substitute_terms(t: &Term, x: &[Term], u: &[Term]) -> Term {
             t.clone()
         },
         App(a) => term(App(Rc::from(a.iter().map(|s|
-            substitute_terms(s, x, u)).collect::<Vec<_>>())), t.ty.clone()),
+            substitute_terms(s, x, u, mc)).collect::<Vec<_>>())), t.ty.clone()),
         Forall(a) => term(
-            Forall(Rc::new((a.0.clone(), substitute_terms(&a.1, x, u)))),
+            Forall(Rc::new((a.0.clone(), substitute_terms(&a.1, x, u, mc)))),
             t.ty.clone()),
         Exists(a) => term(
-            Exists(Rc::new((a.0.clone(), substitute_terms(&a.1, x, u)))),
+            Exists(Rc::new((a.0.clone(), substitute_terms(&a.1, x, u, mc)))),
             t.ty.clone()),
         Lambda(a) => term(
-            Lambda(Rc::new((a.0.clone(), substitute_terms(&a.1, x, u)))),
+            Lambda(Rc::new((a.0.clone(), substitute_terms(&a.1, x, u, mc)))),
             t.ty.clone()),
         _ => t.clone()
     }
@@ -715,11 +785,36 @@ fn comprehension(env: &Env) -> Result<Term, Error> {
     Ok(app([constant("comp", Type::None), pred], Ind))
 }
 
+fn invalid_digit(line: usize, byte: u8) -> Error {
+    syntax_error(line, format!("invalid digit: {}", byte))
+}
+
+fn parse_int(line: usize, x: &Bstr) -> Result<i64, Error> {
+    let mut n: i64 = 0;
+    for &byte in x.as_slice() {
+        let digit = match byte.checked_sub(b'0') {
+            None => return Err(invalid_digit(line, byte)),
+            Some(digit) if digit > 9 => return Err(invalid_digit(line, byte)),
+            Some(digit) => i64::from(digit)
+        };
+        n = n.checked_mul(10).and_then(|n| n.checked_add(digit))
+            .ok_or_else(|| syntax_error(line,
+                format!("number literal too large: {}", x)))?;
+    }
+    Ok(n)
+}
+
 fn nud(env: &Env) -> Result<Term, Error> {
     let token = env.lookup();
     if let TokenValue::Identifier(id) = &token.value {
         env.advance();
-        if let Some(ty) = env.definitions.get(id) {
+        if let Some(expansion) = lookup_macro_def(env, id) {
+            if matches!(expansion.value, Subst(_)) {
+                Ok(term(TermValue::Var(id.clone()), Type::Some))
+            } else {
+                Ok(expansion.deep_copy())
+            }
+        } else if let Some(ty) = env.definitions.get(id) {
             Ok(term(TermValue::Const(id.clone()), ty.clone()))
         } else {
             Ok(term(TermValue::Var(id.clone()), Type::Some))
@@ -753,6 +848,9 @@ fn nud(env: &Env) -> Result<Term, Error> {
         quantifier(env, Exists)
     } else if token.is_symbol("{") {
         comprehension(env)
+    } else if let TokenValue::Number(x) = &token.value {
+        env.advance();
+        Ok(term(TermValue::Int(parse_int(token.line, x)?), Ind))
     } else {
         if let TokenValue::Symbol(symbol) = &token.value {
             if let Some((bp, op)) = env.prefix_table.get(symbol.as_slice()) {
@@ -771,11 +869,13 @@ fn application(env: &Env) -> Result<Term, Error> {
     let x = nud(env)?;
     let mut token = env.lookup();
     if matches!(&token.value, TokenValue::Identifier(_)) ||
+       matches!(&token.value, TokenValue::Number(_)) ||
        matches!(&token.value, TokenValue::Symbol(s)
            if {let s = s.as_slice(); s == b"(" || s == b"{"})
     {
         let mut args: Vec<Term> = vec![x];
         while matches!(&token.value, TokenValue::Identifier(_)) ||
+              matches!(&token.value, TokenValue::Number(_)) ||
               matches!(&token.value, TokenValue::Symbol(s)
                   if {let s = s.as_slice(); s == b"(" || s == b"{"})
         {
@@ -787,7 +887,9 @@ fn application(env: &Env) -> Result<Term, Error> {
             return Err(syntax_error(line0,
                 "predicate or function must be an identifier".to_string()));
         }
-        args[0].ty = Type::FnSome;
+        if !matches!(args[0].ty, Type::Fn(_)) {
+            args[0].ty = Type::FnSome;
+        }
         Ok(term(App(Rc::from(args)), Type::Some))
     } else {
         Ok(x)
@@ -796,6 +898,17 @@ fn application(env: &Env) -> Result<Term, Error> {
 
 fn formula(env: &Env, rbp: u32) -> Result<Term, Error> {
     let mut x = application(env)?;
+    if let App(a) = &x.value && let Var(id) = &a[0].value {
+        if let Some(term) = lookup_macro_def(env, id) {
+            if let Subst(subs) = &term.value {
+                x = subs.macro_call(&a[1..]).deep_copy();
+            } else {
+                let token = env.lookup();
+                return Err(logic_error(token.line, format!(
+                    "The macro {} takes arguments which must be provided", id)))
+            }
+        }
+    }
     loop {
         let token = env.lookup();
         if let TokenValue::None = token.value {break;}
@@ -829,12 +942,26 @@ fn type_check(line: usize, t: &mut Term, record: &mut HashMap<Bstr, Type>)
         }
     } else if let App(a) = &mut t.value {
         let Some(a) = Rc::get_mut(a) else {unreachable!()};
+        {
+            let (first, a) = a.split_at_mut(1);
+            if let Type::Fn(fn_type) = &first[0].ty {
+                for i in 0..a.len() {
+                    ensure_type(&mut a[i], line, &fn_type.argv[i])?;
+                }
+                if t.ty == Type::Some {
+                    t.ty = fn_type.value.clone();
+                } else if t.ty != fn_type.value {
+                    return Err(logic_error(line, format!(
+                        "Type error for app value: {} != {}", t.ty, fn_type.value)));
+                }
+            }
+        }
         for x in a {
             type_check(line, x, record)?;
         }
-        if t.ty == Type::Some {
-            t.ty = Ind;
-        }
+        // if t.ty == Type::Some {
+        //     t.ty = Ind;
+        // }
     } else if let Forall(a) | Exists(a) | Lambda(a) = &mut t.value {
         let Some(a) = Rc::get_mut(a) else {unreachable!()};
         type_check(line, &mut a.1, record)?;
@@ -1020,12 +1147,75 @@ fn parse_statement(env: &Env) -> Result<Statement, Error> {
     Ok (Statement {line, label, term, rule, hint})
 }
 
+fn lookup_macro_def<'a>(env: &'a Env, x: &Bstr) -> Option<&'a Term> {
+    let mut i = env.macro_stack.len() - 1;
+    loop {
+        let macro_tab = &env.macro_stack[i];
+        for t in macro_tab {
+            if t.0 == *x {
+                return Some(&t.1);
+            }
+        }
+        if i == 0 {break;}
+        i -= 1;
+    }
+    None
+}
+
+fn local_macro_def(env: &mut Env, x: &Bstr, term: &Term) {
+    let n = env.macro_stack.len();
+    env.macro_stack[n - 1].push((x.clone(), term.clone()));
+}
+
+fn invalid_macro_def(line: usize) -> Result<(), Error> {
+    Err(logic_error(line, "invalid macro definition".to_string()))
+}
+
+fn macro_def(env: &mut Env) -> Result<(), Error> {
+    let t = formula(env, 0)?;
+    let token = env.lookup();
+    if token.is_symbol(".") {
+        env.advance();
+    } else {
+        return invalid_macro_def(token.line);
+    }
+    if t.is_connective("eq") || t.is_connective("bijn") {
+        let x = t.arg(1);
+        let rhs = t.arg(2);
+        if let Var(x) = &x.value {
+            local_macro_def(env, x, rhs);
+        } else if let App(a) = &x.value {
+            let Var(id) = &a[0].value else {
+                return invalid_macro_def(token.line)
+            };
+            local_macro_def(env, id, &term(Subst(Rc::new(
+                Substitution {term: rhs.clone(), args: a[1..].to_vec()})), Type::None))
+        } else {
+            return invalid_macro_def(token.line);
+        }
+    } else {
+        return invalid_macro_def(token.line);
+    }
+    Ok(())
+}
+
 fn parse(env: &mut Env, cb: fn(&mut Env, Statement) -> Result<(), Error>) -> Result<(), Error> {
     loop {
         let token = env.lookup();
         if matches!(token.value, TokenValue::None) {break;}
-        let stmt = parse_statement(env)?;
-        cb(env, stmt)?;
+        if token.is_symbol("let") {
+            env.advance();
+            macro_def(env)?;
+        } else if token.is_symbol("begin") {
+            env.advance();
+            env.macro_stack.push(Vec::new());
+        } else if token.is_symbol("end") {
+            env.advance();
+            env.macro_stack.pop();
+        } else {
+            let stmt = parse_statement(env)?;
+            cb(env, stmt)?;
+        }
     }
     Ok(())
 }
@@ -1072,6 +1262,7 @@ fn term_eq(env: &Env, a: &Term, b: &Term) -> bool {
         (Var(a), Var(b)) => a == b,
         (Const(a), Const(b)) => a == b,
         (BoundVar(a), BoundVar(b)) => a == b,
+        (Int(a), Int(b)) => a == b,
         (App(a), App(b)) => a.as_ref().iter().zip(b.as_ref()).all(
             |(x, y)| term_eq(env, x, y)),
         (Forall(a), Forall(b)) | (Exists(a), Exists(b)) | (Lambda(a), Lambda(b)) => {
@@ -1560,6 +1751,7 @@ fn definition(env: &mut Env, line: usize, seq: &mut Term, args: &[Bstr], label: 
                 }
                 free_vars_check(env, line, b, &args[1..], label)?;
                 env.definitions.insert(id.clone(), args[0].ty.clone());
+                // println!("def {}: {:?}", id, args[0].ty);
                 let mut args = args.to_vec();
                 args[0] = term(Const(id.clone()), args[0].ty.clone());
                 *seq = theorem_sequent(app([
@@ -1576,6 +1768,79 @@ fn definition(env: &mut Env, line: usize, seq: &mut Term, args: &[Bstr], label: 
         return Err(logic_error(line, "malformed definition".to_string()));
     }
     Ok(())
+}
+
+fn calc_unary(x: &Term, op: fn(x: i64) -> i64) -> Option<Term> {
+    let x = calc_term(x);
+    if let Int(x) = x.value {
+        return Some(term(Int(op(x)), Ind));
+    }
+    None
+}
+
+fn calc_binary(x: &Term, y: &Term, op: fn(x: i64, y: i64) -> i64) -> Option<Term> {
+    let x = calc_term(x);
+    let y = calc_term(y);
+    if let Int(x) = x.value {
+        if let Int(y) = y.value {
+            return Some(term(Int(op(x, y)), Ind));
+        }
+    }
+    None
+}
+
+fn calc_term(t: &Term) -> Term {
+    if let App(a) = &t.value {
+        if let Const(f) = &a[0].value {
+            if let Some(value) = match f.as_slice() {
+                b"minus" => calc_unary(&a[1], |x| -x),
+                b"add" => calc_binary(&a[1], &a[2], |x, y| x + y),
+                b"sub" => calc_binary(&a[1], &a[2], |x, y| x - y),
+                b"mul" => calc_binary(&a[1], &a[2], |x, y| x * y),
+                _ => None
+            } {
+                return value;
+            }
+        }
+    }
+    t.clone()
+}
+
+fn calculate(env: &Env, line: usize, seq: &Term, args: &[Bstr])
+-> Result<(), Error>
+{
+    if args.len() != 1 {
+        return expect_len(line, args, 0, "calc");
+    }
+    if !seq.is_connective("seq") {
+        return Err(logic_error(line, "calc expects a sequent".to_string()));
+    }
+    if !seq.arg(1).is_const("true") {
+        return Err(logic_error(line, "calc expects empty context".to_string()));
+    }
+    let c = seq.arg(2);
+    if c.is_connective("eq") {
+        let a = calc_term(c.arg(1));
+        let b = calc_term(c.arg(2));
+        if !term_eq(env, &a, &b) {
+            return Err(logic_error(line, "calculation failed".to_string()));
+        }
+        Ok(())
+    } else if c.is_connective("element") {
+        let x = calc_term(c.arg(1));
+        if !matches!(x.value, Int(_)) {
+            return Err(logic_error(line, "calc expected number literal".to_string()));
+        }
+        let s = c.arg(2);
+        if !(s.is_const("ℕ") || s.is_const("ℤ") || s.is_const("ℚ") ||
+             s.is_const("ℝ") || s.is_const("ℂ"))
+        {
+            return Err(logic_error(line, "calc expected number set".to_string()));
+        }
+        Ok(())
+    } else {
+        Err(logic_error(line, "calculation expects an equality".to_string()))
+    }
 }
 
 fn verify_cb(env: &mut Env, stmt: Statement) -> Result<(), Error> {
@@ -1602,6 +1867,8 @@ fn verify_cb(env: &mut Env, stmt: Statement) -> Result<(), Error> {
     if rule[0].as_slice() == b"def" {
         definition(env, line, &mut form, &rule, &label)?;
     } else if rule[0].as_slice() == b"axiom" {
+    } else if rule[0].as_slice() == b"calc" {
+        calculate(env, line, &form, &rule)?;
     } else {
         modus_ponens(env, line, &form, &rule, hint)?;
     }
