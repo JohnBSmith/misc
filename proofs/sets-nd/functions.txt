@@ -168,6 +168,22 @@ map_union. ⊢ map f X1 Y1 → map g X2 Y2 → X1 ∩ X2 = ∅ →
 map_union_eq_rngs. ⊢ map f X1 Y → map g X2 Y → X1 ∩ X2 = ∅ →
   map (f ∪ g) (X1 ∪ X2) Y, subj_intro_iii 6.
 
+01. 1 ⊢ ∀x. x ∈ X → ∃z. ∀y. z = y ↔ (x, y) ∈ f, hypo.
+02. 2 ⊢ x ∈ X, hypo.
+03. 1, 2 ⊢ ∃z. ∀y. z = y ↔ (x, y) ∈ f, uq_bounded_elim 1 2.
+04. 4 ⊢ ∀y. z = y ↔ (x, y) ∈ f, hypo.
+05. 4 ⊢ z = z ↔ (x, z) ∈ f, uq_elim 4.
+06. ⊢ z = z, eq_refl.
+07. 4 ⊢ (x, z) ∈ f, lsubj_elim 5 6.
+08. 4 ⊢ x ∈ dom f, dom_intro 7.
+09. 1, 2 ⊢ x ∈ dom f, ex_elim 3 8.
+10. 1 ⊢ x ∈ X → x ∈ dom f, subj_intro 9.
+11. 1 ⊢ ∀x. x ∈ X → x ∈ dom f, uq_intro 10.
+12. 1 ⊢ X ⊆ dom f, incl_intro 11.
+subclass_dom_from_ex_uniq. ⊢
+  (∀x. x ∈ X → ∃z. ∀y. z = y ↔ (x, y) ∈ f) →
+  X ⊆ dom f, subj_intro 12.
+
 01. 1 ⊢ ∀x. x ∈ X → ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f, hypo.
 02. 2 ⊢ x ∈ X, hypo.
 03. 1, 2 ⊢ ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f, uq_bounded_elim 1 2.
@@ -182,9 +198,38 @@ map_union_eq_rngs. ⊢ map f X1 Y → map g X2 Y → X1 ∩ X2 = ∅ →
 12. 1 ⊢ x ∈ X → x ∈ dom f, subj_intro 11.
 13. 1 ⊢ ∀x. x ∈ X → x ∈ dom f, uq_intro 12.
 14. 1 ⊢ X ⊆ dom f, incl_intro 13.
-subclass_dom_from_ex_uniq. ⊢
+subclass_dom_from_ex_uniq_in_cod. ⊢
   (∀x. x ∈ X → ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f) →
   X ⊆ dom f, subj_intro 14.
+
+01. 1 ⊢ f ⊆ X × Y, hypo.
+02. 2 ⊢ ∀x. x ∈ X → ∃b. ∀y. b = y ↔ (x, y) ∈ f, hypo.
+03. 3 ⊢ (x, y1) ∈ f, hypo.
+04. 4 ⊢ (x, y2) ∈ f, hypo.
+05. 1, 3 ⊢ (x, y1) ∈ X × Y, incl_elim 1 3.
+06. 1, 3 ⊢ x ∈ X ∧ y1 ∈ Y, prod_elim_pair 5.
+07. 1, 3 ⊢ x ∈ X, conj_eliml 6.
+08. 1, 2, 3 ⊢ ∃b. ∀y. b = y ↔ (x, y) ∈ f,
+  uq_bounded_elim 2 7.
+09. 1, 2, 3, 4 ⊢ y1 = y2, ex_uniq_elimr 8 3 4.
+10. 1, 2 ⊢ (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2,
+  subj_intro_ii 9.
+11. 1, 2 ⊢ ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2,
+  uq_intro 10.
+12. 1, 2 ⊢ ∀y1. ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2,
+  uq_intro 11.
+13. 1, 2 ⊢ ∀x. ∀y1. ∀y2. (x, y1) ∈ f → (x, y2) ∈ f → y1 = y2,
+  uq_intro 12.
+14. 1 ⊢ relation f, relation_from_incl 1.
+15. 1, 2 ⊢ function f, function_intro 14 13.
+16. 1 ⊢ dom f ⊆ X, dom_of_subclass_prod 1.
+17. 2 ⊢ X ⊆ dom f, subclass_dom_from_ex_uniq 2.
+18. 1, 2 ⊢ dom f = X, incl_antisym 16 17.
+19. 1 ⊢ rng f ⊆ Y, rng_of_subclass_prod 1.
+20. 1, 2 ⊢ map f X Y, map_intro 15 18 19.
+map_from_ex_uniq. ⊢ f ⊆ X × Y →
+  (∀x. x ∈ X → ∃b. ∀y. b = y ↔ (x, y) ∈ f) → map f X Y,
+  subj_intro_ii 20.
 
 01. 1 ⊢ map f X Y, hypo.
 02. 2 ⊢ Y ⊆ Z, hypo.

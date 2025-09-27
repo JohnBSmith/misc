@@ -475,6 +475,21 @@ ex_uniq_set_intro. ⊢ (∃x. S x ∧ P x) → (∀x. ∀y. P x → P y → x = 
 ex_uniq_set_elimr. ⊢ (∃x. S x ∧ ∀y. x = y ↔ P y) → P x → P y → x = y,
   subj_intro_iii 14.
 
+01. 1 ⊢ ∃x. P x ∧ ∀y. P y → x = y, hypo.
+02. 2 ⊢ P x ∧ ∀y. P y → x = y, hypo.
+03. 2 ⊢ P x, conj_eliml 2.
+04. 2 ⊢ ∀y. P y → x = y, conj_elimr 2.
+05. 2 ⊢ P y → x = y, uq_elim 4.
+06. 6 ⊢ x = y, hypo.
+07. 2, 6 ⊢ P y, eq_subst 6 3.
+08. 2 ⊢ x = y → P y, subj_intro 7.
+09. 2 ⊢ x = y ↔ P y, bij_intro 8 5.
+10. 2 ⊢ ∀y. x = y ↔ P y, uq_intro 9.
+11. 2 ⊢ ∃x. ∀y. x = y ↔ P y, ex_intro 10.
+12. 1 ⊢ ∃x. ∀y. x = y ↔ P y, ex_elim 1 11.
+ex_uniq_from_mixed_form. ⊢ (∃x. P x ∧ ∀y. P y → x = y) →
+  (∃x. ∀y. x = y ↔ P y), subj_intro 12.
+
 01. 1 ⊢ ∃x. S x ∧ P x ∧ ∀y. P y → x = y, hypo.
 02. 2 ⊢ S x ∧ P x ∧ ∀y. P y → x = y, hypo.
 03. 2 ⊢ S x, conj_elimll 2.
@@ -489,7 +504,7 @@ ex_uniq_set_elimr. ⊢ (∃x. S x ∧ ∀y. x = y ↔ P y) → P x → P y → x
 12. 2 ⊢ S x ∧ ∀y. x = y ↔ P y, conj_intro 3 11.
 13. 2 ⊢ ∃x. S x ∧ ∀y. x = y ↔ P y, ex_intro 12.
 14. 1 ⊢ ∃x. S x ∧ ∀y. x = y ↔ P y, ex_elim 1 13.
-ex_uniq_from_mixed_form. ⊢ (∃x. S x ∧ P x ∧ ∀y. P y → x = y) →
+ex_uniq_set_from_mixed_form. ⊢ (∃x. S x ∧ P x ∧ ∀y. P y → x = y) →
   (∃x. S x ∧ ∀y. x = y ↔ P y), subj_intro 14.
 
 01. 1 ⊢ ∀x. P x → Q x, hypo.

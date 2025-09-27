@@ -1806,7 +1806,21 @@ fn calc_term(t: &Term) -> Term {
     t.clone()
 }
 
-fn calculate(env: &Env, line: usize, seq: &Term, args: &[Bstr])
+fn calc_assert(line: usize, a: &Term, b: &Term, f: fn(i64, i64) -> bool)
+-> Result<(), Error>
+{
+    let a = calc_term(a);
+    let b = calc_term(b);
+    if let Int(a) = a.value && let Int(b) = b.value {
+        if f(a, b) {Ok(())} else {
+            Err(logic_error(line, "calculation failed".to_string()))
+        }
+    } else {
+        Err(logic_error(line, "calc expects number expressions".to_string()))
+    }
+}
+
+fn calculate(line: usize, seq: &Term, args: &[Bstr])
 -> Result<(), Error>
 {
     if args.len() != 1 {
@@ -1819,13 +1833,23 @@ fn calculate(env: &Env, line: usize, seq: &Term, args: &[Bstr])
         return Err(logic_error(line, "calc expects empty context".to_string()));
     }
     let c = seq.arg(2);
-    if c.is_connective("eq") {
-        let a = calc_term(c.arg(1));
-        let b = calc_term(c.arg(2));
-        if !term_eq(env, &a, &b) {
-            return Err(logic_error(line, "calculation failed".to_string()));
+    if c.is_connective("neg") {
+        let c1 = c.arg(1);
+        if c1.is_connective("eq") {
+            calc_assert(line, c1.arg(1), c1.arg(2), |x, y| x != y)
+        } else if c1.is_connective("le") {
+            calc_assert(line, c1.arg(1), c1.arg(2), |x, y| !(x <= y))
+        } else if c1.is_connective("lt") {
+            calc_assert(line, c1.arg(1), c1.arg(2), |x, y| !(x < y))
+        } else {
+            Err(logic_error(line, "unexpected term in calculation".to_string()))
         }
-        Ok(())
+    } else if c.is_connective("eq") {
+        calc_assert(line, c.arg(1), c.arg(2), |x, y| x == y)
+    } else if c.is_connective("le") {
+        calc_assert(line, c.arg(1), c.arg(2), |x, y| x <= y)
+    } else if c.is_connective("lt") {
+        calc_assert(line, c.arg(1), c.arg(2), |x, y| x < y)
     } else if c.is_connective("element") {
         let x = calc_term(c.arg(1));
         if !matches!(x.value, Int(_)) {
@@ -1839,7 +1863,7 @@ fn calculate(env: &Env, line: usize, seq: &Term, args: &[Bstr])
         }
         Ok(())
     } else {
-        Err(logic_error(line, "calculation expects an equality".to_string()))
+        Err(logic_error(line, "unexpected term in calculation".to_string()))
     }
 }
 
@@ -1868,7 +1892,7 @@ fn verify_cb(env: &mut Env, stmt: Statement) -> Result<(), Error> {
         definition(env, line, &mut form, &rule, &label)?;
     } else if rule[0].as_slice() == b"axiom" {
     } else if rule[0].as_slice() == b"calc" {
-        calculate(env, line, &form, &rule)?;
+        calculate(line, &form, &rule)?;
     } else {
         modus_ponens(env, line, &form, &rule, hint)?;
     }

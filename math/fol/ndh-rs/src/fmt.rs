@@ -10,7 +10,8 @@ static FMT_KW_TAB: &[(&str, &str)] = &[
     ("box", "□"), ("dia", "◇"), ("forall", "∀"), ("exists", "∃"), ("in", "∈"),
     ("sub", "⊆"), ("cup", "∪"), ("cap", "∩"), ("Cap", "⋂"), ("Cup", "⋃"),
     ("times", "×"), ("empty_set", "∅"), ("circ", "∘"), ("equiv", "≡"),
-    ("phi", "φ"), ("psi", "ψ"), ("chi", "χ")
+    ("phi", "φ"), ("psi", "ψ"), ("chi", "χ"),
+    ("Nat", "ℕ"), ("Int", "ℤ"), ("Rat", "ℚ"), ("Real", "ℝ"), ("Complex", "ℂ")
 ];
 static UNSPACE_SET: &[&str] = &[
     "not", "box", "dia", "forall", "exists", "Cap", "Cup"

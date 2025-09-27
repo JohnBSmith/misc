@@ -416,7 +416,7 @@ let F = {A | A ⊆ X × Y ∧ closed A}.
 152. 47, 48, 2, 3, 4, 55, 56 ⊢ ∃y. y ∈ Y ∧
   (x, y) ∈ f ∧ ∀y'. (x, y') ∈ f → y = y', ex_intro 151.
 153. 47, 48, 2, 3, 4, 55, 56 ⊢ ∃z. z ∈ Y ∧
-  ∀y. z = y ↔ (x, y) ∈ f, ex_uniq_from_mixed_form 152.
+  ∀y. z = y ↔ (x, y) ∈ f, ex_uniq_set_from_mixed_form 152.
 154. 47, 48, 2, 3, 4 ⊢ x ∈ X →
   (∀u. u ∈ X → (u, x) ∈ R → ∃z. z ∈ Y ∧ ∀y. z = y ↔ (u, y) ∈ f) →
   (∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f), subj_intro_ii 153.
@@ -427,7 +427,8 @@ let F = {A | A ⊆ X × Y ∧ closed A}.
   ∃z. z ∈ Y ∧ ∀y. z = y ↔ (x, y) ∈ f, wf_induction 1 155.
 157. 47, 48, 3, 4 ⊢ dom f ⊆ X, dom_of_subclass_prod 51.
 158. 47, 48, 3, 4 ⊢ rng f ⊆ Y, rng_of_subclass_prod 51.
-159. 47, 48, 1, 2, 3, 4 ⊢ X ⊆ dom f, subclass_dom_from_ex_uniq 156.
+159. 47, 48, 1, 2, 3, 4 ⊢ X ⊆ dom f,
+  subclass_dom_from_ex_uniq_in_cod 156.
 160. 47, 48, 1, 2, 3, 4 ⊢ dom f = X, incl_antisym 157 159.
 161. 47, 48, 1, 2, 3, 4 ⊢ fn_on f X, fn_on_intro_cod 78 156.
 162. 47, 48, 1, 2, 3, 4 ⊢ function f, function_from_fn_on 161 157.

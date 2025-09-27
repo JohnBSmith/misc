@@ -1389,6 +1389,15 @@ disjoint_sg_from_new. ⊢ set a → ¬a ∈ X → X ∩ {a} = ∅,
 26. 1, 2 ⊢ x = ∅ ∨ x = {a}, disj_elim 3 12 25.
 subsets_of_sg. ⊢ set a → x ⊆ {a} → x = ∅ ∨ x = {a}, subj_intro_ii 26.
 
+01. 1 ⊢ x ∈ A \ {x}, hypo.
+02. 1 ⊢ ¬x ∈ {x}, diff_elimr 1.
+03. 1 ⊢ set x, set_intro 1.
+04. ⊢ x = x, eq_refl.
+05. 1 ⊢ x ∈ {x}, sg_intro 3 4.
+06. 1 ⊢ ⊥, neg_elim 2 5.
+diff_sg_contra. ⊢ x ∈ A \ {x} → ⊥, subj_intro 6.
+
+
 (*/section Operations on families of sets *)
 
 01. 1 ⊢ set (A i), hypo.
