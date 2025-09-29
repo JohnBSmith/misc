@@ -7,15 +7,22 @@
 0. ⊢ a + b = _, def.
 0. ⊢ a⋅b = _, def.
 0. ⊢ -a = _, def.
+0. ⊢ /a = _, def.
 rsub_eq. ⊢ a - b = a + (-b), def.
+rdiv_eq. ⊢ a/b = a⋅(/b), def.
 
 0. ⊢ x ≤ y ↔ _, def.
-lt_eq. ⊢ x < y ↔ x ≤ y ∧ ¬x = y, def.
+lt_equi. ⊢ a < b ↔ a ≤ b ∧ ¬a = b, def.
+
+upper_bound_equi. ⊢ upper_bound b A ↔ ∀x. x ∈ A → x ≤ b, def.
+is_sup_equi. ⊢ is_sup s A ↔
+  upper_bound s A ∧ (∀b. b ∈ ℝ → upper_bound b A → s ≤ b), def.
 
 real_is_set. ⊢ set ℝ, axiom.
 radd_closed. ⊢ a ∈ ℝ → b ∈ ℝ → a + b ∈ ℝ, axiom.
 rmul_closed. ⊢ a ∈ ℝ → b ∈ ℝ → a⋅b ∈ ℝ, axiom.
 rneg_closed. ⊢ a ∈ ℝ → -a ∈ ℝ, axiom.
+rinv_closed. ⊢ a ∈ ℝ → ¬a = 0 → /a ∈ ℝ, axiom.
 
 radd_comm. ⊢ a ∈ ℝ → b ∈ ℝ →
   a + b = b + a, axiom.
@@ -24,6 +31,7 @@ rmul_comm. ⊢ a ∈ ℝ → b ∈ ℝ →
 radd_neutr. ⊢ a ∈ ℝ → a + 0 = a, axiom.
 radd_inv. ⊢ a ∈ ℝ → a + (-a) = 0, axiom.
 rmul_neutr. ⊢ a ∈ ℝ → a⋅1 = a, axiom.
+rmul_inv. ⊢ a ∈ ℝ → ¬a = 0 → a⋅(/a) = 1, axiom.
 radd_assoc. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
   (a + b) + c = a + (b + c), axiom.
 rmul_assoc. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
@@ -40,6 +48,8 @@ rle_compat_add. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
 rle_compat_mul. ⊢ a ∈ ℝ → b ∈ ℝ →
   0 ≤ a → 0 ≤ b → 0 ≤ a⋅b, axiom.
 
+lub_property. ⊢ A ⊆ ℝ → ¬A = ∅ → (∃b. b ∈ ℝ ∧ upper_bound b A) →
+  (∃s. s ∈ ℝ ∧ is_sup s A), axiom.
 
 (*/section Basic results *)
 
@@ -51,6 +61,23 @@ rle_compat_mul. ⊢ a ∈ ℝ → b ∈ ℝ →
   eq_subst_rev rsub_eq 4, P t ↔ t ∈ ℝ.
 rsub_closed. ⊢ a ∈ ℝ → b ∈ ℝ → a - b ∈ ℝ,
   subj_intro_ii 5.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ ¬b = 0, hypo.
+04. ⊢ a/b = a⋅(/b), rdiv_eq.
+05. 2, 3 ⊢ /b ∈ ℝ, rinv_closed 2 3.
+06. 1, 2, 3 ⊢ a⋅(/b) ∈ ℝ, rmul_closed 1 5.
+07. 1, 2, 3 ⊢ a/b ∈ ℝ, eq_subst_rev 4 6, P t ↔ t ∈ ℝ.
+rdiv_closed. ⊢ a ∈ ℝ → b ∈ ℝ → ¬b = 0 → a/b ∈ ℝ,
+  subj_intro_iii 7.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ ¬a = 0, hypo.
+03. ⊢ 1 ∈ ℝ, calc.
+04. 1, 2 ⊢ 1/a ∈ ℝ, rdiv_closed 3 1 2.
+rreci_closed. ⊢ a ∈ ℝ → ¬a = 0 → 1/a ∈ ℝ,
+  subj_intro_ii 4.
 
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. ⊢ 0 ∈ ℝ, calc.
@@ -80,6 +107,23 @@ rmul_neutl. ⊢ a ∈ ℝ → 1⋅a = a, subj_intro 5.
 11. 1, 2 ⊢ a + b - b = a, eq_trans 9 10.
 radd_cancel. ⊢ a ∈ ℝ → b ∈ ℝ → a + b - b = a,
   subj_intro_ii 11.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. ⊢ a - b = a + (-b), rsub_eq.
+04. ⊢ a - b + b = a + (-b) + b, f_equal 3, f t = t + b.
+05. 2 ⊢ -b ∈ ℝ, rneg_closed 2.
+06. 1, 2 ⊢ a + (-b) + b = a + (-b + b), radd_assoc 1 5 2.
+07. 2 ⊢ -b + b = b + -b, radd_comm 5 2.
+08. 2 ⊢ b + -b = 0, radd_inv 2.
+09. 2 ⊢ -b + b = 0, eq_trans 7 8.
+10. 2 ⊢ a + (-b + b) = a + 0, f_equal 9, f t = a + t.
+11. 1 ⊢ a + 0 = a, radd_neutr 1.
+12. 1, 2 ⊢ a + (-b + b) = a, eq_trans 10 11.
+13. 1, 2 ⊢ a + (-b) + b = a, eq_trans 6 12.
+14. 1, 2 ⊢ a - b + b = a, eq_trans 4 13.
+rsub_cancel. ⊢ a ∈ ℝ → b ∈ ℝ → a - b + b = a,
+  subj_intro_ii 14.
 
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. 2 ⊢ b ∈ ℝ, hypo.
@@ -347,6 +391,111 @@ rneg_dist_add. ⊢ a ∈ ℝ → b ∈ ℝ → -(a + b) = -a + -b,
 rsub_neg. ⊢ a ∈ ℝ → b ∈ ℝ → -(a - b) = b - a,
   subj_intro_ii 14.
 
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ ¬b = 0, hypo.
+04. ⊢ a/b = a⋅(/b), rdiv_eq.
+05. 2, 3 ⊢ /b ∈ ℝ, rinv_closed 2 3.
+06. 1, 2, 3 ⊢ a⋅(/b) ∈ ℝ, rmul_closed 1 5.
+07. 1, 2, 3 ⊢ a/b ∈ ℝ, eq_subst_rev 4 6, P t ↔ t ∈ ℝ.
+rdiv_closed. ⊢ a ∈ ℝ → b ∈ ℝ → ¬b = 0 → a/b ∈ ℝ,
+  subj_intro_iii 7.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ ¬a = 0, hypo.
+03. ⊢ 1 ∈ ℝ, calc.
+04. 1, 2 ⊢ 1/a ∈ ℝ, rdiv_closed 3 1 2.
+rreci_closed. ⊢ a ∈ ℝ → ¬a = 0 → 1/a ∈ ℝ,
+  subj_intro_ii 4.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ ¬a = 0, hypo.
+03. 1, 2 ⊢ /a ∈ ℝ, rinv_closed 1 2.
+04. ⊢ 1/a = 1⋅(/a), rdiv_eq.
+05. 1, 2 ⊢ 1⋅(/a) = /a, rmul_neutl 3.
+06. 1, 2 ⊢ 1/a = /a, eq_trans 4 5.
+rdiv_reci. ⊢ a ∈ ℝ → ¬a = 0 → 1/a = /a, subj_intro_ii 6.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ ¬a = 0, hypo.
+03. ⊢ a/a = a⋅(/a), rdiv_eq.
+04. 1, 2 ⊢ a⋅(/a) = 1, rmul_inv 1 2.
+05. 1, 2 ⊢ a/a = 1, eq_trans 3 4.
+rdiv_self. ⊢ a ∈ ℝ → ¬a = 0 → a/a = 1, subj_intro_ii 5.
+
+01. ⊢ 1 ∈ ℝ, calc.
+02. ⊢ ¬1 = 0, calc.
+03. ⊢ 1⋅(/1) = 1, rmul_inv 1 2.
+04. ⊢ /1 ∈ ℝ, rinv_closed 1 2.
+05. ⊢ 1⋅(/1) = /1, rmul_neutl 4.
+rinv_one. ⊢ 1 = /1, eq_trans_ll 3 5.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. ⊢ a/1 = a⋅(/1), rdiv_eq.
+03. ⊢ 1 ∈ ℝ, calc.
+04. ⊢ a⋅1 = a⋅(/1), f_equal rinv_one, f t = a⋅t.
+05. ⊢ a/1 = a⋅1, eq_trans_rr 2 4.
+06. 1 ⊢ a⋅1 = a, rmul_neutr 1.
+07. 1 ⊢ a/1 = a, eq_trans 5 6.
+rdiv_neut. ⊢ a ∈ ℝ → a/1 = a, subj_intro 7.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ ¬a = 0, hypo.
+03. 1, 2 ⊢ 1/a = /a, rdiv_reci 1 2.
+04. 1, 2 ⊢ a⋅(1/a) = a⋅(/a), f_equal 3, f t = a⋅t.
+05. 1, 2 ⊢ a⋅(/a) = 1, rmul_inv 1 2.
+06. 1, 2 ⊢ a⋅(1/a) = 1, eq_trans 4 5.
+rmul_reci_cancel. ⊢ a ∈ ℝ → ¬a = 0 → a⋅(1/a) = 1,
+  subj_intro_ii 6.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ ¬a = 0, hypo.
+03. 3 ⊢ 1/a = 0, hypo.
+04. 3 ⊢ a⋅(1/a) = a⋅0, f_equal 3, f t = a⋅t.
+05. 1, 2 ⊢ a⋅(1/a) = 1, rmul_reci_cancel 1 2.
+06. 1, 2, 3 ⊢ a⋅0 = 1, eq_trans_ll 4 5.
+07. 1 ⊢ a⋅0 = 0, rmul_rzero 1.
+08. 1, 2, 3 ⊢ 0 = 1, eq_trans_ll 7 6.
+09. ⊢ ¬0 = 1, calc.
+10. 1, 2, 3 ⊢ ⊥, neg_elim 9 8.
+11. 1, 2 ⊢ ¬1/a = 0, neg_intro 10.
+rreci_non_zero. ⊢ a ∈ ℝ → ¬a = 0 → ¬1/a = 0,
+  subj_intro_ii 11.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ c ∈ ℝ, hypo.
+04. 4 ⊢ ¬c = 0, hypo.
+05. 3, 4 ⊢ /c ∈ ℝ, rinv_closed 3 4.
+06. ⊢ (a + b)/c = (a + b)⋅(/c), rdiv_eq.
+07. 1, 2, 3, 4 ⊢ (a + b)⋅(/c) = a⋅(/c) + b⋅(/c),
+  rmul_distr_add 1 2 5.
+08. 1, 2, 3, 4 ⊢ (a + b)/c = a⋅(/c) + b⋅(/c), eq_trans 6 7.
+09. ⊢ a/c = a⋅(/c), rdiv_eq.
+10. ⊢ b/c = b⋅(/c), rdiv_eq.
+11. ⊢ a/c + b/c = a⋅(/c) + b⋅(/c),
+  f_equal_ii 9 10, f x y = x + y.
+12. 1, 2, 3, 4 ⊢ (a + b)/c = a/c + b/c, eq_trans_rr 8 11.
+rdiv_dist_add. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
+  ¬c = 0 → (a + b)/c = a/c + b/c, subj_intro_iv 12.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ c ∈ ℝ, hypo.
+04. 4 ⊢ ¬c = 0, hypo.
+05. 3, 4 ⊢ /c ∈ ℝ, rinv_closed 3 4.
+06. ⊢ (a - b)/c = (a - b)⋅(/c), rdiv_eq.
+07. 1, 2, 3, 4 ⊢ (a - b)⋅(/c) = a⋅(/c) - b⋅(/c),
+  rmul_distr_sub 1 2 5.
+08. 1, 2, 3, 4 ⊢ (a - b)/c = a⋅(/c) - b⋅(/c), eq_trans 6 7.
+09. ⊢ a/c = a⋅(/c), rdiv_eq.
+10. ⊢ b/c = b⋅(/c), rdiv_eq.
+11. ⊢ a/c - b/c = a⋅(/c) - b⋅(/c),
+  f_equal_ii 9 10, f x y = x - y.
+12. 1, 2, 3, 4 ⊢ (a - b)/c = a/c - b/c, eq_trans_rr 8 11.
+rdiv_dist_sub. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
+  ¬c = 0 → (a - b)/c = a/c - b/c, subj_intro_iv 12.
+
 
 (*/section Useful lemmata *)
 
@@ -499,6 +648,20 @@ le_eq_trans. ⊢ a ≤ b → b = c → a ≤ c, subj_intro_ii 3.
 03. 1, 2 ⊢ a ≤ c, eq_subst_rev 1 2, P t ↔ t ≤ c.
 eq_le_trans. ⊢ a = b → b ≤ c → a ≤ c, subj_intro_ii 3.
 
+01. 1 ⊢ a < b, hypo.
+02. 1 ⊢ ¬a = b, lsubj_conj_elimr lt_equi 1.
+neq_from_lt. ⊢ a < b → ¬a = b, subj_intro 2.
+
+01. 1 ⊢ a < b, hypo.
+02. 1 ⊢ a ≤ b, lsubj_conj_eliml lt_equi 1.
+le_from_lt. ⊢ a < b → a ≤ b, subj_intro 2.
+
+01. 1 ⊢ a ≤ b, hypo.
+02. 2 ⊢ ¬a = b, hypo.
+03. 1, 2 ⊢ a ≤ b ∧ ¬a = b, conj_intro 1 2.
+04. 1, 2 ⊢ a < b, rsubj_elim lt_equi 3.
+lt_intro. ⊢ a ≤ b → ¬a = b → a < b, subj_intro_ii 4.
+
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. 2 ⊢ b ∈ ℝ, hypo.
 03. 3 ⊢ ¬a ≤ b, hypo.
@@ -641,6 +804,184 @@ rmul_np_nn. ⊢ a ∈ ℝ → b ∈ ℝ →
 21. 1, 2, 3, 4 ⊢ 0 ≤ a⋅b, le_eq_trans 13 20.
 rmul_np_np. ⊢ a ∈ ℝ → b ∈ ℝ →
   a ≤ 0 → b ≤ 0 → 0 ≤ a⋅b, subj_intro_iv 21.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ c ∈ ℝ, hypo.
+04. 4 ⊢ a ≤ b, hypo.
+05. 5 ⊢ b < c, hypo.
+06. 5 ⊢ b ≤ c, le_from_lt 5.
+07. 1, 2, 3, 4, 5 ⊢ a ≤ c, rle_trans 1 2 3 4 6.
+08. 8 ⊢ a = c, hypo.
+09. 5, 8 ⊢ b < a, eq_subst_rev 8 5, P t ↔ b < t.
+10. 5, 8 ⊢ b ≤ a, le_from_lt 9.
+11. 1, 2, 4, 5, 8 ⊢ a = b, rle_antisym 1 2 4 10.
+12. 5, 8 ⊢ ¬b = a, neq_from_lt 9.
+13. 5, 8 ⊢ ¬a = b, neq_symm 12.
+14. 1, 2, 4, 5, 8 ⊢ ⊥, neg_elim 13 11.
+15. 1, 2, 4, 5 ⊢ ¬a = c, neg_intro 14.
+16. 1, 2, 3, 4, 5 ⊢ a < c, lt_intro 7 15.
+17. 1, 2, 3 ⊢ a ≤ b → b < c → a < c, subj_intro_ii 16.
+rle_lt_trans. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
+  a ≤ b → b < c → a < c, subj_intro_iii 17.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ c ∈ ℝ, hypo.
+04. 4 ⊢ a < b, hypo.
+05. 5 ⊢ b < c, hypo.
+06. 4 ⊢ a ≤ b, le_from_lt 4.
+07. 1, 2, 3, 4, 5 ⊢ a < c, rle_lt_trans 1 2 3 6 5.
+08. 1, 2, 3 ⊢ a < b → b < c → a < c, subj_intro_ii 7.
+rlt_lt_trans. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
+  a < b → b < c → a < c, subj_intro_iii 8.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ c ∈ ℝ, hypo.
+04. 4 ⊢ a < b, hypo.
+05. 4 ⊢ a ≤ b, le_from_lt 4.
+06. 1, 2, 3, 4 ⊢ a + c ≤ b + c, rle_compat_add 1 2 3 5.
+07. 7 ⊢ a + c = b + c, hypo.
+08. 1, 2, 3, 7 ⊢ a = b, radd_cancel_rr 1 2 3 7.
+09. 4 ⊢ ¬a = b, neq_from_lt 4.
+10. 1, 2, 3, 4, 7 ⊢ ⊥, neg_elim 9 8.
+11. 1, 2, 3, 4 ⊢ ¬a + c = b + c, neg_intro 10.
+12. 1, 2, 3, 4 ⊢ a + c < b + c, lt_intro 6 11.
+rlt_compat_add. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
+  a < b → a + c < b + c, subj_intro_iv 12.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ c ∈ ℝ, hypo.
+04. 4 ⊢ a < b, hypo.
+05. 3 ⊢ -c ∈ ℝ, rneg_closed 3.
+06. 1, 2, 3, 4 ⊢ a + -c < b + -c,
+  rlt_compat_add 1 2 5 4.
+07. ⊢ a - c = a + -c, rsub_eq.
+08. ⊢ b - c = b + -c, rsub_eq.
+09. 1, 2, 3, 4 ⊢ a - c < b + -c,
+  eq_subst_rev 7 6, P t ↔ t < b + -c.
+10. 1, 2, 3, 4 ⊢ a - c < b - c,
+  eq_subst_rev 8 9, P t ↔ a - c < t.
+rlt_compat_sub. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
+  a < b → a - c < b - c, subj_intro_iv 10.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ c ∈ ℝ, hypo.
+04. 4 ⊢ a + c < b + c, hypo.
+05. 1, 3 ⊢ a + c ∈ ℝ, radd_closed 1 3.
+06. 2, 3 ⊢ b + c ∈ ℝ, radd_closed 2 3.
+07. 1, 2, 3, 4 ⊢ a + c - c < b + c - c, rlt_compat_sub 5 6 3 4.
+08. 1, 3 ⊢ a + c - c = a, radd_cancel 1 3.
+09. 2, 3 ⊢ b + c - c = b, radd_cancel 2 3.
+10. 1, 2, 3, 4 ⊢ a < b + c - c, eq_subst 8 7, P t ↔ t < b + c - c.
+11. 1, 2, 3, 4 ⊢ a < b, eq_subst 9 10, P t ↔ a < t.
+rlt_add_cancel_rr. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
+  a + c < b + c → a < b, subj_intro_iv 11.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. ⊢ b < a ∨ ¬b < a, lem.
+04. 4 ⊢ b < a, hypo.
+05. 4 ⊢ a ≤ b ∨ b < a, disj_intror 4.
+06. 6 ⊢ ¬b < a, hypo.
+07. ⊢ b < a ↔ b ≤ a ∧ ¬b = a, lt_equi.
+08. 6 ⊢ ¬(b ≤ a ∧ ¬b = a), rsubj_tollens 7 6.
+09. 6 ⊢ ¬b ≤ a ∨ ¬¬b = a, neg_conj 8.
+10. 10 ⊢ ¬b ≤ a, hypo.
+11. 1, 2, 10 ⊢ a ≤ b, rle_neg 2 1 10.
+12. 1, 2, 10 ⊢ a ≤ b ∨ b < a, disj_introl 11.
+13. 13 ⊢ ¬¬b = a, hypo.
+14. 13 ⊢ b = a, dne 13.
+15. 13 ⊢ a = b, eq_symm 14.
+16. 1 ⊢ a ≤ a, rle_refl 1.
+17. 1, 13 ⊢ a ≤ b, le_eq_trans 16 15.
+18. 1, 13 ⊢ a ≤ b ∨ b < a, disj_introl 17.
+19. 1, 2, 6 ⊢ a ≤ b ∨ b < a, disj_elim 9 12 18.
+20. 1, 2 ⊢ a ≤ b ∨ b < a, disj_elim 3 5 19.
+rle_lt_tricho. ⊢ a ∈ ℝ → b ∈ ℝ → a ≤ b ∨ b < a,
+  subj_intro_ii 20.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ a ≤ b, hypo.
+04. 1, 2, 3 ⊢ a - a ≤ b - a, rle_compat_sub 1 2 1 3.
+05. 1 ⊢ a - a = 0, rsub_self 1.
+06. 1 ⊢ 0 = a - a, eq_symm 5.
+07. 1, 2, 3 ⊢ 0 ≤ b - a, eq_le_trans 6 4.
+rle_as_diff. ⊢ a ∈ ℝ → b ∈ ℝ → a ≤ b → 0 ≤ b - a,
+  subj_intro_iii 7.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ 0 ≤ b - a, hypo.
+04. 1, 2 ⊢ b - a ∈ ℝ, rsub_closed 2 1.
+05. ⊢ 0 ∈ ℝ, calc.
+06. 1, 2, 3 ⊢ 0 + a ≤ b - a + a, rle_compat_add 5 4 1 3.
+07. 1 ⊢ 0 + a = a, radd_neutl 1.
+08. 1 ⊢ a = 0 + a, eq_symm 7.
+09. 1, 2, 3 ⊢ a ≤ b - a + a, eq_le_trans 8 6.
+10. 1, 2 ⊢ b - a + a = b, rsub_cancel 2 1.
+11. 1, 2, 3 ⊢ a ≤ b, le_eq_trans 9 10.
+rle_from_diff. ⊢ a ∈ ℝ → b ∈ ℝ → 0 ≤ b - a → a ≤ b,
+  subj_intro_iii 11.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ c ∈ ℝ, hypo.
+04. 4 ⊢ a ≤ b, hypo.
+05. 5 ⊢ 0 ≤ c, hypo.
+06. 1, 2, 4 ⊢ 0 ≤ b - a, rle_as_diff 1 2 4.
+07. 1, 2 ⊢ b - a ∈ ℝ, rsub_closed 2 1.
+08. 1, 2, 3, 4, 5 ⊢ 0 ≤ (b - a)⋅c, rle_compat_mul 7 3 6 5.
+09. 1, 2, 3 ⊢ (b - a)⋅c = b⋅c - a⋅c, rmul_distr_sub 2 1 3.
+10. 1, 2, 3, 4, 5 ⊢ 0 ≤ b⋅c - a⋅c, le_eq_trans 8 9.
+11. 1, 3 ⊢ a⋅c ∈ ℝ, rmul_closed 1 3.
+12. 2, 3 ⊢ b⋅c ∈ ℝ, rmul_closed 2 3.
+13. 1, 2, 3, 4, 5 ⊢ a⋅c ≤ b⋅c, rle_from_diff 11 12 10.
+14. 1, 2, 3 ⊢ a ≤ b → 0 ≤ c → a⋅c ≤ b⋅c, subj_intro_ii 13.
+rle_compat_mulr. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
+  a ≤ b → 0 ≤ c → a⋅c ≤ b⋅c, subj_intro_iii 14.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ c ∈ ℝ, hypo.
+04. 4 ⊢ a ≤ b, hypo.
+05. 5 ⊢ 0 ≤ c, hypo.
+06. 1, 2, 3, 4, 5 ⊢ a⋅c ≤ b⋅c, rle_compat_mulr 1 2 3 4 5.
+07. 1, 3 ⊢ c⋅a = a⋅c, rmul_comm 3 1.
+08. 2, 3 ⊢ b⋅c = c⋅b, rmul_comm 2 3.
+09. 1, 2, 3, 4, 5 ⊢ c⋅a ≤ b⋅c, eq_le_trans 7 6.
+10. 1, 2, 3, 4, 5 ⊢ c⋅a ≤ c⋅b, le_eq_trans 9 8.
+11. 1, 2, 3 ⊢ a ≤ b → 0 ≤ c → c⋅a ≤ c⋅b, subj_intro_ii 10.
+rle_compat_mull. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
+  a ≤ b → 0 ≤ c → c⋅a ≤ c⋅b, subj_intro_iii 11.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ 0 < a, hypo.
+03. 3 ⊢ 1/a ≤ 0, hypo.
+04. 2 ⊢ 0 ≤ a, le_from_lt 2.
+05. 2 ⊢ ¬0 = a, neq_from_lt 2.
+06. 2 ⊢ ¬a = 0, neq_symm 5.
+07. 1, 2 ⊢ 1/a ∈ ℝ, rreci_closed 1 6.
+08. ⊢ 0 ∈ ℝ, calc.
+09. 1, 2, 3 ⊢ a⋅(1/a) ≤ a⋅0, rle_compat_mull 7 8 1 3 4.
+10. 1, 2 ⊢ a⋅(1/a) = 1, rmul_reci_cancel 1 6.
+11. 1, 2 ⊢ 1 = a⋅(1/a), eq_symm 10.
+12. 1, 2, 3 ⊢ 1 ≤ a⋅0, eq_le_trans 11 9.
+13. 1 ⊢ a⋅0 = 0, rmul_rzero 1.
+14. 1, 2, 3 ⊢ 1 ≤ 0, le_eq_trans 12 13.
+15. ⊢ ¬1 ≤ 0, calc.
+16. 1, 2, 3 ⊢ ⊥, neg_elim 15 14.
+17. 1, 2 ⊢ ¬1/a ≤ 0, neg_intro 16.
+18. 1, 2 ⊢ 0 ≤ 1/a, rle_neg 7 8 17.
+19. 1, 2 ⊢ ¬1/a = 0, rreci_non_zero 1 6.
+20. 1, 2 ⊢ ¬0 = 1/a, neq_symm 19.
+21. 1, 2 ⊢ 0 < 1/a, lt_intro 18 20.
+rreci_positive. ⊢ a ∈ ℝ → 0 < a → 0 < 1/a,
+  subj_intro_ii 21.
 
 
 (*/section Absolute value *)
@@ -882,10 +1223,12 @@ rabs_triangle_ineq. ⊢ x ∈ ℝ → y ∈ ℝ →
 rabs_dist_mul. ⊢ x ∈ ℝ → y ∈ ℝ →
   abs (x⋅y) = (abs x)⋅(abs y), subj_intro_ii 48.
 
+(*/note lub_property
+The least-upper-bound property. *)
+
 (*/note abs_eq
 The <i>absolute value</i> of a real number x, defined as<br>
-\_\_|x| := [[cond_eq|if]] x ≥ 0 then x else -x.<br>
-*)
+\_\_|x| := [[cond_eq|if]] x ≥ 0 then x else -x. *)
 
 (*/note rabs_bounded
 From -a ≤ x ≤ a it follows that |x| ≤ a. *)

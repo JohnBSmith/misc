@@ -262,6 +262,9 @@ iadd_neutr. ⊢ a ∈ ℤ → a + 0 = a,
 isub_zero. ⊢ a ∈ ℤ → a - 0 = a,
   pred_restr int_incl_in_real rsub_zero.
 
+isub_self. ⊢ a ∈ ℤ → a - a = 0,
+  pred_restr int_incl_in_real rsub_self.
+
 imul_neutl. ⊢ a ∈ ℤ → 1⋅a = a,
   pred_restr int_incl_in_real rmul_neutl.
 
@@ -302,10 +305,64 @@ imul_compatr_neg. ⊢ a ∈ ℤ → b ∈ ℤ → -(a⋅b) = a⋅(-b),
   pred_ii_restr int_incl_in_real rmul_compatr_neg.
 
 
+(*/section Basic inequalities *)
+
+ile_refl. ⊢ a ∈ ℤ → a ≤ a,
+  pred_restr int_incl_in_real rle_refl.
+
+ile_antisym. ⊢ a ∈ ℤ → b ∈ ℤ → a ≤ b → b ≤ a → a = b,
+  pred_ii_restr int_incl_in_real rle_antisym.
+
+ile_trans. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ → a ≤ b → b ≤ c → a ≤ c,
+  pred_iii_restr int_incl_in_real rle_trans.
+
+ile_total. ⊢ a ∈ ℤ → b ∈ ℤ → a ≤ b ∨ b ≤ a,
+  pred_ii_restr int_incl_in_real rle_total.
+
+ile_compat_addl. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ → a ≤ b → c + a ≤ c + b,
+  pred_iii_restr int_incl_in_real rle_compat_addl.
+
+ile_compat_add. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ → a ≤ b → a + c ≤ b + c,
+  pred_iii_restr int_incl_in_real rle_compat_add.
+
+ile_lt_trans. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ →
+  a ≤ b → b < c → a < c,
+  pred_iii_restr int_incl_in_real rle_lt_trans.
+
+ilt_lt_trans. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ →
+  a < b → b < c → a < c,
+  pred_iii_restr int_incl_in_real rlt_lt_trans.
+
+ilt_add_cancel_rr. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ →
+  a + c < b + c → a < b,
+  pred_iii_restr int_incl_in_real rlt_add_cancel_rr.
+
+ile_lt_tricho. ⊢ a ∈ ℤ → b ∈ ℤ → a ≤ b ∨ b < a,
+  pred_ii_restr int_incl_in_real rle_lt_tricho.
+
+
 (*/section Elementary number theory *)
 
 divides_equi. ⊢ divides m a ↔ ∃k. k ∈ ℤ ∧ a = m⋅k, def.
-eq_mod_equi. ⊢ eq_mod a b m ↔ divides m (a - b), def.
+cong_equi. ⊢ cong a b m ↔ divides m (a - b), def.
 divisors_eq. ⊢ divisors a = {d | d ∈ ℕ ∧ divides d a}, def.
 prime_equi. ⊢ prime a ↔ 2 ≤ a ∧ divisors a = {1, a}, def.
+
+01. 1 ⊢ k ∈ ℤ, hypo.
+02. 2 ⊢ a - b = m⋅k, hypo.
+03. 1, 2 ⊢ k ∈ ℤ ∧ a - b = m⋅k, conj_intro 1 2.
+04. 1, 2 ⊢ ∃k. k ∈ ℤ ∧ a - b = m⋅k, ex_intro 3.
+05. ⊢ divides m (a - b) ↔ ∃k. k ∈ ℤ ∧ a - b = m⋅k, divides_equi.
+06. 1, 2 ⊢ divides m (a - b), rsubj_elim 5 4.
+07. 1, 2 ⊢ cong a b m, rsubj_elim cong_equi 6.
+cong_intro. ⊢ k ∈ ℤ → a - b = m⋅k → cong a b m, subj_intro_ii 7.
+
+01. 1 ⊢ a ∈ ℤ, hypo.
+02. 2 ⊢ m ∈ ℤ, hypo.
+03. 1 ⊢ a - a = 0, isub_self 1.
+04. ⊢ 0 ∈ ℤ, calc.
+05. 2 ⊢ m⋅0 = 0, imul_rzero 2.
+06. 1, 2 ⊢ a - a = m⋅0, eq_trans_rr 3 5.
+07. 1, 2 ⊢ cong a a m, cong_intro 4 6.
+cong_refl. ⊢ a ∈ ℤ → m ∈ ℤ → cong a a m, subj_intro_ii 7.
 

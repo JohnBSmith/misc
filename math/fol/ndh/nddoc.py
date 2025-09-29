@@ -180,7 +180,7 @@ def extract(s, acc, env):
                 env.propose_clear = False
             update_dependencies(env, idents)
             idents = " ".join(link_ident(x) for x in idents)
-            env.buf.append(htm_escape(s[start:idents_from]) + idents + s[idents_to:i])
+            env.buf.append(htm_escape(s[start:idents_from]) + idents + htm_escape(s[idents_to:i]))
             if named:
                 qident = quote(ident)
                 text = htm_escape(s[i0:j])

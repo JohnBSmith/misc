@@ -6,11 +6,11 @@
 is_max_equi. ⊢ is_max R y A ↔ y ∈ A ∧ ∀x. x ∈ A → R x y, def.
 is_min_equi. ⊢ is_min R y A ↔ y ∈ A ∧ ∀x. x ∈ A → R y x, def.
 
-is_sup_equi. ⊢ is_sup R M y A ↔
+is_supremum_equi. ⊢ is_supremum R M y A ↔
   (∀x. x ∈ A → R x y) ∧
   (∀b. b ∈ M → (∀x. x ∈ A → R x b) → R y b), def.
 
-is_inf_equi. ⊢ is_inf R M y A ↔
+is_infimum_equi. ⊢ is_infimum R M y A ↔
   (∀x. x ∈ A → R y x) ∧
   (∀b. b ∈ M → (∀x. x ∈ A → R b x) → R b y), def.
 

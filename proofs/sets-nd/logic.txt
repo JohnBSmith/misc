@@ -273,6 +273,15 @@ lsubj_conj_elimlll. ⊢ (E ↔ A ∧ B ∧ C ∧ D) → E → A, subj_intro_ii 4
 04. 1, 2 ⊢ B, conj_elimllr 3.
 lsubj_conj_elimllr. ⊢ (E ↔ A ∧ B ∧ C ∧ D) → E → B, subj_intro_ii 4.
 
+01. 1 ⊢ A ↔ B, hypo.
+02. 2 ⊢ ¬A, hypo.
+03. 3 ⊢ B, hypo.
+04. 1, 3 ⊢ A, rsubj_elim 1 3.
+05. 1, 2, 3 ⊢ ⊥, neg_elim 2 4.
+06. 1, 2 ⊢ ¬B, neg_intro 5.
+rsubj_tollens. ⊢ (A ↔ B) → ¬A → ¬B, subj_intro_ii 6.
+
+
 (*/section First order logic *)
 
 (*/subsection Bounded quantification *)
