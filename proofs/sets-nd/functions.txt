@@ -286,6 +286,23 @@ sg_eq_from_uniq. ⊢ set x → (∀y. x = y ↔ P y) → {x} = {y | P y},
 sg_eq_from_ex_uniq. ⊢ (∃b. set b ∧ ∀y. b = y ↔ P y) →
   (∃b. set b ∧ {b} = {y | P y}), subj_intro 8.
 
+01. 1 ⊢ x = ⋂{y |P y}, hypo.
+02. 2 ⊢ ∃x. set x ∧ ∀y. x = y ↔ P y, hypo.
+03. 2 ⊢ ∃x. set x ∧ {x} = {y | P y}, sg_eq_from_ex_uniq 2.
+04. 4 ⊢ set a ∧ {a} = {y | P y}, hypo.
+05. 4 ⊢ set a, conj_eliml 4.
+06. 4 ⊢ {a} = {y | P y}, conj_elimr 4.
+07. 4 ⊢ ⋂{a} = ⋂{y | P y}, f_equal 6, f t = ⋂t.
+08. 1, 4 ⊢ x = ⋂{a}, eq_trans_rr 1 7.
+09. 4 ⊢ ⋂{a} = a, Intersection_sg 5.
+10. 1, 4 ⊢ x = a, eq_trans 8 9.
+11. 1, 4 ⊢ x ∈ {a}, sg_intro 5 10.
+12. 1, 4 ⊢ x ∈ {y | P y}, eq_subst 6 11, P t ↔ x ∈ t.
+13. 1, 4 ⊢ P x, comp_elim 12.
+14. 1, 2 ⊢ P x, ex_elim 3 13.
+iota_property. ⊢ x = ⋂{y |P y} → (∃x. set x ∧ ∀y. x = y ↔ P y) → P x,
+  subj_intro_ii 14.
+
 01. 1 ⊢ function f, hypo.
 02. 2 ⊢ x ∈ dom f, hypo.
 03. 2 ⊢ ∃y. (x, y) ∈ f, dom_elim 2.
@@ -881,7 +898,7 @@ fn_app_restr. ⊢ function f → x ∈ dom f → x ∈ A → app f x = app (rest
   subj_intro_iii 13.
 
 
-(* Images and inverse images *)
+(*/section Images and inverse images *)
 
 01. 1 ⊢ map f X Y, hypo.
 02. 1 ⊢ dom f = X, map_dom 1.
@@ -903,6 +920,83 @@ map_img_of_dom_is_rng. ⊢ map f X Y → img f X = rng f, subj_intro 4.
 12. 1, 2 ⊢ ∃x. x ∈ X ∧ y = app f x, ex_elim 5 11.
 map_rng_elim. ⊢ map f X Y → y ∈ rng f →
   ∃x. x ∈ X ∧ y = app f x, subj_intro_ii 12.
+
+01. 1 ⊢ function f, hypo.
+02. 2 ⊢ x ∈ inv_img f A ∩ inv_img f B, hypo.
+03. 2 ⊢ x ∈ inv_img f A, intersection_eliml 2.
+04. 2 ⊢ x ∈ inv_img f B, intersection_elimr 2.
+05. 2 ⊢ ∃a. a ∈ A ∧ (x, a) ∈ f, inv_img_elim 3.
+06. 2 ⊢ ∃b. b ∈ B ∧ (x, b) ∈ f, inv_img_elim 4.
+07. 7 ⊢ a ∈ A ∧ (x, a) ∈ f, hypo.
+08. 8 ⊢ b ∈ B ∧ (x, b) ∈ f, hypo.
+09. 7 ⊢ a ∈ A, conj_eliml 7.
+10. 8 ⊢ b ∈ B, conj_eliml 8.
+11. 7 ⊢ (x, a) ∈ f, conj_elimr 7.
+12. 8 ⊢ (x, b) ∈ f, conj_elimr 8.
+13. 1, 7, 8 ⊢ a = b, fn_unique_value 1 11 12.
+14. 1, 7, 8 ⊢ a ∈ B, eq_subst_rev 13 10, P t ↔ t ∈ B.
+15. 1, 7, 8 ⊢ a ∈ A ∩ B, intersection_intro 9 14.
+16. 1, 7, 8 ⊢ x ∈ inv_img f (A ∩ B), inv_img_intro 15 11.
+17. 1, 2, 7 ⊢ x ∈ inv_img f (A ∩ B), ex_elim 6 16.
+18. 1, 2 ⊢ x ∈ inv_img f (A ∩ B), ex_elim 5 17.
+19. 1 ⊢ x ∈ inv_img f A ∩ inv_img f B →
+  x ∈ inv_img f (A ∩ B), subj_intro 18.
+20. 1 ⊢ ∀x. x ∈ inv_img f A ∩ inv_img f B →
+  x ∈ inv_img f (A ∩ B), uq_intro 19.
+21. 1 ⊢ inv_img f A ∩ inv_img f B ⊆ inv_img f (A ∩ B),
+  incl_intro 20.
+22. ⊢ inv_img f (A ∩ B) ⊆ inv_img f A ∩ inv_img f B,
+  inv_img_dist_inter.
+23. 1 ⊢ inv_img f (A ∩ B) = inv_img f A ∩ inv_img f B,
+  incl_antisym 22 21.
+fn_inv_img_dist_inter. ⊢ function f →
+  inv_img f (A ∩ B) = inv_img f A ∩ inv_img f B,
+  subj_intro 23.
+
+01. 1 ⊢ y ∈ img f A, hypo.
+02. 1 ⊢ ∃x. x ∈ A ∧ (x, y) ∈ f, img_elim 1.
+03. 3 ⊢ x ∈ A ∧ (x, y) ∈ f, hypo.
+04. 3 ⊢ x ∈ A, conj_eliml 3.
+05. 3 ⊢ (x, y) ∈ f, conj_elimr 3.
+06. 3 ⊢ (x, y) ∈ restr f A, restr_intro 5 4.
+07. 3 ⊢ y ∈ img (restr f A) A, img_intro 4 6.
+08. 1 ⊢ y ∈ img (restr f A) A, ex_elim 2 7.
+09. ⊢ y ∈ img f A → y ∈ img (restr f A) A, subj_intro 8.
+10. ⊢ ∀y. y ∈ img f A → y ∈ img (restr f A) A, uq_intro 9.
+restr_img_self. ⊢ img f A ⊆ img (restr f A) A, incl_intro 10.
+
+01. 1 ⊢ function f, hypo.
+02. 2 ⊢ A ⊆ dom f, hypo.
+03. 3 ⊢ set A, hypo.
+04. 1 ⊢ function (restr f A), restr_is_function 1.
+05. ⊢ dom (restr f A) = dom f ∩ A, dom_restr.
+06. 2 ⊢ A ∩ dom f = A, intersection_from_incl 2.
+07. ⊢ dom f ∩ A = A ∩ dom f, intersection_comm.
+08. 2 ⊢ dom f ∩ A = A, eq_trans 7 6.
+09. 2 ⊢ dom (restr f A) = A, eq_trans 5 8.
+10. 2, 3 ⊢ set (dom (restr f A)), eq_subst_rev 9 3, P t ↔ set t.
+11. 1, 2, 3 ⊢ set (rng (restr f A)), substitution 4 10.
+12. ⊢ img (restr f A) A ⊆ rng (restr f A), img_incl_in_rng.
+13. ⊢ img f A ⊆ img (restr f A) A, restr_img_self.
+14. ⊢ img f A ⊆ rng (restr f A), incl_trans 13 12.
+15. 1, 2, 3 ⊢ set (img f A), subset 14 11.
+replacement. ⊢ function f → A ⊆ dom f → set A → set (img f A),
+  subj_intro_iii 15.
+
+01. 1 ⊢ function f, hypo.
+02. 2 ⊢ set A, hypo.
+03. 1 ⊢ function (restr f A), restr_is_function 1.
+04. ⊢ dom (restr f A) = dom f ∩ A, dom_restr.
+05. ⊢ dom f ∩ A ⊆ A, intersection_incl_right.
+06. 2 ⊢ set (dom f ∩ A), subset 5 2.
+07. 2 ⊢ set (dom (restr f A)), eq_subst_rev 4 6, P t ↔ set t.
+08. 1, 2 ⊢ set (rng (restr f A)), substitution 3 7.
+09. ⊢ img (restr f A) A ⊆ rng (restr f A), img_incl_in_rng.
+10. ⊢ img f A ⊆ img (restr f A) A, restr_img_self.
+11. ⊢ img f A ⊆ rng (restr f A), incl_trans 10 9.
+12. 1, 2 ⊢ set (img f A), subset 11 8.
+replacement_strong. ⊢ function f → set A → set (img f A),
+  subj_intro_ii 12.
 
 
 (*/section Special functions *)
@@ -1622,6 +1716,40 @@ Diaconescu_Goodman_Myhill_theorem. ⊢
   (∀M. ∃f. choice_function f ∧ dom f = M \ {∅}) →
   A ∨ ¬A, subj_intro 111.
 end
+
+(*/note fn_inv_img_dist_inter
+Distribution law for the [[inv_img_eq|inverse image]] operation
+with respect to [[intersection_eq|intersection]].<br>
+<br>
+<b>Proof sketch</b><br>
+The inclusion f<sup>−1</sup>[A ∩ B] ⊆ f<sup>−1</sup>[A] ∩ f<sup>−1</sup>[B]
+is universally valid for any relation\_f. Thus it suffices to show the
+converse inclusion<br>
+\_\_f<sup>−1</sup>[A] ∩ f<sup>−1</sup>[B] ⊆ f<sup>−1</sup>[A ∩ B].<br>
+So let x ∈ f<sup>−1</sup>[A] ∩ f<sup>−1</sup>[B], thus
+x\_∈\_f<sup>−1</sup>[A] as well as x\_∈\_f<sup>−1</sup>[B].
+In this respect, a ∈ A with (x, a) ∈ f and b\_∈\_B with (x,\_b)\_∈\_f exist.
+However, because f is a function, a\_=\_b follows from (x,\_a)\_∈\_f and
+(x,\_b)\_∈\_f, since a functions's argument has a unique value. Accordingly,
+a\_∈\_B holds, meaning that a\_∈\_A\_∩\_B with (x,\_a)\_∈\_f, which
+witnesses that x\_∈\_f<sup>−1</sup>[A\_∩\_B]. q.e.d. *)
+
+(*/note replacement
+The axiom of replacement, derived as a theorem from its prototypical
+form, the [[substitution|axiom of substitution]]. The premise
+A\_⊆\_dom\_f is actually not needed, as shown in
+[[replacement_strong]].<br>
+<br>
+<b>Proof sketch</b><br>
+Consider the [[restr_eq|restriction]] f|<sub>A</sub>, which has
+[[dom_eq|domain]]\_A because A\_⊆\_dom\_f. Thus, according to the
+[[substitution|substitution axiom]], its [[rng_eq|range]]
+rng(f|<sub>A</sub>) must be a set. But then, according to the
+[[subset|subset axiom]], the [[img_eq|image]] f[A] must ultimately also
+be a set, because f[A]\_⊆\_rng(f|<sub>A</sub>). q.e.d. *)
+
+(*/note replacement_strong
+A stronger form of the [[replacement|replacement axiom]]. *)
 
 (*/note Diaconescu_Goodman_Myhill_theorem
 This theorem states that the [[lem|law of excluded middle]] follows from

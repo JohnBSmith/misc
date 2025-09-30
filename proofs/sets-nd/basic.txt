@@ -125,6 +125,16 @@ comp_intro_from. ⊢ u ∈ A → P u → u ∈ {x | P x}, subj_intro_ii 4.
 
 01. 1 ⊢ u ∈ {x | x ∈ A ∧ P x}, hypo.
 02. 1 ⊢ u ∈ A ∧ P u, comp_elim 1.
+03. ⊢ u ∈ {x | x ∈ A ∧ P x} → u ∈ A ∧ P u, subj_intro 2.
+04. 4 ⊢ u ∈ A ∧ P u, hypo.
+05. 4 ⊢ u ∈ A, conj_eliml 4.
+06. 4 ⊢ set u, set_intro 5.
+07. 4 ⊢ u ∈ {x | x ∈ A ∧ P x}, comp_intro 6 4.
+08. ⊢ u ∈ A ∧ P u → u ∈ {x | x ∈ A ∧ P x}, subj_intro 7.
+separation. ⊢ u ∈ {x | x ∈ A ∧ P x} ↔ u ∈ A ∧ P u, bij_intro 3 8.
+
+01. 1 ⊢ u ∈ {x | x ∈ A ∧ P x}, hypo.
+02. 1 ⊢ u ∈ A ∧ P u, comp_elim 1.
 03. 1 ⊢ u ∈ A, conj_eliml 2.
 04. ⊢ u ∈ {x | x ∈ A ∧ P x} → u ∈ A, subj_intro 3.
 05. ⊢ ∀u. u ∈ {x | x ∈ A ∧ P x} → u ∈ A, uq_intro 4.
@@ -134,6 +144,25 @@ sep_is_subclass. ⊢ {x | x ∈ A ∧ P x} ⊆ A, incl_intro 5.
 02. ⊢ {x | x ∈ A ∧ P x} ⊆ A, sep_is_subclass.
 03. 1 ⊢ set {x | x ∈ A ∧ P x}, subset 2 1.
 sep_is_set. ⊢ set A → set {x | x ∈ A ∧ P x}, subj_intro 3.
+
+begin
+let S B ↔ (∀x. x ∈ B ↔ x ∈ A ∧ P x).
+01. 1 ⊢ ∃B. S B, hypo.
+02. 2 ⊢ S B1, hypo.
+03. 3 ⊢ S B2, hypo.
+04. 2 ⊢ x ∈ B1 ↔ x ∈ A ∧ P x, uq_elim 2.
+05. 3 ⊢ x ∈ B2 ↔ x ∈ A ∧ P x, uq_elim 3.
+06. 2, 3 ⊢ x ∈ B1 ↔ x ∈ B2, equi_trans_rr 4 5.
+07. 2, 3 ⊢ ∀x. x ∈ B1 ↔ x ∈ B2, uq_intro 6.
+08. 2, 3 ⊢ B1 = B2, ext 7.
+09. ⊢ S B1 → S B2 → B1 = B2, subj_intro_ii 8.
+10. ⊢ ∀B2. S B1 → S B2 → B1 = B2, uq_intro 9.
+11. ⊢ ∀B1. ∀B2. S B1 → S B2 → B1 = B2, uq_intro 10.
+12. 1 ⊢ ∃C. ∀B. C = B ↔ S B, ex_uniq_intro 1 11.
+separation_is_unique. ⊢ (∃B. ∀x. x ∈ B ↔ x ∈ A ∧ P x) →
+  (∃C. ∀B. C = B ↔ ∀x. x ∈ B ↔ x ∈ A ∧ P x), subj_intro 12.
+end
+
 
 (*/section Binary operations on sets *)
 
@@ -1502,6 +1531,32 @@ let M = {u | A ∧ u = x ∨ ¬A ∧ u = y}.
 cond_eqr. ⊢ set y → ¬A → if A x y = y, subj_intro_ii 27.
 end
 
+(*/note comp_intro
+Comprehension introduction, a lemma derived from the axiom of
+[[comp|class comprehension]]. *)
+
+(*/note comp_elim
+Comprehension elimination, a lemma derived from the axiom of
+[[comp|class comprehension]]. *)
+
+(*/note separation
+The axiom of separation, derived as a theorem from the more general
+axiom of [[comp|class comprehension]]. More precisely, it represents an
+axiom schema, namely an axiom for every predicate P which stands for
+an arbitrary formula. It could be stated in existential form as<br>
+\_\_∃B. ∀u. u ∈ B ↔ u ∈ A ∧ P u,<br>
+but this set B is uniquely determined, as [[separation_is_unique]]
+shows. Thus we may introduce<br>
+\_\_{x | x ∈ A ∧ P x} := B<br>
+by definitional extension. *)
+
+(*/note separation_is_unique
+If there exists a separation set, i.e., the [[separation|axiom of separation]]
+holds for A with respect to P, this set exists uniquely. Since the
+proof depends solely on the [[ext|extensionality]] axiom, this
+uniqueness holds in any fragmental system of set theory to which the
+separation axiom is to be added. *)
+
 (*/note cond_eq
 The conditional expression, i.e., if A then x else y.
 See [[cond_eql]] and [[cond_eqr]]. *)
@@ -1511,3 +1566,4 @@ Given A we have ([[cond_eq|if]] A then x else y) = x. *)
 
 (*/note cond_eqr
 Given ¬A we have ([[cond_eq|if]] A then x else y) = y. *)
+

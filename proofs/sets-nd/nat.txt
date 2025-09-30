@@ -440,18 +440,20 @@ let F = {A | A ⊆ ℕ × X ∧ closed A}.
   conj_intro 201 199.
 203. 1, 2, 3, 4 ⊢ map f ℕ X ∧ (app f 0 = x0 ∧
   ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n)), conj_intro 191 202.
-204. 1, 2, 3, 4 ⊢ ∃f. map f ℕ X ∧ (app f 0 = x0 ∧
-  ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n)), ex_intro 203.
-205. 1, 2, 3 ⊢ f = ⋂F → ∃f. map f ℕ X ∧ (app f 0 = x0 ∧
-  ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n)), subj_intro 204.
-206. 1, 2, 3 ⊢ ∀f. f = ⋂F → ∃f. map f ℕ X ∧ (app f 0 = x0 ∧
-  ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n)), uq_intro 205.
-207. 1, 2, 3 ⊢ ∃f. map f ℕ X ∧ (app f 0 = x0 ∧
-  ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n)), disused_eq 206.
+204. 1, 2, 3, 4 ⊢ set f ∧ (map f ℕ X ∧ (app f 0 = x0 ∧
+  ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n))), conj_intro 69 203.
+205. 1, 2, 3, 4 ⊢ ∃f. set f ∧ (map f ℕ X ∧ (app f 0 = x0 ∧
+  ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n))), ex_intro 204.
+206. 1, 2, 3 ⊢ f = ⋂F → ∃f. set f ∧ (map f ℕ X ∧ (app f 0 = x0 ∧
+  ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n))), subj_intro 205.
+207. 1, 2, 3 ⊢ ∀f. f = ⋂F → ∃f. set f ∧ (map f ℕ X ∧ (app f 0 = x0 ∧
+  ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n))), uq_intro 206.
+208. 1, 2, 3 ⊢ ∃f. set f ∧ (map f ℕ X ∧ (app f 0 = x0 ∧
+  ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n))), disused_eq 207.
 nat_rec_existence. ⊢ set X → x0 ∈ X →
-  (∀n. n ∈ ℕ → ∀x. x ∈ X → φ n x ∈ X) → ∃f. map f ℕ X ∧
-  (app f 0 = x0 ∧ ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n)),
-  subj_intro_iii 207.
+  (∀n. n ∈ ℕ → ∀x. x ∈ X → φ n x ∈ X) → ∃f. set f ∧ (map f ℕ X ∧
+  (app f 0 = x0 ∧ ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n))),
+  subj_intro_iii 208.
 end
 
 begin
@@ -460,7 +462,7 @@ let rec f ↔ app f 0 = x0 ∧
 01. 1 ⊢ set X, hypo.
 02. 2 ⊢ x0 ∈ X, hypo.
 03. 3 ⊢ ∀n. n ∈ ℕ → ∀x. x ∈ X → φ n x ∈ X, hypo.
-04. 1, 2, 3 ⊢ ∃f. map f ℕ X ∧ rec f, nat_rec_existence 1 2 3.
+04. 1, 2, 3 ⊢ ∃f. set f ∧ (map f ℕ X ∧ rec f), nat_rec_existence 1 2 3.
 05. 5 ⊢ map f ℕ X ∧ rec f, hypo.
 06. 6 ⊢ map g ℕ X ∧ rec g, hypo.
 07. 5 ⊢ map f ℕ X, conj_eliml 5.
@@ -476,9 +478,9 @@ let rec f ↔ app f 0 = x0 ∧
   uq_intro 13.
 15. ⊢ ∀f. ∀g. map f ℕ X ∧ rec f → map g ℕ X ∧ rec g → f = g,
   uq_intro 14.
-16. 1, 2, 3 ⊢ ∃g. ∀f. g = f ↔ map f ℕ X ∧ rec f, ex_uniq_intro 4 15.
+16. 1, 2, 3 ⊢ ∃g. set g ∧ ∀f. g = f ↔ map f ℕ X ∧ rec f, ex_uniq_set_intro 4 15.
 nat_recursion. ⊢ set X → x0 ∈ X →
-  (∀n. n ∈ ℕ → ∀x. x ∈ X → φ n x ∈ X) → ∃g. ∀f. g = f ↔ map f ℕ X ∧
+  (∀n. n ∈ ℕ → ∀x. x ∈ X → φ n x ∈ X) → ∃g. set g ∧ ∀f. g = f ↔ map f ℕ X ∧
   (app f 0 = x0 ∧ ∀n. n ∈ ℕ → app f (n + 1) = φ n (app f n)),
   subj_intro_iii 16.
 end
