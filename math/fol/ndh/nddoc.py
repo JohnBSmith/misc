@@ -96,7 +96,7 @@ def consume_ident_list(s, n, i):
         i = consume_space(s, n, i)
     return i, idents
 
-non_link = {"axiom", "def", "calc"}
+non_link = {"axiom", "def", "decl", "calc"}
 
 def htm_escape(s):
     return s.replace("<", "&lt;")
@@ -162,6 +162,8 @@ def extract(s, acc, env):
             i = consume_space(s, n, j + 1)
             if i + 2 < n and s[i:i+3] == "def":
                 kind = "Definition"; cl = "def"
+            elif i + 3 < n and s[i:i+4] == "decl":
+                kind = "Declaration"; cl = "decl"
             elif i + 4 < n and s[i:i+5] == "axiom":
                 kind = "Axiom"; cl = "ax"
             elif i + 3 < n and s[i:i+4] == "rule":
@@ -216,7 +218,7 @@ div.box{
   margin-top: 0.5em;
   margin-bottom: 0.5em;
 }
-div.def, div.thm, div.ax, div.rule{
+div.def, div.decl, div.thm, div.ax, div.rule{
   padding-left: 12px;
   padding-right: 12px;
   padding-top: 4px;
@@ -224,10 +226,12 @@ div.def, div.thm, div.ax, div.rule{
   background-color: #fafaf0;
 }
 div.def {border-left: 6px solid #006000;}
+div.decl{border-left: 6px solid #006000;}
 div.thm {border-left: 6px solid #000080;}
 div.ax  {border-left: 6px solid #d0a000;}
 div.rule{border-left: 6px solid #900060;}
 b.def {color: #006000;}
+b.decl{color: #006000;}
 b.thm {color: #000080;}
 b.ax  {color: #d0a000;}
 b.rule{color: #900060;}\

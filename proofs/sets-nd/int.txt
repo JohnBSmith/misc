@@ -45,7 +45,7 @@ let is_diff z ↔ (∃m. ∃n. m ∈ ℕ ∧ n ∈ ℕ ∧ z = m - n).
 10. 7 ⊢ m ∈ ℝ, incl_elim nat_incl_in_real 8.
 11. 7 ⊢ n ∈ ℝ, incl_elim nat_incl_in_real 9.
 12. 7 ⊢ a = m - n, conj_elimr 7.
-13. 7 ⊢ -a = -(m - n), f_equal 12, f t = -t.
+13. 7 ⊢ -a = -(m - n), eq_cong 12, f t = -t.
 14. 7 ⊢ -(m - n) = n - m, rsub_neg 10 11.
 15. 7 ⊢ -a = n - m, eq_trans 13 14.
 16. 7 ⊢ n ∈ ℕ ∧ m ∈ ℕ, conj_intro 9 8.
@@ -86,7 +86,7 @@ let is_diff z ↔ (∃m. ∃n. m ∈ ℕ ∧ n ∈ ℕ ∧ z = m - n).
 17. 11 ⊢ a = m + -n, eq_trans 13 15.
 18. 12 ⊢ b = m' + -n', eq_trans 14 16.
 19. 11, 12 ⊢ a + b = (m + -n) + (m' + -n'),
-  f_equal_ii 17 18, f x y = x + y.
+  eq_cong_ii 17 18, f x y = x + y.
 20. 11 ⊢ m ∈ ℕ, conj_elimll 11.
 21. 11 ⊢ n ∈ ℕ, conj_elimlr 11.
 22. 12 ⊢ m' ∈ ℕ, conj_elimll 12.
@@ -174,7 +174,7 @@ let is_diff z ↔ (∃m. ∃n. m ∈ ℕ ∧ n ∈ ℕ ∧ z = m - n).
 17. 11 ⊢ a = m + -n, eq_trans 13 15.
 18. 12 ⊢ b = m' + -n', eq_trans 14 16.
 19. 11, 12 ⊢ a⋅b = (m + -n)⋅(m' + -n'),
-  f_equal_ii 17 18, f x y = x⋅y.
+  eq_cong_ii 17 18, f x y = x⋅y.
 20. 11 ⊢ m ∈ ℕ, conj_elimll 11.
 21. 11 ⊢ n ∈ ℕ, conj_elimlr 11.
 22. 12 ⊢ m' ∈ ℕ, conj_elimll 12.
@@ -210,7 +210,7 @@ let is_diff z ↔ (∃m. ∃n. m ∈ ℕ ∧ n ∈ ℕ ∧ z = m - n).
 42. 11, 12 ⊢ -(n⋅m') = (-n)⋅m', rmul_compatl_neg 25 26.
 43. 11, 12 ⊢ -(m⋅n') = m⋅(-n'), rmul_compatr_neg 24 27.
 44. 11, 12 ⊢ -(n⋅m') + -(m⋅n') = (-n)⋅m'+ m⋅(-n'),
-  f_equal_ii 42 43, f x y = x + y.
+  eq_cong_ii 42 43, f x y = x + y.
 45. 11, 12 ⊢ n⋅m' ∈ ℝ, rmul_closed 25 26.
 46. 11, 12 ⊢ m⋅n' ∈ ℝ, rmul_closed 24 27.
 47. 11, 12 ⊢ -(n⋅m' + m⋅n') = -(n⋅m') + -(m⋅n'),
@@ -304,6 +304,13 @@ imul_compatl_neg. ⊢ a ∈ ℤ → b ∈ ℤ → -(a⋅b) = (-a)⋅b,
 imul_compatr_neg. ⊢ a ∈ ℤ → b ∈ ℤ → -(a⋅b) = a⋅(-b),
   pred_ii_restr int_incl_in_real rmul_compatr_neg.
 
+isub_neg. ⊢ a ∈ ℤ → b ∈ ℤ → -(a - b) = b - a,
+  pred_ii_restr int_incl_in_real rsub_neg.
+
+isub_cancel_middle. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ →
+  (a - b) + (b - c) = a - c,
+  pred_iii_restr int_incl_in_real rsub_cancel_middle.
+
 
 (*/section Basic inequalities *)
 
@@ -357,6 +364,12 @@ prime_equi. ⊢ prime a ↔ 2 ≤ a ∧ divisors a = {1, a}, def.
 07. 1, 2 ⊢ cong a b m, rsubj_elim cong_equi 6.
 cong_intro. ⊢ k ∈ ℤ → a - b = m⋅k → cong a b m, subj_intro_ii 7.
 
+01. 1 ⊢ cong a b m, hypo.
+02. 1 ⊢ divides m (a - b), lsubj_elim cong_equi 1.
+03. ⊢ divides m (a - b) ↔ ∃k. k ∈ ℤ ∧ (a - b) = m⋅k, divides_equi.
+04. 1 ⊢ ∃k. k ∈ ℤ ∧ (a - b) = m⋅k, lsubj_elim 3 2.
+cong_elim. ⊢ cong a b m → ∃k. k ∈ ℤ ∧ (a - b) = m⋅k, subj_intro 4.
+
 01. 1 ⊢ a ∈ ℤ, hypo.
 02. 2 ⊢ m ∈ ℤ, hypo.
 03. 1 ⊢ a - a = 0, isub_self 1.
@@ -366,3 +379,50 @@ cong_intro. ⊢ k ∈ ℤ → a - b = m⋅k → cong a b m, subj_intro_ii 7.
 07. 1, 2 ⊢ cong a a m, cong_intro 4 6.
 cong_refl. ⊢ a ∈ ℤ → m ∈ ℤ → cong a a m, subj_intro_ii 7.
 
+01. 1 ⊢ a ∈ ℤ, hypo.
+02. 2 ⊢ b ∈ ℤ, hypo.
+03. 3 ⊢ m ∈ ℤ, hypo.
+04. 4 ⊢ cong a b m, hypo.
+05. 4 ⊢ ∃k. k ∈ ℤ ∧ (a - b) = m⋅k, cong_elim 4.
+06. 6 ⊢ k ∈ ℤ ∧ (a - b) = m⋅k, hypo.
+07. 6 ⊢ k ∈ ℤ, conj_eliml 6.
+08. 6 ⊢ (a - b) = m⋅k, conj_elimr 6.
+09. 6 ⊢ -(a - b) = -(m⋅k), eq_cong 8, f t = -t.
+10. 1, 2 ⊢ -(a - b) = b - a, isub_neg 1 2.
+11. 3, 6 ⊢ -(m⋅k) = m⋅(-k), imul_compatr_neg 3 7.
+12. 1, 2, 6 ⊢ b - a = -(m⋅k), eq_trans_ll 10 9.
+13. 1, 2, 3, 6 ⊢ b - a = m⋅(-k), eq_trans 12 11.
+14. 6 ⊢ -k ∈ ℤ, ineg_closed 7.
+16. 1, 2, 3, 6 ⊢ cong b a m, cong_intro 14 13.
+17. 1, 2, 3, 4 ⊢ cong b a m, ex_elim 5 16.
+cong_symm. ⊢ a ∈ ℤ → b ∈ ℤ → m ∈ ℤ →
+  cong a b m → cong b a m, subj_intro_iv 17.
+
+01. 1 ⊢ a ∈ ℤ, hypo.
+02. 2 ⊢ b ∈ ℤ, hypo.
+03. 3 ⊢ c ∈ ℤ, hypo.
+04. 4 ⊢ m ∈ ℤ, hypo.
+05. 5 ⊢ cong a b m, hypo.
+06. 6 ⊢ cong b c m, hypo.
+07. 5 ⊢ ∃k. k ∈ ℤ ∧ a - b = m⋅k, cong_elim 5.
+08. 6 ⊢ ∃k'. k' ∈ ℤ ∧ b - c = m⋅k', cong_elim 6.
+09. 9 ⊢ k ∈ ℤ ∧ a - b = m⋅k, hypo.
+10. 10 ⊢ k' ∈ ℤ ∧ b - c = m⋅k', hypo.
+11. 9 ⊢ k ∈ ℤ, conj_eliml 9.
+12. 10 ⊢ k' ∈ ℤ, conj_eliml 10.
+13. 9 ⊢ a - b = m⋅k, conj_elimr 9.
+14. 10 ⊢ b - c = m⋅k', conj_elimr 10.
+15. 9, 10 ⊢ (a - b) + (b - c) = m⋅k + m⋅k',
+  eq_cong_ii 13 14, f x y = x + y.
+16. 1, 2, 3 ⊢ (a - b) + (b - c) = a - c, isub_cancel_middle 1 2 3.
+17. 1, 2, 3, 9, 10 ⊢ a - c = m⋅k + m⋅k', eq_trans_ll 16 15.
+18. 4, 9, 10 ⊢ m⋅(k + k') = m⋅k + m⋅k', imul_distl_add 4 11 12.
+19. 1, 2, 3, 4, 9, 10 ⊢ a - c = m⋅(k + k'), eq_trans_rr 17 18.
+20. 9, 10 ⊢ k + k' ∈ ℤ, iadd_closed 11 12.
+21. 1, 2, 3, 4, 9, 10 ⊢ cong a c m, cong_intro 20 19.
+22. 1, 2, 3, 4, 6, 9 ⊢ cong a c m, ex_elim 8 21.
+23. 1, 2, 3, 4, 5, 6 ⊢ cong a c m, ex_elim 7 22.
+24. 1, 2, 3, 4 ⊢ cong a b m → cong b c m → cong a c m,
+  subj_intro_ii 23.
+cong_trans. ⊢ a ∈ ℤ → b ∈ ℤ → c ∈ ℤ → m ∈ ℤ →
+  cong a b m → cong b c m → cong a c m, subj_intro_iv 24.

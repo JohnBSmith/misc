@@ -3,15 +3,15 @@
 
 (*/section Axiomatic definition *)
 
-0. ⊢ ℝ = _, def.
-0. ⊢ a + b = _, def.
-0. ⊢ a⋅b = _, def.
-0. ⊢ -a = _, def.
-0. ⊢ /a = _, def.
+real_decl. ⊢ ℝ = _, decl.
+radd_decl. ⊢ a + b = _, decl.
+rmul_decl. ⊢ a⋅b = _, decl.
+rneg_decl. ⊢ -a = _, decl.
+rinv_decl. ⊢ /a = _, decl.
 rsub_eq. ⊢ a - b = a + (-b), def.
 rdiv_eq. ⊢ a/b = a⋅(/b), def.
 
-0. ⊢ x ≤ y ↔ _, def.
+le_decl. ⊢ x ≤ y ↔ _, decl.
 lt_equi. ⊢ a < b ↔ a ≤ b ∧ ¬a = b, def.
 
 upper_bound_equi. ⊢ upper_bound b A ↔ ∀x. x ∈ A → x ≤ b, def.
@@ -111,13 +111,13 @@ radd_cancel. ⊢ a ∈ ℝ → b ∈ ℝ → a + b - b = a,
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. 2 ⊢ b ∈ ℝ, hypo.
 03. ⊢ a - b = a + (-b), rsub_eq.
-04. ⊢ a - b + b = a + (-b) + b, f_equal 3, f t = t + b.
+04. ⊢ a - b + b = a + (-b) + b, eq_cong 3, f t = t + b.
 05. 2 ⊢ -b ∈ ℝ, rneg_closed 2.
 06. 1, 2 ⊢ a + (-b) + b = a + (-b + b), radd_assoc 1 5 2.
 07. 2 ⊢ -b + b = b + -b, radd_comm 5 2.
 08. 2 ⊢ b + -b = 0, radd_inv 2.
 09. 2 ⊢ -b + b = 0, eq_trans 7 8.
-10. 2 ⊢ a + (-b + b) = a + 0, f_equal 9, f t = a + t.
+10. 2 ⊢ a + (-b + b) = a + 0, eq_cong 9, f t = a + t.
 11. 1 ⊢ a + 0 = a, radd_neutr 1.
 12. 1, 2 ⊢ a + (-b + b) = a, eq_trans 10 11.
 13. 1, 2 ⊢ a + (-b) + b = a, eq_trans 6 12.
@@ -129,7 +129,7 @@ rsub_cancel. ⊢ a ∈ ℝ → b ∈ ℝ → a - b + b = a,
 02. 2 ⊢ b ∈ ℝ, hypo.
 03. 3 ⊢ c ∈ ℝ, hypo.
 04. 4 ⊢ a + c = b + c, hypo.
-05. 4 ⊢ a + c - c = b + c - c, f_equal 4, f t = t - c.
+05. 4 ⊢ a + c - c = b + c - c, eq_cong 4, f t = t - c.
 06. 1, 3 ⊢ a + c - c = a, radd_cancel 1 3.
 07. 2, 3 ⊢ b + c - c = b, radd_cancel 2 3.
 08. 1, 3, 4 ⊢ a = b + c - c, eq_trans_ll 6 5.
@@ -188,7 +188,7 @@ rmul_distr_add. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. ⊢ 0 ∈ ℝ, calc.
 03. ⊢ 0 + 0 = 0, radd_neutr 2.
-04. ⊢ a⋅(0 + 0) = a⋅0, f_equal 3, f t = a⋅t.
+04. ⊢ a⋅(0 + 0) = a⋅0, eq_cong 3, f t = a⋅t.
 05. 1 ⊢ a⋅(0 + 0) = a⋅0 + a⋅0, rmul_distl_add 1 2 2.
 06. 1 ⊢ a⋅0 + a⋅0 = a⋅0, eq_trans_ll 5 4.
 07. 1 ⊢ a⋅0 ∈ ℝ, rmul_closed 1 2.
@@ -209,13 +209,13 @@ rmul_lzero. ⊢ a ∈ ℝ → 0⋅a = 0, subj_intro 5.
 03. ⊢ 0 ∈ ℝ, calc.
 04. 1 ⊢ a⋅0 = 0, rmul_rzero 1.
 05. 2 ⊢ b + -b = 0, radd_inv 2.
-06. 2 ⊢ a⋅(b + -b) = a⋅0, f_equal 5, f t = a⋅t.
+06. 2 ⊢ a⋅(b + -b) = a⋅0, eq_cong 5, f t = a⋅t.
 07. 1, 2 ⊢ a⋅(b + -b) = 0, eq_trans 6 4.
 08. 2 ⊢ -b ∈ ℝ, rneg_closed 2.
 09. 1, 2 ⊢ a⋅(b + -b) = a⋅b + a⋅(-b), rmul_distl_add 1 2 8.
 10. 1, 2 ⊢ 0 = a⋅b + a⋅(-b), eq_trans_ll 7 9.
 11. 1, 2 ⊢ 0 + -(a⋅b) = a⋅b + a⋅(-b) + -(a⋅b),
-  f_equal 10, f t = t + -(a⋅b).
+  eq_cong 10, f t = t + -(a⋅b).
 12. 1, 2 ⊢ a⋅b ∈ ℝ, rmul_closed 1 2.
 13. 1, 2 ⊢ -(a⋅b) ∈ ℝ, rneg_closed 12.
 14. 1, 2 ⊢ 0 + -(a⋅b) = -(a⋅b), radd_neutl 13.
@@ -251,7 +251,7 @@ rmul_compatl_neg. ⊢ a ∈ ℝ → b ∈ ℝ → -(a⋅b) = (-a)⋅b,
 02. 2 ⊢ b ∈ ℝ, hypo.
 03. 3 ⊢ c ∈ ℝ, hypo.
 04. ⊢ b - c = b + (-c), rsub_eq.
-05. ⊢ a⋅(b - c) = a⋅(b + (-c)), f_equal 4, f x = a⋅x.
+05. ⊢ a⋅(b - c) = a⋅(b + (-c)), eq_cong 4, f x = a⋅x.
 06. 3 ⊢ -c ∈ ℝ, rneg_closed 3.
 07. 1, 2, 3 ⊢ a⋅(b + (-c)) = a⋅b + a⋅(-c),
   rmul_distl_add 1 2 6.
@@ -273,7 +273,7 @@ rmul_distl_sub. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
 06. 1, 2, 3 ⊢ c⋅(a - b) = c⋅a - c⋅b, rmul_distl_sub 3 1 2.
 07. 1, 3 ⊢ c⋅a = a⋅c, rmul_comm 3 1.
 08. 2, 3 ⊢ c⋅b = b⋅c, rmul_comm 3 2.
-09. 1, 3 ⊢ c⋅a - c⋅b = a⋅c - c⋅b, f_equal 7, f t = t - c⋅b.
+09. 1, 3 ⊢ c⋅a - c⋅b = a⋅c - c⋅b, eq_cong 7, f t = t - c⋅b.
 10. 1, 2, 3 ⊢ c⋅a - c⋅b = a⋅c - b⋅c, eq_subst 8 9,
   P t ↔ c⋅a - c⋅b = a⋅c - t.
 11. 1, 2, 3 ⊢ (a - b)⋅c = c⋅a - c⋅b, eq_trans 5 6.
@@ -308,12 +308,12 @@ rsub_from_zero. ⊢ a ∈ ℝ → 0 - a = -a, subj_intro 5.
 04. 1 ⊢ -x + -(-x) = 0, radd_inv 2.
 05. 1 ⊢ -(-x) + -x = -x + -(-x), radd_comm 3 2.
 06. 1 ⊢ -(-x) + -x = 0, eq_trans 5 4.
-07. 1 ⊢ -(-x) + -x + x = 0 + x, f_equal 6, f t = t + x.
+07. 1 ⊢ -(-x) + -x + x = 0 + x, eq_cong 6, f t = t + x.
 08. 1 ⊢ -(-x) + -x + x = -(-x) + (-x + x), radd_assoc 3 2 1.
 09. 1 ⊢ -x + x = x + -x, radd_comm 2 1.
 10. 1 ⊢ x + -x = 0, radd_inv 1.
 11. 1 ⊢ -x + x = 0, eq_trans 9 10.
-12. 1 ⊢ -(-x) + (-x + x) = -(-x) + 0, f_equal 11, f t = -(-x) + t.
+12. 1 ⊢ -(-x) + (-x + x) = -(-x) + 0, eq_cong 11, f t = -(-x) + t.
 13. 1 ⊢ -(-x) + 0 = -(-x), radd_neutr 3.
 14. 1 ⊢ -(-x) + (-x + x) = -(-x), eq_trans 12 13.
 15. 1 ⊢ -(-x) + -x + x = -(-x), eq_trans 8 14.
@@ -326,14 +326,14 @@ rneg_involution. ⊢ x ∈ ℝ → -(-x) = x, subj_intro 18.
 02. ⊢ 1 ∈ ℝ, calc.
 03. ⊢ -1 ∈ ℝ, rneg_closed 2.
 04. ⊢ -1 + 1 = 0, calc.
-05. ⊢ (-1 + 1)⋅x = 0⋅x, f_equal 4, f t = t⋅x.
+05. ⊢ (-1 + 1)⋅x = 0⋅x, eq_cong 4, f t = t⋅x.
 06. 1 ⊢ (-1 + 1)⋅x = (-1)⋅x + 1⋅x, rmul_distr_add 3 2 1.
 07. 1 ⊢ (-1)⋅x + 1⋅x = 0⋅x, eq_trans_ll 6 5.
 08. 1 ⊢ 1⋅x = x, rmul_neutl 1.
 09. 1 ⊢ (-1)⋅x + x = 0⋅x, eq_subst 8 7, P t ↔ (-1)⋅x + t = 0⋅x.
 10. 1 ⊢ 0⋅x = 0, rmul_lzero 1.
 11. 1 ⊢ (-1)⋅x + x = 0, eq_trans 9 10.
-12. 1 ⊢ (-1)⋅x + x - x = 0 - x, f_equal 11, f t = t - x.
+12. 1 ⊢ (-1)⋅x + x - x = 0 - x, eq_cong 11, f t = t - x.
 13. 1 ⊢ (-1)⋅x ∈ ℝ, rmul_closed 3 1.
 14. 1 ⊢ (-1)⋅x + x - x = (-1)⋅x, radd_cancel 13 1.
 15. 1 ⊢ (-1)⋅x = 0 - x, eq_trans_ll 14 12.
@@ -344,7 +344,7 @@ rmul_minus_one. ⊢ x ∈ ℝ → (-1)⋅x = -x, subj_intro 17.
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. 2 ⊢ b ∈ ℝ, hypo.
 03. 1, 2 ⊢ -(a⋅b) = (-a)⋅b, rmul_compatl_neg 1 2.
-04. 1, 2 ⊢ -(-(a⋅b)) = -((-a)⋅b), f_equal 3, f t = -t.
+04. 1, 2 ⊢ -(-(a⋅b)) = -((-a)⋅b), eq_cong 3, f t = -t.
 05. 1 ⊢ -a ∈ ℝ, rneg_closed 1.
 06. 1, 2 ⊢ -((-a)⋅b) = (-a)⋅(-b), rmul_compatr_neg 5 2.
 07. 1, 2 ⊢ -(-(a⋅b)) = (-a)⋅(-b), eq_trans 4 6.
@@ -376,7 +376,7 @@ rneg_dist_add. ⊢ a ∈ ℝ → b ∈ ℝ → -(a + b) = -a + -b,
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. 2 ⊢ b ∈ ℝ, hypo.
 03. ⊢ a - b = a + -b, rsub_eq.
-04. ⊢ -(a - b) = -(a + -b), f_equal 3, f t = -t.
+04. ⊢ -(a - b) = -(a + -b), eq_cong 3, f t = -t.
 05. 2 ⊢ -b ∈ ℝ, rneg_closed 2.
 06. 1, 2 ⊢ -(a + -b) = -a + -(-b), rneg_dist_add 1 5.
 07. 1, 2 ⊢ -(a - b) = -a + -(-b), eq_trans 4 6.
@@ -433,7 +433,7 @@ rinv_one. ⊢ 1 = /1, eq_trans_ll 3 5.
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. ⊢ a/1 = a⋅(/1), rdiv_eq.
 03. ⊢ 1 ∈ ℝ, calc.
-04. ⊢ a⋅1 = a⋅(/1), f_equal rinv_one, f t = a⋅t.
+04. ⊢ a⋅1 = a⋅(/1), eq_cong rinv_one, f t = a⋅t.
 05. ⊢ a/1 = a⋅1, eq_trans_rr 2 4.
 06. 1 ⊢ a⋅1 = a, rmul_neutr 1.
 07. 1 ⊢ a/1 = a, eq_trans 5 6.
@@ -442,7 +442,7 @@ rdiv_neut. ⊢ a ∈ ℝ → a/1 = a, subj_intro 7.
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. 2 ⊢ ¬a = 0, hypo.
 03. 1, 2 ⊢ 1/a = /a, rdiv_reci 1 2.
-04. 1, 2 ⊢ a⋅(1/a) = a⋅(/a), f_equal 3, f t = a⋅t.
+04. 1, 2 ⊢ a⋅(1/a) = a⋅(/a), eq_cong 3, f t = a⋅t.
 05. 1, 2 ⊢ a⋅(/a) = 1, rmul_inv 1 2.
 06. 1, 2 ⊢ a⋅(1/a) = 1, eq_trans 4 5.
 rmul_reci_cancel. ⊢ a ∈ ℝ → ¬a = 0 → a⋅(1/a) = 1,
@@ -451,7 +451,7 @@ rmul_reci_cancel. ⊢ a ∈ ℝ → ¬a = 0 → a⋅(1/a) = 1,
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. 2 ⊢ ¬a = 0, hypo.
 03. 3 ⊢ 1/a = 0, hypo.
-04. 3 ⊢ a⋅(1/a) = a⋅0, f_equal 3, f t = a⋅t.
+04. 3 ⊢ a⋅(1/a) = a⋅0, eq_cong 3, f t = a⋅t.
 05. 1, 2 ⊢ a⋅(1/a) = 1, rmul_reci_cancel 1 2.
 06. 1, 2, 3 ⊢ a⋅0 = 1, eq_trans_ll 4 5.
 07. 1 ⊢ a⋅0 = 0, rmul_rzero 1.
@@ -474,7 +474,7 @@ rreci_non_zero. ⊢ a ∈ ℝ → ¬a = 0 → ¬1/a = 0,
 09. ⊢ a/c = a⋅(/c), rdiv_eq.
 10. ⊢ b/c = b⋅(/c), rdiv_eq.
 11. ⊢ a/c + b/c = a⋅(/c) + b⋅(/c),
-  f_equal_ii 9 10, f x y = x + y.
+  eq_cong_ii 9 10, f x y = x + y.
 12. 1, 2, 3, 4 ⊢ (a + b)/c = a/c + b/c, eq_trans_rr 8 11.
 rdiv_dist_add. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
   ¬c = 0 → (a + b)/c = a/c + b/c, subj_intro_iv 12.
@@ -491,7 +491,7 @@ rdiv_dist_add. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
 09. ⊢ a/c = a⋅(/c), rdiv_eq.
 10. ⊢ b/c = b⋅(/c), rdiv_eq.
 11. ⊢ a/c - b/c = a⋅(/c) - b⋅(/c),
-  f_equal_ii 9 10, f x y = x - y.
+  eq_cong_ii 9 10, f x y = x - y.
 12. 1, 2, 3, 4 ⊢ (a - b)/c = a/c - b/c, eq_trans_rr 8 11.
 rdiv_dist_sub. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
   ¬c = 0 → (a - b)/c = a/c - b/c, subj_intro_iv 12.
@@ -499,7 +499,7 @@ rdiv_dist_sub. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. 2 ⊢ ¬a = 0, hypo.
 03. 3 ⊢ a⋅a = 0, hypo.
-04. 3 ⊢ a⋅a⋅(1/a) = 0⋅(1/a), f_equal 3, f t = t⋅(1/a).
+04. 3 ⊢ a⋅a⋅(1/a) = 0⋅(1/a), eq_cong 3, f t = t⋅(1/a).
 05. 1, 2 ⊢ 1/a ∈ ℝ, rreci_closed 1 2.
 06. 1, 2 ⊢ 0⋅(1/a) = 0, rmul_lzero 5.
 07. 1, 2, 3 ⊢ a⋅a⋅(1/a) = 0, eq_trans 4 6.
@@ -526,7 +526,7 @@ rsq_is_zero_impl. ⊢ a ∈ ℝ → a⋅a = 0 → a = 0,
 03. 3 ⊢ ¬a = 0, hypo.
 04. 4 ⊢ ¬b = 0, hypo.
 05. 5 ⊢ a⋅b = 0, hypo.
-06. 5 ⊢ a⋅b⋅(1/b) = 0⋅(1/b), f_equal 5, f t = t⋅(1/b).
+06. 5 ⊢ a⋅b⋅(1/b) = 0⋅(1/b), eq_cong 5, f t = t⋅(1/b).
 07. 2, 4 ⊢ 1/b ∈ ℝ, rreci_closed 2 4.
 08. 2, 4 ⊢ 0⋅(1/b) = 0, rmul_lzero 7.
 09. 2, 4, 5 ⊢ a⋅b⋅(1/b) = 0, eq_trans 6 8.
@@ -562,7 +562,7 @@ zero_product_property. ⊢ a ∈ ℝ → b ∈ ℝ →
 07. 1, 2, 3 ⊢ (a + b)⋅c = a⋅c + b⋅c, rmul_distr_add 1 2 3.
 08. 1, 2, 4 ⊢ (a + b)⋅d = a⋅d + b⋅d, rmul_distr_add 1 2 4.
 09. 1, 2, 3, 4 ⊢ (a + b)⋅c + (a + b)⋅d =
-  a⋅c + b⋅c + (a⋅d + b⋅d), f_equal_ii 7 8, f x y = x + y.
+  a⋅c + b⋅c + (a⋅d + b⋅d), eq_cong_ii 7 8, f x y = x + y.
 10. 1, 2, 3, 4 ⊢ (a + b)⋅(c + d) = a⋅c + b⋅c + (a⋅d + b⋅d),
   eq_trans 6 9.
 11. 1, 3 ⊢ a⋅c ∈ ℝ, rmul_closed 1 3.
@@ -582,7 +582,7 @@ rmul_expand_add_add. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ → d ∈ ℝ →
 03. 3 ⊢ c ∈ ℝ, hypo.
 04. 1, 2, 3 ⊢ a + b + c = a + (b + c), radd_assoc 1 2 3.
 05. 1, 2, 3 ⊢ a + b + c + d = a + (b + c) + d,
-  f_equal 4, f t = t + d.
+  eq_cong 4, f t = t + d.
 radd_assoc_llloolo. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
   a + b + c + d = a + (b + c) + d, subj_intro_iii 5.
 
@@ -628,7 +628,7 @@ radd_assoc_llolloo. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ → d ∈ ℝ →
 01. 1 ⊢ a ∈ ℝ, hypo.
 02. 2 ⊢ b ∈ ℝ, hypo.
 03. 1, 2 ⊢ a + b = b + a, radd_comm 1 2.
-04. 1, 2 ⊢ a + b + c = b + a + c, f_equal 3, f t = t + c.
+04. 1, 2 ⊢ a + b + c = b + a + c, eq_cong 3, f t = t + c.
 radd_perm_213. ⊢ a ∈ ℝ → b ∈ ℝ → a + b + c = b + a + c,
   subj_intro_ii 4.
 
@@ -636,7 +636,7 @@ radd_perm_213. ⊢ a ∈ ℝ → b ∈ ℝ → a + b + c = b + a + c,
 02. 2 ⊢ b ∈ ℝ, hypo.
 03. 3 ⊢ c ∈ ℝ, hypo.
 04. 2, 3 ⊢ b + c = c + b, radd_comm 2 3.
-05. 2, 3 ⊢ a + (b + c) = a + (c + b), f_equal 4, f t = a + t.
+05. 2, 3 ⊢ a + (b + c) = a + (c + b), eq_cong 4, f t = a + t.
 06. 1, 2, 3 ⊢ a + b + c = a + (b + c), radd_assoc 1 2 3.
 07. 1, 2, 3 ⊢ a + c + b = a + (c + b), radd_assoc 1 3 2.
 08. 1, 2, 3 ⊢ a + b + c = a + (c + b), eq_trans 6 5.
@@ -687,6 +687,36 @@ radd_perm_321. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
   eq_trans_rr 7 8.
 radd_perm_1423. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ → d ∈ ℝ →
   a + b + c + d = a + d + b + c, subj_intro_iv 9.
+
+01. 1 ⊢ a ∈ ℝ, hypo.
+02. 2 ⊢ b ∈ ℝ, hypo.
+03. 3 ⊢ c ∈ ℝ, hypo.
+04. ⊢ a - b = a + -b, rsub_eq.
+05. ⊢ b - c = b + -c, rsub_eq.
+06. ⊢ (a - b) + (b - c) = (a + -b) + (b + -c),
+  eq_cong_ii 4 5, f x y = x + y.
+07. 2 ⊢ -b ∈ ℝ, rneg_closed 2.
+08. 3 ⊢ -c ∈ ℝ, rneg_closed 3.
+09. 1, 2, 3 ⊢ a + -b + b + -c = (a + -b) + (b + -c),
+  radd_assoc_llolloo 1 7 2 8.
+10. 1, 2 ⊢ a + -b + b + -c = a + (-b + b) + -c,
+  radd_assoc_llloolo 1 7 2.
+11. 1, 2, 3 ⊢ (a + -b) + (b + -c) = a + (-b + b) + -c,
+  eq_trans_ll 9 10.
+12. 1, 2, 3 ⊢ (a - b) + (b - c) = a + (-b + b) + -c,
+  eq_trans 6 11.
+13. 2 ⊢ -b + b = b + -b, radd_comm  7 2.
+14. 2 ⊢ b + -b = 0, radd_inv 2.
+15. 2 ⊢ -b + b = 0, eq_trans 13 14.
+16. 2 ⊢ a + (-b + b) = a + 0, eq_cong 15, f x = a + x.
+17. 1 ⊢ a + 0 = a, radd_neutr 1.
+18. 1, 2 ⊢ a + (-b + b) = a, eq_trans 16 17.
+19. 1, 2, 3 ⊢ (a - b) + (b - c) = a + -c,
+  eq_subst 18 12, P t ↔ (a - b) + (b - c) = t + -c.
+20. ⊢ a - c = a + -c, rsub_eq.
+21. 1, 2, 3 ⊢ (a - b) + (b - c) = a - c, eq_trans_rr 19 20.
+rsub_cancel_middle. ⊢ a ∈ ℝ → b ∈ ℝ → c ∈ ℝ →
+  (a - b) + (b - c) = a - c, subj_intro_iii 21.
 
 
 (*/section Basic inequalities *)
@@ -793,7 +823,7 @@ rneg_non_negative. ⊢ x ∈ ℝ → 0 ≤ x → -x ≤ 0,
 11. 1 ⊢ -a ∈ ℝ, rneg_closed 1.
 12. 1, 2 ⊢ b + -a = -a + b, radd_comm 2 11.
 13. 1, 2 ⊢ b - a = -a + b, eq_trans 10 12.
-14. 1, 2 ⊢ (b - a) - b = (-a + b) - b, f_equal 13, f t = t - b.
+14. 1, 2 ⊢ (b - a) - b = (-a + b) - b, eq_cong 13, f t = t - b.
 15. 1, 2 ⊢ (-a + b) - b = -a, radd_cancel 11 2.
 16. 1, 2 ⊢ (b - a) - b = -a, eq_trans 14 15.
 17. 1, 2, 3 ⊢ 0 - b ≤ -a, le_eq_trans 9 16.
@@ -848,7 +878,7 @@ rmul_np_nn. ⊢ a ∈ ℝ → b ∈ ℝ →
 12. 2 ⊢ -b ∈ ℝ, rneg_closed 2.
 13. 1, 2, 3, 4 ⊢ 0 ≤ (-a)⋅(-b), rle_compat_mul 11 12 9 10.
 14. 1, 2 ⊢ -(a⋅b) = a⋅(-b), rmul_compatr_neg 1 2.
-15. 1, 2 ⊢ -(-(a⋅b)) = -(a⋅(-b)), f_equal 14, f t = -t.
+15. 1, 2 ⊢ -(-(a⋅b)) = -(a⋅(-b)), eq_cong 14, f t = -t.
 16. 1, 2 ⊢ a⋅b ∈ ℝ, rmul_closed 1 2.
 17. 1, 2 ⊢ -(-(a⋅b)) = a⋅b, rneg_involution 16.
 18. 1, 2 ⊢ -(a⋅(-b)) = a⋅b, eq_trans_ll 15 17.
@@ -1092,7 +1122,7 @@ rabs_eqr. ⊢ x ∈ ℝ → ¬0 ≤ x → abs x = -x, subj_intro_ii 7.
 07. ⊢ 0 ≤ 0, rle_refl 3.
 08. ⊢ abs 0 = 0, rabs_eql 3 7.
 09. ⊢ -0 = 0, calc.
-10. 1, 2, 5 ⊢ -x = -0, f_equal 6, f t = -t.
+10. 1, 2, 5 ⊢ -x = -0, eq_cong 6, f t = -t.
 11. 1, 2, 5 ⊢ -x = 0, eq_trans 10 9.
 12. 1, 2, 5 ⊢ abs x = 0, eq_subst_rev 6 8, P t ↔ abs t = 0.
 13. 1, 2, 5 ⊢ abs x = -x, eq_trans_rr 12 11.
@@ -1300,6 +1330,30 @@ rabs_triangle_ineq. ⊢ x ∈ ℝ → y ∈ ℝ →
 48. 1, 2 ⊢ abs (x⋅y) = (abs x)⋅(abs y), disj_elim 3 24 47.
 rabs_dist_mul. ⊢ x ∈ ℝ → y ∈ ℝ →
   abs (x⋅y) = (abs x)⋅(abs y), subj_intro_ii 48.
+
+(*/note real_decl Declares the <i>set of real numbers</i> to be a
+primitive constant symbol. It is characterized by axioms rather than
+given by a definition. *)
+
+(*/note radd_decl Declares <i>addition of real numbers</i> to be a
+primitive function symbol. It is characterized by axioms rather than
+given by a definition. *)
+
+(*/note rmul_decl Declares <i>multiplication of real numbers</i> to be
+a primitive function symbol. It is characterized by axioms rather than
+given by a definition. *)
+
+(*/note rneg_decl Declares <i>negation of a real number</i> to be a
+primitive function symbol. It is characterized by axioms rather than
+given by a definition. *)
+
+(*/note rinv_decl Declares <i>multiplicative inversion of a real
+number</i> to be a primitive function symbol. It is characterized by
+axioms rather than given by a definition. *)
+
+(*/note le_decl Declares <i>less than or equal</i> for real numbers to
+be a primitive predicate symbol. It is characterized by axioms rather
+than given by a definition. *)
 
 (*/note lub_property
 The least-upper-bound property. *)

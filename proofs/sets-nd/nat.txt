@@ -348,7 +348,7 @@ let F = {A | A ⊆ ℕ × X ∧ closed A}.
 158. 1, 2, 3, 4, 121, 123, 127, 143, 150 ⊢
   u = a, uq_bounded_elim 125 157.
 159. 1, 2, 3, 4, 121, 123, 127, 143, 150 ⊢
-  φ m u = φ m a, f_equal 158, f t = φ m t.
+  φ m u = φ m a, eq_cong 158, f t = φ m t.
 160. 127, 150 ⊢ x = φ m a, conj_elimr 154.
 161. 1, 2, 3, 4, 121, 123, 127, 143, 150 ⊢
   φ m u = x, eq_trans_rr 159 160.
@@ -566,7 +566,7 @@ nadd_closed. ⊢ a ∈ ℕ → b ∈ ℕ → a + b ∈ ℕ, subj_intro_ii 21.
 05. 5 ⊢ a⋅n ∈ ℕ, hypo.
 06. 1, 5 ⊢ a⋅n + a ∈ ℕ, nadd_closed 5 1.
 07. 1 ⊢ a⋅1 = a, nmul_neutr 1.
-08. 1 ⊢ a⋅n + a⋅1 = a⋅n + a, f_equal 7, f t = a⋅n + t.
+08. 1 ⊢ a⋅n + a⋅1 = a⋅n + a, eq_cong 7, f t = a⋅n + t.
 09. ⊢ 1 ∈ ℕ, calc.
 10. 1, 4 ⊢ a⋅(n + 1) = a⋅n + a⋅1, nmul_distl_add 1 4 9.
 11. 1, 4 ⊢ a⋅(n + 1) = a⋅n + a, eq_trans 10 8.
@@ -596,7 +596,7 @@ let A n ↔ n = 0 ∨ (∃m. m ∈ ℕ ∧ n = m + 1).
 13. 12 ⊢ k ∈ ℕ, conj_eliml 12.
 14. 12 ⊢ n = k + 1, conj_elimr 12.
 15. 12 ⊢ k + 1 ∈ ℕ, succ_in_nat 13.
-16. 12 ⊢ n + 1 = k + 1 + 1, f_equal 14, f t = t + 1.
+16. 12 ⊢ n + 1 = k + 1 + 1, eq_cong 14, f t = t + 1.
 17. 12 ⊢ k + 1 ∈ ℕ ∧ n + 1 = k + 1 + 1, conj_intro 15 16.
 18. 12 ⊢ ∃m. m ∈ ℕ ∧ n + 1 = m + 1, ex_intro 17.
 19. 12 ⊢ A (n + 1), disj_intror 18.

@@ -328,7 +328,7 @@ img_dist_inter. ⊢ img R (A ∩ B) ⊆ img R A ∩ img R B, incl_intro 13.
 
 01. 1 ⊢ A ⊆ B, hypo.
 02. 1 ⊢ A ∪ B = B, union_from_incl 1.
-03. 1 ⊢ img R (A ∪ B) = img R B, f_equal 2, f u = img R u.
+03. 1 ⊢ img R (A ∪ B) = img R B, eq_cong 2, f u = img R u.
 04. ⊢ img R A ∪ img R B = img R (A ∪ B), eq_symm img_dist_union.
 05. 1 ⊢ img R A ∪ img R B = img R B, eq_trans 4 3.
 06. 1 ⊢ img R A ⊆ img R B, incl_from_union 5.
@@ -423,7 +423,7 @@ inv_img_dist_union. ⊢ inv_img R (A ∪ B) = inv_img R A ∪ inv_img R B,
 
 01. 1 ⊢ A ⊆ B, hypo.
 02. 1 ⊢ A ∪ B = B, union_from_incl 1.
-03. 1 ⊢ inv_img R (A ∪ B) = inv_img R B, f_equal 2, f u = inv_img R u.
+03. 1 ⊢ inv_img R (A ∪ B) = inv_img R B, eq_cong 2, f u = inv_img R u.
 04. ⊢ inv_img R A ∪ inv_img R B = inv_img R (A ∪ B),
   eq_symm inv_img_dist_union.
 05. 1 ⊢ inv_img R A ∪ inv_img R B = inv_img R B, eq_trans 4 3.

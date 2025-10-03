@@ -493,15 +493,19 @@ struct Prefix {
     value_type: Type,
     special: u32
 }
+const PREFIX_SEQ: u32 = 1;
 
 impl Prefix {
     fn call(&self, line: usize, mut x: Term) -> Result<Term, Error> {
         ensure_type(&mut x, line, &self.arg_type)?;
-        let f_ty = fn_type(vec![self.arg_type.clone()], self.value_type.clone());
-        let f = constant(self.ident, f_ty);
-        let value = if self.special != 0 {
+        let value = if self.special == PREFIX_SEQ {
+            let f_ty = fn_type(vec![Prop, self.arg_type.clone()],
+                self.value_type.clone());
+            let f = constant(self.ident, f_ty);
             App(Rc::from([f, verum(), x]))
         } else {
+            let f_ty = fn_type(vec![self.arg_type.clone()], self.value_type.clone());
+            let f = constant(self.ident, f_ty);
             App(Rc::from([f, x]))
         };
         Ok(term(value, self.value_type.clone()))
@@ -513,7 +517,7 @@ fn prefix(ident: &'static str, arg_type: Type, value_type: Type) -> Prefix {
 }
 
 fn prefix_seq() -> Prefix {
-    Prefix {ident: "seq", arg_type: Prop, value_type: Prop, special: 1}
+    Prefix {ident: "seq", arg_type: Prop, value_type: Prop, special: PREFIX_SEQ}
 }
 
 fn init_prefix_table() -> HashMap<&'static [u8], (u32, Prefix)> {
@@ -568,7 +572,6 @@ fn init_definitions() -> HashMap<Bstr, Type> {
         (Bstr::from("seq"), prop_prop_prop()),
         (Bstr::from("nf"), Type::None),
         (Bstr::from("eq"), ind_ind_prop()),
-        (Bstr::from("element"), ind_ind_prop()),
         (Bstr::from("comp"), Type::None)
     ])
 }
@@ -947,6 +950,11 @@ fn type_check(line: usize, t: &mut Term, record: &mut HashMap<Bstr, Type>)
         {
             let (first, a) = a.split_at_mut(1);
             if let Type::Fn(fn_type) = &first[0].ty {
+                if a.len() != fn_type.argv.len() {
+                    return Err(logic_error(line, format!(
+                        "{} expected argument count {}, but got {}",
+                        first[0], fn_type.argv.len(), a.len())));
+                }
                 for i in 0..a.len() {
                     ensure_type(&mut a[i], line, &fn_type.argv[i])?;
                 }
@@ -1696,11 +1704,11 @@ fn free_vars(env: &Env, a: &Term, s: &mut HashMap<Bstr, ()>) {
     }
 }
 
-fn free_vars_check(env: &Env, line: usize, a: &Term, argv: &[Term], label: &Bstr) -> Result<(), Error> {
+fn free_vars_check(env: &Env, line: usize, a: &Term, argv: &[Term], decl: bool) -> Result<(), Error> {
     let mut s = HashMap::new();
     free_vars(env, a, &mut s);
     for x in s.keys() {
-        if label.as_slice() != "0".as_bytes() &&
+        if !decl &&
             !argv.iter().any(|arg|
                 matches!(&arg.value, Const(id) | Var(id) if id == x))
         {
@@ -1716,7 +1724,7 @@ fn theorem_sequent(t: Term) -> Term {
     app([constant("seq", prop_prop_prop()), verum(), t], Prop)
 }
 
-fn definition(env: &mut Env, line: usize, seq: &mut Term, args: &[Bstr], label: &Bstr)
+fn definition(env: &mut Env, line: usize, seq: &mut Term, args: &[Bstr], decl: bool)
 -> Result<(), Error>
 {
     if args.len() != 1 {
@@ -1736,7 +1744,7 @@ fn definition(env: &mut Env, line: usize, seq: &mut Term, args: &[Bstr], label: 
                 if env.definitions.contains_key(id) {
                     return Err(logic_error(line, "already defined".to_string()));
                 }
-                free_vars_check(env, line, b, &[], label)?;
+                free_vars_check(env, line, b, &[], decl)?;
                 env.definitions.insert(id.clone(), a.ty.clone());
                 *seq = theorem_sequent(app([
                     con.clone(),
@@ -1751,7 +1759,7 @@ fn definition(env: &mut Env, line: usize, seq: &mut Term, args: &[Bstr], label: 
                 if env.definitions.contains_key(id) {
                     return Err(logic_error(line, "already defined".to_string()));
                 }
-                free_vars_check(env, line, b, &args[1..], label)?;
+                free_vars_check(env, line, b, &args[1..], decl)?;
                 env.definitions.insert(id.clone(), args[0].ty.clone());
                 // println!("def {}: {:?}", id, args[0].ty);
                 let mut args = args.to_vec();
@@ -1890,15 +1898,19 @@ fn verify_cb(env: &mut Env, stmt: Statement) -> Result<(), Error> {
     if rule.iter().any(|x| *x == label) {
         return Err(logic_error(line, "cyclic deduction".to_string()));
     }
+    let mut decl = false;
     if rule[0].as_slice() == b"def" {
-        definition(env, line, &mut form, &rule, &label)?;
+        definition(env, line, &mut form, &rule, decl)?;
+    } else if rule[0].as_slice() == b"decl" {
+        decl = true;
+        definition(env, line, &mut form, &rule, decl)?;
     } else if rule[0].as_slice() == b"axiom" {
     } else if rule[0].as_slice() == b"calc" {
         calculate(line, &form, &rule)?;
     } else {
         modus_ponens(env, line, &form, &rule, hint)?;
     }
-    if label.as_slice() != b"0" {
+    if !decl {
         env.book.insert(label.clone(), form);
     }
     Ok(())

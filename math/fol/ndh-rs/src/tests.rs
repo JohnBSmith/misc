@@ -415,7 +415,7 @@ const_conj. ⊢ (∀x. A ∧ P x) → A ∧ (∀x. P x), subj_intro 6.
 2. ⊢ A (f a) → A (f a), 1.
 "),
 ("05.02", OK, "
-0. ⊢ f x = some_function, def.
+_. ⊢ f x = _, decl.
 1. ⊢ A x → A x, axiom.
 2. ⊢ A (f a) → A (f a), 1.
 "),
@@ -424,38 +424,38 @@ const_conj. ⊢ (∀x. A ∧ P x) → A ∧ (∀x. P x), subj_intro 6.
 2. ⊢ A (f a b) → A (f a b), 1.
 "),
 ("05.04", OK, "
-0. ⊢ f x y = some_function, def.
+_. ⊢ f x y = _, decl.
 1. ⊢ A x → A x, axiom.
 2. ⊢ A (f a b) → A (f a b), 1.
 "),
 ("05.05", OK, "
-0. |- add x y = some_function, def.
+_. |- add x y = _, decl.
 1. |- x = x, axiom.
 2. |- a + b = a + b, 1.
 "),
 ("05.06", OK, "
-0. |- add x y = some_function, def.
+_. |- add x y = _, decl.
 1. |- A x → A x, axiom.
 2. |- A (a + b) → A (a + b), 1.
 "),
 
 ("06.01", ELOGIC, "
-0. ⊢ p x ↔ some_predicate, def.
+_. ⊢ p x ↔ _, decl.
 1. ⊢ p x → p x, axiom.
 2. ⊢ A x → A x, 1.
 "),
 ("06.02", ELOGIC, "
-0. ⊢ add x y = some_function, def.
+_. ⊢ add x y = _, decl.
 1. ⊢ x = x, axiom.
 2. ⊢ a + b = a + c, 1.
 "),
 ("06.03", ELOGIC, "
-0. ⊢ add x y = some_function, def.
+_. ⊢ add x y = _, decl.
 1. ⊢ x = x, axiom.
 2. ⊢ x = a, 1.
 "),
 ("06.04", ELOGIC, "
-0. ⊢ add x y = some_function, def.
+_. ⊢ add x y = _, decl.
 1. ⊢ A x → A x, axiom.
 2. ⊢ A (a + b) → A (a + c), 1.
 "),
@@ -482,35 +482,35 @@ const_conj. ⊢ (∀x. A ∧ P x) → A ∧ (∀x. P x), subj_intro 6.
 "), */
 
 ("07.01", OK, "
-0. ⊢ a = some_constant, def.
-0. ⊢ b = some_constant, def.
-0. ⊢ x + y = some_function, def.
+_. ⊢ a = _, decl.
+_. ⊢ b = _, decl.
+_. ⊢ x + y = _, decl.
 c_eq. ⊢ c = a + b, def.
 "),
 ("07.02", OK, "
-0. ⊢ a = some_constant, def.
-0. ⊢ b = some_constant, def.
-0. ⊢ x + y = some_function, def.
+_. ⊢ a = _, decl.
+_. ⊢ b = _, decl.
+_. ⊢ x + y = _, decl.
 p_equi. ⊢ p ↔ a = b, def.
 "),
 ("07.03", OK, "
-0. ⊢ p x ↔ some_predicate, def.
-0. ⊢ q x ↔ some_predicate, def.
+_. ⊢ p x ↔ _, decl.
+_. ⊢ q x ↔ _, decl.
 r_equi. ⊢ r x ↔ p x ∧ q x, def.
 "),
 ("07.04", OK, "
-0. ⊢ p x ↔ some_predicate, def.
-0. ⊢ q x ↔ some_predicate, def.
+_. ⊢ p x ↔ _, decl.
+_. ⊢ q x ↔ _, decl.
 r_equi. ⊢ r ↔ ∀x. p x ∧ q x, def.
 "),
 ("07.05", OK, "
-0. ⊢ f x = some_function, def.
-0. ⊢ g x = some_function, def.
+_. ⊢ f x = _, decl.
+_. ⊢ g x = _, decl.
 h_eq. ⊢ h x = g (f x), def.
 "),
 ("07.06", OK, "
-0. ⊢ f x = some_function, def.
-0. ⊢ g x = some_function, def.
+_. ⊢ f x = _, decl.
+_. ⊢ g x = _, decl.
 r_equi. ⊢ r ↔ ∀x. f x = g x, def.
 "),
 

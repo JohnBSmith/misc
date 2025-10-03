@@ -286,21 +286,21 @@ sg_eq_from_uniq. ⊢ set x → (∀y. x = y ↔ P y) → {x} = {y | P y},
 sg_eq_from_ex_uniq. ⊢ (∃b. set b ∧ ∀y. b = y ↔ P y) →
   (∃b. set b ∧ {b} = {y | P y}), subj_intro 8.
 
-01. 1 ⊢ x = ⋂{y |P y}, hypo.
-02. 2 ⊢ ∃x. set x ∧ ∀y. x = y ↔ P y, hypo.
-03. 2 ⊢ ∃x. set x ∧ {x} = {y | P y}, sg_eq_from_ex_uniq 2.
-04. 4 ⊢ set a ∧ {a} = {y | P y}, hypo.
+01. 1 ⊢ u = ⋂{x |P x}, hypo.
+02. 2 ⊢ ∃a. set a ∧ ∀x. a = x ↔ P x, hypo.
+03. 2 ⊢ ∃a. set a ∧ {a} = {x | P x}, sg_eq_from_ex_uniq 2.
+04. 4 ⊢ set a ∧ {a} = {x | P x}, hypo.
 05. 4 ⊢ set a, conj_eliml 4.
-06. 4 ⊢ {a} = {y | P y}, conj_elimr 4.
-07. 4 ⊢ ⋂{a} = ⋂{y | P y}, f_equal 6, f t = ⋂t.
-08. 1, 4 ⊢ x = ⋂{a}, eq_trans_rr 1 7.
+06. 4 ⊢ {a} = {x | P x}, conj_elimr 4.
+07. 4 ⊢ ⋂{a} = ⋂{x | P x}, eq_cong 6, f t = ⋂t.
+08. 1, 4 ⊢ u = ⋂{a}, eq_trans_rr 1 7.
 09. 4 ⊢ ⋂{a} = a, Intersection_sg 5.
-10. 1, 4 ⊢ x = a, eq_trans 8 9.
-11. 1, 4 ⊢ x ∈ {a}, sg_intro 5 10.
-12. 1, 4 ⊢ x ∈ {y | P y}, eq_subst 6 11, P t ↔ x ∈ t.
-13. 1, 4 ⊢ P x, comp_elim 12.
-14. 1, 2 ⊢ P x, ex_elim 3 13.
-iota_property. ⊢ x = ⋂{y |P y} → (∃x. set x ∧ ∀y. x = y ↔ P y) → P x,
+10. 1, 4 ⊢ u = a, eq_trans 8 9.
+11. 1, 4 ⊢ u ∈ {a}, sg_intro 5 10.
+12. 1, 4 ⊢ u ∈ {x | P x}, eq_subst 6 11, P t ↔ u ∈ t.
+13. 1, 4 ⊢ P u, comp_elim 12.
+14. 1, 2 ⊢ P u, ex_elim 3 13.
+iota_property. ⊢ u = ⋂{x |P x} → (∃a. set a ∧ ∀x. a = x ↔ P x) → P u,
   subj_intro_ii 14.
 
 01. 1 ⊢ function f, hypo.
@@ -341,7 +341,7 @@ fn_img_lemma. ⊢ function f → x ∈ dom f →
 08. 2 ⊢ y ∈ {y | (x, y) ∈ f}, comp_intro 7 2.
 09. 2, 3 ⊢ y ∈ {b}, eq_subst_rev 5 8, P u ↔ y ∈ u.
 10. 2, 3 ⊢ y = b, sg_elim 4 9.
-11. 3 ⊢ ⋂{b} = ⋂{y | (x, y) ∈ f}, f_equal 5, f u = ⋂u.
+11. 3 ⊢ ⋂{b} = ⋂{y | (x, y) ∈ f}, eq_cong 5, f u = ⋂u.
 12. 3 ⊢ ⋂{b} = b, Intersection_sg 4.
 13. 3 ⊢ b = ⋂{b}, eq_symm 12.
 14. 3 ⊢ b = ⋂{y | (x, y) ∈ f}, eq_trans 13 11.
@@ -1510,7 +1510,7 @@ composition_bij_bij_is_bij. ⊢ bij f X Y → bij g Y Z →
 06. 6 ⊢ a ∈ X, hypo.
 07. 7 ⊢ b ∈ X, hypo.
 08. 8 ⊢ app f a = app f b, hypo.
-09. 8 ⊢ app g (app f a) = app g (app f b), f_equal 8, f x = app g x.
+09. 8 ⊢ app g (app f a) = app g (app f b), eq_cong 8, f x = app g x.
 10. 1, 3, 6 ⊢ app (g ∘ f) a = app g (app f a), map_app_composition 1 4 6.
 11. 1, 3, 7 ⊢ app (g ∘ f) b = app g (app f b), map_app_composition 1 4 7.
 12. 1, 3, 6, 8 ⊢ app (g ∘ f) a = app g (app f b), eq_trans 10 9.
@@ -1576,10 +1576,10 @@ restr_is_choice_fn. ⊢ choice_function f →
 05. 2 ⊢ choice_function (restr f (A \ {∅})), restr_is_choice_fn 3.
 06. ⊢ dom (restr f (A \ {∅})) = dom f ∩ (A \ {∅}), dom_restr.
 07. 2 ⊢ dom f ∩ (A \ {∅}) = (UnivCl \ {∅}) ∩ (A \ {∅}),
-  f_equal 4, f x = x ∩ (A \ {∅}).
+  eq_cong 4, f x = x ∩ (A \ {∅}).
 08. ⊢ UnivCl ∩ A = A, intersection_neutl.
 09. ⊢ A = UnivCl ∩ A, eq_symm 8.
-10. ⊢ A \ {∅} = (UnivCl ∩ A) \ {∅}, f_equal 9, f x = x \ {∅}.
+10. ⊢ A \ {∅} = (UnivCl ∩ A) \ {∅}, eq_cong 9, f x = x \ {∅}.
 11. ⊢ (UnivCl ∩ A) \ {∅} = (UnivCl \ {∅}) ∩ (A \ {∅}), diff_dist_inter.
 12. ⊢ A \ {∅} = (UnivCl \ {∅}) ∩ (A \ {∅}), eq_trans 10 11.
 13. ⊢ (UnivCl \ {∅}) ∩ (A \ {∅}) = A \ {∅}, eq_symm 12.
@@ -1693,7 +1693,7 @@ let Y = {y | y ∈ {∅, {∅}} ∧ (A ∨ y = {∅})}.
 092. 75 ⊢ u ∈ X ↔ u ∈ Y, bij_intro 83 91.
 093. 75 ⊢ ∀u. u ∈ X ↔ u ∈ Y, uq_intro 92.
 094. 75 ⊢ X = Y, ext 93.
-095. 75 ⊢ app g X = app g Y, f_equal 94, f x = app g x.
+095. 75 ⊢ app g X = app g Y, eq_cong 94, f x = app g x.
 096. 75 ⊢ app f X = app f Y, 95.
 097. 73 ⊢ ∅ = app f X, eq_symm 74.
 098. 73, 75 ⊢ ∅ = app f Y, eq_trans 97 96.
@@ -1716,6 +1716,21 @@ Diaconescu_Goodman_Myhill_theorem. ⊢
   (∀M. ∃f. choice_function f ∧ dom f = M \ {∅}) →
   A ∨ ¬A, subj_intro 111.
 end
+
+(*/note iota_property
+The operation ⋂{x | P x} may be seen as an encoding of ιx.\_P\_x, read
+"the unique x such that x has property P", which represents a
+<i>definite description</i>. It originates from Russell's
+<i>Principia Mathematica</i>, see vol.\_I, *14, page\_181.<br>
+<br>
+<b>Proof sketch</b><br>
+By assumption, there exists exactly one x with P\_x, call it a.
+Thus, the comprehension reduces to the singleton<br>
+\_\_{x | P x} = {a}.<br>
+So we have<br>
+\_\_u = ⋂{x | P x} = ⋂{a} = a.<br>
+But u = a means u ∈ {a}, thus u ∈ {x | P x}, and therefore
+P\_u. q.e.d. *)
 
 (*/note fn_inv_img_dist_inter
 Distribution law for the [[inv_img_eq|inverse image]] operation
@@ -1745,11 +1760,21 @@ Consider the [[restr_eq|restriction]] f|<sub>A</sub>, which has
 [[dom_eq|domain]]\_A because A\_⊆\_dom\_f. Thus, according to the
 [[substitution|substitution axiom]], its [[rng_eq|range]]
 rng(f|<sub>A</sub>) must be a set. But then, according to the
-[[subset|subset axiom]], the [[img_eq|image]] f[A] must ultimately also
-be a set, because f[A]\_⊆\_rng(f|<sub>A</sub>). q.e.d. *)
+[[subset|subset axiom]], the [[img_eq|image]] f[A] must be a set as
+well, since f[A]\_⊆\_rng(f|<sub>A</sub>). q.e.d. *)
 
 (*/note replacement_strong
-A stronger form of the [[replacement|replacement axiom]]. *)
+A stronger form of the [[replacement|replacement axiom]].<br>
+<br>
+<b>Proof sketch</b><br>
+Consider the [[restr_eq|restriction]] f|<sub>A</sub>, which has
+[[dom_eq|domain]] dom(f|<sub>A</sub>) = (dom\_f)\_∩\_A.
+Because A is a set, this [[intersection_eq|intersection]] must be a set as
+well, since it is a subset of A, which brings the [[subset|subset axiom]]
+into play. Thus, according to the [[substitution|substitution axiom]],
+the [[rng_eq|range]] rng(f|<sub>A</sub>) must be a set. But then,
+according to the subset axiom again, the [[img_eq|image]] f[A]
+must be a set as well, since f[A]\_⊆\_rng(f|<sub>A</sub>). q.e.d. *)
 
 (*/note Diaconescu_Goodman_Myhill_theorem
 This theorem states that the [[lem|law of excluded middle]] follows from

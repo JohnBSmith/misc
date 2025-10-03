@@ -514,7 +514,7 @@ diff_incl. ⊢ A \ B ⊆ A, incl_intro 4.
 02. ⊢ compl C ∩ compl C = compl C, intersection_idem.
 03. ⊢ compl C = compl C ∩ compl C, eq_symm 2.
 04. ⊢ (A ∩ B) ∩ compl C = (A ∩ B) ∩ (compl C ∩ compl C),
-  f_equal 3, f x = (A ∩ B) ∩ x.
+  eq_cong 3, f x = (A ∩ B) ∩ x.
 05. ⊢ (A ∩ B) ∩ (compl C ∩ compl C) =
   ((A ∩ B) ∩ compl C) ∩ compl C, intersection_assocr.
 06. ⊢ (A ∩ B) ∩ compl C = compl C ∩ (A ∩ B), intersection_comm.
@@ -876,13 +876,13 @@ union_compl. ⊢ A ∪ compl A = UnivCl, incl_antisym 13 12.
 Intersection_empty_set. ⊢ ⋂∅ = UnivCl, incl_antisym 12 11.
 
 01. ⊢ A \ B = A ∩ compl B, diff_as_inter.
-02. ⊢ (A \ B) ∪ B = (A ∩ compl B) ∪ B, f_equal 1, f x = x ∪ B.
+02. ⊢ (A \ B) ∪ B = (A ∩ compl B) ∪ B, eq_cong 1, f x = x ∪ B.
 03. ⊢ (A ∩ compl B) ∪ B = (A ∪ B) ∩ (compl B ∪ B), union_distr.
 04. ⊢ B ∪ compl B = UnivCl, union_compl.
 05. ⊢ compl B ∪ B = B ∪ compl B, union_comm.
 06. ⊢ compl B ∪ B = UnivCl, eq_trans 5 4.
 07. ⊢ (A ∪ B) ∩ (compl B ∪ B) = (A ∪ B) ∩ UnivCl,
-  f_equal 6, f x = (A ∪ B) ∩ x.
+  eq_cong 6, f x = (A ∪ B) ∩ x.
 08. ⊢ (A ∪ B) ∩ UnivCl = A ∪ B, intersection_neutr.
 09. ⊢ (A ∪ B) ∩ (compl B ∪ B) = A ∪ B, eq_trans 7 8.
 10. ⊢ (A ∩ compl B) ∪ B = A ∪ B, eq_trans 3 9.
@@ -1172,7 +1172,7 @@ setr_from_pair. ⊢ set (x, y) → set y, subj_intro 10.
 12. ⊢ {x} ⊆ {x, y}, union_incl_left.
 13. ⊢ {x} ∩ {x, y} = {x}, intersection_from_incl 12.
 14. 1 ⊢ ⋂(x, y) = {x}, eq_trans 11 13.
-15. 1 ⊢ ⋂⋂(x, y) = ⋂{x}, f_equal 14, f u = ⋂u.
+15. 1 ⊢ ⋂⋂(x, y) = ⋂{x}, eq_cong 14, f u = ⋂u.
 16. 1 ⊢ ⋂{x} = x, Intersection_sg 2.
 17. 1 ⊢ ⋂⋂(x, y) = x, eq_trans 15 16.
 18. ⊢ fst (x, y) = ⋂⋂(x, y), fst_eq.
@@ -1185,12 +1185,12 @@ pair_fst_conj. ⊢ set x ∧ set y → fst (x, y) = x, subj_intro 19.
 23. 1 ⊢ ⋃(x, y) = {x} ∪ {x, y}, eq_trans 21 22.
 24. ⊢ {x} ∪ {x, y} = {x, y}, union_from_incl 12.
 25. 1 ⊢ ⋃(x, y) = {x, y}, eq_trans 23 24.
-26. 1 ⊢ ⋃⋃(x, y) = ⋃{x, y}, f_equal 25, f u = ⋃u.
+26. 1 ⊢ ⋃⋃(x, y) = ⋃{x, y}, eq_cong 25, f u = ⋃u.
 27. 1 ⊢ ⋃{x, y} = x ∪ y, Union_pair_set 1.
 28. 1 ⊢ ⋃⋃(x, y) = x ∪ y, eq_trans 26 27.
 
 29. 1 ⊢ ⋂{x, y} = x ∩ y, Intersection_pair_set 1.
-30. 1 ⊢ ⋂⋃(x, y) = ⋂{x, y}, f_equal 25, f u = ⋂u.
+30. 1 ⊢ ⋂⋃(x, y) = ⋂{x, y}, eq_cong 25, f u = ⋂u.
 31. 1 ⊢ ⋂⋃(x, y) = x ∩ y, eq_trans 30 29.
 
 32. ⊢ scd (x, y) = ⋂⋃(x, y) ∪ (⋃⋃(x, y) \ ⋂⋂(x, y)), scd_eq.
@@ -1207,7 +1207,7 @@ pair_fst_conj. ⊢ set x ∧ set y → fst (x, y) = x, subj_intro 19.
   intersection_distr.
 39. ⊢ x ∩ compl x = ∅, intersection_compl.
 40. ⊢ (x ∩ compl x) ∪ (y ∩ compl x) = ∅ ∪ (y ∩ compl x),
-  f_equal 39, f a = a ∪ (y ∩ compl x).
+  eq_cong 39, f a = a ∪ (y ∩ compl x).
 41. ⊢ ∅ ∪ (y ∩ compl x) = y ∩ compl x, union_neutl.
 42. ⊢ (x ∩ compl x) ∪ (y ∩ compl x) = y ∩ compl x, eq_trans 40 41.
 43. ⊢ (x ∪ y) ∩ compl x = y ∩ compl x, eq_trans 38 42.
@@ -1219,7 +1219,7 @@ pair_fst_conj. ⊢ set x ∧ set y → fst (x, y) = x, subj_intro 19.
 48. ⊢ (x ∩ y) ∪ (compl x ∩ y) = (x ∪ compl x) ∩ y, eq_symm 47.
 49. 1 ⊢ scd (x, y) = (x ∪ compl x) ∩ y, eq_trans 46 48.
 50. ⊢ x ∪ compl x = UnivCl, union_compl.
-51. ⊢ (x ∪ compl x) ∩ y = UnivCl ∩ y, f_equal 50, f a = a ∩ y.
+51. ⊢ (x ∪ compl x) ∩ y = UnivCl ∩ y, eq_cong 50, f a = a ∩ y.
 52. ⊢ UnivCl ∩ y = y, intersection_neutl.
 53. ⊢ (x ∪ compl x) ∩ y = y, eq_trans 51 52.
 54. 1 ⊢ scd (x, y) = y, eq_trans 49 53.
@@ -1243,13 +1243,13 @@ pair_scd. ⊢ set x → set y → scd (x, y) = y, subj_intro_ii 6.
 07. 1, 2 ⊢ set x', setl_from_pair 6.
 08. 1, 2 ⊢ set y', setr_from_pair 6.
 09. 1, 2 ⊢ set x' ∧ set y', conj_intro 7 8.
-10. 2 ⊢ fst (x, y) = fst (x', y'), f_equal 2, f u = fst u.
+10. 2 ⊢ fst (x, y) = fst (x', y'), eq_cong 2, f u = fst u.
 11. 1 ⊢ fst (x, y) = x, pair_fst_conj 1.
 12. 1 ⊢ x = fst (x, y), eq_symm 11.
 13. 1, 2 ⊢ fst (x', y') = x', pair_fst_conj 9.
 14. 1, 2 ⊢ x = fst (x', y'), eq_trans 12 10.
 15. 1, 2 ⊢ x = x', eq_trans 14 13.
-16. 2 ⊢ scd (x, y) = scd (x', y'), f_equal 2, f u = scd u.
+16. 2 ⊢ scd (x, y) = scd (x', y'), eq_cong 2, f u = scd u.
 17. 1 ⊢ scd (x, y) = y, pair_scd_conj 1.
 18. 1 ⊢ y = scd (x, y), eq_symm 17.
 19. 1, 2 ⊢ scd (x', y') = y', pair_scd_conj 9.
@@ -1492,7 +1492,7 @@ let M = {u | A ∧ u = x ∨ ¬A ∧ u = y}.
 21. 1, 2 ⊢ u ∈ M ↔ u ∈ {x}, bij_intro 13 20.
 22. 1, 2 ⊢ ∀u. u ∈ M ↔ u ∈ {x}, uq_intro 21.
 23. 1, 2 ⊢ M = {x}, ext 22.
-24. 1, 2 ⊢ ⋂M = ⋂{x}, f_equal 23, f t = ⋂t.
+24. 1, 2 ⊢ ⋂M = ⋂{x}, eq_cong 23, f t = ⋂t.
 25. 1 ⊢ ⋂{x} = x, Intersection_sg 1.
 26. 1, 2 ⊢ if A x y = ⋂{x}, eq_trans cond_eq 24.
 27. 1, 2 ⊢ if A x y = x, eq_trans 26 25.
@@ -1524,12 +1524,18 @@ let M = {u | A ∧ u = x ∨ ¬A ∧ u = y}.
 21. 1, 2 ⊢ u ∈ M ↔ u ∈ {y}, bij_intro 13 20.
 22. 1, 2 ⊢ ∀u. u ∈ M ↔ u ∈ {y}, uq_intro 21.
 23. 1, 2 ⊢ M = {y}, ext 22.
-24. 1, 2 ⊢ ⋂M = ⋂{y}, f_equal 23, f t = ⋂t.
+24. 1, 2 ⊢ ⋂M = ⋂{y}, eq_cong 23, f t = ⋂t.
 25. 1 ⊢ ⋂{y} = y, Intersection_sg 1.
 26. 1, 2 ⊢ ⋂M = y, eq_trans 24 25.
 27. 1, 2 ⊢ if A x y = y, eq_trans cond_eq 26.
 cond_eqr. ⊢ set y → ¬A → if A x y = y, subj_intro_ii 27.
 end
+
+(*/note incl_intro Inclusion introduction,
+a lemma derived from [[incl_equi]]. *)
+
+(*/note incl_elim Inclusion elimination,
+a lemma derived from [[incl_equi]]. *)
 
 (*/note comp_intro
 Comprehension introduction, a lemma derived from the axiom of
