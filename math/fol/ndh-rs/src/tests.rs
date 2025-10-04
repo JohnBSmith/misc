@@ -29,9 +29,12 @@ fn run_test_list() {
         load_prelude(&mut env);
         let result = match verify(&mut env, code.as_bytes()) {
             Ok(()) => OK,
-            Err(e) => match e.kind {
-                ErrorKind::Logic => ELOGIC,
-                ErrorKind::Syntax => ESYNTAX
+            Err(e) => {
+                if *expected == OK {println!("\nERROR MESSAGE:\n{}", e.info);}
+                match e.kind {
+                    ErrorKind::Logic => ELOGIC,
+                    ErrorKind::Syntax => ESYNTAX
+                }
             }
         };
         assert!(result == *expected, "Test {} failed.", test_id);
@@ -538,6 +541,33 @@ r_equi. ⊢ r ↔ ∀x. f x = g x, def.
 ("08.08", ELOGIC, "
 1. ⊢ p x ↔ q x, def.
 "),
+
+("09.01", ELOGIC, "
+_. ⊢ c = _, decl. # Declares c to be a constant symbol
+eq_refl. ⊢ x = x, axiom.
+1. nf u (⊥) → (⊢ u = c) → (⊢ ∀x. x = c), axiom.
+2. ⊢ c = c, eq_refl.
+3. ⊢ ∀x. x = c, 1 2. # nf c (⊥) fails, because c is not a variable
+"),
+("09.02", ELOGIC, "
+_. ⊢ f a b = _, decl. # Declares f to be a function symbol
+eq_refl. ⊢ x = x, axiom.
+1. nf u (⊥) → (⊢ u = f a b) → (⊢ ∀x. x = f a b), axiom.
+2. ⊢ f a b = f a b, eq_refl.
+3. ⊢ ∀x. x = f a b, 1 2.
+"),
+("09.03", ELOGIC, "
+eq_refl. ⊢ x = x, axiom.
+1. nf u (⊥) → (⊢ u = f a b) → (⊢ ∀x. x = f a b), axiom.
+2. ⊢ f a b = f a b, eq_refl.
+3. ⊢ ∀x. x = f a b, 1 2.
+"),
+("09.04", ELOGIC, "
+eq_refl. ⊢ x = x, axiom.
+1. nf u (⊥) → (⊢ u = f a b) → (⊢ ∀x. x = f a b), axiom.
+2. ⊢ g a b = g a b, eq_refl.
+3. ⊢ ∀x. x = g a b, 1 2, f a b = g a b.
+")
 
 /*("09.01", ELOGIC, "
 1. 1 ⊢ P x, hypo.

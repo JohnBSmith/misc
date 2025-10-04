@@ -47,3 +47,63 @@ po_antisym. ⊢ partial_order R M → x ∈ M → y ∈ M →
 po_trans. ⊢ partial_order R M → x ∈ M → y ∈ M → z ∈ M →
   R x y → R y z → R x z, subj_intro 5.
 
+
+(*/section Power set lattice *)
+
+begin
+let M = {x | x ⊆ a ∧ app f x ⊆ x}.
+let w = ⋂M.
+01. 1 ⊢ set a, hypo.
+02. 2 ⊢ map f (power a) (power a), hypo.
+03. 3 ⊢ ∀x. ∀y. y ⊆ a → x ⊆ y → app f x ⊆ app f y, hypo.
+04. 4 ⊢ x ∈ M, hypo.
+05. ⊢ w = w, eq_refl.
+06. 4 ⊢ w ⊆ x, Intersection_is_lower_bound 5 4.
+07. 4 ⊢ x ⊆ a ∧ app f x ⊆ x, comp_elim 4.
+08. 4 ⊢ x ⊆ a, conj_eliml 7.
+09. 3 ⊢ ∀y. y ⊆ a → w ⊆ y → app f w ⊆ app f y, uq_elim 3.
+10. 3, 4 ⊢ w ⊆ x → app f w ⊆ app f x, uq_bounded_elim 9 8.
+11. 3, 4 ⊢ app f w ⊆ app f x, subj_elim 10 6.
+12. 4 ⊢ app f x ⊆ x, conj_elimr 7.
+13. 3, 4 ⊢ app f w ⊆ x, incl_trans 11 12.
+14. 3 ⊢ x ∈ M → app f w ⊆ x, subj_intro 13.
+15. 3 ⊢ ∀x. x ∈ M → app f w ⊆ x, uq_intro 14.
+16. 3 ⊢ app f w ⊆ w, lower_bound_incl_in_Intersection 15.
+17. ⊢ a ⊆ a, incl_refl.
+18. 1 ⊢ a ∈ power a, power_intro 1 17.
+19. 1, 2 ⊢ app f a ∈ power a, map_app_in_cod 2 18.
+20. 1, 2 ⊢ app f a ⊆ a, power_elim 19.
+21. 1, 2 ⊢ a ⊆ a ∧ app f a ⊆ a, conj_intro 17 20.
+22. 1, 2 ⊢ a ∈ M, comp_intro 1 21, P x ↔ x ⊆ a ∧ app f x ⊆ x.
+23. 1, 2 ⊢ w ⊆ a, Intersection_is_lower_bound 5 22.
+24. 3 ⊢ ∀y. y ⊆ a → app f w ⊆ y →
+  app f (app f w) ⊆ app f y, uq_elim 3.
+25. 1, 2, 3 ⊢ app f w ⊆ w →
+  app f (app f w) ⊆ app f w, uq_bounded_elim 24 23.
+26. 1, 2, 3 ⊢ app f (app f w) ⊆ app f w, subj_elim 25 16.
+27. 1, 2, 3 ⊢ app f w ⊆ a, incl_trans 16 23.
+28. 1, 2, 3 ⊢ set (app f w), subset 27 1.
+29. 1, 2, 3 ⊢ app f w ⊆ a ∧
+  app f (app f w) ⊆ app f w, conj_intro 27 26.
+30. 1, 2, 3 ⊢ app f w ∈ M,
+  comp_intro 28 29, P x ↔ x ⊆ a ∧ app f x ⊆ x.
+31. 1, 2, 3 ⊢ w ⊆ app f w, Intersection_is_lower_bound 5 30.
+32. 1, 2, 3 ⊢ app f w = w, incl_antisym 16 31.
+33. 33 ⊢ x ⊆ a, hypo.
+34. 34 ⊢ app f x = x, hypo.
+35. 34 ⊢ app f x ⊆ x, incl_from_eq 34.
+36. 33, 34 ⊢ x ⊆ a ∧ app f x ⊆ x, conj_intro 33 35.
+37. 1, 33 ⊢ set x, subset 33 1.
+38. 1, 33, 34 ⊢ x ∈ M, comp_intro 37 36.
+39. 1, 33, 34 ⊢ w ⊆ x, Intersection_is_lower_bound 5 38.
+40. 1 ⊢ x ⊆ a → app f x = x → w ⊆ x, subj_intro_ii 39.
+41. 1 ⊢ ∀x. x ⊆ a → app f x = x → w ⊆ x, uq_intro 40.
+43. 1, 2, 3 ⊢ app f w = w ∧
+  (∀x. x ⊆ a → app f x = x → w ⊆ x), conj_intro 32 41.
+44. 1, 2, 3 ⊢ ∃p. app f p = p ∧
+  (∀x. x ⊆ a → app f x = x → p ⊆ x), ex_intro 43.
+incl_Knaster_Tarski_least. ⊢ set a → map f (power a) (power a) →
+  (∀x. ∀y. y ⊆ a → x ⊆ y → app f x ⊆ app f y) →
+  ∃u. app f u = u ∧ (∀x. x ⊆ a → app f x = x → u ⊆ x),
+  subj_intro_iii 44.
+end

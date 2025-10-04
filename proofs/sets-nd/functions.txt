@@ -286,6 +286,25 @@ sg_eq_from_uniq. ⊢ set x → (∀y. x = y ↔ P y) → {x} = {y | P y},
 sg_eq_from_ex_uniq. ⊢ (∃b. set b ∧ ∀y. b = y ↔ P y) →
   (∃b. set b ∧ {b} = {y | P y}), subj_intro 8.
 
+01. 1 ⊢ P u, hypo.
+02. 2 ⊢ ∃a. set a ∧ ∀x. a = x ↔ P x, hypo.
+03. 2 ⊢ ∃a. set a ∧ {a} = {x | P x}, sg_eq_from_ex_uniq 2.
+04. 4 ⊢ set a ∧ {a} = {x | P x}, hypo.
+05. 4 ⊢ set a, conj_eliml 4.
+06. 4 ⊢ {a} = {x | P x}, conj_elimr 4.
+07. 4 ⊢ ⋂{a} = ⋂{x | P x}, eq_cong 6, f t = ⋂t.
+08. 4 ⊢ ⋂{a} = a, Intersection_sg 5.
+09. ⊢ a = a, eq_refl.
+10. 4 ⊢ a ∈ {a}, sg_intro 5 9.
+11. 4 ⊢ a ∈ {x | P x}, eq_subst 6 10, P t ↔ a ∈ t.
+12. 4 ⊢ P a, comp_elim 11.
+13. 1, 2, 4 ⊢ u = a, ex_uniq_set_elimr 2 1 12.
+14. 1, 2, 4 ⊢ u = ⋂{a}, eq_trans_rr 13 8.
+15. 1, 2, 4 ⊢ u = ⋂{x | P x}, eq_trans 14 7.
+16. 1, 2 ⊢ u = ⋂{x | P x}, ex_elim 3 15.
+iota_intro. ⊢  P u → (∃a. set a ∧ ∀x. a = x ↔ P x) →
+  u = ⋂{x | P x}, subj_intro_ii 16.
+
 01. 1 ⊢ u = ⋂{x |P x}, hypo.
 02. 2 ⊢ ∃a. set a ∧ ∀x. a = x ↔ P x, hypo.
 03. 2 ⊢ ∃a. set a ∧ {a} = {x | P x}, sg_eq_from_ex_uniq 2.
@@ -300,7 +319,7 @@ sg_eq_from_ex_uniq. ⊢ (∃b. set b ∧ ∀y. b = y ↔ P y) →
 12. 1, 4 ⊢ u ∈ {x | P x}, eq_subst 6 11, P t ↔ u ∈ t.
 13. 1, 4 ⊢ P u, comp_elim 12.
 14. 1, 2 ⊢ P u, ex_elim 3 13.
-iota_property. ⊢ u = ⋂{x |P x} → (∃a. set a ∧ ∀x. a = x ↔ P x) → P u,
+iota_elim. ⊢ u = ⋂{x |P x} → (∃a. set a ∧ ∀x. a = x ↔ P x) → P u,
   subj_intro_ii 14.
 
 01. 1 ⊢ function f, hypo.
@@ -1717,7 +1736,7 @@ Diaconescu_Goodman_Myhill_theorem. ⊢
   A ∨ ¬A, subj_intro 111.
 end
 
-(*/note iota_property
+(*/note iota_elim
 The operation ⋂{x | P x} may be seen as an encoding of ιx.\_P\_x, read
 "the unique x such that x has property P", which represents a
 <i>definite description</i>. It originates from Russell's

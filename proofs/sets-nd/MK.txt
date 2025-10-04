@@ -192,7 +192,7 @@ equal. *)
 (*/note app_eq
 The <i>application</i> of f to x, or "f of x" for short, that is to say,
 the function value at position\_x. The right hand side is a
-[[iota_property|iota operation]], encoded in set theory, which works as
+[[iota_elim|iota operation]], encoded in set theory, which works as
 follows: Since the value y is uniquely determined for each\_x in dom\_f
 with respect to (x,\_y)\_∈\_f, the comprehension reduces to a
 singleton,<br>

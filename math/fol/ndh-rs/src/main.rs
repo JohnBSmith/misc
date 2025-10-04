@@ -1668,6 +1668,10 @@ fn modus_ponens(env: &Env, line: usize, b: &Term, args: &[Bstr], hint: Option<Te
         }
         // println!("COND: {} in {:?}", x, a);
         // println!("SUBS: {:#?}", subs);
+        if !matches!(x.value, Var(_)) {
+            return Err(logic_error(line, format!(
+                "in {}: {} is not a variable", args[0], x)));
+        }
         if free_in(env, x, a, &subs) {
             return Err(logic_error(line, format!(
                 "in {}: {} occurs free in {}", args[0], x, a)));

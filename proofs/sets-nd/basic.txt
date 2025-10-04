@@ -510,6 +510,20 @@ diff_as_inter. ⊢ A \ B = A ∩ compl B, ext 18.
 04. ⊢ ∀x. x ∈ A \ B → x ∈ A, uq_intro 3.
 diff_incl. ⊢ A \ B ⊆ A, incl_intro 4.
 
+01. 1 ⊢ A ⊆ B, hypo.
+02. 2 ⊢ x ∈ X \ B, hypo.
+03. 2 ⊢ x ∈ X, diff_eliml 2.
+04. 2 ⊢ ¬x ∈ B, diff_elimr 2.
+05. 1 ⊢ x ∈ A → x ∈ B, incl_elim 1.
+06. 1 ⊢ ¬x ∈ B → ¬x ∈ A, contraposition 5.
+07. 1, 2 ⊢ ¬x ∈ A, subj_elim 6 4.
+08. 1, 2 ⊢ x ∈ X \ A, diff_intro 3 7.
+09. 1 ⊢ x ∈ X \ B → x ∈ X \ A, subj_intro 8.
+10. 1 ⊢ ∀x. x ∈ X \ B → x ∈ X \ A, uq_intro 9.
+11. 1 ⊢ X \ B ⊆ X \ A, incl_intro 10.
+incl_contraposition. ⊢ A ⊆ B → X \ B ⊆ X \ A,
+  subj_intro 11.
+
 01. ⊢ (A ∩ B) \ C = (A ∩ B) ∩ compl C, diff_as_inter.
 02. ⊢ compl C ∩ compl C = compl C, intersection_idem.
 03. ⊢ compl C = compl C ∩ compl C, eq_symm 2.
@@ -535,6 +549,7 @@ diff_incl. ⊢ A \ B ⊆ A, incl_intro 4.
 19. ⊢ (A ∩ B) ∩ compl C = (A \ C) ∩ (B \ C), eq_subst_rev 18 17,
   P x ↔ (A ∩ B) ∩ compl C = (A \ C) ∩ x.
 diff_dist_inter. ⊢ (A ∩ B) \ C = (A \ C) ∩ (B \ C), eq_trans 1 19.
+
 
 (*/section The empty set *)
 
@@ -750,6 +765,17 @@ Intersection_intro_non_empty. ⊢ ¬M = ∅ →
 08. 1, 2 ⊢ A ⊆ B, incl_intro 7.
 Intersection_is_lower_bound. ⊢ A = ⋂M → B ∈ M → A ⊆ B, subj_intro_ii 8.
 
+01. 1 ⊢ A = ⋃M, hypo.
+02. 2 ⊢ B ∈ M, hypo.
+03. 3 ⊢ x ∈ B, hypo.
+04. 2, 3 ⊢ x ∈ ⋃M, Union_intro 2 3.
+05. 1, 2, 3 ⊢ x ∈ A, eq_subst_rev 1 4, P t ↔ x ∈ t.
+06. 1, 2 ⊢ x ∈ B → x ∈ A, subj_intro 5.
+07. 1, 2 ⊢ ∀x. x ∈ B → x ∈ A, uq_intro 6.
+08. 1, 2 ⊢ B ⊆ A, incl_intro 7.
+Union_is_upper_bound. ⊢ A = ⋃M → B ∈ M → B ⊆ A,
+  subj_intro_ii 8.
+
 01. 1 ⊢ ∀x. x ∈ M → u ⊆ x, hypo.
 02. 2 ⊢ y ∈ u, hypo.
 03. 3 ⊢ x ∈ M, hypo.
@@ -895,6 +921,32 @@ diff_union. ⊢ (A \ B) ∪ B = A ∪ B, eq_trans 2 10.
 05. ⊢ (X \ A) ∪ A = X ∪ A, diff_union.
 06. 1 ⊢ (X \ A) ∪ A = X, eq_trans 5 4.
 diff_union_subclass. ⊢ A ⊆ X → (X \ A) ∪ A = X, subj_intro 6.
+
+01. 1 ⊢ x ∈ compl A, hypo.
+02. 1 ⊢ set x, set_intro 1.
+03. 1 ⊢ x ∈ UnivCl, UnivCl_intro 2.
+04. 1 ⊢ ¬x ∈ A, compl_elim 1.
+05. 1 ⊢ x ∈ UnivCl \ A, diff_intro 3 4.
+06. ⊢ x ∈ compl A → x ∈ UnivCl \ A, subj_intro 5.
+07. 7 ⊢ x ∈ UnivCl \ A, hypo.
+08. 7 ⊢ set x, set_intro 7.
+09. 7 ⊢ ¬x ∈ A, diff_elimr 7.
+10. 7 ⊢ x ∈ compl A, compl_intro 8 9.
+11. ⊢ x ∈ UnivCl \ A → x ∈ compl A, subj_intro 10.
+12. ⊢ x ∈ compl A ↔ x ∈ UnivCl \ A, bij_intro 6 11.
+13. ⊢ ∀x. x ∈ compl A ↔ x ∈ UnivCl \ A, uq_intro 12.
+compl_as_diff. ⊢ compl A = UnivCl \ A, ext 13.
+
+01. 1 ⊢ A ⊆ B, hypo.
+02. 1 ⊢ UnivCl \ B ⊆ UnivCl \ A, incl_contraposition 1.
+03. ⊢ compl A = UnivCl \ A, compl_as_diff.
+04. ⊢ compl B = UnivCl \ B, compl_as_diff.
+05. 1 ⊢ compl B ⊆ UnivCl \ A,
+  eq_subst_rev 4 2, P t ↔ t ⊆ UnivCl \ A.
+06. 1 ⊢ compl B ⊆ compl A,
+  eq_subst_rev 3 5, P t ↔ compl B ⊆ t.
+incl_contraposition_compl. ⊢ A ⊆ B → compl B ⊆ compl A,
+  subj_intro 6.
 
 
 (*/section Singletons, pair sets and pairs *)
