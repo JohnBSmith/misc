@@ -245,4 +245,8 @@ x = x, on the other hand, is a shorthand for eq\_x\_x. *)
 (*/note equi_subst The admissible substitution schema for logical
 equivalence. It is needed to be able to perform equivalent
 transformations in a general way. It is feasible to do without it,
-but this can make the proof more complicated. *)
+but this can make the proof more complicated. It can be avoided
+by applying the congruence laws of equivalence manually, see
+[[equi_cong_neg]], [[equi_cong_conj]], [[equi_cong_disj]],
+[[equi_cong_subj]], [[equi_cong_bij]]. *)
+

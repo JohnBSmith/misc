@@ -68,7 +68,7 @@ let w = ⋂M.
 13. 3, 4 ⊢ app f w ⊆ x, incl_trans 11 12.
 14. 3 ⊢ x ∈ M → app f w ⊆ x, subj_intro 13.
 15. 3 ⊢ ∀x. x ∈ M → app f w ⊆ x, uq_intro 14.
-16. 3 ⊢ app f w ⊆ w, lower_bound_incl_in_Intersection 15.
+16. 3 ⊢ app f w ⊆ w, Intersection_is_infimum 15.
 17. ⊢ a ⊆ a, incl_refl.
 18. 1 ⊢ a ∈ power a, power_intro 1 17.
 19. 1, 2 ⊢ app f a ∈ power a, map_app_in_cod 2 18.
@@ -98,12 +98,77 @@ let w = ⋂M.
 39. 1, 33, 34 ⊢ w ⊆ x, Intersection_is_lower_bound 5 38.
 40. 1 ⊢ x ⊆ a → app f x = x → w ⊆ x, subj_intro_ii 39.
 41. 1 ⊢ ∀x. x ⊆ a → app f x = x → w ⊆ x, uq_intro 40.
-43. 1, 2, 3 ⊢ app f w = w ∧
-  (∀x. x ⊆ a → app f x = x → w ⊆ x), conj_intro 32 41.
-44. 1, 2, 3 ⊢ ∃p. app f p = p ∧
-  (∀x. x ⊆ a → app f x = x → p ⊆ x), ex_intro 43.
+42. 1, 2, 3 ⊢ w ⊆ a ∧ app f w = w, conj_intro 23 32.
+43. 1, 2, 3 ⊢ w ⊆ a ∧ app f w = w ∧
+  (∀x. x ⊆ a → app f x = x → w ⊆ x), conj_intro 42 41.
+44. 1, 2, 3 ⊢ ∃u. u ⊆ a ∧ app f u = u ∧
+  (∀x. x ⊆ a → app f x = x → u ⊆ x), ex_intro 43.
 incl_Knaster_Tarski_least. ⊢ set a → map f (power a) (power a) →
   (∀x. ∀y. y ⊆ a → x ⊆ y → app f x ⊆ app f y) →
-  ∃u. app f u = u ∧ (∀x. x ⊆ a → app f x = x → u ⊆ x),
+  ∃u. u ⊆ a ∧ app f u = u ∧ (∀x. x ⊆ a → app f x = x → u ⊆ x),
   subj_intro_iii 44.
+end
+
+begin
+let M = {x | x ⊆ a ∧ x ⊆ app f x}.
+let w = ⋃M.
+01. 1 ⊢ set a, hypo.
+02. 2 ⊢ map f (power a) (power a), hypo.
+03. 3 ⊢ ∀x. ∀y. y ⊆ a → x ⊆ y → app f x ⊆ app f y, hypo.
+
+04. 4 ⊢ x ∈ M, hypo.
+05. 4 ⊢ x ⊆ a ∧ x ⊆ app f x, comp_elim 4.
+06. 4 ⊢ x ⊆ a, conj_eliml 5.
+07. ⊢ x ∈ M → x ⊆ a, subj_intro 6.
+08. ⊢ ∀x. x ∈ M → x ⊆ a, uq_intro 7.
+10. ⊢ w ⊆ a, Union_is_supremum 8.
+
+11. 11 ⊢ x ∈ M, hypo.
+12. ⊢ w = w, eq_refl.
+13. 11 ⊢ x ⊆ w, Union_is_upper_bound 12 11.
+14. 3 ⊢ ∀y. y ⊆ a → x ⊆ y → app f x ⊆ app f y, uq_elim 3.
+15. 3 ⊢ x ⊆ w → app f x ⊆ app f w, uq_bounded_elim 14 10.
+16. 3, 11 ⊢ app f x ⊆ app f w, subj_elim 15 13.
+17. 11 ⊢ x ⊆ a ∧ x ⊆ app f x, comp_elim 11.
+18. 11 ⊢ x ⊆ app f x, conj_elimr 17.
+19. 3, 11 ⊢ x ⊆ app f w, incl_trans 18 16.
+20. 3 ⊢ x ∈ M → x ⊆ app f w, subj_intro 19.
+21. 3 ⊢ ∀x. x ∈ M → x ⊆ app f w, uq_intro 20.
+22. 3 ⊢ w ⊆ app f w, Union_is_supremum 21.
+
+24. 1 ⊢ set w, subset 10 1.
+25. 1 ⊢ w ∈ power a, power_intro 24 10.
+26. 1, 2 ⊢ app f w ∈ power a, map_app_in_cod 2 25.
+27. 1, 2 ⊢ app f w ⊆ a, power_elim 26.
+28. 3 ⊢ ∀y. y ⊆ a → w ⊆ y → app f w ⊆ app f y, uq_elim 3.
+29. 1, 2, 3 ⊢ w ⊆ app f w → app f w ⊆ app f (app f w),
+  uq_bounded_elim 28 27.
+30. 1, 2, 3 ⊢ app f w ⊆ app f (app f w), subj_elim 29 22.
+31. 1, 2, 3 ⊢ app f w ⊆ a ∧ app f w ⊆ app f (app f w),
+  conj_intro 27 30.
+32. 1, 2 ⊢ set (app f w), subset 27 1.
+33. 1, 2, 3 ⊢ app f w ∈ M,
+  comp_intro 32 31, P x ↔ x ⊆ a ∧ x ⊆ app f x.
+34. 1, 2, 3 ⊢ app f w ⊆ w, Union_is_upper_bound 12 33.
+
+35. 1, 2, 3 ⊢ app f w = w, incl_antisym 34 22.
+36. 36 ⊢ x ⊆ a, hypo.
+37. 37 ⊢ app f x = x, hypo.
+38. 37 ⊢ x ⊆ app f x, incl_from_eq_rev 37.
+39. 36, 37 ⊢ x ⊆ a ∧ x ⊆ app f x, conj_intro 36 38.
+40. 1, 36 ⊢ set x, subset 36 1.
+41. 1, 36, 37 ⊢ x ∈ M, comp_intro 40 39.
+42. 1, 36, 37 ⊢ x ⊆ w, Union_is_upper_bound 12 41.
+43. 1 ⊢ x ⊆ a → app f x = x → x ⊆ w, subj_intro_ii 42.
+44. 1 ⊢ ∀x. x ⊆ a → app f x = x → x ⊆ w, uq_intro 43.
+45. 1, 2, 3 ⊢ w ⊆ a ∧ app f w = w, conj_intro 10 35.
+46. 1, 2, 3 ⊢ w ⊆ a ∧ app f w = w ∧
+  (∀x. x ⊆ a → app f x = x → x ⊆ w), conj_intro 45 44.
+47. 1, 2, 3 ⊢ ∃u. u ⊆ a ∧ app f u = u ∧
+  (∀x. x ⊆ a → app f x = x → x ⊆ u), ex_intro 46.
+incl_Knaster_Tarski_greatest. ⊢ set a →
+  map f (power a) (power a) →
+  (∀x. ∀y. y ⊆ a → x ⊆ y → app f x ⊆ app f y) →
+  ∃u. u ⊆ a ∧ app f u = u ∧ (∀x. x ⊆ a → app f x = x → x ⊆ u),
+  subj_intro_iii 47.
 end

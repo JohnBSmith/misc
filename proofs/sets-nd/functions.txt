@@ -70,6 +70,11 @@ fn_is_map. ⊢ function f → dom f = X → map f X UnivCl, subj_intro_ii 4.
 03. 1 ⊢ dom f = X, conj_elimlr 2.
 map_dom. ⊢ map f X Y → dom f = X, subj_intro 3.
 
+01. 1 ⊢ map f X Y, hypo.
+02. 1 ⊢ function f ∧ dom f = X ∧ rng f ⊆ Y, map_unfold 1.
+03. 1 ⊢ rng f ⊆ Y, conj_elimr 2.
+map_rng. ⊢ map f X Y → rng f ⊆ Y, subj_intro 3.
+
 01. 1 ⊢ f ⊆ g, hypo.
 02. 2 ⊢ function g, hypo.
 03. 2 ⊢ relation g, fn_is_rel 2.

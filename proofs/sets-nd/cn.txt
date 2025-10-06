@@ -325,6 +325,78 @@ let D = {x | x ∈ X ∧ ¬x ∈ app f x}.
 Cantor's_theorem. ⊢ set X → num_lt X (power X), subj_intro 56.
 end
 
+begin
+let h A = X \ img g (Y \ img f A).
+let Gh = {t | ∃A. A ∈ power X ∧ t = (A, h A)}.
+01. 1 ⊢ set X, hypo.
+02. 2 ⊢ rng g ⊆ X, hypo.
+03. ⊢ Gh = Gh, eq_refl.
+
+04. 4 ⊢ A ∈ power X, hypo.
+05. ⊢ h A ⊆ X, diff_incl.
+06. 1 ⊢ set (h A), subset 5 1.
+07. 1 ⊢ h A ∈ power X, power_intro 6 5.
+08. 1, 4 ⊢ h A ∈ power X, wk 7.
+09. 1 ⊢ A ∈ power X → h A ∈ power X, subj_intro 8.
+10. 1 ⊢ ∀A. A ∈ power X → h A ∈ power X, uq_intro 9.
+
+11. 11 ⊢ A2 ⊆ X, hypo.
+12. 12 ⊢ A1 ⊆ A2, hypo.
+13. 12 ⊢ img f A1 ⊆ img f A2, img_incl 12.
+14. 12 ⊢ Y \ (img f A2) ⊆ Y \ (img f A1), incl_contraposition 13.
+15. 12 ⊢ img g (Y \ (img f A2)) ⊆ img g (Y \ (img f A1)), img_incl 14.
+16. 12 ⊢ h A1 ⊆ h A2, incl_contraposition 15.
+
+17. 11, 12 ⊢ A1 ⊆ X, incl_trans 12 11.
+18. 1, 11, 12 ⊢ set A1, subset 17 1.
+19. 1, 11 ⊢ set A2, subset 11 1.
+20. 1, 11, 12 ⊢ A1 ∈ power X, power_intro 18 17.
+21. 1, 11 ⊢ A2 ∈ power X, power_intro 19 11.
+22. 1, 11, 12 ⊢ app Gh A1 = h A1, map_from_term_app 3 10 20.
+23. 1, 11 ⊢ app Gh A2 = h A2, map_from_term_app 3 10 21.
+
+24. 1, 11, 12 ⊢ app Gh A1 ⊆ h A2,
+  eq_subst_rev 22 16, P t ↔ t ⊆ h A2.
+25. 1, 11, 12 ⊢ app Gh A1 ⊆ app Gh A2,
+  eq_subst_rev 23 24, P t ↔ app Gh A1 ⊆ t.
+26. 1 ⊢ A2 ⊆ X → A1 ⊆ A2 →
+  app Gh A1 ⊆ app Gh A2, subj_intro_ii 25.
+27. 1 ⊢ ∀A2. A2 ⊆ X → A1 ⊆ A2 →
+  app Gh A1 ⊆ app Gh A2, uq_intro 26.
+28. 1 ⊢ ∀A1. ∀A2. A2 ⊆ X → A1 ⊆ A2 →
+  app Gh A1 ⊆ app Gh A2, uq_intro 27.
+29. 1 ⊢ map Gh (power X) (power X), map_from_term 3 10.
+30. 1 ⊢ ∃A. A ⊆ X ∧ app Gh A = A ∧
+  (∀U. U ⊆ X → app Gh U = U → A ⊆ U),
+  incl_Knaster_Tarski_least 1 29 28.
+
+31. 31 ⊢ A ⊆ X ∧ app Gh A = A ∧
+  (∀U. U ⊆ X → app Gh U = U → A ⊆ U), hypo.
+32. 31 ⊢ A ⊆ X, conj_elimll 31.
+33. 31 ⊢ app Gh A = A, conj_elimlr 31.
+34. 1, 31 ⊢ set A, subset 32 1.
+35. 1, 31 ⊢ A ∈ power X, power_intro 34 32.
+36. 1, 31 ⊢ app Gh A = h A, map_from_term_app 3 10 35.
+37. 1, 31 ⊢ h A = A, eq_trans_ll 36 33.
+38. ⊢ img g (Y \ img f A) ⊆ rng g, img_incl_in_rng.
+39. 2 ⊢ img g (Y \ img f A) ⊆ X, incl_trans 38 2.
+40. 2 ⊢ X \ h A = img g (Y \ img f A), diff_is_involution 39.
+41. 1, 2, 31 ⊢ X \ A = img g (Y \ img f A),
+  eq_subst 37 40, P t ↔ X \ t = img g (Y \ img f A).
+42. ⊢ img f A = img f A, eq_refl.
+43. 1, 2, 31 ⊢ img f A = img f A ∧
+  X \ A = img g (Y \ img f A), conj_intro 42 41.
+44. 1, 2, 31 ⊢ ∃B. img f A = B ∧
+  X \ A = img g (Y \ B), ex_intro 43.
+45. 1, 2, 31 ⊢ ∃A. ∃B. img f A = B ∧
+  X \ A = img g (Y \ B), ex_intro 44.
+46. 1, 2 ⊢ ∃A. ∃B. img f A = B ∧
+  X \ A = img g (Y \ B), ex_elim 30 45.
+Banach_decomposition_theorem. ⊢ set X → rng g ⊆ X →
+  ∃A. ∃B. img f A = B ∧ X \ A = img g (Y \ B),
+  subj_intro_ii 46.
+end
+
 (*/note num_le_equi
 A set X is called <i>not greater than</i> Y, written |X| ≤ |Y|, if
 there exists an [[inj_equi|injection]] from X to Y. *)

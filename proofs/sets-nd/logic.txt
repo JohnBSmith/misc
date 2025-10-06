@@ -159,6 +159,13 @@ equi_symm. ⊢ (A ↔ B) → (B ↔ A), subj_intro 4.
 09. 1, 2 ⊢ A ↔ C, bij_intro 7 8.
 equi_trans. ⊢ (A ↔ B) → (B ↔ C) → (A ↔ C), subj_intro_ii 9.
 
+01. 1 ⊢ C ↔ A, hypo.
+02. 2 ⊢ C ↔ B, hypo.
+03. 1 ⊢ A ↔ C, equi_symm 1.
+04. 1, 2 ⊢ A ↔ B, equi_trans 3 2.
+equi_trans_ll. ⊢ (C ↔ A) → (C ↔ B) → (A ↔ B),
+  subj_intro_ii 4.
+
 01. 1 ⊢ A ↔ C, hypo.
 02. 2 ⊢ B ↔ C, hypo.
 03. 2 ⊢ C ↔ B, equi_symm 2.
@@ -308,6 +315,101 @@ lsubj_conj_elimllr. ⊢ (E ↔ A ∧ B ∧ C ∧ D) → E → B, subj_intro_ii 4
 05. 1, 2, 3 ⊢ ⊥, neg_elim 2 4.
 06. 1, 2 ⊢ ¬B, neg_intro 5.
 rsubj_tollens. ⊢ (A ↔ B) → ¬A → ¬B, subj_intro_ii 6.
+
+(*/subsection Congrunce laws of equivalence *)
+
+01. 1 ⊢ A ↔ A', hypo.
+02. 2 ⊢ ¬A, hypo.
+03. 3 ⊢ A', hypo.
+04. 1, 3 ⊢ A, rsubj_elim 1 3.
+05. 1, 2, 3 ⊢ ⊥, neg_elim 2 4.
+06. 1, 2 ⊢ ¬A', neg_intro 5.
+07. 1 ⊢ ¬A → ¬A', subj_intro 6.
+08. 8 ⊢ ¬A', hypo.
+09. 9 ⊢ A, hypo.
+10. 1, 9 ⊢ A', lsubj_elim 1 9.
+11. 1, 8, 9 ⊢ ⊥, neg_elim 8 10.
+12. 1, 8 ⊢ ¬A, neg_intro 11.
+13. 1 ⊢ ¬A' → ¬A, subj_intro 12.
+14. 1 ⊢ ¬A ↔ ¬A', bij_intro 7 13.
+equi_cong_neg. ⊢ (A ↔ A') → (¬A ↔ ¬A'),
+  subj_intro 14.
+
+01. 1 ⊢ A ↔ A', hypo.
+02. 2 ⊢ B ↔ B', hypo.
+03. 3 ⊢ A ∧ B, hypo.
+04. 3 ⊢ A, conj_eliml 3.
+05. 3 ⊢ B, conj_elimr 3.
+06. 1, 3 ⊢ A', lsubj_elim 1 4.
+07. 2, 3 ⊢ B', lsubj_elim 2 5.
+08. 1, 2, 3 ⊢ A' ∧ B', conj_intro 6 7.
+09. 1, 2 ⊢ A ∧ B → A' ∧ B', subj_intro 8.
+10. 10 ⊢ A' ∧ B', hypo.
+11. 10 ⊢ A', conj_eliml 10.
+12. 10 ⊢ B', conj_elimr 10.
+13. 1, 10 ⊢ A, rsubj_elim 1 11.
+14. 2, 10 ⊢ B, rsubj_elim 2 12.
+15. 1, 2, 10 ⊢ A ∧ B, conj_intro 13 14.
+16. 1, 2 ⊢ A' ∧ B' → A ∧ B, subj_intro 15.
+17. 1, 2 ⊢ A ∧ B ↔ A' ∧ B', bij_intro 9 16.
+equi_cong_conj. ⊢ (A ↔ A') → (B ↔ B') →
+  (A ∧ B ↔ A' ∧ B'), subj_intro_ii 17.
+
+01. 1 ⊢ A ↔ A', hypo.
+02. 2 ⊢ B ↔ B', hypo.
+03. 3 ⊢ A ∨ B, hypo.
+04. 4 ⊢ A, hypo.
+05. 1, 4 ⊢ A', lsubj_elim 1 4.
+06. 1, 4 ⊢ A' ∨ B', disj_introl 5.
+07. 7 ⊢ B, hypo.
+08. 2, 7 ⊢ B', lsubj_elim 2 7.
+09. 2, 7 ⊢ A' ∨ B', disj_intror 8.
+10. 1, 2, 3 ⊢ A' ∨ B', disj_elim 3 6 9.
+11. 1, 2 ⊢ A ∨ B → A' ∨ B', subj_intro 10.
+12. 12 ⊢ A' ∨ B', hypo.
+13. 13 ⊢ A', hypo.
+14. 1, 13 ⊢ A, rsubj_elim 1 13.
+15. 1, 13 ⊢ A ∨ B, disj_introl 14.
+16. 16 ⊢ B', hypo.
+17. 2, 16 ⊢ B, rsubj_elim 2 16.
+18. 2, 16 ⊢ A ∨ B, disj_intror 17.
+19. 1, 2, 12 ⊢ A ∨ B, disj_elim 12 15 18.
+20. 1, 2 ⊢ A' ∨ B' → A ∨ B, subj_intro 19.
+21. 1, 2 ⊢ A ∨ B ↔ A' ∨ B', bij_intro 11 20.
+equi_cong_disj. ⊢ (A ↔ A') → (B ↔ B') →
+  (A ∨ B ↔ A' ∨ B'), subj_intro_ii 21.
+
+01. 1 ⊢ A ↔ A', hypo.
+02. 2 ⊢ B ↔ B', hypo.
+03. 3 ⊢ A → B, hypo.
+04. 4 ⊢ A', hypo.
+05. 1, 4 ⊢ A, rsubj_elim 1 4.
+06. 1, 3, 4 ⊢ B, subj_elim 3 5.
+07. 1, 2, 3, 4 ⊢ B', lsubj_elim 2 6.
+08. 1, 2 ⊢ (A → B) → (A' → B'), subj_intro_ii 7.
+09. 9 ⊢ A' → B', hypo.
+10. 10 ⊢ A, hypo.
+11. 1, 10 ⊢ A', lsubj_elim 1 10.
+12. 1, 9, 10 ⊢ B', subj_elim 9 11.
+13. 1, 2, 9, 10 ⊢ B, rsubj_elim 2 12.
+14. 1, 2 ⊢ (A' → B') → (A → B), subj_intro_ii 13.
+15. 1, 2 ⊢ (A → B) ↔ (A' → B'), bij_intro 8 14.
+equi_cong_subj. ⊢ (A ↔ A') → (B ↔ B') →
+  ((A → B) ↔ (A' → B')), subj_intro_ii 15.
+
+01. 1 ⊢ A ↔ A', hypo.
+02. 2 ⊢ B ↔ B', hypo.
+03. 3 ⊢ A ↔ B, hypo.
+04. 1, 3 ⊢ A' ↔ B, equi_trans_ll 1 3.
+05. 1, 2, 3 ⊢ A' ↔ B', equi_trans 4 2.
+06. 1, 2 ⊢ (A ↔ B) → (A' ↔ B'), subj_intro 5.
+07. 7 ⊢ A' ↔ B', hypo.
+08. 1, 7 ⊢ A ↔ B', equi_trans 1 7.
+09. 1, 2, 7 ⊢ A ↔ B, equi_trans_rr 8 2.
+10. 1, 2 ⊢ (A' ↔ B') → (A ↔ B), subj_intro 9.
+11. 1, 2 ⊢ (A ↔ B) ↔ (A' ↔ B'), bij_intro 6 10.
+equi_cong_bij. ⊢ (A ↔ A') → (B ↔ B') →
+  ((A ↔ B) ↔ (A' ↔ B')), subj_intro_ii 11.
 
 
 (*/section First order logic *)
@@ -623,22 +725,54 @@ the proof over u. *)
 intuitionistic logic, which is why it requires [[lem]] as a
 dependency. *)
 
+(*/note contraposition Two rules are automatically derived from this
+theorem. When applied to one argument, the contraposition rule<br>
+\_\_(H ⊢ A → B) → (H ⊢ ¬B → ¬A),<br>
+and when applied to two arguments, the modus tollens<br>
+\_\_(H1 ⊢ A → B) → (H2 ⊢ ¬B) → (H1 ∧ H2 ⊢ ¬A).<br>
+<br>
+<b>Proof sketch</b><br>
+From the premises A → B and ¬B we need to derive the conclusion ¬A.
+This means, from the additional premise A we need to derive a
+contradiction. First, B follows from A\_→\_B and A. But then we have
+both ¬B and B, which is already a contradiction. q.e.d. *)
+
 (*/note eq_subst_rev This variant of [[eq_subst]] allows the omission
 of [[eq_symm]], which improves ergonomics. *)
+
+(*/note equi_refl
+Reflexivity law of logical equivalence. *)
+
+(*/note equi_symm
+Symmetry law of logical equivalence. *)
+
+(*/note equi_trans
+Transitive law of logical equivalence. *)
+
+(*/note equi_trans_ll Transitive law of logical equivalence with left
+hand sides bridging. This variant of [[equi_trans]] allows the omission
+of [[equi_symm]], which improves ergonomics. *)
+
+(*/note equi_trans_rr Transitive law of logical equivalence with right
+hand sides bridging. This variant of [[equi_trans]] allows the omission
+of [[equi_symm]], which improves ergonomics. *)
+
+(*/note rsubj_tollens Modus tollens with respect to the
+right subjunction. *)
 
 (*/note eq_cong Congruence rule for function application. *)
 
 (*/note eq_cong_ii Congruence rule for function application. *)
 
-(*/note eq_symm Symmetry law for equality. *)
+(*/note eq_symm Symmetry law of equality. *)
 
-(*/note eq_trans Transitive law for equality. *)
+(*/note eq_trans Transitive law of equality. *)
 
-(*/note eq_trans_ll Transitive law for equality with left hand
+(*/note eq_trans_ll Transitive law of equality with left hand
 sides bridging. This variant of [[eq_trans]] allows the omission
 of [[eq_symm]], which improves ergonomics. *)
 
-(*/note eq_trans_rr Transitive law for equality with right hand sides
+(*/note eq_trans_rr Transitive law of equality with right hand sides
 bridging. This variant of [[eq_trans]] allows the omission
 of [[eq_symm]], which improves ergonomics. *)
 

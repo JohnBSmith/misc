@@ -1,5 +1,9 @@
 
-use crate::{Env, verify, ErrorKind, load_prelude, KEYWORDS};
+use crate::{
+    Env, verify, ErrorKind, load_prelude, KEYWORDS,
+    Term, Type, Var, Const, PatVar, App, Forall, Exists, Lambda,
+    Prop, Ind, fn_type, scan, formula_type_checked
+};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Expected {Ok, ErrLogic, ErrSyntax}
@@ -38,6 +42,46 @@ fn run_test_list() {
             }
         };
         assert!(result == *expected, "Test {} failed.", test_id);
+    }
+}
+
+fn check_type(t: &Term, id: &str, ty: &Type) -> Result<(), ()> {
+    match &t.value {
+        Var(x) | Const(x) | PatVar(x) => {
+            if x.as_slice() == id.as_bytes() {
+                if t.ty != *ty {return Err(());}
+            }
+        },
+        App(a) => {
+            for x in a.iter() {check_type(x, id, ty)?;}
+        },
+        Forall(x) | Exists(x) | Lambda(x) => {
+            check_type(&x.1, id, ty)?;
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
+fn assert_type(test_id: &str, code: &str, s: &str, id: &str, ty: Type) {
+    let mut env = Env::new();
+    if !code.is_empty() {
+        // Allows for definitions
+        let Ok(_) = verify(&mut env, code.as_bytes()) else {
+            unreachable!()
+        };
+    }
+    env.tokens = scan(s.as_bytes());
+    env.index.set(0);
+    let Ok(t) = formula_type_checked(&env) else {unreachable!()};
+    let result = check_type(&t, id, &ty);
+    assert!(matches!(result, Ok(_)), "Type test {} failed.", test_id);
+}
+
+#[test]
+fn type_tests() {
+    for (test_id, code, term, id, ty) in TYPE_TESTS {
+        assert_type(test_id, code, term, id, ty());
     }
 }
 
@@ -574,4 +618,40 @@ eq_refl. ⊢ x = x, axiom.
 2. ⊢ P x → P x, subj_intro 1.
 3. ⊢ ∀P. P x → P x, uq_intro 2.
 "),*/
+];
+
+static TYPE_TESTS: &[(&str, &str, &str, &str, fn() -> Type)] = &[
+("01.01", "", "A", "A", || Prop),
+("01.02", "", "⊢ A", "A", || Prop),
+("01.03", "", "H ⊢ A", "H", || Prop),
+("01.04", "", "H ⊢ A", "A", || Prop),
+("01.05", "", "A ∧ B", "A", || Prop),
+("01.06", "", "A ∧ B", "B", || Prop),
+("01.07", "", "H ⊢ A ∧ B", "A", || Prop),
+("01.08", "", "H ⊢ A ∧ B", "B", || Prop),
+("01.09", "", "A ∨ B", "A", || Prop),
+("01.10", "", "A ∨ B", "B", || Prop),
+("01.11", "", "H ⊢ A ∨ B", "A", || Prop),
+("01.12", "", "H ⊢ A ∨ B", "B", || Prop),
+("01.13", "", "A → B", "A", || Prop),
+("01.14", "", "A → B", "B", || Prop),
+("01.15", "", "H ⊢ A → B", "A", || Prop),
+("01.16", "", "H ⊢ A → B", "B", || Prop),
+("01.17", "", "A ↔ B", "A", || Prop),
+("01.18", "", "A ↔ B", "B", || Prop),
+("01.19", "", "H ⊢ A ↔ B", "A", || Prop),
+("01.20", "", "H ⊢ A ↔ B", "B", || Prop),
+("01.21", "", "¬A", "A", || Prop),
+("01.21", "", "H ⊢ ¬A", "A", || Prop),
+
+("02.01", "", "x = y", "x", || Ind),
+("03.01", "", "P x", "x", || Ind),
+("03.02", "", "P x y", "x", || Ind),
+("03.03", "", "P x y", "y", || Ind),
+("03.04", "", "P x", "P", || fn_type(vec![Ind], Prop)),
+("03.05", "", "P x y", "P", || fn_type(vec![Ind, Ind], Prop)),
+
+("04.01", "_. ⊢ P A ↔ A, decl.", "P A", "A", || Prop),
+("04.01", "_. ⊢ P A ↔ A, decl.",
+    "P A", "P", || fn_type(vec![Prop], Prop))
 ];

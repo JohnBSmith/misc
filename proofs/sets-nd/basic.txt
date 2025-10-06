@@ -550,6 +550,30 @@ incl_contraposition. ⊢ A ⊆ B → X \ B ⊆ X \ A,
   P x ↔ (A ∩ B) ∩ compl C = (A \ C) ∩ x.
 diff_dist_inter. ⊢ (A ∩ B) \ C = (A \ C) ∩ (B \ C), eq_trans 1 19.
 
+01. 1 ⊢ A ⊆ X, hypo.
+02. 2 ⊢ x ∈ X \ (X \ A), hypo.
+03. 2 ⊢ x ∈ X, diff_eliml 2.
+04. 2 ⊢ ¬x ∈ X \ A, diff_elimr 2.
+05. 5 ⊢ ¬x ∈ A, hypo.
+06. 2, 5 ⊢ x ∈ X \ A, diff_intro 3 5.
+07. 2, 5 ⊢ ⊥, neg_elim 4 6.
+08. 2 ⊢ ¬¬x ∈ A, neg_intro 7.
+09. 2 ⊢ x ∈ A, dne 8.
+10. ⊢ x ∈ X \ (X \ A) → x ∈ A, subj_intro 9.
+11. 11 ⊢ x ∈ A, hypo.
+12. 1, 11 ⊢ x ∈ X, incl_elim 1 11.
+13. 13 ⊢ x ∈ X \ A, hypo.
+14. 13 ⊢ ¬x ∈ A, diff_elimr 13.
+15. 11, 13 ⊢ ⊥, neg_elim 14 11.
+16. 11 ⊢ ¬x ∈ X \ A, neg_intro 15.
+17. 1, 11 ⊢ x ∈ X \ (X \ A), diff_intro 12 16.
+18. 1 ⊢ x ∈ A → x ∈ X \ (X \ A), subj_intro 17.
+19. 1 ⊢ x ∈ X \ (X \ A) ↔ x ∈ A, bij_intro 10 18.
+20. 1 ⊢ ∀x. x ∈ X \ (X \ A) ↔ x ∈ A, uq_intro 19.
+21. 1 ⊢ X \ (X \ A) = A, ext 20.
+diff_is_involution. ⊢ A ⊆ X → X \ (X \ A) = A,
+  subj_intro 21.
+
 
 (*/section The empty set *)
 
@@ -788,7 +812,22 @@ Union_is_upper_bound. ⊢ A = ⋃M → B ∈ M → B ⊆ A,
 10. 1 ⊢ y ∈ u → y ∈ ⋂M, subj_intro 9.
 11. 1 ⊢ ∀y. y ∈ u → y ∈ ⋂M, uq_intro 10.
 12. 1 ⊢ u ⊆ ⋂M, incl_intro 11.
-lower_bound_incl_in_Intersection. ⊢ (∀x. x ∈ M → u ⊆ x) → u ⊆ ⋂M,
+Intersection_is_infimum. ⊢ (∀x. x ∈ M → u ⊆ x) → u ⊆ ⋂M,
+  subj_intro 12.
+
+01. 1 ⊢ ∀x. x ∈ M → x ⊆ u, hypo.
+02. 2 ⊢ x ∈ ⋃M, hypo.
+03. 2 ⊢ ∃y. y ∈ M ∧ x ∈ y, Union_elim 2.
+04. 4 ⊢ y ∈ M ∧ x ∈ y, hypo.
+05. 4 ⊢ y ∈ M, conj_eliml 4.
+06. 4 ⊢ x ∈ y, conj_elimr 4.
+07. 1, 4 ⊢ y ⊆ u, uq_bounded_elim 1 5.
+08. 1, 4 ⊢ x ∈ u, incl_elim 7 6.
+09. 1, 2 ⊢ x ∈ u, ex_elim 3 8.
+10. 1 ⊢ x ∈ ⋃M → x ∈ u, subj_intro 9.
+11. 1 ⊢ ∀x. x ∈ ⋃M → x ∈ u, uq_intro 10.
+12. 1 ⊢ ⋃M ⊆ u, incl_intro 11.
+Union_is_supremum. ⊢ (∀x. x ∈ M → x ⊆ u) → ⋃M ⊆ u,
   subj_intro 12.
 
 
@@ -1625,3 +1664,22 @@ Given A we have ([[cond_eq|if]] A then x else y) = x. *)
 (*/note cond_eqr
 Given ¬A we have ([[cond_eq|if]] A then x else y) = y. *)
 
+(*/note Intersection_is_lower_bound
+States that ⋂M is a lower bound of M with respect to the
+[[incl_equi|inclusion]] order. See [[Union_is_upper_bound]] for the
+dual statement. *)
+
+(*/note Union_is_upper_bound
+States that ⋃M is an upper bound of M with respect to the
+[[incl_equi|inclusion]] order. See [[Intersection_is_lower_bound]] for
+the dual statement. *)
+
+(*/note Intersection_is_infimum
+Together with [[Intersection_is_lower_bound]] it states that
+⋂M is the infimum of M with respect to the [[incl_equi|inclusion]]
+order. See [[Union_is_supremum]] for the dual statement. *)
+
+(*/note Union_is_supremum
+Together with [[Union_is_upper_bound]] it states that
+⋃M is the supremum of M with respect to the [[incl_equi|inclusion]]
+order. See [[Intersection_is_infimum]] for the dual statement. *)
