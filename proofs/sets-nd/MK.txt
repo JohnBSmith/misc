@@ -1,5 +1,6 @@
 
 (*/title Formal theorems and proofs *)
+(*/dir proofs *)
 
 (*/chapter Morse-Kelley set theory *)
 

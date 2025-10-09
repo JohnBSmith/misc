@@ -3,11 +3,13 @@
 # A tool that documents all definitions, axioms and proven theorems
 
 from sys import argv
-from os.path import isdir
 from os import mkdir
 from urllib.parse import quote
+import json, html
 
 DIR_NAME = "proofs-doc"
+TOC_NAME = "toc"
+ALL_ITEMS_NAME = "all-items"
 
 class Env:
     def __init__(self):
@@ -26,6 +28,7 @@ class Env:
         self.title = None
         self.rules = set()
         self.notes = {}
+        self.chapters = []
 
 def consume_ident(s, n, i):
     j = i
@@ -51,6 +54,10 @@ def consume_until(c, s, n, i):
 def id_from_text(text):
     pass
 
+def add_to_chapter(env, text):
+    if env.chapter_count != 0:
+        env.chapters[env.chapter_count - 1].append(text)
+
 def process_command(s, acc, env):
     i = 0
     while i < len(s) and not s[i].isspace():
@@ -63,16 +70,25 @@ def process_command(s, acc, env):
         id = str(env.chapter_count)
         acc.append(f"<h2 id='{id}'>{content}</h2>\n")
         env.toc.append((content, id, []))
+        env.chapters.append([])
     elif cmd == "section":
         env.subsection_count = 0
         env.section_count += 1
         id = f"{env.chapter_count}.{env.section_count}"
         acc.append(f"<h3 id='{id}'>{content}</h3>\n")
+        add_to_chapter(env, f"<h2 id='{id}'>{content}</h2>\n")
+        if len(env.toc) == 0:
+            raise ValueError(f"Section '{content}' without chapter")
         env.toc[-1][2].append((content, id, []))
     elif cmd == "subsection":
         env.subsection_count += 1
         id = f"{env.chapter_count}.{env.section_count}.{env.subsection_count}"
         acc.append(f"<h4 id='{id}'>{content}</h4>\n")
+        add_to_chapter(env, f"<h3 id='{id}'>{content}</h3>\n")
+        if len(env.toc) == 0:
+            raise ValueError(f"Subsection '{content}' without chapter")
+        if len(env.toc[-1][2]) == 0:
+            raise ValueError(f"Subsection '{content}' without section")
         env.toc[-1][2][-1][2].append((content, id, []))
     elif cmd == "title":
         env.title = content
@@ -86,6 +102,10 @@ def process_command(s, acc, env):
         label = content[0:i]
         content = content[i:].strip()
         env.notes[label] = content
+    elif cmd == "dir":
+        global DIR_NAME, TOC_NAME
+        DIR_NAME = content
+        TOC_NAME = content + "-toc"
 
 def consume_ident_list(s, n, i):
     idents = []
@@ -99,7 +119,7 @@ def consume_ident_list(s, n, i):
 non_link = {"axiom", "def", "decl", "calc"}
 
 def htm_escape(s):
-    return s.replace("<", "&lt;")
+    return html.escape(s, quote = False)
 
 def link_ident(ident):
     if ident[0].isalpha() and not ident in non_link:
@@ -155,8 +175,8 @@ def extract(s, acc, env):
             while i < n and not s[i] in "|(⊢":
                 i += 1
             i0 = i
-            if s[i] == "⊢": i0 += 1
-            elif i + 1 < n and s[1] == "|" and s[i+1] == "-": i0 += 2
+            if i < n and s[i] == "⊢": i0 += 1
+            elif i + 1 < n and s[i] == "|" and s[i+1] == "-": i0 += 2
             if i0 < n and s[i0] == ' ': i0 += 1
             j = consume_until(',', s, n, i)
             i = consume_space(s, n, j + 1)
@@ -186,14 +206,17 @@ def extract(s, acc, env):
             if named:
                 qident = quote(ident)
                 text = htm_escape(s[i0:j])
-                acc.append(f"<div class='box'><div class='{cl}'><b class='{cl}'>{kind}.</b> ")
-                acc.append(f"<a href='{DIR_NAME}/{qident}.htm'>{ident}</a><br>\n{text}</div></div>\n")
+                qitem = (f"<div class='box'><div class='{cl}'><b class='{cl}'>{kind}.</b> "
+                    + f"<a href='{qident}.htm'>{ident}</a><br>\n{text}</div></div>\n")
+                acc.append(qitem)
                 item = (f"<div class='box'><div class='{cl}'><b class='{cl}'>{kind}.</b> "
                   + f"{ident}<br>\n{text}</div></div>\n")
                 env.proofs.append({
                     "ident": ident, "kind": kind, "item": item,
-                    "proof": "\n".join(env.buf)
+                    "proof": "\n".join(env.buf),
+                    "chapter": env.chapter_count
                 })
+                add_to_chapter(env, qitem)
                 env.dep_db[ident] =  (kind, env.dependencies.copy())
                 env.propose_clear = True
                 if kind == "Definition":
@@ -218,6 +241,14 @@ div.box{
   margin-top: 0.5em;
   margin-bottom: 0.5em;
 }
+div.navi{
+  border: 2px solid #cacac2;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin-bottom: 2em;
+  background-color: #fafaf0;
+  color: #505050;
+}
 div.def, div.decl, div.thm, div.ax, div.rule{
   padding-left: 12px;
   padding-right: 12px;
@@ -237,15 +268,42 @@ b.ax  {color: #d0a000;}
 b.rule{color: #900060;}\
 """
 
-def header(acc):
+def header(acc, path = None, title = "Library"):
+    css_file = "list.css"
+    if path is not None:
+        css_file = path + "/" + css_file
     acc.append(f"""\
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Library</title>
+  <title>{title}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
+  <link href="{css_file}" rel="stylesheet">
+</head>
+<body>
+""")
+
+main_css = f"""
+body{{
+  font-family: {CSS_FONTS};
+  font-size: 12pt;
+  margin-left: 10%;
+  margin-right: 10%;
+  line-height: 1.5;
+  margin-top: 2em;
+  margin-bottom: 6em;
+}}
+@media(max-width: 62em){{
+  body{{margin-left: 6%; margin-right: 6%;}}
+}}
+@media(max-width: 52em){{
+  body{{margin-left: 3%; margin-right: 3%;}}
+}}
+{CSS_COMMON}
+"""
+
+list_css = f"""
 body{{
   font-family: {CSS_FONTS};
   font-size: 12pt;
@@ -259,32 +317,10 @@ body{{
   body{{margin-left: 3%; margin-right: 3%;}}
 }}
 {CSS_COMMON}
-  </style>
-</head>
-<body>
-""")
-
-main_css = f"""
-body{{
-  font-family: {CSS_FONTS};
-  font-size: 12pt;
-  margin-left: 10%;
-  margin-right: 10%;
-  line-height: 1.5;
-  margin-top: 4em;
-  margin-bottom: 6em;
-}}
-@media(max-width: 62em){{
-  body{{margin-left: 6%; margin-right: 6%;}}
-}}
-@media(max-width: 52em){{
-  body{{margin-left: 3%; margin-right: 3%;}}
-}}
-{CSS_COMMON}
 """
 
 def footer(acc):
-    acc.append("\n</body>\n</html>")
+    acc.append("</body>\n</html>")
 
 def sublist(a):
     if len(a) == 0: return ""
@@ -347,7 +383,7 @@ def format_text(s):
         else:
             acc.append(s[i])
             i += 1
-    acc.append("</p>")
+    acc.append("</p>\n")
     return "".join(acc)
 
 def proof_file(env, kwargs):
@@ -373,6 +409,9 @@ def proof_file(env, kwargs):
         notes_text = format_text(env.notes[ident])
     else:
         notes_text = ""
+    chapter_number = kwargs["chapter"]
+    navi = f"<div class='navi'><a href='chapter-{chapter_number}.htm'>Up</a>"
+    navi += " | <a href='search.htm'>Search</a></div>"
     return f"""\
 <!DOCTYPE html>
 <html>
@@ -383,16 +422,108 @@ def proof_file(env, kwargs):
   <link href="main.css" rel="stylesheet">
 </head>
 <body>
+{navi}
 <h3>{kind} {ident}</h3>
 {item}{notes_text}{text}{axiom_deps}
 </body>
 </html>\
 """
 
+def toc_file(env, toc):
+    acc = []
+    header(acc, path = DIR_NAME, title = "Contents")
+    acc.append(f"<div class='navi'><a href='{DIR_NAME}/{ALL_ITEMS_NAME}.htm'>All items</a>")
+    acc.append(f" | <a href='{DIR_NAME}/search.htm'>Search</a></div>\n")
+    if not env.title is None:
+        acc.append(f"<h1>{env.title}</h1>\n")
+    acc.append(f"<h2>Table of contents</h2>\n")
+    acc.append("<ol>\n")
+    for x in toc:
+        acc.append(f"<li><a href='{DIR_NAME}/chapter-{x[1]}.htm'>{x[0]}</a>\n")
+    acc.append("</ol>\n")
+    footer(acc)
+    with open(f"./{TOC_NAME}.htm", "w") as fout:
+        fout.write("".join(acc))
+
+def chapter_toc_file(env, i, a):
+    acc = []
+    header(acc, title = f"Chapter {i + 1}")
+    navi = f"<div class='navi'><a href='../{TOC_NAME}.htm'>Up</a>"
+    navi += " | <a href='search.htm'>Search</a></div>\n"
+    acc.append(navi)
+    acc.append(f"<h1>{env.toc[i][0]}</h1>\n")
+    acc.append(table_of_contents(env.toc[i][2]))
+    acc.append("".join(env.chapters[i]))
+    footer(acc)
+    with open(f"./{DIR_NAME}/chapter-{i + 1}.htm", "w") as fout:
+        fout.write("".join(acc))
+
+def chapter_toc_files(env):
+    for (i, a) in enumerate(env.chapters):
+        chapter_toc_file(env, i, a)
+
+JS_CODE = """
+const input = document.getElementById('input');
+const results = document.getElementById('results');
+
+function show_entrys(entrys) {
+    results.innerHTML = '';
+    if (entrys.length === 0) {
+        results.innerHTML = '<div>No results</div>';
+        return;
+    }
+    const list = document.createElement('div');
+    var first = true;
+    entrys.forEach(entry => {
+        if (first) {first = false;}
+        else {list.appendChild(document.createElement('br'));}
+        const link = document.createElement('a');
+        link.textContent = entry;
+        link.href = `${encodeURIComponent(entry)}.htm`;
+        list.appendChild(link);
+    });
+    results.appendChild(list);
+}
+
+function search() {
+    const search_term = input.value.trim();
+    if (search_term.length === 0) {
+        results.innerHTML = '';
+        return;
+    }
+    const filtered = data.filter(
+        entry => entry.includes(search_term));
+    show_entrys(filtered);
+}
+
+input.addEventListener('keyup', function(event) {
+    if (event.key === 'Enter') {search();}
+});
+"""
+
+def search_page(env):
+    items = sorted(t["ident"] for t in env.proofs)
+    acc = []
+    header(acc, title = "Search")
+    acc.append(f"<div class='navi'><a href='{ALL_ITEMS_NAME}.htm'>All items</a>")
+    acc.append(f" | <a href='../{TOC_NAME}.htm'>Table of contents</a></div>\n")
+    acc.append("<h2>Search</h2>\n")
+    acc.append("<input type='button' value='Search' onclick='search()'>")
+    acc.append("<input type='text' id='input' style='width: 20em'><br>\n<br>\n")
+    acc.append("<div id='results'></div>\n")
+    data = f"const data = {json.dumps(items)};"
+    acc.append(f"<script>{data}{JS_CODE}</script>")
+    footer(acc)
+    with open(f"./{DIR_NAME}/search.htm", "w") as fout:
+        fout.write("".join(acc))
+
 def main():
     env = Env()
     acc = []; count = 0
-    header(acc)
+    header(acc, title = "All items")
+    navi_pos = len(acc)
+    acc.append("")
+    acc.append(" | <a href='search.htm'>Search</a></div>\n")
     title_pos = len(acc)
     acc.append("")
     toc_pos = len(acc)
@@ -401,27 +532,35 @@ def main():
         with open(name, "r") as fin:
             s = fin.read()
             extract(s, acc, env)
+    acc[navi_pos] = f"<div class='navi'><a href='../{TOC_NAME}.htm'>Up</a>"
     acc.append("<p><b>Statistics</b>\n<pre>\n")
     acc.append(f"{env.def_count:4} definitions\n")
     acc.append(f"{env.axiom_count:4} axioms\n")
     acc.append(f"{env.thm_count:4} theorems\n")
     total_count = env.def_count + env.axiom_count + env.thm_count
     acc.append("────────────────\n")
-    acc.append(f"{total_count:4} items total\n</pre>")
+    acc.append(f"{total_count:4} items total\n</pre>\n")
     footer(acc)
     if len(env.toc) != 0:
         acc[toc_pos] = table_of_contents(env.toc)
     if not env.title is None:
         acc[title_pos] = f"<h1>{env.title}</h1>\n"
-    with open("proofs-doc.htm", "w") as fout:
-        fout.write("".join(acc))
-    if not isdir(f"./{DIR_NAME}"):
+    try:
         mkdir(f"./{DIR_NAME}")
+    except FileExistsError:
+        pass
+    with open(f"./{DIR_NAME}/{ALL_ITEMS_NAME}.htm", "w") as fout:
+        fout.write("".join(acc))
     for proof in env.proofs:
         ident = proof["ident"]
         with open(f"{DIR_NAME}/{ident}.htm", "w") as fout:
             fout.write(proof_file(env, proof))
     with open(f"{DIR_NAME}/main.css", "w") as fout:
         fout.write(main_css)
+    with open(f"{DIR_NAME}/list.css", "w") as fout:
+        fout.write(list_css)
+    toc_file(env, env.toc)
+    chapter_toc_files(env)
+    search_page(env)
 
 main()

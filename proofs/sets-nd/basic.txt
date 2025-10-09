@@ -1628,6 +1628,10 @@ a lemma derived from [[incl_equi]]. *)
 (*/note incl_elim Inclusion elimination,
 a lemma derived from [[incl_equi]]. *)
 
+(*/note incl_refl Reflexivity law of [[incl_equi|inclusion]]. *)
+(*/note incl_trans Transitivity law of [[incl_equi|inclusion]]. *)
+(*/note incl_antisym Antisymmetry law of [[incl_equi|inclusion]]. *)
+
 (*/note comp_intro
 Comprehension introduction, a lemma derived from the axiom of
 [[comp|class comprehension]]. *)
