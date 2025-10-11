@@ -782,12 +782,20 @@ end
 (*/note nat_eq
 The natural numbers, defined as the smallest subset of the real numbers
 that contains zero and is closed with respect to the successor
-operation. *)
+operation. The corresponding induction principle is
+[[nat_induction_sets]] and [[nat_induction]]. The corresponding
+recursion theorem is [[nat_recursion]]. *)
+
+(*/note nat_induction_sets
+The induction principle for the [[nat_eq|natural numbers]].
+This variant concerns a set A. For the variant that concerns a
+property\_P, see [[nat_induction]]. *)
 
 (*/note nat_induction
-The induction principle for the [[nat_eq|natural numbers]]. See
-[[wf_induction]] for a generalization to
-[[wf_equi|well-founded relations]]. *)
+The induction principle for the [[nat_eq|natural numbers]]. The
+corresponding recursion theorem is [[nat_recursion]]. For strong
+induction, see [[nat_strong_induction]]. See [[wf_induction]] for a
+generalization to [[wf_equi|well-founded relations]]. *)
 
 (*/note nat_recursion
 The Dedekind recursion theorem. It states that there exists

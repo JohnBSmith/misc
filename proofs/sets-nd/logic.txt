@@ -65,18 +65,102 @@ efq_from_dne. ⊢ (¬¬A → A) → (⊥ → A), subj_intro_ii 6.
 08. ⊢ ¬¬(A ∨ ¬A), neg_intro 7.
 lem_from_dne. ⊢ A ∨ ¬A, dne 8.
 
+(*/subsection Projection lemmata *)
+
+01. 1 ⊢ A ∧ B ∧ C, hypo.
+02. 1 ⊢ A ∧ B, conj_eliml 1.
+03. 1 ⊢ A, conj_eliml 2.
+conj_elimll. ⊢ A ∧ B ∧ C → A, subj_intro 3.
+
+01. 1 ⊢ A ∧ B ∧ C, hypo.
+02. 1 ⊢ A ∧ B, conj_eliml 1.
+03. 1 ⊢ B, conj_elimr 2.
+conj_elimlr. ⊢ A ∧ B ∧ C → B, subj_intro 3.
+
+01. 1 ⊢ A ∧ (B ∧ C), hypo.
+02. 1 ⊢ B ∧ C, conj_elimr 1.
+03. 1 ⊢ B, conj_eliml 2.
+conj_elimrl. ⊢ A ∧ (B ∧ C) → B, subj_intro 3.
+
+01. 1 ⊢ A ∧ (B ∧ C), hypo.
+02. 1 ⊢ B ∧ C, conj_elimr 1.
+03. 1 ⊢ C, conj_elimr 2.
+conj_elimrr. ⊢ A ∧ (B ∧ C) → C, subj_intro 3.
+
+01. 1 ⊢ A ∧ B ∧ C ∧ D, hypo.
+02. 1 ⊢ A ∧ B ∧ C, conj_eliml 1.
+03. 1 ⊢ A ∧ B, conj_eliml 2.
+04. 1 ⊢ A, conj_eliml 3.
+conj_elimlll. ⊢ A ∧ B ∧ C ∧ D → A, subj_intro 4.
+
+01. 1 ⊢ A ∧ B ∧ C ∧ D, hypo.
+02. 1 ⊢ A ∧ B ∧ C, conj_eliml 1.
+03. 1 ⊢ A ∧ B, conj_eliml 2.
+04. 1 ⊢ B, conj_elimr 3.
+conj_elimllr. ⊢ A ∧ B ∧ C ∧ D → B, subj_intro 4.
+
+01. 1 ⊢ A ↔ B, hypo.
+02. 1 ⊢ A → B, bij_eliml 1.
+lsubj_elim. ⊢ (A ↔ B) → A → B, subj_intro 2.
+
+01. 1 ⊢ A ↔ B, hypo.
+02. 1 ⊢ B → A, bij_elimr 1.
+rsubj_elim. ⊢ (A ↔ B) → B → A, subj_intro 2.
+
+01. 1 ⊢ E ↔ A ∧ B, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B, lsubj_elim 1 2.
+04. 1, 2 ⊢ A, conj_eliml 3.
+lsubj_conj_eliml. ⊢ (E ↔ A ∧ B) → E → A, subj_intro_ii 4.
+
+01. 1 ⊢ E ↔ A ∧ B, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B, lsubj_elim 1 2.
+04. 1, 2 ⊢ B, conj_elimr 3.
+lsubj_conj_elimr. ⊢ (E ↔ A ∧ B) → E → B, subj_intro_ii 4.
+
+01. 1 ⊢ E ↔ A ∧ B ∧ C, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B ∧ C, lsubj_elim 1 2.
+04. 1, 2 ⊢ A, conj_elimll 3.
+lsubj_conj_elimll. ⊢ (E ↔ A ∧ B ∧ C) → E → A, subj_intro_ii 4.
+
+01. 1 ⊢ E ↔ A ∧ B ∧ C, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B ∧ C, lsubj_elim 1 2.
+04. 1, 2 ⊢ B, conj_elimlr 3.
+lsubj_conj_elimlr. ⊢ (E ↔ A ∧ B ∧ C) → E → B, subj_intro_ii 4.
+
+01. 1 ⊢ E ↔ A ∧ B ∧ C ∧ D, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B ∧ C ∧ D, lsubj_elim 1 2.
+04. 1, 2 ⊢ A, conj_elimlll 3.
+lsubj_conj_elimlll. ⊢ (E ↔ A ∧ B ∧ C ∧ D) → E → A, subj_intro_ii 4.
+
+01. 1 ⊢ E ↔ A ∧ B ∧ C ∧ D, hypo.
+02. 2 ⊢ E, hypo.
+03. 1, 2 ⊢ A ∧ B ∧ C ∧ D, lsubj_elim 1 2.
+04. 1, 2 ⊢ B, conj_elimllr 3.
+lsubj_conj_elimllr. ⊢ (E ↔ A ∧ B ∧ C ∧ D) → E → B, subj_intro_ii 4.
+
+01. 1 ⊢ A ↔ B, hypo.
+02. 2 ⊢ ¬A, hypo.
+03. 3 ⊢ B, hypo.
+04. 1, 3 ⊢ A, rsubj_elim 1 3.
+05. 1, 2, 3 ⊢ ⊥, neg_elim 2 4.
+06. 1, 2 ⊢ ¬B, neg_intro 5.
+rsubj_tollens. ⊢ (A ↔ B) → ¬A → ¬B, subj_intro_ii 6.
+
 (*/subsection Useful theorems *)
 
 01. 1 ⊢ A ↔ ¬A, hypo.
-02. 1 ⊢ A → ¬A, bij_eliml 1.
-03. 3 ⊢ A, hypo.
-04. 1, 3 ⊢ ¬A, subj_elim 2 3.
-05. 1, 3 ⊢ ⊥, neg_elim 4 3.
-06. 1 ⊢ ¬A, neg_intro 5.
-07. 1 ⊢ ¬A → A, bij_elimr 1.
-08. 1 ⊢ A, subj_elim 7 6.
-09. 1 ⊢ ⊥, neg_elim 6 8.
-diag_contra. ⊢ (A ↔ ¬A) → ⊥, subj_intro 9.
+02. 2 ⊢ A, hypo.
+03. 1, 2 ⊢ ¬A, lsubj_elim 1 2.
+04. 1, 2 ⊢ ⊥, neg_elim 3 2.
+05. 1 ⊢ ¬A, neg_intro 4.
+06. 1 ⊢ A, rsubj_elim 1 5.
+07. 1 ⊢ ⊥, neg_elim 5 6.
+diag_contra. ⊢ (A ↔ ¬A) → ⊥, subj_intro 7.
 
 01. 1 ⊢ A, hypo.
 02. 2 ⊢ ¬A, hypo.
@@ -230,93 +314,7 @@ contraposition_rev_ii. ⊢ (¬A → ¬B → ¬C) → C → A ∨ B,
   subj_intro_ii 17.
 
 
-(*/subsection Projections *)
-
-01. 1 ⊢ A ∧ B ∧ C, hypo.
-02. 1 ⊢ A ∧ B, conj_eliml 1.
-03. 1 ⊢ A, conj_eliml 2.
-conj_elimll. ⊢ A ∧ B ∧ C → A, subj_intro 3.
-
-01. 1 ⊢ A ∧ B ∧ C, hypo.
-02. 1 ⊢ A ∧ B, conj_eliml 1.
-03. 1 ⊢ B, conj_elimr 2.
-conj_elimlr. ⊢ A ∧ B ∧ C → B, subj_intro 3.
-
-01. 1 ⊢ A ∧ (B ∧ C), hypo.
-02. 1 ⊢ B ∧ C, conj_elimr 1.
-03. 1 ⊢ B, conj_eliml 2.
-conj_elimrl. ⊢ A ∧ (B ∧ C) → B, subj_intro 3.
-
-01. 1 ⊢ A ∧ (B ∧ C), hypo.
-02. 1 ⊢ B ∧ C, conj_elimr 1.
-03. 1 ⊢ C, conj_elimr 2.
-conj_elimrr. ⊢ A ∧ (B ∧ C) → C, subj_intro 3.
-
-01. 1 ⊢ A ∧ B ∧ C ∧ D, hypo.
-02. 1 ⊢ A ∧ B ∧ C, conj_eliml 1.
-03. 1 ⊢ A ∧ B, conj_eliml 2.
-04. 1 ⊢ A, conj_eliml 3.
-conj_elimlll. ⊢ A ∧ B ∧ C ∧ D → A, subj_intro 4.
-
-01. 1 ⊢ A ∧ B ∧ C ∧ D, hypo.
-02. 1 ⊢ A ∧ B ∧ C, conj_eliml 1.
-03. 1 ⊢ A ∧ B, conj_eliml 2.
-04. 1 ⊢ B, conj_elimr 3.
-conj_elimllr. ⊢ A ∧ B ∧ C ∧ D → B, subj_intro 4.
-
-01. 1 ⊢ A ↔ B, hypo.
-02. 1 ⊢ A → B, bij_eliml 1.
-lsubj_elim. ⊢ (A ↔ B) → A → B, subj_intro 2.
-
-01. 1 ⊢ A ↔ B, hypo.
-02. 1 ⊢ B → A, bij_elimr 1.
-rsubj_elim. ⊢ (A ↔ B) → B → A, subj_intro 2.
-
-01. 1 ⊢ E ↔ A ∧ B, hypo.
-02. 2 ⊢ E, hypo.
-03. 1, 2 ⊢ A ∧ B, lsubj_elim 1 2.
-04. 1, 2 ⊢ A, conj_eliml 3.
-lsubj_conj_eliml. ⊢ (E ↔ A ∧ B) → E → A, subj_intro_ii 4.
-
-01. 1 ⊢ E ↔ A ∧ B, hypo.
-02. 2 ⊢ E, hypo.
-03. 1, 2 ⊢ A ∧ B, lsubj_elim 1 2.
-04. 1, 2 ⊢ B, conj_elimr 3.
-lsubj_conj_elimr. ⊢ (E ↔ A ∧ B) → E → B, subj_intro_ii 4.
-
-01. 1 ⊢ E ↔ A ∧ B ∧ C, hypo.
-02. 2 ⊢ E, hypo.
-03. 1, 2 ⊢ A ∧ B ∧ C, lsubj_elim 1 2.
-04. 1, 2 ⊢ A, conj_elimll 3.
-lsubj_conj_elimll. ⊢ (E ↔ A ∧ B ∧ C) → E → A, subj_intro_ii 4.
-
-01. 1 ⊢ E ↔ A ∧ B ∧ C, hypo.
-02. 2 ⊢ E, hypo.
-03. 1, 2 ⊢ A ∧ B ∧ C, lsubj_elim 1 2.
-04. 1, 2 ⊢ B, conj_elimlr 3.
-lsubj_conj_elimlr. ⊢ (E ↔ A ∧ B ∧ C) → E → B, subj_intro_ii 4.
-
-01. 1 ⊢ E ↔ A ∧ B ∧ C ∧ D, hypo.
-02. 2 ⊢ E, hypo.
-03. 1, 2 ⊢ A ∧ B ∧ C ∧ D, lsubj_elim 1 2.
-04. 1, 2 ⊢ A, conj_elimlll 3.
-lsubj_conj_elimlll. ⊢ (E ↔ A ∧ B ∧ C ∧ D) → E → A, subj_intro_ii 4.
-
-01. 1 ⊢ E ↔ A ∧ B ∧ C ∧ D, hypo.
-02. 2 ⊢ E, hypo.
-03. 1, 2 ⊢ A ∧ B ∧ C ∧ D, lsubj_elim 1 2.
-04. 1, 2 ⊢ B, conj_elimllr 3.
-lsubj_conj_elimllr. ⊢ (E ↔ A ∧ B ∧ C ∧ D) → E → B, subj_intro_ii 4.
-
-01. 1 ⊢ A ↔ B, hypo.
-02. 2 ⊢ ¬A, hypo.
-03. 3 ⊢ B, hypo.
-04. 1, 3 ⊢ A, rsubj_elim 1 3.
-05. 1, 2, 3 ⊢ ⊥, neg_elim 2 4.
-06. 1, 2 ⊢ ¬B, neg_intro 5.
-rsubj_tollens. ⊢ (A ↔ B) → ¬A → ¬B, subj_intro_ii 6.
-
-(*/subsection Congrunce laws of equivalence *)
+(*/subsection Congruence laws of equivalence *)
 
 01. 1 ⊢ A ↔ A', hypo.
 02. 2 ⊢ ¬A, hypo.
@@ -711,9 +709,16 @@ left subjunction. *)
 (*/note bij_elimr Bijunction elimination to obtain the
 right subjunction. *)
 
-(*/note subj_intro_ii The rule [[subj_intro]] applied twice consecutively.
-This admissible rule was added for ergonomic reasons, because it cannot
-be expressed and derived as a theorem. *)
+(*/note wk Weakening. If B holds under hypothesis H, it certainly holds
+under the additional hypothesis A. *)
+
+(*/note exch Exchange. States that σ(H) ⊢ A follows from H ⊢ A for any
+permutation σ of conjunction arguments. Since this rule is automatically
+applied by the proof checker, it does not need to be explicitly stated. *)
+
+(*/note uq_elim Universal quantification elimination. A universal
+quantification ∀x.\_P\_x may be specialised to any proposition P\_t,
+where\_t is an arbitrary term. *)
 
 (*/note uq_intro Universal quantification introduction. A universal
 quantification ∀x.\_P\_x is shown from hypotheses H by deriving P\_u
@@ -721,9 +726,39 @@ from H for a parameter u that does not occur free in H and ∀x.\_P\_x.
 That is to say, we show that something holds for all x by parametrizing
 the proof over u. *)
 
+(*/note ex_intro Existential quantification introduction. If P\_t is
+shown for some term t, we may conclude the existence of at least one x
+with P\_x by witness x\_:=\_t. *)
+
+(*/note ex_elim Existential quantification elimination. *)
+
+(*/note subj_intro_ii The rule [[subj_intro]] applied twice consecutively.
+This admissible rule was added for ergonomic reasons, because it cannot
+be expressed and derived as a theorem. *)
+(*/note subj_intro_iii See [[subj_intro_ii]. *)
+(*/note subj_intro_iv See [[subj_intro_ii]. *)
+
 (*/note dne Double negation elimination. It is not valid in
 intuitionistic logic, which is why it requires [[lem]] as a
-dependency. *)
+dependency.<br>
+<br>
+<b>Proof sketch</b><br>
+Let ¬¬A hold. To be shown is A. According to [[lem]], A ∨ ¬A holds
+unconditionally. Proof by cases. In case A, A already holds. Case ¬A
+contradicts ¬¬A, so A follows from the contradiction via [[efq]].
+Thus, A holds in every case. q.e.d. *)
+
+(*/note efq_from_dne States that [[efq|ex falso quodlibet]] can be
+derived from [[dne|double negation elimination]].<br>
+<br>
+<b>Proof sketch</b><br>
+Let ¬¬A → A hold. To be shown is ⊥\_→\_A, that is, A under the additional
+hypothesis ⊥. Then ⊥ holds even more so under the further hypothesis
+¬A. Since ¬A leads to a contradiction in this respect, ¬¬A must hold.
+Ergo, A follows via the first hypothesis from this finding. q.e.d. *)
+
+(*/note lem_from_dne States that the [[lem|law of excluded middle]] can
+be derived from [[dne|double negation elimination]]. *)
 
 (*/note contraposition Two rules are automatically derived from this
 theorem. When applied to one argument, the contraposition rule<br>
@@ -736,6 +771,29 @@ From the premises A → B and ¬B we need to derive the conclusion ¬A.
 This means, from the additional premise A we need to derive a
 contradiction. First, B follows from A\_→\_B and A. But then we have
 both ¬B and B, which is already a contradiction. q.e.d. *)
+
+(*/note diag_contra
+Lemma of diagonal arguments.<br>
+<br>
+<b>Proof sketch</b><br>
+Let A ↔ ¬A hold. A contradiction must be derived. Under the
+additional assumption A, ¬A follows by means of the premise, but this
+contradicts the assumption. Therefore, the assumption must be false,
+meaning that ¬A holds. From this, A follows by means of the premise,
+but this again results in a contradiction, which, in contrast to the
+previous one, depends only on the premise alone. q.e.d. *)
+
+(*/note dn_intro
+Double negation introduction.<br>
+<br>
+<b>Proof sketch</b><br>
+Let A hold. To be shown is ¬¬A, which means, from the additional
+assumption ¬A, a contradiction must be derived. Now ¬A already
+contradicts A, so we are done. q.e.d. *)
+
+(*/note tollendo_ponens_left Modus tollendo ponens. *)
+
+(*/note tollendo_ponens_right Modus tollendo ponens. *)
 
 (*/note eq_subst_rev This variant of [[eq_subst]] allows the omission
 of [[eq_symm]], which improves ergonomics. *)

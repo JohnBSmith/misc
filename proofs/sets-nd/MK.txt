@@ -46,8 +46,8 @@ inv_eq. ⊢ inv f = {t | ∃x. ∃y. t = (y, x) ∧ (x, y) ∈ f}, def.
 restr_eq. ⊢ restr f A = f ∩ (A × UnivCl), def.
 choice_function_equi. ⊢ choice_function f ↔
   function f ∧ ∀x. x ∈ dom f → app f x ∈ x, def.
-composition_eq. ⊢ g ∘ f = {t | ∃x. ∃y. ∃z.
-  t = (x, z) ∧ (x, y) ∈ f ∧ (y, z) ∈ g}, def.
+composition_eq. ⊢ S ∘ R = {t | ∃x. ∃y. ∃z.
+  t = (x, z) ∧ (x, y) ∈ R ∧ (y, z) ∈ S}, def.
 
 (*/section Axioms *)
 
@@ -75,14 +75,14 @@ with syntax x\_∈\_A as a shorthand for element\_x\_A. It is opaque,
 a primitive symbol that is characterized by axioms rather than given
 by a definition. *)
 
-(*/note set_equi A class is called <i>set</i> if there exists another class
-that contains it. Otherwise it is called <i>proper</i> class, i.e.
+(*/note set_equi A class is called <i>set</i> if there exists another
+class that contains it. Otherwise it is called <i>proper</i> class, i.e.
 a class\_A with ¬set\_A is proper. Theorems [[UnivCl_intro]] and
 [[UnivCl_elim]] show that a class is a set, if and only if it is an
 element of [[UnivCl_eq|UnivCl]]. *)
 
-(*/note incl_equi The inclusion relation. Like equality, it is formed
-by a binary relation symbol, thus defined on the entire class
+(*/note incl_equi The <i>inclusion</i> relation. Like equality, it is
+formed by a binary relation symbol, thus defined on the entire class
 universe. If A ⊆ B, then we say that A is <i>included</i> in B, or
 that A is a <i>subclass</i> of B. Inclusion is a partial order on the
 class universe, as [[incl_refl]], [[incl_trans]] and
@@ -171,6 +171,14 @@ appearing in R. *)
 containing every element that is the second component of some pair
 appearing in R. *)
 
+(*/note img_eq The <i>image</i> of a relation R under A is the class
+containing every element that is the second component of a pair whose
+first component is in A. *)
+
+(*/note inv_img_eq The <i>inverse image</i> of a relation R under B is
+the class containing every element that is the first component of a
+pair whose second component is in B. *)
+
 (*/note relation_equi A class is called <i>relation</i> if all of
 its elements are [[pair_eq|pairs]]. *)
 
@@ -186,9 +194,25 @@ and its [[rng_eq|range]] is a [[incl_equi|subclass]] of Y. *)
 <i>injective</i> if any two elements of X with the same image must be
 equal. *)
 
+(*/note sur_equi A [[map_equi|mapping]] f from X to Y is called
+<i>surjective</i> if its [[rng_eq|range]] coincides with its
+codomain\_Y. *)
+
 (*/note bij_equi A [[map_equi|mapping]] f from X to Y is called
 <i>bijective</i> if it is [[inj_equi|injective]] as well as
 [[sur_equi|surjective]]. *)
+
+(*/note inv_eq The <i>inverse</i> of a relation is formed by swapping
+the components for each pair. *)
+
+(*/note choice_function_equi A <i>choice function</i> is a
+[[function_equi|function]] that selects an element from every class
+that occurs as an element in its [[dom_eq|domain]]. *)
+
+(*/note composition_eq The <i>composition</i> of two relations S and R
+is the relation containing every pair (x, z) for which there exists a
+common element y such that (x, y) is an element of R and (y, z) is an
+element of S. *)
 
 (*/note app_eq
 The <i>application</i> of f to x, or "f of x" for short, that is to say,
@@ -215,8 +239,8 @@ A\_⊆\_dom\_f, the domain of f|<sub>A</sub> is simply A. *)
 (*/note efq Ex falso quodlibet. From a contradiction,
 any proposition follows. *)
 
-(*/note lem The law of excluded middle. Valid in classical logic,
-but not in intuitionistic logic. *)
+(*/note lem The law of excluded middle, also known as tertium non datur.
+Valid in classical logic, but not in intuitionistic logic. *)
 
 (*/note ext The axiom of extensionality. It states that two sets with
 the same elements are equal. Thus, a set contains an element neither
@@ -228,6 +252,27 @@ class u is an element of the class of all the elements with shared
 property P if and only if u is [[set_equi|set]] and u has this
 property itself. For practical use, see [[comp_intro]] and
 [[comp_elim]]. *)
+
+(*/note pairing The axiom of pairing. It states that the pair set of
+two [[set_equi|sets]] must also be a set. Note that the pair set
+{x,\_y} is defined as a shorthand for {x}\_∪\_{y}, the
+[[union_eq|union]] of two [[sg_eq|singletons]]. *)
+
+(*/note subset The axiom of subsets. It states that a
+[[incl_equi|subclass]] of a [[set_equi|set]] must also be a set. *)
+
+(*/note power The axiom of power set. It states that the
+[[power_eq|power set]] of a [[set_equi|set]] must also be a set. *)
+
+(*/note union The axiom of union. It states that the [[Union_eq|union]]
+of a [[set_equi|set]] of sets must also be a set. *)
+
+(*/note regularity The axiom of regularity. It states that every
+non-empty class A contains an element that is disjoint from\_A. *)
+
+(*/note infinity The axiom of infinity. It states that there exists an
+inductive set, i.e., a set that contains the [[empty_set_eq|empty set]]
+and is closed under the [[succ_eq|successor operation]]. *)
 
 (*/note substitution
 The axiom of substitution, a prototypical form of the
@@ -241,9 +286,9 @@ not for proper classes. Secondly, one has to write (x,\_x) ∈ E instead of
 E\_x\_x, since E is a class, not a binary relation symbol. The syntax
 x = x, on the other hand, is a shorthand for eq\_x\_x. *)
 
-(*/note eq_subst The substitution schema for equality. *)
+(*/note eq_subst The substitution schema of equality. *)
 
-(*/note equi_subst The admissible substitution schema for logical
+(*/note equi_subst The admissible substitution schema of logical
 equivalence. It is needed to be able to perform equivalent
 transformations in a general way. It is feasible to do without it,
 but this can make the proof more complicated. It can be avoided

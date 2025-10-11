@@ -54,7 +54,7 @@ wf_unfold. ⊢ wf R M → ∀A. A ⊆ M → ¬A = ∅ →
 38. 9, 1, 21, 7 ⊢ ⊥, ex_elim 14 37.
 39. 9, 1, 21 ⊢ ¬¬A = M, neg_intro 38.
 40. 9, 1, 21 ⊢ A = M, dne 39.
-wf_induction_set. ⊢ wf R M → A ⊆ M →
+wf_induction_sets. ⊢ wf R M → A ⊆ M →
   (∀x. x ∈ M → (∀y. y ∈ M → (y, x) ∈ R → y ∈ A) → x ∈ A) → A = M,
   subj_intro_iii 40.
 
@@ -91,7 +91,7 @@ wf_induction_set. ⊢ wf R M → A ⊆ M →
 31. 2 ⊢ x ∈ A → x ∈ M, subj_intro 30.
 32. 2 ⊢ ∀x. x ∈ A → x ∈ M, uq_intro 31.
 33. 2 ⊢ A ⊆ M, incl_intro 32.
-34. 1, 2, 3 ⊢ A = M, wf_induction_set 1 33 26.
+34. 1, 2, 3 ⊢ A = M, wf_induction_sets 1 33 26.
 35. 35 ⊢ x ∈ M, hypo.
 36. 1, 2, 3, 35 ⊢ x ∈ A, eq_subst_rev 34 35, P u ↔ x ∈ u.
 37. 1, 2, 3, 35 ⊢ x ∈ {x | x ∈ M ∧ P x}, eq_subst 2 36, P u ↔ x ∈ u.
@@ -483,7 +483,15 @@ end
 
 (*/note wf_equi A relation R is called <i>well-founded</i> on M, if every
 non-empty set A ⊆ M posesses a minimal element y. The corresponding
-induction principle is shown by [[wf_induction_set]] and [[wf_induction]]. *)
+induction principle is shown by [[wf_induction_sets]] and [[wf_induction]]. *)
+
+(*/note wf_induction_sets States that the principle of well-founded
+induction holds with respect to a [[wf_equi|well-founded relation]].
+This variant concerns a set\_A. For the variant that concerns a
+property\_P, see [[wf_induction]]. *)
+
+(*/note wf_induction States that the principle of well-founded
+induction holds with respect to a [[wf_equi|well-founded relation]]. *)
 
 (*/note wf_rec_unique
 This theorem states that the solution to a [[wf_equi|well-founded]]

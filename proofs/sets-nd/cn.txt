@@ -397,6 +397,10 @@ Banach_decomposition_theorem. ⊢ set X → rng g ⊆ X →
   subj_intro_ii 46.
 end
 
+(*/note num_eq_equi
+Two sets X, Y are called <i>equinumerous</i>, written |X| = |Y|, if
+there exists a [[bij_equi|bijection]] from X to Y. *)
+
 (*/note num_le_equi
 A set X is called <i>not greater than</i> Y, written |X| ≤ |Y|, if
 there exists an [[inj_equi|injection]] from X to Y. *)
@@ -405,6 +409,12 @@ there exists an [[inj_equi|injection]] from X to Y. *)
 A set X is called <i>strictly smaller than</i> Y, written
 |X| &lt; |Y|, if X is [[num_le_equi|not greater]] than Y and
 there is no [[sur_equi|surjection]] from X to Y. *)
+
+(*/note Map_eq The set of [[map_equi|mappings]] from X to Y. *)
+
+(*/note indicator_eq
+The <i>indicator function</i> of A, defined as<br>
+\_\_χ<sub>A</sub>: X → {0, 1}, χ<sub>A</sub> x := 1 if x ∈ A else 0. *)
 
 (*/note power_equinum_indicators
 This theorem states that the [[power_eq|power set]] of a set X is
